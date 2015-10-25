@@ -1,0 +1,451 @@
+fileFormatVersion: 2
+guid: 97c24dc642d559d4ea318c8eb2d640c7
+timeCreated: 1443717880
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: AssaultRifle_0
+    21300002: AssaultRifle_1
+    21300004: AssaultRifle_2
+    21300006: AssaultRifle_3
+    21300008: AssaultRifle_4
+    21300010: AssaultRifle_5
+    21300012: AssaultRifle_6
+    21300014: AssaultRifle_7
+    21300016: AssaultRifle_8
+    21300018: AssaultRifle_9
+    21300020: AssaultRifle_10
+    21300022: AssaultRifle_11
+    21300024: AssaultRifle_12
+    21300026: AssaultRifle_13
+    21300028: AssaultRifle_14
+    21300030: AssaultRifle_15
+    21300032: AssaultRifle_16
+    21300034: AssaultRifle_17
+    21300036: AssaultRifle_18
+    21300038: AssaultRifle_19
+    21300040: AssaultRifle_20
+    21300042: AssaultRifle_21
+    21300044: AssaultRifle_22
+    21300046: AssaultRifle_23
+    21300048: AssaultRifle_24
+    21300050: AssaultRifle_25
+    21300052: AssaultRifle_26
+    21300054: AssaultRifle_27
+    21300056: AssaultRifle_28
+    21300058: AssaultRifle_29
+    21300060: AssaultRifle_30
+    21300062: AssaultRifle_31
+    21300064: AssaultRifle_32
+    21300066: AssaultRifle_33
+    21300068: AssaultRifle_34
+    21300070: AssaultRifle_35
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: .25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 8
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -3
+  maxTextureSize: 1024
+  textureSettings:
+    filterMode: 0
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: .5, y: .5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 32
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: AssaultRifle_0
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 217
+        width: 6
+        height: 22
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_1
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 217
+        width: 6
+        height: 22
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_2
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 217
+        width: 6
+        height: 22
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_3
+      rect:
+        serializedVersion: 2
+        x: 234
+        y: 216
+        width: 6
+        height: 22
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_4
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 217
+        width: 6
+        height: 22
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_5
+      rect:
+        serializedVersion: 2
+        x: 362
+        y: 217
+        width: 6
+        height: 22
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_6
+      rect:
+        serializedVersion: 2
+        x: 426
+        y: 217
+        width: 6
+        height: 22
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_7
+      rect:
+        serializedVersion: 2
+        x: 490
+        y: 216
+        width: 6
+        height: 22
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_8
+      rect:
+        serializedVersion: 2
+        x: 554
+        y: 217
+        width: 6
+        height: 22
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_9
+      rect:
+        serializedVersion: 2
+        x: 6
+        y: 145
+        width: 33
+        height: 13
+      alignment: 9
+      pivot: {x: .75999999, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_10
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 144
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_11
+      rect:
+        serializedVersion: 2
+        x: 134
+        y: 145
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_12
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 145
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_13
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 145
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_14
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 144
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_15
+      rect:
+        serializedVersion: 2
+        x: 390
+        y: 145
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_16
+      rect:
+        serializedVersion: 2
+        x: 454
+        y: 145
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_17
+      rect:
+        serializedVersion: 2
+        x: 518
+        y: 145
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_18
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 66
+        width: 6
+        height: 23
+      alignment: 2
+      pivot: {x: .5, y: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_19
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 66
+        width: 6
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_20
+      rect:
+        serializedVersion: 2
+        x: 146
+        y: 65
+        width: 6
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_21
+      rect:
+        serializedVersion: 2
+        x: 211
+        y: 64
+        width: 6
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_22
+      rect:
+        serializedVersion: 2
+        x: 274
+        y: 66
+        width: 6
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_23
+      rect:
+        serializedVersion: 2
+        x: 338
+        y: 67
+        width: 6
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_24
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 66
+        width: 6
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_25
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 65
+        width: 6
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_26
+      rect:
+        serializedVersion: 2
+        x: 530
+        y: 66
+        width: 6
+        height: 23
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_27
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 17
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_28
+      rect:
+        serializedVersion: 2
+        x: 89
+        y: 16
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_29
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 17
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_30
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 17
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_31
+      rect:
+        serializedVersion: 2
+        x: 281
+        y: 17
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_32
+      rect:
+        serializedVersion: 2
+        x: 345
+        y: 16
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_33
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 17
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_34
+      rect:
+        serializedVersion: 2
+        x: 473
+        y: 17
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: AssaultRifle_35
+      rect:
+        serializedVersion: 2
+        x: 537
+        y: 17
+        width: 33
+        height: 13
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

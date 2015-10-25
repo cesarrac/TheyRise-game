@@ -1,0 +1,1100 @@
+fileFormatVersion: 2
+guid: 5a4ea846ca07fac4ca0ceff88ed846b1
+timeCreated: 1442969335
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: icons-sbed-newColors_0
+    21300002: icons-sbed-newColors_1
+    21300004: icons-sbed-newColors_2
+    21300006: icons-sbed-newColors_3
+    21300008: icons-sbed-newColors_4
+    21300010: icons-sbed-newColors_5
+    21300012: icons-sbed-newColors_6
+    21300014: icons-sbed-newColors_7
+    21300016: icons-sbed-newColors_8
+    21300018: icons-sbed-newColors_9
+    21300020: icons-sbed-newColors_10
+    21300022: icons-sbed-newColors_11
+    21300024: icons-sbed-newColors_12
+    21300026: icons-sbed-newColors_13
+    21300028: icons-sbed-newColors_14
+    21300030: icons-sbed-newColors_15
+    21300032: icons-sbed-newColors_16
+    21300034: icons-sbed-newColors_17
+    21300036: icons-sbed-newColors_18
+    21300038: icons-sbed-newColors_19
+    21300040: icons-sbed-newColors_20
+    21300042: icons-sbed-newColors_21
+    21300044: icons-sbed-newColors_22
+    21300046: icons-sbed-newColors_23
+    21300048: icons-sbed-newColors_24
+    21300050: icons-sbed-newColors_25
+    21300052: icons-sbed-newColors_26
+    21300054: icons-sbed-newColors_27
+    21300056: icons-sbed-newColors_28
+    21300058: icons-sbed-newColors_29
+    21300060: icons-sbed-newColors_30
+    21300062: icons-sbed-newColors_31
+    21300064: icons-sbed-newColors_32
+    21300066: icons-sbed-newColors_33
+    21300068: icons-sbed-newColors_34
+    21300070: icons-sbed-newColors_35
+    21300072: icons-sbed-newColors_36
+    21300074: icons-sbed-newColors_37
+    21300076: icons-sbed-newColors_38
+    21300078: icons-sbed-newColors_39
+    21300080: icons-sbed-newColors_40
+    21300082: icons-sbed-newColors_41
+    21300084: icons-sbed-newColors_42
+    21300086: icons-sbed-newColors_43
+    21300088: icons-sbed-newColors_44
+    21300090: icons-sbed-newColors_45
+    21300092: icons-sbed-newColors_46
+    21300094: icons-sbed-newColors_47
+    21300096: icons-sbed-newColors_48
+    21300098: icons-sbed-newColors_49
+    21300100: icons-sbed-newColors_50
+    21300102: icons-sbed-newColors_51
+    21300104: icons-sbed-newColors_52
+    21300106: icons-sbed-newColors_53
+    21300108: icons-sbed-newColors_54
+    21300110: icons-sbed-newColors_55
+    21300112: icons-sbed-newColors_56
+    21300114: icons-sbed-newColors_57
+    21300116: icons-sbed-newColors_58
+    21300118: icons-sbed-newColors_59
+    21300120: icons-sbed-newColors_60
+    21300122: icons-sbed-newColors_61
+    21300124: icons-sbed-newColors_62
+    21300126: icons-sbed-newColors_63
+    21300128: icons-sbed-newColors_64
+    21300130: icons-sbed-newColors_65
+    21300132: icons-sbed-newColors_66
+    21300134: icons-sbed-newColors_67
+    21300136: icons-sbed-newColors_68
+    21300138: icons-sbed-newColors_69
+    21300140: icons-sbed-newColors_70
+    21300142: icons-sbed-newColors_71
+    21300144: icons-sbed-newColors_72
+    21300146: icons-sbed-newColors_73
+    21300148: icons-sbed-newColors_74
+    21300150: icons-sbed-newColors_75
+    21300152: icons-sbed-newColors_76
+    21300154: icons-sbed-newColors_77
+    21300156: icons-sbed-newColors_78
+    21300158: icons-sbed-newColors_79
+    21300160: icons-sbed-newColors_80
+    21300162: icons-sbed-newColors_81
+    21300164: icons-sbed-newColors_82
+    21300166: icons-sbed-newColors_83
+    21300168: icons-sbed-newColors_84
+    21300170: icons-sbed-newColors_85
+    21300172: icons-sbed-newColors_86
+    21300174: icons-sbed-newColors_87
+    21300176: icons-sbed-newColors_88
+    21300178: icons-sbed-newColors_89
+    21300180: icons-sbed-newColors_90
+    21300182: icons-sbed-newColors_91
+    21300184: icons-sbed-newColors_92
+    21300186: icons-sbed-newColors_93
+    21300188: icons-sbed-newColors_94
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: .25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 8
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -3
+  maxTextureSize: 512
+  textureSettings:
+    filterMode: 1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: .5, y: .5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 32
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: icons-sbed-newColors_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 460
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_1
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 460
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_2
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 460
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_3
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 460
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_4
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 460
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_5
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 461
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_6
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 460
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_7
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 460
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_8
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 460
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_9
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 460
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 409
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_11
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 409
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_12
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 408
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_13
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 409
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_14
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 409
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_15
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 410
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_16
+      rect:
+        serializedVersion: 2
+        x: 308
+        y: 410
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_17
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 409
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_18
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 409
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_19
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 409
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 358
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_21
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 358
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_22
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 357
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_23
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 358
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_24
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 358
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_25
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 358
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_26
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 358
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_27
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 358
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_28
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 358
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_29
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 358
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 307
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_31
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 307
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_32
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 307
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_33
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 307
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_34
+      rect:
+        serializedVersion: 2
+        x: 203
+        y: 307
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_35
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 308
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_36
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 307
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_37
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 307
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_38
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 307
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_39
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 307
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_40
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 256
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_41
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 256
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_42
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 256
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_43
+      rect:
+        serializedVersion: 2
+        x: 152
+        y: 256
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_44
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 256
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_45
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 256
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_46
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 256
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_47
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 256
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_48
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 256
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_49
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 256
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_50
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 204
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_51
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 204
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_52
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 204
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_53
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 205
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_54
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 204
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_55
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 204
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_56
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 204
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_57
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 204
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_58
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 204
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_59
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 204
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_60
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 153
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_61
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 153
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_62
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 153
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_63
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 153
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_64
+      rect:
+        serializedVersion: 2
+        x: 205
+        y: 154
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_65
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 153
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_66
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 153
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_67
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 153
+        width: 46
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_68
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 153
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_69
+      rect:
+        serializedVersion: 2
+        x: 457
+        y: 152
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_70
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 102
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_71
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 102
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_72
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 102
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_73
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 101
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_74
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 102
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_75
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 102
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_76
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 102
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_77
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 102
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_78
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 102
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_79
+      rect:
+        serializedVersion: 2
+        x: 458
+        y: 102
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_80
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 51
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_81
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 51
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_82
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 51
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_83
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 51
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_84
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 51
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_85
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 51
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_86
+      rect:
+        serializedVersion: 2
+        x: 307
+        y: 51
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_87
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 51
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_88
+      rect:
+        serializedVersion: 2
+        x: 409
+        y: 51
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_89
+      rect:
+        serializedVersion: 2
+        x: 460
+        y: 51
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_90
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_91
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 2
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_92
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 0
+        width: 46
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_93
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 0
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: icons-sbed-newColors_94
+      rect:
+        serializedVersion: 2
+        x: 204
+        y: 0
+        width: 47
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
