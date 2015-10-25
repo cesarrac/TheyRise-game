@@ -156,7 +156,7 @@ public class Enemy_MoveHandler : MonoBehaviour {
 					// When the Loop reaches the last Node store the value as a Vector3 destination
 					if (x == spwnPtHandler.paths[spwnPtIndex].Count - 1){
 
-						destination = new Vector3( currentPath[x].x, currentPath[x].y, 0.0f);
+						destination = new Vector3( resourceGrid.capitalSpawnX, resourceGrid.capitalSpawnY, 0.0f);
 					}
 				}
 
@@ -174,7 +174,8 @@ public class Enemy_MoveHandler : MonoBehaviour {
 
 					// As above, last Node is stored in Vector3 destination
 					if (x == spwnPtHandler.kamikazePaths[spwnPtIndex].Count - 1){
-						destination = new Vector3( currentPath[x].x, currentPath[x].y, 0.0f);
+                        //destination = new Vector3( currentPath[x].x, currentPath[x].y, 0.0f);
+                        destination = new Vector3(spwnPtHandler.kamikazeDestinations[spwnPtIndex].x, spwnPtHandler.kamikazeDestinations[spwnPtIndex].y, 0.0f);
 					}
 				}
 
@@ -619,13 +620,13 @@ public class Enemy_MoveHandler : MonoBehaviour {
 			}
 
 			// this check if for KAMIKAZE UNITS ONLY
-			if (isKamikaze){
+		//	if (isKamikaze){
 				// if the next tile on the Path is the destination
 				if (currentPath[1].x == destination.x && currentPath[1].y == destination.y){
 					// reached the destination, do Special Attack!
 					enemyAttkHandler.SpecialAttack(currentPath[1].x, currentPath[1].y);
 				}
-			}
+		//	}
 		} 	
 		// Move to the next Node position in path
 		posX = currentPath [1].x;

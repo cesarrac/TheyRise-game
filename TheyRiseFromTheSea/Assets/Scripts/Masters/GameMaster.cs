@@ -91,8 +91,6 @@ public class GameMaster : MonoBehaviour {
 	void CheckIfBuilding()
 	{
 
-
-			Debug.Log ("GM: Checking if Building!");
 			if (resourceGrid.terraformer_built && !building_UIHandler.currentlyBuilding) {
 				_canFireWeapon = true;
 			} else {

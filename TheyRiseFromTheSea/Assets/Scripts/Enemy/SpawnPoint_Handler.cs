@@ -29,7 +29,7 @@ public class SpawnPoint_Handler : MonoBehaviour {
 	bool canGetPath, canGetKamikazePath;
 
 	void Awake(){
-
+        
 		if (!map_generator) {
 			map_generator = GameObject.FindGameObjectWithTag ("Map").GetComponent<Map_Generator> ();
 			map_width = map_generator.width;
@@ -46,10 +46,8 @@ public class SpawnPoint_Handler : MonoBehaviour {
 			maxSpawnX = map_width - (map_width / 4);
 			maxSpawnY = map_height - (map_height / 6);
 		}
+      
 
-//		Debug.Log ("MinX = " + minSpawnX + " MaxX =" + maxSpawnX + " MinY=" + minSpawnY + " MaxY=" + maxSpawnY);
-
-		
 		if (resourceGrid == null)
 			resourceGrid = GameObject.FindGameObjectWithTag ("Map").GetComponent<ResourceGrid> ();
 
@@ -59,84 +57,119 @@ public class SpawnPoint_Handler : MonoBehaviour {
 
 
 
-	/* Make this A LOT simpler by just getting the map width and height and assuming that it will always have at least
+    /* Make this A LOT simpler by just getting the map width and height and assuming that it will always have at least
 	 *  a 2 Pixel border. So we have to get all the x positions at y = 2 and y = mapHeight - 2, then all the y positions
 	 * at x = 2 and x = mapWidth - 2 */
+    /*
+      void InitializeAllSpawnPositions(int waterTilesCount)
+      {
 
-	void InitializeAllSpawnPositions(int waterTilesCount)
-	{
+          // Bottom
+          for (int y = minSpawnY; y <= minSpawnY + 4; y++) {
+              for (int x = minSpawnX; x < maxSpawnX; x++) {
 
-		// Bottom
-		for (int y = minSpawnY; y <= minSpawnY + 4; y++) {
-			for (int x = minSpawnX; x < maxSpawnX; x++) {
+                  possiblePositions.Add(new Vector2(x,y)); 
+              }
+          }
+          //Top
+          for (int y = maxSpawnY - 4; y <= maxSpawnY; y++) {
+              for (int x = minSpawnX; x < maxSpawnX; x++) {
 
-				possiblePositions.Add(new Vector2(x,y)); 
-			}
-		}
-		//Top
-		for (int y = maxSpawnY - 4; y <= maxSpawnY; y++) {
-			for (int x = minSpawnX; x < maxSpawnX; x++) {
+                  possiblePositions.Add(new Vector2(x,y));
 
-				possiblePositions.Add(new Vector2(x,y));
+              }
+          }
+          // Left ( more like top left)
+          for (int x = minSpawnX - 1; x <= minSpawnX; x++){
+              for (int y = maxSpawnY - minSpawnY; y <= maxSpawnY; y++)  {
 
-			}
-		}
-		// Left ( more like top left)
-		for (int x = minSpawnX - 1; x <= minSpawnX; x++){
-			for (int y = maxSpawnY - minSpawnY; y <= maxSpawnY; y++)  {
+                  possiblePositions.Add(new Vector2(x,y));
 
-				possiblePositions.Add(new Vector2(x,y));
+              }
+          }
+          // Right
+          for (int x = maxSpawnX -1; x <= maxSpawnX; x++){
+              for (int y = maxSpawnY - minSpawnY; y <= maxSpawnY; y++)  {
 
-			}
-		}
-		// Right
-		for (int x = maxSpawnX -1; x <= maxSpawnX; x++){
-			for (int y = maxSpawnY - minSpawnY; y <= maxSpawnY; y++)  {
+                  possiblePositions.Add(new Vector2(x,y));
 
-				possiblePositions.Add(new Vector2(x,y));
+              }
+          }
 
-			}
-		}
+          InitActualSpawnPositions ();
+      }
 
-		InitActualSpawnPositions ();
-	}
-
-	void InitActualSpawnPositions()
-	{
-		// Initialize the spawn positions array
-		spawnPositions = new Vector2[numberOfSpawnPositions];
-		for (int i = 0; i < spawnPositions.Length; i++) {
-			spawnPositions[i] = GetRandomSpawnPositions();
-//			Debug.Log("SPAWN POS: " + spawnPositions[i] + " index:" + i);
-		}
-	}
-	Vector2 GetRandomSpawnPositions()
-	{
-		Vector2 returnVector = Vector2.zero;
-//		int randomPositionPick = Random.Range (0, possibleSpawnPositions.Length / 2);
-		int randomPositionPick = Random.Range (0, possiblePositions.Count - 1);
-
-
-//		return new Vector2 (possibleSpawnPositions [randomPositionPick].x, possibleSpawnPositions [randomPositionPick].y);
-		return new Vector2 (possiblePositions [randomPositionPick].x, possiblePositions [randomPositionPick].y);
+      void InitActualSpawnPositions()
+      {
+          // Initialize the spawn positions array
+          spawnPositions = new Vector2[numberOfSpawnPositions];
+          for (int i = 0; i < spawnPositions.Length; i++) {
+              spawnPositions[i] = GetRandomSpawnPositions();
+  //			Debug.Log("SPAWN POS: " + spawnPositions[i] + " index:" + i);
+          }
+      }
+      Vector2 GetRandomSpawnPositions()
+      {
+          Vector2 returnVector = Vector2.zero;
+  //		int randomPositionPick = Random.Range (0, possibleSpawnPositions.Length / 2);
+          int randomPositionPick = Random.Range (0, possiblePositions.Count - 1);
 
 
-	}
-	void GetRandomKamikazeDestinations()
-	{
-		kamikazeDestinations = new Vector2[numberOfSpawnPositions];
-		// Loop through the Kamikaze Destinations array and fill each with a random X and Y
-		for (int x = 0; x < kamikazeDestinations.Length; x++) {
-			int randomKamikazeX = Random.Range(minSpawnX + 5, maxSpawnX - 5);
-			int randomKamikazeY = Random.Range(minSpawnY + 5, maxSpawnY - 5);
-			kamikazeDestinations[x] = new Vector2(randomKamikazeX, randomKamikazeY);
-		}
-	}
+  //		return new Vector2 (possibleSpawnPositions [randomPositionPick].x, possibleSpawnPositions [randomPositionPick].y);
+          return new Vector2 (possiblePositions [randomPositionPick].x, possiblePositions [randomPositionPick].y);
 
-	void Start () {
 
-		InitializeAllSpawnPositions (resourceGrid.totalTilesThatAreWater);
-		// Create some random Kamikaze positions
+      }
+      */
+      void GetRandomKamikazeDestinations()
+      {
+          kamikazeDestinations = new Vector2[numberOfSpawnPositions];
+          // Loop through the Kamikaze Destinations array and fill each with a random X and Y
+          for (int x = 0; x < kamikazeDestinations.Length; x++) {
+              int randomKamikazeX = Random.Range(minSpawnX + 5, maxSpawnX - 5);
+              int randomKamikazeY = Random.Range(minSpawnY + 5, maxSpawnY - 5);
+              kamikazeDestinations[x] = new Vector2(randomKamikazeX, randomKamikazeY);
+          }
+      }
+
+
+      void GetSpawnPositionsInWater()
+      {
+          // Initialize the spawn positions array
+          spawnPositions = new Vector2[numberOfSpawnPositions];
+
+          if (resourceGrid)
+          {
+              for (int i = 0; i < spawnPositions.Length; i++)
+              {
+                if (resourceGrid.waterTilePositions.Count > 0)
+                {
+                    int randomWaterTile = Random.Range(0, resourceGrid.waterTilePositions.Count - 1);
+                    // pick from water tiles list
+                    if (randomWaterTile < resourceGrid.waterTilePositions.Count)
+                    {
+                        // Fill the spawn position
+                        spawnPositions[i] = resourceGrid.waterTilePositions[randomWaterTile];
+                        // Then remove it from the list so it doesn't get repeated
+                        resourceGrid.waterTilePositions.RemoveAt(randomWaterTile);
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Grid is out of WATER TILES?!?!");
+                }
+                
+              }
+
+          }
+      }
+
+      void Start () {
+
+          /*	InitializeAllSpawnPositions (resourceGrid.totalTilesThatAreWater); */
+        GetSpawnPositionsInWater();
+
+        // Create some random Kamikaze positions
 		GetRandomKamikazeDestinations ();
 		
 		paths = new List<Node>[spawnPositions.Length];

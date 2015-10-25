@@ -104,10 +104,11 @@ public class PixelPerfectCam : MonoBehaviour {
 	}
 	
 	public void Update(){
-
+        /*
 		if(_winSize.x != Screen.width || _winSize.y != Screen.height){
 			ResizeCamToTargetSize();
 		}
+        */
 		if (_cameraHolder && followTarget) {
 			Vector3 newPosition = new Vector3 (followTarget.transform.position.x, followTarget.transform.position.y, 0.0F);
 			float nextX = Mathf.Round (_pixelLockedPPU * newPosition.x);

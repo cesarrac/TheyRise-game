@@ -61,9 +61,9 @@ public class ResourceGrid : MonoBehaviour{
 
 
 	// NOTE: the total represents the total of leader rock tiles, not really the total
-	[Range (5, 15)]
+	[Range (5, 55)]
 	public int totalRocksOnMap;
-	[Range (6, 18)]
+	[Range (6, 28)]
 	public int totalMineralsOnMap;
 
 	// Center of the map
@@ -92,6 +92,8 @@ public class ResourceGrid : MonoBehaviour{
 	bool islandVisible;
 
 	Transform cameraHolder;
+
+    public List<Vector2> waterTilePositions;
 
 	void Awake()
 	{
