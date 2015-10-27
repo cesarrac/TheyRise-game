@@ -91,7 +91,8 @@ public class ResourceGrid : MonoBehaviour{
 
 	bool islandVisible;
 
-	Transform cameraHolder;
+    [HideInInspector]
+	public Transform cameraHolder;
 
     public List<Vector2> waterTilePositions;
 
@@ -277,7 +278,10 @@ public class ResourceGrid : MonoBehaviour{
 	{
 		// SPAWN PLAYER CAPITAL HERE:
 		tiles [_terraPosX, _terraPosX] = new TileData("Capital", TileData.Types.capital, 0, 10000, 200, 5,0,0,0,0);
-		SpawnDiscoverTile(tiles [_terraPosX, _terraPosX].tileName, new Vector3(_terraPosX, _terraPosY, 0.0f),tiles [_terraPosX, _terraPosY].tileType); 
+		SpawnDiscoverTile(tiles [_terraPosX, _terraPosX].tileName, new Vector3(_terraPosX, _terraPosY, 0.0f),tiles [_terraPosX, _terraPosY].tileType);
+
+        // Spawn Player / Hero 1 tile down from the terraformer
+        Hero =  game_master.SpawnThePlayer(_terraPosX, _terraPosY - 1);
 
 		// TODO: replace capitalPos completely with terraformer pos
 		capitalSpawnX = _terraPosX;
@@ -285,6 +289,7 @@ public class ResourceGrid : MonoBehaviour{
 
 		terraformer_built = true;
 
+       
 		// Turn on the Enemy Wave spawner
 		enemy_waveSpawner.SetActive (true);
 
@@ -306,11 +311,16 @@ public class ResourceGrid : MonoBehaviour{
 		for (int x = centerPosX - (centerPosX/4); x < centerPosX + (centerPosX/4); x++) {
 			for (int y = centerPosY - (centerPosY/4); y < centerPosX + (centerPosY/4); y++) {
 				if (CheckIsInMapBounds(x, y)){
-					if (tiles[x,y].tileType == TileData.Types.empty){
-						magicPosX = x;
-						magicPosY = y;
-						break;
-					}
+                    if (!CheckForWater(x, y))
+                    {
+                        if (tiles[x, y].tileType == TileData.Types.empty)
+                        {
+                            magicPosX = x;
+                            magicPosY = y;
+                            break;
+                        }
+                    }
+				
 
 				}
 			}
@@ -323,7 +333,7 @@ public class ResourceGrid : MonoBehaviour{
 		for (int i = 0; i < totalRocksOnMap; i++) {
 //			
 			if (i== 0){
-				SetNewOrePatch(centerPosX, centerPosY, rockTypeName);
+				SetNewOrePatch(magicPosX, magicPosY, rockTypeName);
 			}else{
 				// pick up/left, up/right, down/left, down/right
 				int pick = Random.Range(1,5);
@@ -376,12 +386,11 @@ public class ResourceGrid : MonoBehaviour{
 
 	bool CheckForWater (int x, int y)
 	{
-		// TODO: Have to make sure that all these calculations below don't result in going out of map bounds
-
+        int waterRange = 2;
 		bool hasWater = false;
-		// Check from x-5, y-5 to x +5, y+5, but make sure every position is still within map bounds
-		for (int bottomX = x-5; bottomX < x + 5; bottomX++){
-			for (int bottomY = y-5; bottomY < y + 5; bottomY++){
+		// Make sure every position is still within map bounds
+		for (int bottomX = x- waterRange; bottomX < x + waterRange; bottomX++){
+			for (int bottomY = y- waterRange; bottomY < y + waterRange; bottomY++){
 				if (CheckIsInMapBounds(bottomX, bottomY)){
 					// It IS in map bounds, now check if it's water
 					if (tiles[bottomX, bottomY].tileType == TileData.Types.water){
@@ -400,7 +409,7 @@ public class ResourceGrid : MonoBehaviour{
 		return hasWater;
 	}
 
-	bool CheckIsInMapBounds(int x, int y)
+	public bool CheckIsInMapBounds(int x, int y)
 	{
 		if (x < mapSizeX && y < mapSizeY && x > 0 && y > 0) {
 			return true;
@@ -418,11 +427,11 @@ public class ResourceGrid : MonoBehaviour{
 			// the closer to the center the DENSER a patch of ore will be
 			float distance = Vector2.Distance (new Vector2 (leadX, leadY), new Vector2 (centerPosX, centerPosY)); 
 			int density = 0;
-			if (distance >= 15) {
+			if (distance >= 20) {
 				// pick a 1 or 2 density
 				int pick = Random.Range (0, 3);
 				density = pick;
-			} else if (distance < 15 && distance > 8) {
+			} else if (distance < 20 && distance > 8) {
 				// pick between 4 or 5 density
 				int pick = Random.Range (3, 5);
 				density = pick;

@@ -50,12 +50,15 @@ public class Player_GunBaseClass : MonoBehaviour {
 
 	public GameMaster gameMaster;
 
+    public AudioClip shootSound;
+    public AudioSource source;
+
 	void Awake()
 	{
 		sprite_renderer = GetComponent<SpriteRenderer> ();
 		parent_srenderer = GetComponentInParent<SpriteRenderer> ();
 
-		gameMaster = GetComponentInParent<Player_HeroAttackHandler> ().gameMaster;
+
 
 	}
 
@@ -128,6 +131,8 @@ public class Player_GunBaseClass : MonoBehaviour {
 		targetInSight = RaycastToGetTarget();
 		// Actually shoot the bullet
 		VisualProjectileShoot ();
+        // Play gun shot sound
+        source.PlayOneShot(shootSound, 0.5f);
 		// Apply gun kick to Player
 		//		GunKick ();
 		StartCoroutine (GunKick ());

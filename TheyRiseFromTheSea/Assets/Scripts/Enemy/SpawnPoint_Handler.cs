@@ -266,7 +266,7 @@ public class SpawnPoint_Handler : MonoBehaviour {
 				paths [i].Add (currPath [p]);
 			}
 
-//			Debug.Log ("PATH TO CAPITAL: " + i + " From: " + paths [i] [0].x + " " + paths [i] [0].y + " To: " + paths [i] [paths [i].Count - 1].x + " " + paths [i] [paths [i].Count - 1].y);
+		//Debug.Log ("PATH TO CAPITAL: " + i + " From: " + paths [i] [0].x + " " + paths [i] [0].y + " To: " + paths [i] [paths [i].Count - 1].x + " " + paths [i] [paths [i].Count - 1].y);
 
 		} else {
 			kamikazePaths [i] = new List<Node> ();

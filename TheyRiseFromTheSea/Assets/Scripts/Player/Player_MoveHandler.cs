@@ -53,6 +53,9 @@ public class Player_MoveHandler : MonoBehaviour {
 		rBody = GetComponent<Rigidbody2D> ();
 
 		mStats.Init ();
+
+        if (!resourceGrid)
+            resourceGrid = GameObject.FindGameObjectWithTag("Map").GetComponent<ResourceGrid>();
 	}
 
 

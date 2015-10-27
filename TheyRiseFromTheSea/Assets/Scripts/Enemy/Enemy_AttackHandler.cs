@@ -37,6 +37,11 @@ public class Enemy_AttackHandler : Unit_Base {
 
 	private bool isPlayerAttacker;
 
+    void Awake()
+    {
+        audio_source = GetComponent<AudioSource>();
+    }
+
 	void Start () {
 
 		// Get the value of isKamikaze set by the public bool in Move Handler

@@ -17,6 +17,22 @@ public class Map_Generator : MonoBehaviour {
 	int[,] map;
 
 	ResourceGrid grid;
+
+    public GameObject _Floor;
+
+    void Awake()
+    {
+        // For the Resource Grid to work, this MAP Gameobject needs to sit on X = 1/2 map width Y = 1/2 map height Z = 0
+        float _x = ((float)width) / 2;
+        float _y = ((float)height) / 2;
+        Vector3 correctPosition = new Vector3(_x, _y, 0.0f);
+        if (transform.position != correctPosition)
+        {
+            transform.position = correctPosition;
+            // and move the floor as well, except don't touch its z position
+            _Floor.transform.position = new Vector3(_x, _y, _Floor.transform.position.z);
+        }
+    }
 	
 	void Start()
 	{
@@ -47,7 +63,7 @@ public class Map_Generator : MonoBehaviour {
 		ProcessMap ();
 		
 		// BORDERS:
-		int borderSize = 1;
+		int borderSize = 64;
 		int [,] borderedMap = new int[width + borderSize * 2, height + borderSize * 2];
 
 		for (int x = 0; x < borderedMap.GetLength(0); x++) {
@@ -75,6 +91,8 @@ public class Map_Generator : MonoBehaviour {
 	{
 		// Loop through the map array and if it is equal to 0 make it empty if it's equal to 1 make it water
 		ResourceGrid grid = GetComponent<ResourceGrid> ();
+        grid.mapSizeX = width;
+        grid.mapSizeY = height;
 		grid.tiles = new TileData[width, height];
 
 		int countWaterTiles = 0;
@@ -85,7 +103,7 @@ public class Map_Generator : MonoBehaviour {
 			for (int y =0; y < height; y ++){
 				if (map[x,y] == 0){
 					grid.tiles[x,y] = new TileData(TileData.Types.empty, 0, 1);
-				}else if (map[x,y] == 1){
+				}else {
 					grid.tiles[x,y] = new TileData(TileData.Types.water, 200, 2);
                     // fill a list of water tiles positions as vector 2 to be used as potential spawn positions for enemies
                     grid.waterTilePositions.Add(new Vector2(x, y));
@@ -109,7 +127,8 @@ public class Map_Generator : MonoBehaviour {
 	{
 		List<List<Coord>> wallRegions = GetRegions (1);
 		
-		int wallThresholdSize = 200;
+        
+		int wallThresholdSize =200;
 		foreach (List<Coord> wallRegion in wallRegions) {
 			if (wallRegion.Count < wallThresholdSize){
 				foreach(Coord tile in wallRegion){
@@ -117,9 +136,10 @@ public class Map_Generator : MonoBehaviour {
 				}
 			}
 		}
+      
 		
 		List<List<Coord>> roomRegions = GetRegions (0);
-		int roomThresholdSize = 10;
+		int roomThresholdSize =64;
 		List<Room> survivingRooms = new List<Room> ();
 		
 		foreach (List<Coord> roomRegion in roomRegions) {
@@ -139,6 +159,7 @@ public class Map_Generator : MonoBehaviour {
 		
 		
 		ConnectClosestRooms (survivingRooms);
+       
 	}
 	
 	// Connects all "rooms" with passages so NO room is disconnected
@@ -365,9 +386,11 @@ public class Map_Generator : MonoBehaviour {
 	void RandomFillMap()
 	{
 		if (useRandomSeed) {
-			// Grabs a random seed using the value of Time
-			seed = Time.time.ToString();
-		}
+            // Grabs a random seed using the value of Time
+            //seed = Time.time.ToString();
+            int randomSeed = UnityEngine.Random.Range(100, 100992112);
+            seed = randomSeed.ToString();
+        }
 		
 		System.Random pseudoRandom = new System.Random (seed.GetHashCode ());
 		
@@ -379,8 +402,9 @@ public class Map_Generator : MonoBehaviour {
 					
 					map [x, y] = 1;
 				}else{
-					map[x,y] = (pseudoRandom.Next(0,100) < randomFillPercent) ? 1: 0;
-				}
+                    map[x,y] = (pseudoRandom.Next(0,100) < randomFillPercent) ? 1: 0;
+                    
+                }
 				
 			}
 		}

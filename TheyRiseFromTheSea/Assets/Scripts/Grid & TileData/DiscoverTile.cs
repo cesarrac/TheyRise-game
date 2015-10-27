@@ -90,10 +90,14 @@ public class DiscoverTile : MonoBehaviour {
 			// so it will have a Building Click Handler that needs its pos X and pos Y
 			if (tileType != TileData.Types.rock && tileType != TileData.Types.empty && tileType != TileData.Types.mineral) {
 				Building_ClickHandler bClickHandler = tileToSpawn.GetComponent<Building_ClickHandler> ();
-				bClickHandler.mapPosX = mapPosX;
-				bClickHandler.mapPosY = mapPosY;
-				bClickHandler.resourceGrid = grid;
-				bClickHandler.objPool = objPool;
+                if (bClickHandler)
+                {
+                    bClickHandler.mapPosX = mapPosX;
+                    bClickHandler.mapPosY = mapPosY;
+                    bClickHandler.resourceGrid = grid;
+                    bClickHandler.objPool = objPool;
+                }
+			
 
 			} else if (tileType == TileData.Types.rock || tileType == TileData.Types.mineral){
 				GetSpriteForRockOrMineral(tileType);
@@ -101,15 +105,20 @@ public class DiscoverTile : MonoBehaviour {
 			if (tileType == TileData.Types.extractor) {
 				// IF IT'S AN EXTRACTOR it will ALSO need the extractor variables
 				Extractor extra = tileToSpawn.GetComponent<Extractor> ();
-				extra.mapPosX = mapPosX;
-				extra.mapPosY = mapPosY;
-				extra.resourceGrid = grid;
-				extra.playerResources = playerCapital.GetComponent<Player_ResourceManager> ();
+                if (extra)
+                {
+                    extra.mapPosX = mapPosX;
+                    extra.mapPosY = mapPosY;
+                    extra.resourceGrid = grid;
+                    extra.playerResources = playerCapital.GetComponent<Player_ResourceManager>();
+                }
+				
 			} 
 			if (tileType == TileData.Types.capital){
 				// IF IT'S THE TERRAFORMER it will need the master state manager
 				Terraformer_Handler terra = tileToSpawn.GetComponent<Terraformer_Handler>();
-				terra.master_State = master_state;
+                if (terra)
+				    terra.master_State = master_state;
 			}
 
 	

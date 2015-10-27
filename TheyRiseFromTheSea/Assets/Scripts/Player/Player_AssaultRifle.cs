@@ -13,9 +13,14 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 		gunStats.Init ();
 		
 		rigid_body = GetComponentInParent<Rigidbody2D> ();
-	}
-	
-	void Start()
+
+        source = GetComponentInParent<AudioSource>();
+
+        gameMaster = GetComponentInParent<Player_HeroAttackHandler>().gameMaster;
+
+    }
+
+    void Start()
 	{
 		objPool = GetComponentInParent<Player_HeroAttackHandler> ().objPool;
 		if (!gameMaster)

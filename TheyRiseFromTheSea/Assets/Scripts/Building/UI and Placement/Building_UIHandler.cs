@@ -76,7 +76,7 @@ public class Building_UIHandler : MonoBehaviour {
 		InitBuildCosts ();
 
 		activeButtons = new Button[4]; // there will only be 4 Options buttons
-		CreateBuildingButtons ();
+		// CreateBuildingButtons ();
 	
 	}
 

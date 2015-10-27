@@ -99,9 +99,11 @@ public class Building_ClickHandler : MonoBehaviour {
 
 		if (!resourceGrid) {
 			resourceGrid = GameObject.FindGameObjectWithTag ("Map").GetComponent<ResourceGrid> ();
-			nano_builder = resourceGrid.Hero.GetComponent<NanoBuilding_Handler> ();
+            if (myTileType != TileData.Types.capital)
+			    nano_builder = resourceGrid.Hero.GetComponent<NanoBuilding_Handler> ();
 		} else {
-			nano_builder = resourceGrid.Hero.GetComponent<NanoBuilding_Handler> ();
+            if (myTileType != TileData.Types.capital)
+                nano_builder = resourceGrid.Hero.GetComponent<NanoBuilding_Handler> ();
 		}
 
 

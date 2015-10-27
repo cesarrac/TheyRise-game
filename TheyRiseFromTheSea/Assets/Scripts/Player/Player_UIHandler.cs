@@ -36,9 +36,10 @@ public class Player_UIHandler : MonoBehaviour {
 		foodCostText.color = Color.red;
 
 		// Get the player hero component
-		if (!playerhero) {
+		/*if (!playerhero) {
 			playerhero = GameObject.FindGameObjectWithTag("Player").GetComponent<Player_HeroAttackHandler>();
 		}
+        */
 	}
 
 	void GetResourcesText()

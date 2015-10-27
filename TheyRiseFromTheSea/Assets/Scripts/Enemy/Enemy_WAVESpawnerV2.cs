@@ -135,7 +135,7 @@ public class Enemy_WAVESpawnerV2 : MonoBehaviour {
 
 	void Update () 
 	{
-
+        /*
 		// Wave Spawner waits to have access to the Terraformer, and the terraformer to be working, before countdown to spawn
 		if (terraformer) {
 			if (terraformer.curState == Terraformer_Handler.State.WORKING) {
@@ -150,8 +150,10 @@ public class Enemy_WAVESpawnerV2 : MonoBehaviour {
 		} else {
 			Debug.Log("WAVESPAWNER: Can't find the terraformer!");
 		}
+        */
+        Countdown();
 
-	}
+    }
 
 	void Countdown()
 	{

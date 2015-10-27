@@ -59,6 +59,9 @@ public class Unit_Base : MonoBehaviour {
 	private Building_StatusIndicator _buildingIndi;
 	public Building_StatusIndicator buildingStatusIndicator { get {return _buildingIndi;} set {_buildingIndi = value;}}
 
+    public AudioClip takeDamageSound, doDamageSound;
+    public AudioSource audio_source;
+
 	void Start(){
 
 		if (_statusIndi != null) {
@@ -154,6 +157,9 @@ public class Unit_Base : MonoBehaviour {
 	public void SpecialAttackOtherUnit(Unit_Base unit){
 		if (unit.stats.curHP >= 1f) {
 			TakeDamage (unit, stats.curSPdamage);
+            // Play do damage sound
+            if (audio_source)
+                audio_source.PlayOneShot(doDamageSound, 1);
 		} else {
 			Die (unit.gameObject);
 		}
@@ -184,7 +190,12 @@ public class Unit_Base : MonoBehaviour {
 	public void TakeDamage(float damage)
 	{
 		stats.curHP -= damage;
-		Debug.Log (this.gameObject.name + " has " + stats.curHP + "HP left");
+        //Debug.Log (this.gameObject.name + " has " + stats.curHP + "HP left");
+
+        // Play take damage sound
+        if (audio_source)
+            audio_source.PlayOneShot(takeDamageSound, 0.5f);
+
 		// Indicate damage using Unit / Building's canvas
 		if (gameObject.activeSelf) {
 			

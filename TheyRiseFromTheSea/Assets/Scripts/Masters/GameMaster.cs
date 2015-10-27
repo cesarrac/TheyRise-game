@@ -11,6 +11,8 @@ public class GameMaster : MonoBehaviour {
 	public Building_UIHandler building_UIHandler;
 	public Player_GunBaseClass player_weapon;
 
+    ObjectPool objPool;
+
 	public bool _canFireWeapon;
 
 	bool levelInitialized;
@@ -23,9 +25,15 @@ public class GameMaster : MonoBehaviour {
 		curCredits = 1000;
 		Debug.Log ("GM is awake!");
 
+        if (Application.loadedLevel == 1)
+        {
+            resourceGrid = GameObject.FindGameObjectWithTag("Map").GetComponent<ResourceGrid>();
+            objPool = GameObject.FindGameObjectWithTag("Pool").GetComponent<ObjectPool>();
+        }
 
 	}
 
+ 
 	// LEVEL LOADING:
 
 	void OnLevelWasLoaded (int level){
@@ -47,6 +55,27 @@ public class GameMaster : MonoBehaviour {
 			Application.LoadLevel(2);
 		}
 	}
+
+    // HERO/PLAYER LOADING:
+    public GameObject SpawnThePlayer(int posX, int posY)
+    {
+        /* Going to need a position that is 100% for sure an empty land tile.
+        To do that I'll need to load the player once the map generator and resource Grid have done their thing */
+        Vector3 playerPosition = new Vector3(posX, posY, 0.0f);
+        GameObject Hero = objPool.GetObjectForType("Hero", true, playerPosition);
+        if (Hero)
+        {
+            Hero.GetComponent<Player_MoveHandler>().resourceGrid = resourceGrid;
+            Hero.GetComponent<Player_HeroAttackHandler>().objPool = objPool;
+            resourceGrid.cameraHolder.gameObject.GetComponent<PixelPerfectCam>().followTarget = Hero;
+            return Hero;
+        }
+        else
+        {
+            return null;
+        }
+
+    }
 
 	void InitializeInventoryAndSupplies()
 	{

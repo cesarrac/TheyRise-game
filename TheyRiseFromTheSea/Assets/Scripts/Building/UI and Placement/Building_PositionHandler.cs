@@ -219,7 +219,8 @@ public class Building_PositionHandler : MonoBehaviour {
 		if (Input.GetMouseButtonDown (1)) {
 			// CANCEL THE BUILD
 			PoolObject(gameObject);
-		}
+            buildingUI.currentlyBuilding = false;
+        }
 	}
 
 	void PoolObject(GameObject objToPool){

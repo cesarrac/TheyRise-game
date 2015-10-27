@@ -149,15 +149,19 @@ public class Enemy_MoveHandler : MonoBehaviour {
 				// Initialize Current Path
 				currentPath = new List<Node>();
 
-				// Loop through each Node of the corresponding path and Add Node to Current Path
-				for (int x = 0; x < spwnPtHandler.paths[spwnPtIndex].Count; x++){
+                destination = new Vector3(resourceGrid.capitalSpawnX, resourceGrid.capitalSpawnY, 0.0f);
+
+                // Loop through each Node of the corresponding path and Add Node to Current Path
+                for (int x = 0; x < spwnPtHandler.paths[spwnPtIndex].Count; x++){
 					currentPath.Add(spwnPtHandler.paths[spwnPtIndex][x]);
 
-					// When the Loop reaches the last Node store the value as a Vector3 destination
-					if (x == spwnPtHandler.paths[spwnPtIndex].Count - 1){
+                    // When the Loop reaches the last Node store the value as a Vector3 destination
+                    /*
+                    if (x == spwnPtHandler.paths[spwnPtIndex].Count - 1){
 
 						destination = new Vector3( resourceGrid.capitalSpawnX, resourceGrid.capitalSpawnY, 0.0f);
 					}
+                    */
 				}
 
 				// Now that all Nodes in Current Path have been set, start moving
@@ -552,6 +556,7 @@ public class Enemy_MoveHandler : MonoBehaviour {
 		
 		// Check if the next tile is a UNWAKABLE tile OR if it is clear path
 		if (resourceGrid.UnitCanEnterTile (currentPath [1].x, currentPath [1].y) == false) {
+            Debug.Log("ENEMY_MOVE: Next tile in path is unwakable!!");
 
 			// Since Path is blocked set the state to Idling until this unit knows if it must attack
 			_state = State.IDLING;
@@ -620,13 +625,13 @@ public class Enemy_MoveHandler : MonoBehaviour {
 			}
 
 			// this check if for KAMIKAZE UNITS ONLY
-		//	if (isKamikaze){
+			if (isKamikaze){
 				// if the next tile on the Path is the destination
 				if (currentPath[1].x == destination.x && currentPath[1].y == destination.y){
 					// reached the destination, do Special Attack!
 					enemyAttkHandler.SpecialAttack(currentPath[1].x, currentPath[1].y);
 				}
-		//	}
+		   }
 		} 	
 		// Move to the next Node position in path
 		posX = currentPath [1].x;

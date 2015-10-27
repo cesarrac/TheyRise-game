@@ -21,6 +21,7 @@ public class Player_HeroAttackHandler : Unit_Base {
 
 		if (!gameMaster)
 			gameMaster = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster> ();
+
 	}
 
 	void Start () {
