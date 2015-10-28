@@ -100,9 +100,13 @@ public class Terraformer_Handler : MonoBehaviour {
 		}
 	}
 
-	void OnTriggerEnter2D(Collider2D coll){
+	void OnTriggerStay2D(Collider2D coll){
 		if (coll.gameObject.tag == "Citizen") {
-			StartTerraformer();
-		}
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                StartTerraformer();
+
+            }
+        }
 	}
 }
