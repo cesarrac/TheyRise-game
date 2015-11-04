@@ -50,6 +50,7 @@ public class Building_ClickHandler : MonoBehaviour {
 	public enum State { ASSEMBLING, READY, DISSASEMBLING, RECYCLE_NANOBOTS, CREATING }
 	private State _state;
 	public State state { get { return _state; } set { _state = value; } }
+    public State debugState;
 
 	NanoBuilding_Handler nano_builder; // this will allow the building to give back the nanobots when sold, getting it from resourceGrid
 	int nanoBotsCreated = 0;
@@ -99,9 +100,18 @@ public class Building_ClickHandler : MonoBehaviour {
 
 		if (!resourceGrid) {
 			resourceGrid = GameObject.FindGameObjectWithTag ("Map").GetComponent<ResourceGrid> ();
+
+            // get my tiletype
+            myTileType = CheckTileType((int)transform.position.x, (int)transform.position.y);
+
             if (myTileType != TileData.Types.capital)
 			    nano_builder = resourceGrid.Hero.GetComponent<NanoBuilding_Handler> ();
+
 		} else {
+
+            // get my tiletype
+            myTileType = CheckTileType((int)transform.position.x, (int)transform.position.y);
+
             if (myTileType != TileData.Types.capital)
                 nano_builder = resourceGrid.Hero.GetComponent<NanoBuilding_Handler> ();
 		}
@@ -130,16 +140,16 @@ public class Building_ClickHandler : MonoBehaviour {
 		myCollider = GetComponent<BoxCollider2D> ();
 		vertExtents = myCollider.bounds.extents.y;
 
-		// get my tiletype
-		myTileType = CheckTileType ((int)transform.position.x,(int) transform.position.y);
+		
 
 
 	}
 
 	void Update()
-	{			
-		MyStateMachine (_state);
-	}
+	{
+        MyStateMachine(_state);
+        debugState = _state;
+    }
 
 	void MyStateMachine(State _curState)
 	{
@@ -148,8 +158,9 @@ public class Building_ClickHandler : MonoBehaviour {
 			FadeIn();
 			break;
 		case State.READY:
+            /* Player can Dissasemble by right clicking on its Collider */
 
-			DissasemblyControl();
+			//DissasemblyControl();
 
 			if (Input.GetKeyDown (KeyCode.F) && playerIsNear) {
 				if (!buildingUIhandler.currentlyBuilding){
@@ -333,6 +344,23 @@ public class Building_ClickHandler : MonoBehaviour {
 			playerIsNear = false;
 		}
 	}
+
+
+    void OnMouseOver()
+    {
+       
+        if (_state == State.READY) {
+            if (Input.GetButtonDown("Break")) {
+                
+                if (!isDissasembling) {
+                    isDissasembling = true;
+                    isFading = true;
+                    _state = State.RECYCLE_NANOBOTS;
+                   
+                }
+            }
+        }
+    }
 
 //	void OnMouseOver()
 //	{

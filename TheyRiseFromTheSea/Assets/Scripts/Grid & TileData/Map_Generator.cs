@@ -66,6 +66,8 @@ public class Map_Generator : MonoBehaviour {
 		int borderSize = 64;
 		int [,] borderedMap = new int[width + borderSize * 2, height + borderSize * 2];
 
+        int[,] islandMap = new int[width, height];
+
 		for (int x = 0; x < borderedMap.GetLength(0); x++) {
 			for (int y = 0; y < borderedMap.GetLength(1); y++) {
 				
@@ -76,13 +78,34 @@ public class Map_Generator : MonoBehaviour {
 					borderedMap[x,y] = 1;
 
 				}
+
+              
 			}
 		}
 
+        for (int x = 0; x < islandMap.GetLength(0); x++)
+        {
+            for (int y = 0; y < islandMap.GetLength(1); y++)
+            {
+                if (map[x,y] == 0)
+                {
+                    islandMap[x, y] = 1;
+
+                }
+
+            }
+        }
 
 
-		Mesh_Generator meshGen = GetComponent<Mesh_Generator> ();
+
+
+        Mesh_Generator meshGen = GetComponent<Mesh_Generator> ();
 		meshGen.GenerateMesh (borderedMap, 1);
+
+        meshGen.GenerateIslandMesh(islandMap, 1);
+        // Build island Texture
+        TileTexture tileTexture = _Floor.GetComponent<TileTexture>();
+        tileTexture.BuildTexture(islandMap.GetLength(0), islandMap.GetLength(1));
 
 		GiveMapToResourceGrid ();
 	}
@@ -116,10 +139,11 @@ public class Map_Generator : MonoBehaviour {
 
 		// let the grid know how many of these tiles are water so it can get spawn positions
 		grid.totalTilesThatAreWater = countWaterTiles;
-
-
-
+        
 		grid.InitializeRockandMinerals ();
+
+        // turn water tiles list into an array for faster searching
+        grid.waterTilesArray = grid.waterTilePositions.ToArray();
 	}
 	
 	// Gets rid of smaller patches of land (small defined by threshold)

@@ -20,10 +20,10 @@ class AnimatedTileTexture : MonoBehaviour
 
         //set the tile size of the texture (in UV units), based on the rows and columns
         //Vector2 size = new Vector2(tileSize, tileSize);
-        // Vector2 size = new Vector2(tileSize / columns, tileSize / rows);
-        Vector2 size = new Vector2(rows,  columns);
+      //  Vector2 size = new Vector2(tileSize / columns, tileSize / rows);
+       // Vector2 size = new Vector2(rows,  columns);
 
-        GetComponent<Renderer>().sharedMaterial.SetTextureScale("_MainTex", size);
+       // GetComponent<Renderer>().sharedMaterial.SetTextureScale("_MainTex", size);
     }
 
     private IEnumerator updateTiling()

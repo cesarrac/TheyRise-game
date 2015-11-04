@@ -44,6 +44,8 @@ public class PixelPerfectCam : MonoBehaviour {
 	private bool _zoomedIn;
 	private float _startOrthoSize, _zoomOrthoSize = 8.15f;
 	public float curOrthoSize;
+
+    bool playerReady = false;
 	
 	protected void Start(){
 
@@ -54,7 +56,9 @@ public class PixelPerfectCam : MonoBehaviour {
 			Debug.LogWarning("No camera for pixel perfect cam to use");
 		}else{
 			_camera.orthographic = true;
-			ResizeCamToTargetSize();
+            // If camera has access to player, resize
+            if (followTarget)
+			    ResizeCamToTargetSize();
 		
 		}
 
@@ -105,8 +109,15 @@ public class PixelPerfectCam : MonoBehaviour {
 	
 	public void Update(){
         
+        if (!playerReady && followTarget)
+        {
+            playerReady = true;
+            ResizeCamToTargetSize();
+        }
+
 		if(_winSize.x != Screen.width || _winSize.y != Screen.height){
-			ResizeCamToTargetSize();
+            if (playerReady)
+			    ResizeCamToTargetSize();
 		}
         
 		if (_cameraHolder && followTarget) {

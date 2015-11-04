@@ -99,7 +99,7 @@ public class Enemy_MoveHandler : MonoBehaviour {
 		// Store initial position for Grid as an int
 		posX = (int)transform.position.x;
 		posY = (int)transform.position.y;
-		Debug.Log ("X=" + posX + "Y=" + posY);
+
 		// Store the Attack Handler to interact with its state
 		enemyAttkHandler = GetComponent<Enemy_AttackHandler> ();
 
@@ -576,24 +576,35 @@ public class Enemy_MoveHandler : MonoBehaviour {
 					// Check if this unit is NOT an Avoider 
 					if (!isAvoider){
 
-						// the Target Tile is not our destination, so do Normal Attack
-						targetPosX = currentPath [1].x;
-						targetPosY = currentPath [1].y;
-						enemyAttkHandler.targetTilePosX = currentPath [1].x;
-						enemyAttkHandler.targetTilePosY = currentPath [1].y;
-						enemyAttkHandler.resourceGrid = resourceGrid;
+                        // if the Tile is a ROCK they eat it
+                        if (resourceGrid.GetTileType(currentPath[1].x, currentPath[1].y) == TileData.Types.rock)
+                        {
+                            // swap the tile for an empty, as if they ate it
+                            resourceGrid.SwapTileType(currentPath[1].x, currentPath[1].y, TileData.Types.empty);
+                        }
+                        else
+                        {
+                            // the Target Tile is not our destination, so do Normal Attack
+                            targetPosX = currentPath[1].x;
+                            targetPosY = currentPath[1].y;
+                            enemyAttkHandler.targetTilePosX = currentPath[1].x;
+                            enemyAttkHandler.targetTilePosY = currentPath[1].y;
+                            enemyAttkHandler.resourceGrid = resourceGrid;
 
-						// Change attack handler state to Attacking Tile
-						enemyAttkHandler.state = Enemy_AttackHandler.State.ATTACK_TILE;
+                            // Change attack handler state to Attacking Tile
+                            enemyAttkHandler.state = Enemy_AttackHandler.State.ATTACK_TILE;
 
-						// Change my state to Attack to stop movement
-						_state = State.ATTACKING;
+                            // Change my state to Attack to stop movement
+                            _state = State.ATTACKING;
 
-						// Record the Node location that contains the obstacle
-						lastKnownNode = new Vector2(currentPath[1].x, currentPath[1].y);
+                            // Record the Node location that contains the obstacle
+                            lastKnownNode = new Vector2(currentPath[1].x, currentPath[1].y);
 
-						// Record the direction Units must use to disperse
-						disperseDirection = Disperse(lastKnownNode);
+                            // Record the direction Units must use to disperse
+                            disperseDirection = Disperse(lastKnownNode);
+                        }
+
+						
 					}else{
 						// This IS an Avoider, instead of attacking they move around the tile
 
@@ -646,7 +657,7 @@ public class Enemy_MoveHandler : MonoBehaviour {
 
 	bool CheckForTileAttack(int x, int y){
 		if (resourceGrid.tiles [x, y].tileType != TileData.Types.empty && 
-		    resourceGrid.tiles [x, y].tileType != TileData.Types.rock && 
+		     
 		    resourceGrid.tiles [x, y].tileType != TileData.Types.mineral &&
 		    resourceGrid.tiles [x, y].tileType != TileData.Types.water) {
 			return true;
@@ -694,4 +705,6 @@ public class Enemy_MoveHandler : MonoBehaviour {
 		}
 	}
 	*/
+
+
 }

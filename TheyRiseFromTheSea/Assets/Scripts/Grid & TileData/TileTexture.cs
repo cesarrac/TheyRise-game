@@ -12,8 +12,10 @@ public class TileTexture : MonoBehaviour {
 
 	public Map_Generator mapGenScript;
 
+    public int tilesPerRow, numberOfRows;
 	void Awake()
 	{
+        /*
 		if (!mapGenScript) {
 			mapGenScript = GameObject.FindGameObjectWithTag("Map").GetComponent<Map_Generator>();
 		}else{
@@ -23,37 +25,64 @@ public class TileTexture : MonoBehaviour {
 			mesh_renderer = GetComponent<MeshRenderer> ();
 			BuildTexture ();
 		}
+        */
+        mesh_renderer = GetComponent<MeshRenderer>();
+
+    }
 
 
-	}
-
-
-	Color[][] SplitTileSheet()
+    Color[][] SplitTileSheet()
 	{
-		int tilesPerRow = tileSheet.width / tileResolution;
+        /*
+        int tilesPerRow = tileSheet.width / tileResolution;
 		int numberOfRows = tileSheet.height / tileResolution;
-		
+		*/
 		Color[][] tiles = new Color[tilesPerRow * numberOfRows][];
-		tiles [0]=tileSheet.GetPixels(0, 0, tileResolution, tileResolution);
 
-		
-		return tiles;
+        //tiles[0] = tileSheet.GetPixels(0, 0, tileResolution, tileResolution);
+       
+        for (int y = 0; y < numberOfRows; y++)
+        {
+            for (int x = 0; x < tilesPerRow; x++)
+            {
+                tiles[y * tilesPerRow + x] = tileSheet.GetPixels(x * tileResolution, y * tileResolution, tileResolution, tileResolution);
+            }
+        }
+        
+        return tiles;
 	}
 
-	void BuildTexture(int tileSelectionIndex = 0)
+	public void BuildTexture(int width, int height)
 	{
-		int textureWidth = levelWidth * tileResolution;
-		int textureHeight = levelHeight * tileResolution;
+		int textureWidth = width * tileResolution;
+		int textureHeight = height * tileResolution;
 		Texture2D texture = new Texture2D (textureWidth, textureHeight);
 		
 		// Get tiles by Splitting up the sprite sheet
 		Color[][] tiles = SplitTileSheet ();
-		
-		
-		for (int y =0; y < levelHeight; y++){
-			for (int x =0; x < levelWidth; x++){
-				
-				Color[] thisTilePixels = tiles[tileSelectionIndex];
+
+        int tileSelectionIndex = 0;
+
+        for (int y =0; y < height; y++){
+			for (int x =0; x < width; x++){
+                /*
+                if (x == 0 && y == 0)
+                {
+                    tileSelectionIndex = 4;
+                }
+                else if (x == width - 1 && y == 0)
+                {
+                    tileSelectionIndex = 3;
+                }
+                else if (x < width - 1 && x > 0 && y == 0)
+                {
+                    tileSelectionIndex = 0;
+                }
+                else {
+                    tileSelectionIndex = 5;
+                }
+               */
+				Color[] thisTilePixels = tiles[5];
 				
 				texture.SetPixels(x * tileResolution, y * tileResolution, tileResolution, tileResolution, thisTilePixels);
 			}
@@ -61,6 +90,7 @@ public class TileTexture : MonoBehaviour {
 		
 		// Make sure the texture is in Point filter mode (THIS CAN CHANGE DEPENDING ON THE ART!)
 		texture.filterMode = FilterMode.Point;
+
 		
 		// Apply texture
 		texture.Apply ();

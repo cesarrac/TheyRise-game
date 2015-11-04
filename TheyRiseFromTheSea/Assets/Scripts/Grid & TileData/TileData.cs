@@ -49,7 +49,9 @@ public class TileData  {
 		maxResourceQuantity = resourceQuantity;
 		movementCost = moveCost;
 
-		if (type != Types.rock && type != Types.empty && type != Types.mineral && type != Types.water) {
+        // MAKING ROCK UNWAKABLE
+
+		if (type != Types.empty && type != Types.mineral && type != Types.water) {
 			isWalkable = false;
 		}
 		hp = _hp;
@@ -65,7 +67,7 @@ public class TileData  {
 		maxResourceQuantity = resourceQuantity;
 		movementCost = moveCost;
 
-		if (type != Types.rock && type != Types.empty && type != Types.mineral && type != Types.water) {
+		if (type != Types.empty && type != Types.mineral && type != Types.water) {
 			isWalkable = false;
 		}
 		tileName = type.ToString ();

@@ -95,6 +95,7 @@ public class ResourceGrid : MonoBehaviour{
 	public Transform cameraHolder;
 
     public List<Vector2> waterTilePositions;
+    public Vector2[] waterTilesArray;
 
 	void Awake()
 	{
@@ -277,8 +278,8 @@ public class ResourceGrid : MonoBehaviour{
 	void InitCapital(int _terraPosX, int _terraPosY)
 	{
 		// SPAWN PLAYER CAPITAL HERE:
-		tiles [_terraPosX, _terraPosX] = new TileData("Capital", TileData.Types.capital, 0, 10000, 200, 5,0,0,0,0);
-		SpawnDiscoverTile(tiles [_terraPosX, _terraPosX].tileName, new Vector3(_terraPosX, _terraPosY, 0.0f),tiles [_terraPosX, _terraPosY].tileType);
+		tiles [_terraPosX, _terraPosY] = new TileData("Capital", TileData.Types.capital, 0, 10000, 200, 5,0,0,0,0);
+		SpawnDiscoverTile(tiles [_terraPosX, _terraPosY].tileName, new Vector3(_terraPosX, _terraPosY, 0.0f),tiles [_terraPosX, _terraPosY].tileType);
 
         // Spawn Player / Hero 1 tile down from the terraformer
         Hero =  game_master.SpawnThePlayer(_terraPosX, _terraPosY - 1);
@@ -549,6 +550,8 @@ public class ResourceGrid : MonoBehaviour{
 			return null;
 	}
 
+
+   
 
 	/// <summary>
 	/// Swaps the type of the tile.

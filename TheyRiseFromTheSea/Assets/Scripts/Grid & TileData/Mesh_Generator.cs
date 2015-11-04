@@ -8,6 +8,7 @@ public class Mesh_Generator : MonoBehaviour {
 	public SquareGrid squareGrid;
 	public MeshFilter walls;
 	public MeshFilter water;
+    public MeshFilter ground;
 
 	
 	public bool is2D;
@@ -70,6 +71,82 @@ public class Mesh_Generator : MonoBehaviour {
 		}
 		
 	}
+
+    public void GenerateIslandMesh(int[,]map, int squareSize)
+    {
+        outlines.Clear();
+        checkedVertices.Clear();
+        triangleDictionary.Clear();
+
+        squareGrid = new SquareGrid(map, squareSize);
+       
+        vertices = new List<Vector3>();
+        triangles = new List<int>();
+
+        for (int x = 0; x < squareGrid.squares.GetLength(0); x++)
+        {
+            for (int y = 0; y < squareGrid.squares.GetLength(1); y++)
+            {
+                TriangulateSquare(squareGrid.squares[x, y]);
+            }
+        }
+
+
+        /*
+        Vector3[] landVertices = new Vector3[(map.GetLength(0) + 1) * (map.GetLength(1) + 1)];
+        Vector2[] uv = new Vector2[landVertices.Length];
+        for (int i = 0, y = 0; y <= map.GetLength(1); y++)
+        {
+            for (int x = 0; x <= map.GetLength(0); x++, i++)
+            {
+                landVertices[i] = new Vector3(x, y);
+                uv[i] = new Vector2((float)x /map.GetLength(0), (float)y / map.GetLength(1));
+            }
+        }
+
+        int[] landTriangles = new int[map.GetLength(0) * map.GetLength(1) * 6];
+        for (int ti = 0, vi = 0, y = 0; y < map.GetLength(1); y++, vi++)
+        {
+            for (int x = 0; x < map.GetLength(0); x++, ti += 6, vi++)
+            {
+                triangles[ti] = vi;
+                triangles[ti + 3] = triangles[ti + 2] = vi + 1;
+                triangles[ti + 4] = triangles[ti + 1] = vi + map.GetLength(0) + 1;
+                triangles[ti + 5] = vi + map.GetLength(0) + 2;
+            }
+        }
+         mesh.uv = uv;
+        */
+
+        Mesh mesh = new Mesh();
+        ground.mesh = mesh;
+        mesh.name = "Island Mesh";
+
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangles.ToArray();
+       
+        mesh.RecalculateNormals();
+
+       
+
+
+
+
+       
+        int tileAmount = 10;
+        Vector2[] uvs = new Vector2[vertices.Count];
+        for (int i = 0; i < vertices.Count; i++)
+        {
+            /*
+            float percentX = Mathf.InverseLerp(-map.GetLength(0) / 2 * squareSize, map.GetLength(0) / 2 * squareSize, vertices[i].x) * tileAmount;
+            float percentY = Mathf.InverseLerp(-map.GetLength(0) / 2 * squareSize, map.GetLength(0) / 2 * squareSize, vertices[i].z) * tileAmount;
+            uvs[i] = new Vector2(percentX, percentY);
+            */
+            uvs[i] = new Vector2((float)vertices[i].x / map.GetLength(0), (float)vertices[i].z / map.GetLength(1));
+        }
+        mesh.uv = uvs;
+        
+    }
 
 
 	void Generate2DColliders()

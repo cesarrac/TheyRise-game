@@ -39,10 +39,10 @@ public class NanoBuilding_Handler : MonoBehaviour {
      
 
 	void Update () {
-        ListenFourRightClick();
+        ListenForRightClick();
     }
 
-    void ListenFourRightClick()
+    void ListenForRightClick()
     {
         if (Input.GetMouseButtonDown(1) && !building_handler.currentlyBuilding)
         {
@@ -61,6 +61,11 @@ public class NanoBuilding_Handler : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Determines what type of building player wants to build
+    /// by using the tile's type.
+    /// </summary>
+    /// <param name="_tileType"></param>
     void GetBuildingFromType(TileData.Types _tileType)
     {
         switch (_tileType)
