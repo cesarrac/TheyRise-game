@@ -89,7 +89,7 @@ public class TileTexture : MonoBehaviour {
 
         Color[] thisTilePixels;
 
-
+        /*
         // loop through the array to get the island positions
         for (int x = 0; x < emptyTilesArray.Length; x++)
         {
@@ -99,12 +99,13 @@ public class TileTexture : MonoBehaviour {
             texture.SetPixels((int)emptyTilesArray[x].x * tileResolution, (int)emptyTilesArray[x].y * tileResolution, tileResolution, tileResolution, thisTilePixels);
         }
 
+        */
 
         Color[] algaePixels = algaeTile.GetPixels(0, 0, 32, 32);
 
        
 
-        // loop through the mesh to get the positions not rendered as an island tile and make them clear pixels
+        // loop through the mesh to get the positions not rendered as an island tile and make them clear pixels, if it's an island position fill that instead
         for (int mapX = 0; mapX < islandWidth; mapX++)
         {
             for (int mapY = 0; mapY < islandHeight; mapY++)
@@ -113,6 +114,13 @@ public class TileTexture : MonoBehaviour {
                 if (!CheckIfTileExists(emptyTilesArray, thisPosition))
                 {
                     texture.SetPixels((int)thisPosition.x * tileResolution, (int)thisPosition.y * tileResolution, tileResolution, tileResolution, algaePixels);
+                }
+                else
+                {
+                    // Check tile's neighbors to get the correct tile to render
+                    thisTilePixels = tiles[CheckTileNeighbors(emptyTilesArray, thisPosition)];
+
+                    texture.SetPixels((int)thisPosition.x * tileResolution, (int)thisPosition.y * tileResolution, tileResolution, tileResolution, thisTilePixels);
                 }
             }
         }
@@ -126,55 +134,65 @@ public class TileTexture : MonoBehaviour {
 
     }
 
-    int CheckTileNeighbors(Vector2[] emptyTileArray, int index)
+    int CheckTileNeighbors(Vector2[] emptyTileArray, Vector2 emptyTilePos)
     {
         bool left = false, right = false, bottom = false, top = false;
         bool leftTop = false, leftBottom = false, rightTop = false, rightBottom = false;
 
         // Check if a tile exists to my left
-        Vector2 leftTile = new Vector2(emptyTileArray[index].x - 1, emptyTileArray[index].y);
+       // Vector2 leftTile = new Vector2(emptyTileArray[index].x - 1, emptyTileArray[index].y);
+        Vector2 leftTile = new Vector2(emptyTilePos.x - 1, emptyTilePos.y);
         if (CheckIfTileExists(emptyTileArray, leftTile))
         {
             left = true;
         }
         // Check if a tile exists to my right
-        Vector2 rightTile = new Vector2(emptyTileArray[index].x + 1, emptyTileArray[index].y);
+        Vector2 rightTile = new Vector2(emptyTilePos.x + 1, emptyTilePos.y);
+
+        //Vector2 rightTile = new Vector2(emptyTileArray[index].x + 1, emptyTileArray[index].y);
         if (CheckIfTileExists(emptyTileArray, rightTile))
         {
             right = true;
         }
         // Check if a tile exists on top
-        Vector2 topTile = new Vector2(emptyTileArray[index].x, emptyTileArray[index].y + 1);
+        Vector2 topTile = new Vector2(emptyTilePos.x, emptyTilePos.y + 1);
+        //Vector2 topTile = new Vector2(emptyTileArray[index].x, emptyTileArray[index].y + 1);
+
         if (CheckIfTileExists(emptyTileArray, topTile))
         {
             top = true;
         }
         // Check if a tile exists on bottom
-        Vector2 bottomTile = new Vector2(emptyTileArray[index].x, emptyTileArray[index].y - 1);
+        Vector2 bottomTile = new Vector2(emptyTilePos.x,emptyTilePos.y - 1);
+        //Vector2 bottomTile = new Vector2(emptyTileArray[index].x, emptyTileArray[index].y - 1);
         if (CheckIfTileExists(emptyTileArray, bottomTile))
         {
             bottom = true;
         }
         // Check if a tile exists on bottom left
-        Vector2 bottomLeftTile = new Vector2(emptyTileArray[index].x - 1, emptyTileArray[index].y - 1);
+        Vector2 bottomLeftTile = new Vector2(emptyTilePos.x - 1, emptyTilePos.y - 1);
+        //Vector2 bottomLeftTile = new Vector2(emptyTileArray[index].x - 1, emptyTileArray[index].y - 1);
         if (CheckIfTileExists(emptyTileArray, bottomLeftTile))
         {
             leftBottom = true;
         }
         // Check if a tile exists on top left
-        Vector2 topLeftTile = new Vector2(emptyTileArray[index].x - 1, emptyTileArray[index].y + 1);
+        Vector2 topLeftTile = new Vector2(emptyTilePos.x - 1, emptyTilePos.y + 1);
+        //Vector2 topLeftTile = new Vector2(emptyTileArray[index].x - 1, emptyTileArray[index].y + 1);
         if (CheckIfTileExists(emptyTileArray, topLeftTile))
         {
             leftTop = true;
         }
         // Check if a tile exists on top right
-        Vector2 topRightTile = new Vector2(emptyTileArray[index].x + 1, emptyTileArray[index].y + 1);
+        Vector2 topRightTile = new Vector2(emptyTilePos.x + 1, emptyTilePos.y + 1);
+        //Vector2 topRightTile = new Vector2(emptyTileArray[index].x + 1, emptyTileArray[index].y + 1);
         if (CheckIfTileExists(emptyTileArray, topRightTile))
         {
             rightTop = true;
         }
         // Check if a tile exists on bottom right
-        Vector2 bottomRightTile = new Vector2(emptyTileArray[index].x + 1, emptyTileArray[index].y - 1);
+        Vector2 bottomRightTile = new Vector2(emptyTilePos.x + 1, emptyTilePos.y - 1);
+        //Vector2 bottomRightTile = new Vector2(emptyTileArray[index].x + 1, emptyTileArray[index].y - 1);
         if (CheckIfTileExists(emptyTileArray, bottomRightTile))
         {
             rightBottom = true;
