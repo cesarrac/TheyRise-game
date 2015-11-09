@@ -97,6 +97,9 @@ public class ResourceGrid : MonoBehaviour{
     public List<Vector2> waterTilePositions;
     public Vector2[] waterTilesArray;
 
+    public List<Vector2> emptyTilePositions;
+    public Vector2[] emptyTilesArray;
+
 	void Awake()
 	{
 		if (!master_state)

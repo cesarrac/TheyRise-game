@@ -30,7 +30,7 @@ public class Map_Generator : MonoBehaviour {
         {
             transform.position = correctPosition;
             // and move the floor as well, except don't touch its z position
-            _Floor.transform.position = new Vector3(_x, _y, _Floor.transform.position.z);
+            //_Floor.transform.position = new Vector3(_x, _y, _Floor.transform.position.z);
         }
     }
 	
@@ -104,13 +104,13 @@ public class Map_Generator : MonoBehaviour {
 
         meshGen.GenerateIslandMesh(islandMap, 1);
         // Build island Texture
-        TileTexture tileTexture = _Floor.GetComponent<TileTexture>();
-        tileTexture.BuildTexture(islandMap.GetLength(0), islandMap.GetLength(1));
+       // TileTexture tileTexture = _Floor.GetComponent<TileTexture>();
+        // tileTexture.BuildTexture(islandMap.GetLength(0), islandMap.GetLength(1));
 
-		GiveMapToResourceGrid ();
+		GiveMapToResourceGrid (islandMap);
 	}
 
-	void GiveMapToResourceGrid()
+	void GiveMapToResourceGrid(int[,] iMap)
 	{
 		// Loop through the map array and if it is equal to 0 make it empty if it's equal to 1 make it water
 		ResourceGrid grid = GetComponent<ResourceGrid> ();
@@ -122,12 +122,20 @@ public class Map_Generator : MonoBehaviour {
         // Initialize the grid's water tile positions list
         grid.waterTilePositions = new List<Vector2>();
 
+        // Init empty tiles positions list
+        grid.emptyTilePositions = new List<Vector2>();
+
 		for (int x =0; x < width; x++) {
 			for (int y =0; y < height; y ++){
 				if (map[x,y] == 0){
 					grid.tiles[x,y] = new TileData(TileData.Types.empty, 0, 1);
+
+                    // fill empty tiles list
+                    grid.emptyTilePositions.Add(new Vector2(x, y));
+
 				}else {
 					grid.tiles[x,y] = new TileData(TileData.Types.water, 200, 2);
+
                     // fill a list of water tiles positions as vector 2 to be used as potential spawn positions for enemies
                     grid.waterTilePositions.Add(new Vector2(x, y));
 
@@ -144,10 +152,17 @@ public class Map_Generator : MonoBehaviour {
 
         // turn water tiles list into an array for faster searching
         grid.waterTilesArray = grid.waterTilePositions.ToArray();
-	}
-	
-	// Gets rid of smaller patches of land (small defined by threshold)
-	void ProcessMap()
+
+        // do the same to the empty tiles list
+        grid.emptyTilesArray = grid.emptyTilePositions.ToArray();
+
+        // Build island Texture
+        TileTexture tileTexture = _Floor.GetComponent<TileTexture>();
+        tileTexture.BuildTexture(grid.emptyTilesArray, iMap.GetLength(0), iMap.GetLength(1));
+    }
+
+    // Gets rid of smaller patches of land (small defined by threshold)
+    void ProcessMap()
 	{
 		List<List<Coord>> wallRegions = GetRegions (1);
 		
