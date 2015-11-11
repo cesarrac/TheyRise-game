@@ -56,6 +56,7 @@ public class Player_HeroAttackHandler : Unit_Base {
 
 	void SwapItems(float scrollDelta)
 	{
+        /*
 		if (scrollDelta > 0) {
 			if (_curWeapon1.activeSelf) {
 
@@ -75,8 +76,27 @@ public class Player_HeroAttackHandler : Unit_Base {
 				_curWeapon1.SetActive (false);
 			}
 		}
-		
-	}
+        */
+        if (_curWeapon1.activeSelf)
+        {
+            _curWeapon1.SetActive(false);
+            _curWeapon2.SetActive(true);
+            _curTool.SetActive(false);
+        }
+        else if (_curWeapon2.activeSelf)
+        {
+            _curWeapon1.SetActive(false);
+            _curWeapon2.SetActive(false);
+            _curTool.SetActive(true);
+        }
+        else if (_curTool.activeSelf)
+        {
+            _curWeapon1.SetActive(true);
+            _curWeapon2.SetActive(false);
+            _curTool.SetActive(false);
+        }
+
+    }
 
 
 

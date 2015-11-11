@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class TileTexture : MonoBehaviour {
 
@@ -16,7 +16,9 @@ public class TileTexture : MonoBehaviour {
 
     public int tilesPerRow, numberOfRows;
 
-  //  Color32[] pixels;
+    //  Color32[] pixels;
+
+    
 
     void Awake()
 	{
@@ -204,6 +206,7 @@ public class TileTexture : MonoBehaviour {
     bool CheckIfTileExists(Vector2[] emptyTileArray, Vector2 positionToCheck)
     {
         bool tileExists = false;
+        
         foreach (Vector2 vector in emptyTileArray)
         {
             if (vector == positionToCheck)
