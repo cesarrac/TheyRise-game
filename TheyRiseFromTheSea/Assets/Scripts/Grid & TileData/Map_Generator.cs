@@ -102,7 +102,8 @@ public class Map_Generator : MonoBehaviour {
         Mesh_Generator meshGen = GetComponent<Mesh_Generator> ();
 		meshGen.GenerateMesh (borderedMap, 1);
 
-        meshGen.GenerateIslandMesh(islandMap, 1);
+        meshGen.GenerateIslandMesh(islandMap);
+        meshGen.GenerateShoreWaterMesh(borderedMap.GetLength(0), borderedMap.GetLength(1));
         // Build island Texture
        // TileTexture tileTexture = _Floor.GetComponent<TileTexture>();
         // tileTexture.BuildTexture(islandMap.GetLength(0), islandMap.GetLength(1));

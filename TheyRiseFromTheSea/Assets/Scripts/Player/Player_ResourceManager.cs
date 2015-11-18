@@ -20,6 +20,10 @@ public class Player_ResourceManager : MonoBehaviour {
 	public int startWater;
 	public int startEnergy;
 
+	// Ore is split into 2 categories: Common (common throughout the galaxy, iron, nickel, gold) and Enriched (rare ore only found on this planet edaneum, silven, minerals)
+	List<Rock> EnrichedOre = new List<Rock> ();
+	List<Rock> CommonOre = new List<Rock> ();
+	// Total Ore should always equal the sum of EnrichedOre + CommonOre
 
 	// NOTE: Replacing Food Cost with Energy cost:
 
@@ -63,22 +67,13 @@ public class Player_ResourceManager : MonoBehaviour {
 	public int oreExtractedPerDay { get{return _oreExtractedPDay;} set{ _oreExtractedPDay = Mathf.Clamp(value, 0, value);}}
 
 
-	// Hero logic: Player selects their chosen hero before the level begins. This Hero spawns on start then will spawn again, if dead,
-	// every 4 seconds.
-	[Header ("Optional Hero Pre-Fab: ")]
-	public GameObject chosenHero;
-
-	[SerializeField]
-	private GameObject _curHero;
-
-
 	public float timeToSpawn;
 
 	private Vector3 spawnPosition;
 
 	private IEnumerator _spwnCoRoutine;
 
-	public ObjectPool objPool;
+	//public ObjectPool objPool;
 
 	private int _booster;
 	public int booster {get {return _booster;} set{_booster = Mathf.Clamp(value, 0, 4 );}}
@@ -97,18 +92,8 @@ public class Player_ResourceManager : MonoBehaviour {
 		feeding = true;
 
 		// If Object Pool is null
-		if (objPool == null) 
-			objPool = GameObject.FindGameObjectWithTag ("Pool").GetComponent<ObjectPool> ();
-
-		// NOTE: Need to change this Chosen Hero logic to the current one Hero mechanic
-//		if (chosenHero != null) {
-//
-//			// get the spawn position
-//			spawnPosition = new Vector3(resourceGrid.capitalSpawnX, resourceGrid.capitalSpawnY - 1.2f, 0.0f);
-//
-//			_spwnCoRoutine = WaitToSpawn(timeToSpawn);
-//			StartCoroutine(_spwnCoRoutine);
-//		}
+//		if (objPool == null) 
+//			objPool = GameObject.FindGameObjectWithTag ("Pool").GetComponent<ObjectPool> ();
 
 		// TODO: Create a method that takes care of loading resources gathered from previous levels
 		//Initialize the Starting Resources for this level
@@ -128,29 +113,6 @@ public class Player_ResourceManager : MonoBehaviour {
 
 	}
 
-
-	// Spawn Counter for Chosen Hero logic:
-//	IEnumerator WaitToSpawn(float time)
-//	{
-//		yield return new WaitForSeconds (time);
-//		if (_curHero == null) {
-//
-//			_curHero = Instantiate(chosenHero, spawnPosition, Quaternion.identity) as GameObject;
-//			_curHero.GetComponent<SelectedUnit_MoveHandler> ().resourceGrid = resourceGrid;
-//			_curHero.GetComponentInChildren<Player_AttackHandler> ().objPool = objPool;
-//			_curHero.GetComponentInChildren<Player_AttackHandler> ().resourceGrid = resourceGrid;
-//		}else{
-//			// get its hp
-//			if (_curHero.GetComponentInChildren<Player_AttackHandler>() != null){
-//				Player_AttackHandler handler = _curHero.GetComponentInChildren<Player_AttackHandler>();
-//				if (handler.stats.curHP <= 1)
-//					_curHero = null;
-//			}else{
-//				_curHero = null;
-//			}
-//		}
-//
-//	}
 
 	/// <summary>
 	/// Calculates the food production per day.
@@ -796,6 +758,42 @@ public class Player_ResourceManager : MonoBehaviour {
 			print ("R MANAGER: Cant find that resource type!");
 			break;
 		}
+	}
+
+	public void AddOre(Rock rock, int ammount)
+	{
+		Rock.RockProductionType rockPType = rock._rockProductionType;
+		switch (rockPType) {
+		case Rock.RockProductionType.enriched:
+			// Add ammount to list of enriched
+			for (int e = 0; e <= ammount; e++)
+			{
+				EnrichedOre.Add(rock);
+			}
+			// add ammount to total Ore
+			ore += ammount;
+			break;
+		case Rock.RockProductionType.common:
+			// Add ammount to list of common
+			for (int e = 0; e <= ammount; e++)
+			{
+				CommonOre.Add(rock);
+			}
+			// add ammount to total Ore
+			ore += ammount;
+			break;
+		default:
+			// Add ammount to list of common
+			for (int e = 0; e <= ammount; e++)
+			{
+				CommonOre.Add(rock);
+			}
+			// add ammount to total Ore
+			ore += ammount;
+			break;
+		}
+		print ("Common Ore = " + CommonOre.Count);
+		print ("Enriched Ore = " + EnrichedOre.Count);
 	}
 
 

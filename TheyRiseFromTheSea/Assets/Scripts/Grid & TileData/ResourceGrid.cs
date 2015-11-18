@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.UI;
@@ -553,6 +554,120 @@ public class ResourceGrid : MonoBehaviour{
 			return null;
 	}
 
+    public int MineARock(int x, int y, int mineAmmnt)
+    {
+        int resourceMined = 0;
+
+        if (tiles[x,y].maxResourceQuantity >= mineAmmnt)
+        {
+            // mine it
+            tiles[x, y].maxResourceQuantity -= mineAmmnt;
+            if (tiles[x,y].maxResourceQuantity > 0)
+            {
+                // FOR TESTING, just shrink down the rock every time we mine & spawn rock chunks of this type
+                if (spawnedTiles[x, y] != null)
+                {
+                    Rock_Handler rockHandler = spawnedTiles[x, y].GetComponent<Rock_Handler>();
+                    rockHandler.ShrinkDownSize();
+                    // chunks
+                    StartCoroutine(SpawnRockChunks(mineAmmnt, rockHandler.myRockType, spawnedTiles[x, y].transform.position));
+                }
+            }
+            else
+            {
+                // Deplete the tile
+                SwapTileType(x, y, TileData.Types.empty);
+            }
+
+            resourceMined = mineAmmnt;
+        }
+        else if (tiles[x,y].maxResourceQuantity > 0)
+        {
+            // take what's left and deplete it
+            resourceMined = tiles[x, y].maxResourceQuantity;
+            SwapTileType(x, y, TileData.Types.empty);
+        }
+        else
+        {
+            // nothing left
+            resourceMined = 0;
+            SwapTileType(x, y, TileData.Types.empty);
+        }
+
+        return resourceMined;
+    }
+
+    IEnumerator SpawnRockChunks(int chunkCount, Rock.RockType rockType, Vector3 position)
+    {
+        for (int i = 0; i <= chunkCount; i++)
+        {
+            GameObject chunk = objPool.GetObjectForType("Chunk of Rock", true, position);
+            if (chunk)
+            {
+                /* Currently NOT using the rocktype for anything BUT I could use it to assign the chunk's correct sprite.
+                The Problem with that is it might not change fast enough to not show up as the wrong sprite for a moment before popping back.
+                I'll need to assign the correct sprite from an array (probably on the res_sprite manager) of rock chunks, separated by type and maybe size. 
+                ALSO will need to change the spawned chunk's tag to its rock type's tag so when the Player picks up the chunk they get the correct resource added. */
+                SpriteRenderer sr = chunk.GetComponent<SpriteRenderer>();
+                sr.sprite = res_sprite_handler.GetChunkSprite(rockType);
+
+                // FOR NOW I'm painting the minerals yellow until I get a UNIQUE sprite for it
+                if (rockType == Rock.RockType.mineral)
+                {
+                    sr.color = Color.yellow;
+                }
+                else
+                {
+                    sr.color = Color.white;
+                }
+                    
+
+
+                Rigidbody2D rb = chunk.GetComponent<Rigidbody2D>();
+                int randomForceDirection = Random.Range(0, 4);
+                float forceAmmt = 10;
+                switch (randomForceDirection)
+                {
+                    case 0:
+                        rb.AddForce(Vector2.down * forceAmmt, ForceMode2D.Impulse);
+                        break;
+                    case 1:
+                        rb.AddForce(Vector2.up * forceAmmt, ForceMode2D.Impulse);
+                        break;
+                    case 2:
+                        rb.AddForce(Vector2.right * forceAmmt, ForceMode2D.Impulse);
+                        break;
+                    case 3:
+                        rb.AddForce(Vector2.left * forceAmmt, ForceMode2D.Impulse);
+                        break;
+                    default:
+                        rb.AddForce(Vector2.up * forceAmmt, ForceMode2D.Impulse);
+                        break;
+                }
+
+                // Change their tag according to rock type
+                switch (rockType)
+                {
+                    case Rock.RockType.rock:
+                        chunk.tag = "Rock Chunk";
+                        break;
+                    case Rock.RockType.mineral:
+                        chunk.tag = "Mineral Chunk";
+                        break;
+                    default:
+                        chunk.tag = "Rock Chunk";
+                        break;
+                }
+           
+            }
+
+            yield return new WaitForSeconds(0.05f);
+
+        }
+
+        yield break;
+
+    }
 
    
 

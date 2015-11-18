@@ -130,14 +130,107 @@ public class DiscoverTile : MonoBehaviour {
 
 	void GetSpriteForRockOrMineral(TileData.Types _tileType)
 	{
-		if (_tileType == TileData.Types.rock) {
-			// Select a random sprite from rock sprites array
-			int randomRock = Random.Range (0, r_sprite_handler.rockSprites.Length - 1);
-			tileToSpawn.GetComponent<SpriteRenderer> ().sprite = r_sprite_handler.rockSprites [randomRock];
-		} else {
-			// Select a random sprite from rock sprites array
-			int randomMineral = Random.Range (0, r_sprite_handler.mineralSprites.Length - 1);
-			tileToSpawn.GetComponent<SpriteRenderer> ().sprite = r_sprite_handler.mineralSprites [randomMineral];
-		}
+        SpriteRenderer sr = tileToSpawn.GetComponent<SpriteRenderer>();
+        Rock_Handler rock_handler = tileToSpawn.GetComponent<Rock_Handler>();
+        if (_tileType == TileData.Types.rock) {
+			// Is this a single, tiny, small, medium, large or larger rock?
+			int randomRocksize = Random.Range (0, 6);
+            switch (randomRocksize)
+            {
+                case 0:
+                    Rock singleRock = new Rock(Rock.RockType.rock, Rock.RockSize.single);
+                    sr.sprite = r_sprite_handler.GetRockSprite(singleRock._rockType, singleRock._rockSize);
+                    // Initialize this rock from its Rock_Handler script
+                    rock_handler.InitRock(singleRock._rockType, singleRock._rockSize);
+                    rock_handler.res_sprite_handler = r_sprite_handler;
+                    break;
+                case 1:
+                    Rock tinyRock = new Rock(Rock.RockType.rock, Rock.RockSize.tiny);
+                    sr.sprite = r_sprite_handler.GetRockSprite(tinyRock._rockType, tinyRock._rockSize);
+                    // Initialize this rock from its Rock_Handler script
+                    rock_handler.InitRock(tinyRock._rockType, tinyRock._rockSize);
+                    rock_handler.res_sprite_handler = r_sprite_handler;
+                    break;
+                   
+                case 2:
+                    Rock smallRock = new Rock(Rock.RockType.rock, Rock.RockSize.small);
+                    sr.sprite = r_sprite_handler.GetRockSprite(smallRock._rockType, smallRock._rockSize);
+                    rock_handler.InitRock(smallRock._rockType, smallRock._rockSize);
+                    rock_handler.res_sprite_handler = r_sprite_handler;
+                    break;
+                   
+                case 3:
+                    Rock medRock = new Rock(Rock.RockType.rock, Rock.RockSize.medium);
+                    sr.sprite = r_sprite_handler.GetRockSprite(medRock._rockType, medRock._rockSize);
+                    rock_handler.InitRock(medRock._rockType, medRock._rockSize);
+                    rock_handler.res_sprite_handler = r_sprite_handler;
+                    break;
+                    
+                case 4:
+                    Rock largeRock = new Rock(Rock.RockType.rock, Rock.RockSize.large);
+                    sr.sprite = r_sprite_handler.GetRockSprite(largeRock._rockType, largeRock._rockSize);
+                    rock_handler.res_sprite_handler = r_sprite_handler;
+                    rock_handler.InitRock(largeRock._rockType, largeRock._rockSize);
+
+                    break;
+                    
+                case 5:
+                    Rock largerRock = new Rock(Rock.RockType.rock, Rock.RockSize.larger);
+                     sr.sprite = r_sprite_handler.GetRockSprite(largerRock._rockType, largerRock._rockSize);               
+                    rock_handler.res_sprite_handler = r_sprite_handler;
+                    rock_handler.InitRock(largerRock._rockType, largerRock._rockSize);
+
+                    break;
+
+            }
+			
+		} else if (_tileType == TileData.Types.mineral) {
+            // Is this a single, tiny, small, medium, large or larger mineral?
+            int randomRocksize = Random.Range(0, 6);
+            switch (randomRocksize)
+            {
+                case 0:
+                    Rock singleRock = new Rock(Rock.RockType.mineral, Rock.RockSize.single);
+                    sr.sprite = r_sprite_handler.GetRockSprite(singleRock._rockType, singleRock._rockSize);
+                    rock_handler.InitRock(singleRock._rockType, singleRock._rockSize);
+                    rock_handler.res_sprite_handler = r_sprite_handler;
+                    break;
+                case 1:
+                    Rock tinyRock = new Rock(Rock.RockType.mineral, Rock.RockSize.tiny);
+                    sr.sprite = r_sprite_handler.GetRockSprite(tinyRock._rockType, tinyRock._rockSize);
+                    rock_handler.InitRock(tinyRock._rockType, tinyRock._rockSize);
+                    rock_handler.res_sprite_handler = r_sprite_handler;
+                    break;
+
+                case 2:
+                    Rock smallRock = new Rock(Rock.RockType.mineral, Rock.RockSize.small);
+                    sr.sprite = r_sprite_handler.GetRockSprite(smallRock._rockType, smallRock._rockSize);
+                    rock_handler.InitRock(smallRock._rockType, smallRock._rockSize);
+                    rock_handler.res_sprite_handler = r_sprite_handler;
+                    break;
+
+                case 3:
+                    Rock medRock = new Rock(Rock.RockType.mineral, Rock.RockSize.medium);
+                    sr.sprite = r_sprite_handler.GetRockSprite(medRock._rockType, medRock._rockSize);
+                    rock_handler.InitRock(medRock._rockType, medRock._rockSize);
+                    rock_handler.res_sprite_handler = r_sprite_handler;
+                    break;
+
+                case 4:
+                    Rock largeRock = new Rock(Rock.RockType.mineral, Rock.RockSize.large);
+                    sr.sprite = r_sprite_handler.GetRockSprite(largeRock._rockType, largeRock._rockSize);
+                    rock_handler.InitRock(largeRock._rockType, largeRock._rockSize);
+                    rock_handler.res_sprite_handler = r_sprite_handler;
+                    break;
+
+                case 5:
+                    Rock largerRock = new Rock(Rock.RockType.mineral, Rock.RockSize.larger);
+                    sr.sprite = r_sprite_handler.GetRockSprite(largerRock._rockType, largerRock._rockSize);
+                    rock_handler.InitRock(largerRock._rockType, largerRock._rockSize);
+                    rock_handler.res_sprite_handler = r_sprite_handler;
+                    break;
+
+            }
+        }
 	}
 }

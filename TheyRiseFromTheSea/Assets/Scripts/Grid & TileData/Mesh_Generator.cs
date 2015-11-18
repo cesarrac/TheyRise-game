@@ -9,6 +9,7 @@ public class Mesh_Generator : MonoBehaviour {
 	public MeshFilter walls;
 	public MeshFilter water;
     public MeshFilter ground;
+    public MeshFilter shoreWatermap;
 
 	
 	public bool is2D;
@@ -29,7 +30,7 @@ public class Mesh_Generator : MonoBehaviour {
 	public ObjectPool objPool;
 
 
-    private Mesh islandMesh;
+    private Mesh islandMesh, waterShoreMesh;
 
     public void GenerateMesh(int[,] map, float squareSize){
 		
@@ -55,7 +56,7 @@ public class Mesh_Generator : MonoBehaviour {
 		mesh.triangles = triangles.ToArray ();
 		mesh.RecalculateNormals ();
 		
-		int tileAmount = 10;
+		int tileAmount = 32;
 		Vector2[] uvs = new Vector2[vertices.Count];
 		for (int i = 0; i < vertices.Count; i++) {
 			float percentX = Mathf.InverseLerp(-map.GetLength(0)/2*squareSize, map.GetLength(0)/2*squareSize, vertices[i].x) * tileAmount;
@@ -75,7 +76,7 @@ public class Mesh_Generator : MonoBehaviour {
 		
 	}
 
-    public void GenerateIslandMesh(int[,]map, int squareSize)
+    public void GenerateIslandMesh(int[,]map)
     {
     
         ground.GetComponent<MeshFilter>().mesh = islandMesh = new Mesh();
@@ -109,11 +110,44 @@ public class Mesh_Generator : MonoBehaviour {
         islandMesh.triangles = landTriangles;
         islandMesh.RecalculateNormals();
 
-        ground.mesh = islandMesh;
-
     }
 
+    public void GenerateShoreWaterMesh(int width, int height)
+    {
 
+        shoreWatermap.GetComponent<MeshFilter>().mesh = waterShoreMesh = new Mesh();
+        waterShoreMesh.name = "Shore Mesh";
+
+        Vector3[] landVertices = new Vector3[(width + 1) * (width + 1)];
+        Vector2[] uvs = new Vector2[landVertices.Length];
+        for (int i = 0, y = 0; y <= height; y++)
+        {
+            for (int x = 0; x <= width; x++, i++)
+            {
+                landVertices[i] = new Vector3(x, y);
+                uvs[i] = new Vector2((float)x /width, (float)y / height);
+            }
+        }
+
+        waterShoreMesh.vertices = landVertices;
+        waterShoreMesh.uv = uvs;
+
+        int[] landTriangles = new int[width * height * 6];
+        for (int ti = 0, vi = 0, y = 0; y <height; y++, vi++)
+        {
+            for (int x = 0; x < width; x++, ti += 6, vi++)
+            {
+                landTriangles[ti] = vi;
+                landTriangles[ti + 3] = landTriangles[ti + 2] = vi + 1;
+                landTriangles[ti + 4] = landTriangles[ti + 1] = vi + width + 1;
+                landTriangles[ti + 5] = vi + width + 2;
+            }
+        }
+        waterShoreMesh.triangles = landTriangles;
+        waterShoreMesh.RecalculateNormals();
+      
+
+    }
     void Generate2DColliders()
 	{
 		EdgeCollider2D[] currentColliders = gameObject.GetComponents<EdgeCollider2D> ();

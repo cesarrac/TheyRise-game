@@ -18,7 +18,7 @@ public class Player_HandDrill : MonoBehaviour {
     ResourceGrid resourceGrid;
     ObjectPool objPool;
 
-    enum State { IDLE, MINING, EXTRACTING};
+    enum State {MINING, EXTRACTING};
     State _state = State.MINING;
 
     // Mouse position as int
@@ -33,6 +33,11 @@ public class Player_HandDrill : MonoBehaviour {
 
     // Using a Line Renderer on the Sight Start object to shoot the beam
     LineRenderer lineR;
+
+    SpriteRenderer parentRenderer;
+    int mySortingOrder;
+
+    public LayerMask mask;
 	
     void OnEnable()
     {
@@ -41,66 +46,49 @@ public class Player_HandDrill : MonoBehaviour {
 
     void Start()
     {
+        
+
         resourceGrid = GetComponentInParent<Player_MoveHandler>().resourceGrid;
         objPool = GetComponentInParent<Player_HeroAttackHandler>().objPool;
 
         lineR = sightStart.GetComponent<LineRenderer>();
-
+        // Set line renderer sorting layer
+        lineR.sortingLayerName = GetComponentInParent<SpriteRenderer>().sortingLayerName;
+       
         if (!resourceGrid) Debug.Log("WTF?! No grid attached!");
     }
 
     void Update () {
         
         MyStateMachine(_state);
+        FollowMouse();
 	}
+
+    public void FollowMouse()
+    {
+        m = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        float mouseDirection = Mathf.Atan2((m.y - sightStart.position.y), (m.x - sightStart.position.x)) * Mathf.Rad2Deg - 90;
+        if (m != transform.root.position)
+        {
+            sightStart.rotation = Quaternion.AngleAxis(mouseDirection, Vector3.forward);
+            transform.rotation = Quaternion.AngleAxis(mouseDirection, Vector3.forward);
+        }
+
+    }
 
     void MyStateMachine(State _curState)
     {
         switch (_curState)
         {
-            case State.IDLE:
-                // Nothing until player clicks on a tiletype that is rock or mineral
-                if (Input.GetMouseButtonDown(0))
-                {
-                    m = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-                    sightV2 = new Vector2(sightStart.position.x, sightStart.position.y);
-                    mouseV2 = new Vector2(m.x, m.y);
-
-                    // Check if the mouse in in range
-                    var distance = (mouseV2 - sightV2).sqrMagnitude;
-
-                    if (distance <= range)
-                    {
-                        mX = Mathf.RoundToInt(m.x);
-                        mY = Mathf.RoundToInt(m.y);
-
-                        if (resourceGrid.CheckIsInMapBounds(mX, mY))
-                        {
-                            if (resourceGrid.GetTileType(mX, mY) == TileData.Types.rock || resourceGrid.GetTileType(mX, mY) == TileData.Types.mineral)
-                            {
-                                _state = State.MINING;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Debug.Log("Drill NOT in range!");
-                    }
-                    
-                 
-                }
-                break;
-
+         
             case State.MINING:
                 // If Player continues to hold down button, show Beam and start timer
                 if (Input.GetMouseButtonDown(0))
                 {
-                    // Keep the mouse updated
-                    m = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
                     sightV2 = new Vector2(sightStart.position.x, sightStart.position.y);
                     mouseV2 = new Vector2(m.x, m.y);
+
+                    var mouseX = m.x;
 
                     // Keep making sure the mouse stays in range
                     var distance = (mouseV2 - sightV2).sqrMagnitude;
@@ -114,8 +102,8 @@ public class Player_HandDrill : MonoBehaviour {
                         {
                             if (resourceGrid.GetTileType(mX, mY) == TileData.Types.rock || resourceGrid.GetTileType(mX, mY) == TileData.Types.mineral)
                             {
-                                StopCoroutine("Mining");
-                                StartCoroutine("Mining");
+                                StopCoroutine(Mining(mouseX));
+                                StartCoroutine(Mining(mouseX));
                             }
                         }
                     }
@@ -128,6 +116,8 @@ public class Player_HandDrill : MonoBehaviour {
                     
                 }
 
+                
+
                 break;
 
             case State.EXTRACTING:
@@ -138,7 +128,7 @@ public class Player_HandDrill : MonoBehaviour {
                 break;
 
             default:
-                _state = State.IDLE;
+                _state = State.MINING;
                 break;
         }
 
@@ -153,7 +143,7 @@ public class Player_HandDrill : MonoBehaviour {
         }
         else
         {
-            Debug.Log("Counting down to mine");
+            //Debug.Log("Counting down to mine");
 
             miningCountDown -= Time.deltaTime;
         }
@@ -174,18 +164,53 @@ public class Player_HandDrill : MonoBehaviour {
     }
     */
 
-    IEnumerator Mining()
+    IEnumerator Mining(float mX)
     {
         lineR.enabled = true;
 
-        while (Input.GetMouseButton(0))
-        {
-            // Shoot Beam
-            lineR.SetPosition(0, sightStart.position);
-            lineR.SetPosition(1, m);
+        var offset = 1f;
 
-            // Mine
-            Mine();
+        while (Input.GetMouseButton(0) && mX >= (m.x - offset) && mX <= (m.x + offset))
+        {
+
+        
+           RaycastHit2D ray = Physics2D.Raycast(sightStart.position, sightStart.up, range, mask);
+           if (ray.collider != null)
+           {
+                if (ray.collider.gameObject.CompareTag("Rock"))
+                {
+                    lineR.SetPosition(0, sightStart.position);
+                    lineR.SetPosition(1, ray.point);
+                    // Mine
+                    Mine();
+                }
+        
+           }
+
+                    
+             
+
+
+            // mX = Mathf.RoundToInt(m.x);
+            // mY = Mathf.RoundToInt(m.y);
+
+            /*
+            if (resourceGrid.CheckIsInMapBounds(mX, mY))
+            {
+                if (resourceGrid.GetTileType(mX, mY) == TileData.Types.rock || resourceGrid.GetTileType(mX, mY) == TileData.Types.mineral)
+                {
+                    RaycastHit2D ray = Physics2D.Raycast(sightStart.position, sightStart.up, range, mask);
+                    if (ray.collider != null)
+                    {
+                        lineR.SetPosition(0, sightStart.position);
+                        lineR.SetPosition(1, ray.point);
+                    }
+                   
+                    // Mine
+                    Mine();
+                }
+            }
+          */
 
             yield return null;
         }
@@ -195,42 +220,15 @@ public class Player_HandDrill : MonoBehaviour {
 
     void Extract(int x, int y)
     {
-        int q = resourceGrid.tiles[x, y].maxResourceQuantity;
-        int calc = q - mineAmmnt;
-        Debug.Log("Extracting " + mineAmmnt + " out of " + q);
-
-        if (calc > 0)
-        { // theres still ore left in this rock
-           
-
-             // subtract it from the tile
-            resourceGrid.tiles[x, y].maxResourceQuantity = calc;
-
-            // check if tile is depleted
-            int newQ = resourceGrid.tiles[x, y].maxResourceQuantity;
-            if (newQ <= 0)
-            {
-
-             // This rock is Depleted, go back to Idle
-                _state = State.MINING;
-
-             // Deplete the rock and check for more
-                DepleteRock(x, y);
-            }
-        }
-        else
+        if (resourceGrid.MineARock(x, y, mineAmmnt) > 0)
         {
-            // This rock is Depleted, so change state to Idle
-            _state = State.MINING;
-
-            // Deplete the rock
-            DepleteRock(x, y);
+            Debug.Log("Extracting " + resourceGrid.MineARock(x, y, mineAmmnt) + " out of " + resourceGrid.tiles[x,y].maxResourceQuantity);
         }
+       
+       
+
+       
     }
 
-    void DepleteRock(int x, int y)
-    {
-        // To Deplete a rock, swap tile to empty
-        resourceGrid.SwapTileType(x, y, TileData.Types.empty);
-    }
+    
 }
