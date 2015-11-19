@@ -40,13 +40,13 @@ public class TileTexture : MonoBehaviour {
 		*/
         Color[][] tiles = new Color[tilesPerRow * numberOfRows][];
 
-        int offset = 1;
+       
 
         for (int y = 0; y < numberOfRows; y++)
         {
             for (int x = 0; x < tilesPerRow; x++)
             {
-                tiles[y * tilesPerRow + x] = tileSheet.GetPixels((x * tileResolution) + offset, (y * tileResolution) + offset, tileResolution, tileResolution);
+                tiles[y * tilesPerRow + x] = tileSheet.GetPixels(x * tileResolution, y * tileResolution, tileResolution, tileResolution);
 
             }
         }
@@ -228,7 +228,7 @@ public class TileTexture : MonoBehaviour {
             // Left bottom diagonal
             EdgeType myEdgeType = EdgeType.LEFT_BOTTOM_DIAG;
 			// Neighbor 1 = left, Neighbor 2 = bottom
-			myTileType = DefineAll(neighborLeft, neighborBottom, posX, posY, left, posY, posX, bottom, isCorner: false);
+			myTileType = DefineAll(neighborLeft, neighborBottom, posX, posY, left, posY, posX, bottom);
 
             //int randomSelect = Random.Range(0, 4);
             return GetTileSheetIndex(myTileType, myEdgeType);
@@ -238,7 +238,7 @@ public class TileTexture : MonoBehaviour {
             // Right bottom diagonal
 			EdgeType myEdgeType = EdgeType.RIGHT_BOTTOM_DIAG;
 			// Neighbor 1 = bottom, Neighbor 2 = right
-			myTileType = DefineAll(neighborBottom, neighborRight, posX, posY, posX, bottom,right, posY, isCorner: false);
+			myTileType = DefineAll(neighborBottom, neighborRight, posX, posY, posX, bottom,right, posY);
 
 			return GetTileSheetIndex(myTileType, myEdgeType);
 
@@ -259,7 +259,7 @@ public class TileTexture : MonoBehaviour {
 			EdgeType myEdgeType = EdgeType.BOTTOM;
 
 			// Neighbor 1 = left, Neighbor 2 = right
-			myTileType = DefineAll(neighborLeft, neighborRight, posX, posY, left, posY, right, posY, isCorner: false);
+			myTileType = DefineAll(neighborLeft, neighborRight, posX, posY, left, posY, right, posY);
 					
 			return GetTileSheetIndex(myTileType, myEdgeType);
         }
@@ -279,7 +279,7 @@ public class TileTexture : MonoBehaviour {
 			EdgeType myEdgeType = EdgeType.RIGHT;
 
 			// Neighbor 1 = bottom, Neighbor 2 = top
-			myTileType = DefineAll(neighborBottom, neighborTop, posX, posY, posX, bottom, posX, top, isCorner: false);
+			myTileType = DefineAll(neighborBottom, neighborTop, posX, posY, posX, bottom, posX, top);
 		
 			return GetTileSheetIndex(myTileType, myEdgeType);
         }
@@ -289,7 +289,7 @@ public class TileTexture : MonoBehaviour {
 			EdgeType myEdgeType = EdgeType.LEFT;
 
 			// Neighbor 1 = bottom, Neighbor 2 = top
-			myTileType = DefineAll(neighborBottom, neighborTop, posX, posY, posX, bottom, posX, top, isCorner: false);
+			myTileType = DefineAll(neighborBottom, neighborTop, posX, posY, posX, bottom, posX, top);
 			
 			return GetTileSheetIndex(myTileType, myEdgeType);
         }
@@ -299,7 +299,7 @@ public class TileTexture : MonoBehaviour {
 			EdgeType myEdgeType = EdgeType.TOP;
 
 			// Neighbor 1 = left, Neighbor 2 = right
-			myTileType = DefineAll(neighborBottom, neighborTop, posX, posY, left, posY, right, posY, isCorner: false);
+			myTileType = DefineAll(neighborBottom, neighborTop, posX, posY, left, posY, right, posY);
 			myTileType = GetMyTileTypeFromNeighbors(neighborLeft, neighborRight);
 			
 			return GetTileSheetIndex(myTileType, myEdgeType);
@@ -340,18 +340,19 @@ public class TileTexture : MonoBehaviour {
 
     }
 
-	TileType DefineAll(TileType neighborOne, TileType neighborTwo, int myX, int myY, int firstPosX, int firstPosY, int secondPosX, int secondPosY, bool isCorner){
+	TileType DefineAll(TileType neighborOne, TileType neighborTwo, int myX, int myY, int firstPosX, int firstPosY, int secondPosX, int secondPosY, bool isCorner = false){
 		TileType myTileType = TileType.UNDEFINED;
 
-        if (neighborOne != TileType.UNDEFINED && neighborTwo != TileType.UNDEFINED)
+        if (neighborOne != TileType.UNDEFINED || neighborTwo != TileType.UNDEFINED)
         {
             // Both are DEFINED, so select based on the first and second neighbor
-            myTileType = GetMyTileTypeFromNeighbors(neighborOne, neighborTwo);
+            myTileType = GetMyTileTypeFromNeighbors(neighborOne, neighborTwo, isCorner);
+           // print("One neighbor is defined. Neighbors of : " + myX + " " + myY + " are: " + neighborOne.ToString() + " and " + neighborTwo.ToString() + ", isCorner = " + isCorner.ToString());
 
         }
         else
         {
-            
+           
             myTileType = DefineTypeFromUndefinedNeighbors(isCorner);
            
         }
@@ -384,10 +385,10 @@ public class TileTexture : MonoBehaviour {
         // define this tile on the types array
         tileTypes[myX, myY] = myTileType;
 		// define neighbors on the array as well if at least ONE of them was undefined
-		if (tileTypes[firstPosX, firstPosY] == TileType.UNDEFINED || tileTypes[secondPosX, secondPosY] == TileType.UNDEFINED){
-			tileTypes[firstPosX, firstPosY] = neighborOne;
-			tileTypes[secondPosX,secondPosY] = neighborTwo;
-		}
+		//if (tileTypes[firstPosX, firstPosY] == TileType.UNDEFINED || tileTypes[secondPosX, secondPosY] == TileType.UNDEFINED){
+			//tileTypes[firstPosX, firstPosY] = neighborOne;
+			//tileTypes[secondPosX,secondPosY] = neighborTwo;
+		//}
 
 		return myTileType;
 	}
@@ -461,7 +462,7 @@ public class TileTexture : MonoBehaviour {
     }
 
 
-    TileType GetMyTileTypeFromNeighbors(TileType neighbor1Type, TileType neighbor2Type)
+    TileType GetMyTileTypeFromNeighbors(TileType neighbor1Type, TileType neighbor2Type, bool isCorner = false)
     {
         TileType myTileType = TileType.UNDEFINED;
 
@@ -472,7 +473,7 @@ public class TileTexture : MonoBehaviour {
                 {
                     myTileType = TileType.SHORE;
                 }
-                else if (neighbor2Type == TileType.CLIFF)
+                else if (neighbor2Type == TileType.CLIFF && !isCorner)
                 {
                     myTileType = TileType.SHORE_CLIFF;
                 }
@@ -480,14 +481,18 @@ public class TileTexture : MonoBehaviour {
                 {
                     myTileType = TileType.SHORE;
                 }
-                else if (neighbor2Type == TileType.CLIFF_SHORE)
+                else if (neighbor2Type == TileType.CLIFF_SHORE && !isCorner)
                 {
                     myTileType = TileType.SHORE_CLIFF;
+                }
+                else
+                {
+                    myTileType = TileType.SHORE;
                 }
                 
                 break;
             case TileType.CLIFF:
-				if (neighbor2Type == TileType.SHORE || neighbor2Type == TileType.SHORE_CLIFF)
+				if (neighbor2Type == TileType.SHORE || neighbor2Type == TileType.SHORE_CLIFF && !isCorner)
                 {
                     myTileType = TileType.CLIFF_SHORE;
                 }
@@ -495,14 +500,22 @@ public class TileTexture : MonoBehaviour {
                 {
                     myTileType = TileType.CLIFF;
                 }
+                else
+                {
+                    myTileType = TileType.CLIFF;
+                }
      
                 break;
             case TileType.SHORE_CLIFF:
-                if (neighbor2Type == TileType.SHORE || neighbor2Type == TileType.SHORE_CLIFF)
+                if (neighbor2Type == TileType.SHORE || neighbor2Type == TileType.SHORE_CLIFF && !isCorner)
                 {
                     myTileType = TileType.CLIFF_SHORE;
                 }
                 else if (neighbor2Type == TileType.CLIFF || neighbor2Type == TileType.CLIFF_SHORE )
+                {
+                    myTileType = TileType.CLIFF;
+                }
+                else
                 {
                     myTileType = TileType.CLIFF;
                 }
@@ -513,9 +526,13 @@ public class TileTexture : MonoBehaviour {
                 {
                     myTileType = TileType.SHORE;
                 }
-                else if (neighbor2Type == TileType.CLIFF || neighbor2Type == TileType.CLIFF_SHORE)
+                else if (neighbor2Type == TileType.CLIFF || neighbor2Type == TileType.CLIFF_SHORE && !isCorner)
                 {
                     myTileType = TileType.SHORE_CLIFF;
+                }
+                else
+                {
+                    myTileType = TileType.CLIFF;
                 }
 
                 break;
@@ -524,9 +541,13 @@ public class TileTexture : MonoBehaviour {
                 {
                     myTileType = TileType.SHORE;
                 }
-                else if (neighbor2Type == TileType.CLIFF || neighbor2Type == TileType.CLIFF_SHORE)
+                else if (neighbor2Type == TileType.CLIFF || neighbor2Type == TileType.CLIFF_SHORE && !isCorner)
                 {
                     myTileType = TileType.SHORE_CLIFF;
+                }
+                else
+                {
+                    myTileType = TileType.SHORE;
                 }     
 			break;
 
@@ -542,7 +563,7 @@ public class TileTexture : MonoBehaviour {
     int GetTileSheetIndex (TileType myTileType, EdgeType myEdgeType)
     {
         int tileIndex = 0;
-
+        //print("Finding sprite for type: " + myTileType.ToString() + " of Edge type: " + myEdgeType.ToString());
         switch (myTileType)
         {
             case TileType.CLIFF:
@@ -567,11 +588,31 @@ public class TileTexture : MonoBehaviour {
                 }
                 if (myEdgeType == EdgeType.BOTTOM_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(15, 19);
+                    // Pick between large corner or small corner
+                    int pick = Random.Range(0, 3);
+                    if (pick <= 1)
+                    {
+                        tileIndex = Random.Range(15, 19);
+                    }
+                    else
+                    {
+                        tileIndex = Random.Range(111, 114);
+                    }
+                   
                 }
                 if (myEdgeType == EdgeType.BOTTOM_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(10, 14);
+                    // Pick between large corner or small corner
+                    int pick = Random.Range(0, 3);
+                    if (pick <= 1)
+                    {
+                        tileIndex = Random.Range(10, 14);
+                    }
+                    else
+                    {
+                        tileIndex = Random.Range(115, 119);
+                    }
+                    
                 }
                 if (myEdgeType == EdgeType.TOP_LEFT_CORNER)
                 {
@@ -585,11 +626,11 @@ public class TileTexture : MonoBehaviour {
                 }
                 if (myEdgeType == EdgeType.LEFT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(111, 114);
+                    tileIndex = Random.Range(100, 104);
                 }
                 if (myEdgeType == EdgeType.RIGHT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(115, 119);
+                    tileIndex = Random.Range(105, 109);
                 }
                 if (myEdgeType == EdgeType.LEFT_TOP_DIAG)
                 {
@@ -627,11 +668,29 @@ public class TileTexture : MonoBehaviour {
 				// USING CLIFF CORNERS AND DIAGONALS HERE (WHERE AVAILABLE)
                 if (myEdgeType == EdgeType.BOTTOM_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(15, 19);
+                    // Pick between large corner or small corner
+                    int pick = Random.Range(0, 3);
+                    if (pick <= 1)
+                    {
+                        tileIndex = Random.Range(10, 14);
+                    }
+                    else
+                    {
+                        tileIndex = Random.Range(111, 114);
+                    }
                 }
                 if (myEdgeType == EdgeType.BOTTOM_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(10, 14);
+                    // Pick between large corner or small corner
+                    int pick = Random.Range(0, 3);
+                    if (pick <= 1)
+                    {
+                        tileIndex = Random.Range(10, 14);
+                    }
+                    else
+                    {
+                        tileIndex = Random.Range(115, 119);
+                    }
                 }
                 if (myEdgeType == EdgeType.TOP_LEFT_CORNER)
                 {
@@ -683,15 +742,33 @@ public class TileTexture : MonoBehaviour {
 					// USING CLIFF RIGHT SHORE
 					tileIndex = Random.Range(20, 29);
                 }
-				// USING SHORE CORNERS AND CLIFF DIAGONALS HERE (WHERE AVAILABLE)
+				// USING SHORE CORNERS AND SHORE DIAGONALS HERE (WHERE AVAILABLE)
 				if (myEdgeType == EdgeType.BOTTOM_LEFT_CORNER)
-				{
-					tileIndex = Random.Range(15, 19);
+                {     // Pick between large corner or small corner
+                    int pick = Random.Range(0, 3);
+                    if (pick <= 1)
+                    {
+                        tileIndex = Random.Range(15, 19);
+                    }
+                    else
+                    {
+                        tileIndex = Random.Range(115, 119);
+                    }
+                   
 				}
 				if (myEdgeType == EdgeType.BOTTOM_RIGHT_CORNER)
 				{
-					tileIndex = Random.Range(10, 14);
-				}
+                    // Pick between large corner or small corner
+                    int pick = Random.Range(0, 3);
+                    if (pick <= 1)
+                    {
+                        tileIndex = Random.Range(10, 14);
+                    }
+                    else
+                    {
+                        tileIndex = Random.Range(115, 119);
+                    }
+                }
 				if (myEdgeType == EdgeType.TOP_LEFT_CORNER)
 				{
 					// NO GRAPHIC YET
@@ -704,11 +781,11 @@ public class TileTexture : MonoBehaviour {
 				}
 				if (myEdgeType == EdgeType.LEFT_BOTTOM_DIAG)
 				{
-					tileIndex = Random.Range(111, 114);
+					tileIndex = Random.Range(0, 4);
 				}
 				if (myEdgeType == EdgeType.RIGHT_BOTTOM_DIAG)
 				{
-					tileIndex = Random.Range(115, 119);
+					tileIndex = Random.Range(5, 9);
 				}
 				if (myEdgeType == EdgeType.LEFT_TOP_DIAG)
 				{
@@ -723,7 +800,7 @@ public class TileTexture : MonoBehaviour {
             break;
 
             case TileType.SHORE:
-				// select a shore cliff of this edge type
+				// select a shore of this edge type
 				if (myEdgeType == EdgeType.BOTTOM)
 				{
 					tileIndex = Random.Range(60, 69);
@@ -743,11 +820,11 @@ public class TileTexture : MonoBehaviour {
 				// USING SHORE CORNERS AND DIAGONALS HERE (WHERE AVAILABLE)
 				if (myEdgeType == EdgeType.BOTTOM_LEFT_CORNER)
 				{
-					tileIndex = Random.Range(15, 19);
+					tileIndex = Random.Range(75, 79);
 				}
 				if (myEdgeType == EdgeType.BOTTOM_RIGHT_CORNER)
 				{
-					tileIndex = Random.Range(10, 14);
+					tileIndex = Random.Range(70, 74);
 				}
 				if (myEdgeType == EdgeType.TOP_LEFT_CORNER)
 				{
@@ -778,6 +855,62 @@ public class TileTexture : MonoBehaviour {
 					tileIndex = 110;
 				}
             break;
+            case TileType.UNDEFINED:
+                // in this case just select shore types
+                if (myEdgeType == EdgeType.BOTTOM)
+                {
+                    tileIndex = Random.Range(60, 69);
+                }
+                if (myEdgeType == EdgeType.TOP)
+                {
+                    tileIndex = Random.Range(90, 99);
+                }
+                if (myEdgeType == EdgeType.LEFT)
+                {
+                    tileIndex = Random.Range(55, 59);
+                }
+                if (myEdgeType == EdgeType.RIGHT)
+                {
+                    tileIndex = Random.Range(50, 54);
+                }
+                // USING SHORE CORNERS AND DIAGONALS HERE (WHERE AVAILABLE)
+                if (myEdgeType == EdgeType.BOTTOM_LEFT_CORNER)
+                {
+                    tileIndex = Random.Range(75, 79);
+                }
+                if (myEdgeType == EdgeType.BOTTOM_RIGHT_CORNER)
+                {
+                    tileIndex = Random.Range(70, 74);
+                }
+                if (myEdgeType == EdgeType.TOP_LEFT_CORNER)
+                {
+                    // NO GRAPHIC YET
+                    tileIndex = 110;
+                }
+                if (myEdgeType == EdgeType.TOP_RIGHT_CORNER)
+                {
+                    // NO GRAPHIC YET
+                    tileIndex = 110;
+                }
+                if (myEdgeType == EdgeType.LEFT_BOTTOM_DIAG)
+                {
+                    tileIndex = Random.Range(0, 4);
+                }
+                if (myEdgeType == EdgeType.RIGHT_BOTTOM_DIAG)
+                {
+                    tileIndex = Random.Range(5, 9);
+                }
+                if (myEdgeType == EdgeType.LEFT_TOP_DIAG)
+                {
+                    // NO GRAPHIC YET
+                    tileIndex = 110;
+                }
+                if (myEdgeType == EdgeType.RIGHT_TOP_DIAG)
+                {
+                    // NO GRAPHIC YET
+                    tileIndex = 110;
+                }
+                break;
 
             default:
                 // Center tile
