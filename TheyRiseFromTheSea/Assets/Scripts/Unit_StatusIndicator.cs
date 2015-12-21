@@ -17,15 +17,8 @@ public class Unit_StatusIndicator : MonoBehaviour {
 
 	void Start(){
 
-		if (GetComponentInParent<Enemy_AttackHandler> () != null) {
+        objPool = ObjectPool.instance;
 
-			objPool = GetComponentInParent<Enemy_AttackHandler> ().objPool;
-
-		} else {
-
-			objPool = GameObject.FindGameObjectWithTag("Pool").GetComponent<ObjectPool>();
-
-		}
 
 		if (healthBarRect == null) {
 			Debug.Log("STATUS INDICATOR: No health bar referenced!!");
@@ -62,7 +55,7 @@ public class Unit_StatusIndicator : MonoBehaviour {
 		Vector3 scale = new Vector3(0.6f, 1, 1);
 		Vector3 _scaleCalc = canvas.transform.localScale - scale;
 
-		_damageText = objPool.GetObjectForType ("Damage Text", true, Vector3.zero);
+		_damageText = ObjectPool.instance.GetObjectForType ("Damage Text", true, Vector3.zero);
 
 		if (_damageText != null) {
 
@@ -104,8 +97,8 @@ public class Unit_StatusIndicator : MonoBehaviour {
 
 			// since I know I'm going to give the Text object the Easy Pool script, I might as well
 			// fill up its object pool variable here
-			if (_damageText.GetComponent<EasyPool> () != null)
-				_damageText.GetComponent<EasyPool> ().objPool = objPool;
+			//if (_damageText.GetComponent<EasyPool> () != null)
+			//	_damageText.GetComponent<EasyPool> ().objPool = objPool;
 		} else {
 			Debug.Log ("STATUS INDICATOR: Could NOT find Damage Text in Pool!");
 		}

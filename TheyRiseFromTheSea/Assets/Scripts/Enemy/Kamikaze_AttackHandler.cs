@@ -14,8 +14,8 @@ public class Kamikaze_AttackHandler : Unit_Base {
 		// Initialize Unit stats
 		stats.Init ();
 
-		if (resourceGrid == null)
-			resourceGrid = GetComponent<Enemy_MoveHandler> ().resourceGrid;
+        if (resourceGrid == null)
+            resourceGrid = ResourceGrid.Grid;
 
 		// This receives the Object Pool from the Wave Spawner, but just in case...
 		if (objPool == null)
@@ -63,35 +63,35 @@ public class Kamikaze_AttackHandler : Unit_Base {
 	/// <param name="y">The y coordinate.</param>
 	public void KamikazeAttack(int x, int y, Unit_Base unit = null){
 
-		if (unit == null) {
-			// Hit the tile with special damage
-			resourceGrid.DamageTile (x, y, stats.curSPdamage);
-			// then pool myself
-			objPool.PoolObject (this.gameObject);
-		} else {
-			// Hit the Player unit with special damage
-			SpecialAttackOtherUnit(unit);
-		}
+		//if (unit == null) {
+		//	// Hit the tile with special damage
+		//	resourceGrid.DamageTile (x, y, stats.curSPdamage);
+		//	// then pool myself
+		//	objPool.PoolObject (this.gameObject);
+		//} else {
+		//	// Hit the Player unit with special damage
+		//	SpecialAttackOtherUnit(unit);
+		//}
 
 
 
-		// Spawn an explosion at my position
-		GameObject explosion = objPool.GetObjectForType ("Explosion Particles", true, transform.position);
+		//// Spawn an explosion at my position
+		//GameObject explosion = objPool.GetObjectForType ("Explosion Particles", true, transform.position);
 
-		if (explosion != null) {
-			// Explosion must match my layer
-			string targetLayer = GetComponent<SpriteRenderer>().sortingLayerName;
+		//if (explosion != null) {
+		//	// Explosion must match my layer
+		//	string targetLayer = GetComponent<SpriteRenderer>().sortingLayerName;
 
-			// assign it to Particle Renderer
-			explosion.GetComponent<ParticleSystemRenderer>().sortingLayerName = targetLayer;
+		//	// assign it to Particle Renderer
+		//	explosion.GetComponent<ParticleSystemRenderer>().sortingLayerName = targetLayer;
 
-		}
+		//}
 	}
 
 	void KillTarget(Vector3 deathPos){
 		// Currently NOT pooling Player units
 //		objPool.PoolObject(unitToPool);
-		Destroy (unitToPool.GetComponent<Player_AttackHandler>().unitParent);
+		//Destroy (unitToPool.GetComponent<Player_AttackHandler>().unitParent);
 		// Get dead sprite
 		GameObject deadE = objPool.GetObjectForType("dead", false, deathPos);
 		if (deadE != null) {

@@ -34,14 +34,17 @@ public class Building_PositionHandler : MonoBehaviour {
 	bool onEnemy = false; // can't build on top or near enemies
 
 	public Player_ResourceManager resourceManager;
-	public int currOreCost; // this will charge the resources manager with the cost sent from UI handler
+    //public int currOreCost; // this will charge the resources manager with the cost sent from UI handler
+    public int currNanoBotCost;
 
 	public ObjectPool objPool;
 
-	public Building_UIHandler buildingUI;
+    //public Building_UIHandler buildingUI;
+    Build_MainController build_controller;
 
 	public Vector3 spawnPos;
 
+    public NanoBuilding_Handler nanoBuild_handler;
 
 	void Awake()
 	{
@@ -51,7 +54,11 @@ public class Building_PositionHandler : MonoBehaviour {
 
 		sr.color = Color.clear;
 		transform.position = spawnPos;
-	}
+
+        resourceGrid = ResourceGrid.Grid;
+        objPool = ObjectPool.instance;
+        build_controller = Build_MainController.Instance;
+    }
 
 	
 
@@ -191,27 +198,25 @@ public class Building_PositionHandler : MonoBehaviour {
 
 
 			// MAKE SURE WE HAVE ENOUGH ORE TO BUILD!
-		if (resourceManager.ore >= currOreCost ) {
-			canAfford = true;
-		}
+		//if (resourceManager.ore >= currOreCost ) {
+		//	canAfford = true;
+		//}
 		// At this point we KNOW the mouse is NOT over a building or a rock, we have found rocks if extractor AND we are not on enemy
-		if (Input.GetMouseButtonDown (0) && canBuild && canAfford && !onEnemy) {			// So LEFT CLICK to BUILD!! 
+		if (Input.GetMouseButtonDown (0) && canBuild && !onEnemy) {			// So LEFT CLICK to BUILD!! 
 
 			// Subtract the cost
 //			resourceManager.ChargeOreorWater("Ore", -currOreCost);
-			resourceManager.ChangeResource("Ore", -currOreCost);
+			//resourceManager.ChangeResource("Ore", -currOreCost);
 
-			// Right BEFORE pooling this object we tell Building UI that we are NOT currently building anymore
-			buildingUI.currentlyBuilding = false;
+            // Right BEFORE pooling this object we tell Building UI that we are NOT currently building anymore
+            build_controller.SetCurrentlyBuildingBool(false);
 
 			// stop following and tell grid to swap this tile to this new building
 			mapPosX = mX;
 			mapPosY = mY;
-			resourceGrid.SwapTileType (mX, mY, tileType);
+			resourceGrid.SwapTileType (mX, mY, tileType, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
 			followMouse = false;
-
-		
-
+            
 			// Pool this object
 			PoolObject (gameObject); // Pool this because resourceGrid just discovered the tile/building for us
 
@@ -219,11 +224,15 @@ public class Building_PositionHandler : MonoBehaviour {
 		if (Input.GetMouseButtonDown (1)) {
 			// CANCEL THE BUILD
 			PoolObject(gameObject);
-            buildingUI.currentlyBuilding = false;
+            build_controller.SetCurrentlyBuildingBool(false);
+            // give back the nanobots spent on this building
+            nanoBuild_handler.nanoBots += currNanoBotCost;
+           
         }
 	}
 
 	void PoolObject(GameObject objToPool){
+       
 		objPool.PoolObject (objToPool);
 	}
 

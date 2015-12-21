@@ -10,7 +10,7 @@ public class Building_Button : MonoBehaviour {
 		Debug.Log ("CLICK!");
 		if (buildingUI != null) {
 			string buildingName = GetComponentInChildren<Text>().text;
-			buildingUI.BuildThis(buildingName);
+			//buildingUI.BuildThis(buildingName);
 		}
 	}
 

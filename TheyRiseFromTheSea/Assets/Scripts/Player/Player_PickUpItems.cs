@@ -12,7 +12,7 @@ public class Player_PickUpItems : MonoBehaviour {
     void Start()
     {
         if (!objPool)
-         objPool = GetComponent<Player_HeroAttackHandler>().objPool;
+            objPool = ObjectPool.instance;
 
         if (!resource_manager)
             resource_manager = GameObject.FindGameObjectWithTag("Capital").GetComponent<Player_ResourceManager>();
@@ -24,6 +24,13 @@ public class Player_PickUpItems : MonoBehaviour {
     // PICK UP CHUNKS OF ROCK!
     void OnCollisionEnter2D(Collision2D coll)
     {
+        if (!objPool)
+            objPool = ObjectPool.instance;
+
+        if (!resource_manager)
+            resource_manager = GameObject.FindGameObjectWithTag("Capital").GetComponent<Player_ResourceManager>();
+
+
         if (coll.gameObject.CompareTag("Rock Chunk"))
         {
             if (resource_manager && objPool)

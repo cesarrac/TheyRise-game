@@ -11,6 +11,7 @@ public class Mesh_Generator : MonoBehaviour {
     public MeshFilter ground;
     public MeshFilter shoreWatermap;
 
+	public GameObject _FLOOR;
 	
 	public bool is2D;
 	
@@ -31,6 +32,8 @@ public class Mesh_Generator : MonoBehaviour {
 
 
     private Mesh islandMesh, waterShoreMesh;
+
+
 
     public void GenerateMesh(int[,] map, float squareSize){
 		
@@ -156,6 +159,8 @@ public class Mesh_Generator : MonoBehaviour {
 		}
 		
 		CalculateMeshOutlines ();
+
+		//List<Vector2> EmptyTilesOutline = new List<Vector2> ();
 		
 		foreach (List<int> outline in outlines) {
 			EdgeCollider2D edgeCollider = gameObject.AddComponent<EdgeCollider2D>();
@@ -164,6 +169,7 @@ public class Mesh_Generator : MonoBehaviour {
 			for (int i = 0; i < outline.Count; i++){
 				edgepoints[i] = new Vector2(vertices[outline[i]].x,vertices[outline[i]].z) ;
 
+				//EmptyTilesOutline.Add(edgepoints[i]);
                 /*
                 if (i + 1 < outline.Count){
 					GenerateShoreLine(outline, edgepoints[i].x, edgepoints[i].y, i + 1);
@@ -178,6 +184,12 @@ public class Mesh_Generator : MonoBehaviour {
 
 			// move the shore holder to the map's position to set the shore tiles to the right place
 			//shoreHolder.transform.localPosition = transform.position;
+
+			// Build island Texture
+			//Vector2[] emptyTilesArray = EmptyTilesOutline.ToArray();
+
+			//TileTexture tileTexture = _FLOOR.GetComponent<TileTexture>();
+			//tileTexture.BuildTexture(emptyTilesArray, iMap.GetLength(0), iMap.GetLength(1));
 		}
 	}
 

@@ -7,8 +7,8 @@ public class GameMaster : MonoBehaviour {
 	private int _storedCredits;
 	public int curCredits { get { return _storedCredits; }set{ _storedCredits = Mathf.Clamp (value, 0, 100000000); }}
 	
-	public ResourceGrid resourceGrid;
-	public Building_UIHandler building_UIHandler;
+	ResourceGrid resourceGrid;
+    Build_MainController build_mainController;
 	public Player_GunBaseClass player_weapon;
 
     ObjectPool objPool;
@@ -27,8 +27,9 @@ public class GameMaster : MonoBehaviour {
 
         if (Application.loadedLevel == 1)
         {
-            resourceGrid = GameObject.FindGameObjectWithTag("Map").GetComponent<ResourceGrid>();
-            objPool = GameObject.FindGameObjectWithTag("Pool").GetComponent<ObjectPool>();
+            resourceGrid = ResourceGrid.Grid;
+            objPool = ObjectPool.instance;
+
         }
 
 	}
@@ -59,10 +60,13 @@ public class GameMaster : MonoBehaviour {
     // HERO/PLAYER LOADING:
     public GameObject SpawnThePlayer(int posX, int posY)
     {
+        resourceGrid = ResourceGrid.Grid;
+        objPool = ObjectPool.instance;
         /* Going to need a position that is 100% for sure an empty land tile.
         To do that I'll need to load the player once the map generator and resource Grid have done their thing */
         Vector3 playerPosition = new Vector3(posX, posY, 0.0f);
         GameObject Hero = objPool.GetObjectForType("Hero", true, playerPosition);
+
         if (Hero)
         {
             Hero.GetComponent<Player_MoveHandler>().resourceGrid = resourceGrid;
@@ -112,16 +116,15 @@ public class GameMaster : MonoBehaviour {
 	
 	void Update()
 	{
-		if (resourceGrid && building_UIHandler) {
-			if (Application.loadedLevel == 1)
-				CheckIfBuilding (); // this is so Player can know if they can fire or not
-		}
-	}
+		
+        if (Application.loadedLevel == 1)
+            CheckIfBuilding(); // this is so Player can know if they can fire or not
+    }
 
 	void CheckIfBuilding()
 	{
 
-			if (resourceGrid.terraformer_built && !building_UIHandler.currentlyBuilding) {
+			if (ResourceGrid.Grid.terraformer_built && !Build_MainController.Instance.currentlyBuilding) {
 				_canFireWeapon = true;
 			} else {
 				_canFireWeapon = false;
@@ -141,6 +144,8 @@ public class GameMaster : MonoBehaviour {
 		public string weapon;
 		public string suit;
 		public string tool;
+
+        public Blueprint[] blueprints;
 
 		public ExpeditionInventory()
 		{

@@ -170,7 +170,7 @@ public class DeSalt_Plant : MonoBehaviour {
 				buildingUI.currentlyBuilding = false;
 
 				// Set my storage
-				myStorage = resourceGrid.GetTileGameObj (mX, mY).GetComponent<Storage> ();
+				myStorage = resourceGrid.GetTileGameObjFromWorldPos(mouseEnd).GetComponent<Storage> ();
 
 				// Start pumping!!
 				_state = State.PUMPING;

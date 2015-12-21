@@ -62,6 +62,8 @@ public class Unit_Base : MonoBehaviour {
     public AudioClip takeDamageSound, doDamageSound;
     public AudioSource audio_source;
 
+    
+
 	void Start(){
 
 		if (_statusIndi != null) {
@@ -77,50 +79,39 @@ public class Unit_Base : MonoBehaviour {
 		resourceGrid.tiles [x, y].shield = stats.curShield;
 	}
 
-	public bool AttackTile(int x, int y, Enemy_MoveHandler enemyMove){
-		if (resourceGrid.tiles [x, y] != null) {
-			// if no tile has been attacked OR this unit is attacking ANOTHER TILE, then we fill the tile and store it for calcs
-			if (tileUnderAttack == null || tileUnderAttack != resourceGrid.tiles [x, y]) { 
-				tileUnderAttack = resourceGrid.tiles [x, y]; 
-				tileDefence = tileUnderAttack.def;
-				tileShield = tileUnderAttack.shield;
-				tileHP = tileUnderAttack.hp;
-			} 
-		Debug.Log ("TileHP: " + tileUnderAttack.hp);
+	
 
-			if (tileHP > 0) {
-				float calc = (tileDefence - stats.curAttack) - tileShield;
-//			
-				if (calc > 0) {
-					// Apply full damage
-					resourceGrid.DamageTile (x, y, stats.curDamage);  
+    public bool AttackTile(TileData tile)
+    {
+        if (tile.hp > 0)
+        {
+            float calc = (tile.def + tile.shield ) - stats.curAttack;
+            //			
+            if (calc <= 0)
+            {
+                // Apply full damage
+                resourceGrid.DamageTile(tile, stats.curDamage);
+            }
+            else
+            {
+                // Apply just 1 damage
+                resourceGrid.DamageTile(tile, 1f);
+            }
+            return true;
 
+        }
+        else
+        {
+            tileUnderAttack = null;
+            return false;
+        }
+      
+    }
 
-				} else {
-
-					// Apply just 1 damage
-					resourceGrid.DamageTile (x, y, 1f);  
-
-				}
-//				canAttackTile = true;
-				return true;
-
-			} else {
-//				canAttackTile = false;
-				enemyMove.state = Enemy_MoveHandler.State.MOVING;
-				tileUnderAttack = null;
-				return false;
-			}
-		} else {
-//			canAttackTile = false;
-			enemyMove.state = Enemy_MoveHandler.State.MOVING;
-			return false;
-		}
-	}
-
-	public void AttackOtherUnit(Unit_Base unit){
+    public void AttackOtherUnit(Unit_Base unit){
 		Debug.Log ("UNIT: target unit hp at " + unit.stats.curHP);
 		Debug.Log ("UNIT: My damage is " + stats.curDamage + " and my HP is " + stats.curHP);
+
 		if (unit.stats.curHP >= 1f) {
 
 			float def = (unit.stats.curDefence + unit.stats.curShield);
@@ -190,7 +181,7 @@ public class Unit_Base : MonoBehaviour {
 	public void TakeDamage(float damage)
 	{
 		stats.curHP -= damage;
-        //Debug.Log (this.gameObject.name + " has " + stats.curHP + "HP left");
+        Debug.Log (gameObject.name + " has " + stats.curHP + "HP left");
 
         // Play take damage sound
         if (audio_source)

@@ -17,9 +17,9 @@ public class Sword_TargetHandler : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D(Collider2D coll){
-		if (coll.gameObject.tag == "Enemy") {
-			Debug.Log("Hit!");
-			playerAttackHandler.AttackOtherUnit(coll.gameObject.GetComponent<Enemy_AttackHandler>());
-		}
+		//if (coll.gameObject.tag == "Enemy") {
+		//	Debug.Log("Hit!");
+		//	playerAttackHandler.AttackOtherUnit(coll.gameObject.GetComponent<Enemy_AttackHandler>());
+		//}
 	}
 }

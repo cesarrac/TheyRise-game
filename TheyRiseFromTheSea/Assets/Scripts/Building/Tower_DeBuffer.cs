@@ -40,18 +40,15 @@ public class Tower_DeBuffer : Unit_Base {
 		if (bStatusIndicator == null)
 			Debug.Log ("GUN: Building Status Indicator NOT SET!");
 
-		if (resourceGrid == null)
-			resourceGrid = GameObject.FindGameObjectWithTag ("Map").GetComponent<ResourceGrid> ();
-		
-		// Initialize building stats
-		stats.Init ();
+        resourceGrid = ResourceGrid.Grid;
+
+        // Initialize building stats
+        stats.Init ();
 		InitTileStats((int)transform.position.x, (int)transform.position.y);
 
-		// If Object Pool is null we can get it from the Click Handler
-		if (objPool == null)
-			objPool = GetComponentInParent<Building_ClickHandler> ().objPool;
-		
-		enemiesInRange = new GameObject[maxTargets];
+        objPool = ObjectPool.instance;
+
+        enemiesInRange = new GameObject[maxTargets];
 	}
 	
 

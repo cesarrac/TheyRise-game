@@ -13,6 +13,7 @@ public class Detect_Visible_Objects : MonoBehaviour {
 
             // Change layer to Enemies layer
             coll.gameObject.layer = enemiesLayerID;
+      
         }
 
         if (coll.gameObject.CompareTag("Rock") && coll.gameObject.layer == notVisibleLayerID)

@@ -187,11 +187,11 @@ public class Extractor : MonoBehaviour {
 				// Give Building UI ability to access to building menus by clicking again
 				buildingUI.currentlyBuilding = false;
 
-				// Set my storage
-				myStorage = resourceGrid.GetTileGameObj (mX, mY).GetComponent<Storage> ();
+                // Set my storage
+                myStorage = resourceGrid.GetTileGameObjFromWorldPos(mouseEnd).GetComponent<Storage>();
 
-				// Start extracting by finding which direction rock was found
-				if (SearchForRock ()) {
+                // Start extracting by finding which direction rock was found
+                if (SearchForRock ()) {
 
 					// Cycle through the rocks found array to make sure we don't extract from a NULL (represented by Vector2.zero)
 					CycleRocksArray ();

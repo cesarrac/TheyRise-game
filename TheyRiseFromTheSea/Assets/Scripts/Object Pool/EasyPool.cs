@@ -16,10 +16,17 @@ public class EasyPool : MonoBehaviour {
 
 	private State state = State.POOLED;
 
+    void OnEnable()
+    {
+        objPool = ObjectPool.instance;
+        state = State.COUNTING;
+        poolCountdown = timeBeforePool;
+    }
 	void Update () {
 
-		if (objPool == null)
-			objPool = GameObject.FindGameObjectWithTag ("Pool").GetComponent<ObjectPool> ();
+        if (objPool == null)
+            objPool = ObjectPool.instance;
+            //objPool = GameObject.FindGameObjectWithTag ("Pool").GetComponent<ObjectPool> ();
 
 		if (state == State.POOLED)
 			poolCountdown = timeBeforePool;
@@ -33,8 +40,8 @@ public class EasyPool : MonoBehaviour {
 
 
 		} else {
-			state = State.COUNTING;
-			poolCountdown -= Time.deltaTime;
+            poolCountdown -= Time.deltaTime;
+			
 		}
 		
 	}

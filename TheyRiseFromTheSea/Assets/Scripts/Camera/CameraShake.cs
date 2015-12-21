@@ -11,8 +11,12 @@ public class CameraShake : MonoBehaviour {
 
 	public PixelPerfectCam pixelCam;
 
+    public static CameraShake Instance { get; protected set; }
+
 	void Awake()
 	{
+        Instance = this;
+
 		if (mainCam == null)
 			mainCam = Camera.main;
 

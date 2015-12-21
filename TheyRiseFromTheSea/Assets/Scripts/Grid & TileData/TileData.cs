@@ -42,16 +42,23 @@ public class TileData  {
 
 	public string tileName;
 
-	public int energyCost, oreCost;
+	//public int energyCost, oreCost;
+    public int nanoBotCost { get; protected set; }
 
-	public TileData(string name, Types type, int resourceQuantity, int moveCost, float _hp, float _defence, float _attk, float _shield, int eCost, int oCost){
-		tileType = type;
+    public int posX { get; protected set; }
+    public int posY { get; protected set; }
+
+	public TileData(int x, int y, string name, Types type, int resourceQuantity, int moveCost, float _hp, float _defence, float _attk, float _shield, int nCost){
+        posX = x;
+        posY = y;
+
+        tileType = type;
 		maxResourceQuantity = resourceQuantity;
 		movementCost = moveCost;
 
         // MAKING ROCK UNWAKABLE
 
-		if (type != Types.empty && type != Types.mineral && type != Types.water) {
+		if (type != Types.empty && type != Types.water) {
 			isWalkable = false;
 		}
 		hp = _hp;
@@ -59,15 +66,17 @@ public class TileData  {
 		attk = _attk;
 		shield = _shield;
 		tileName = name;
-		energyCost = eCost;
-		oreCost = oCost;
+        nanoBotCost = nCost;
 	}
-	public TileData(Types type, int resourceQuantity, int moveCost){
-		tileType = type;
+	public TileData(int x, int y, Types type, int resourceQuantity, int moveCost){
+        posX = x;
+        posY = y;
+
+        tileType = type;
 		maxResourceQuantity = resourceQuantity;
 		movementCost = moveCost;
 
-		if (type != Types.empty && type != Types.mineral && type != Types.water) {
+		if (type != Types.empty && type != Types.water) {
 			isWalkable = false;
 		}
 		tileName = type.ToString ();

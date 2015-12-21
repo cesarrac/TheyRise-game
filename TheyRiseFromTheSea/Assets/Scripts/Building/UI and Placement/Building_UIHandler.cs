@@ -6,6 +6,9 @@ using UnityEngine.Events;
 
 public class Building_UIHandler : MonoBehaviour {
 
+    // Access to this instance
+    public static Building_UIHandler BuildingHandler { get; protected set; }
+
 	TileData.Types currentTileType;
 	public int currPosX, currPosY;// storing the map pos from click handler 
 
@@ -63,11 +66,14 @@ public class Building_UIHandler : MonoBehaviour {
 	GameMaster game_master;
 
 	void Awake(){
-		canvasRectTransform = canvas.transform as RectTransform;
+
+        BuildingHandler = this;
+
+        canvasRectTransform = canvas.transform as RectTransform;
 
 		
 		game_master = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster> ();
-		game_master.building_UIHandler = this;
+		
 	}
 
 	void Start () {
@@ -159,7 +165,7 @@ public class Building_UIHandler : MonoBehaviour {
 		pointerExitEntry.callback = pointerExitEvent;
 		eventTrigger.triggers.Add(pointerExitEntry);
 
-		buildB.onClick.AddListener(() => BuildThis(currBuildingName));
+		//buildB.onClick.AddListener(() => BuildThis(currBuildingName));
 		buildB.GetComponent<Image> ().sprite = image;
 
 
@@ -175,301 +181,301 @@ public class Building_UIHandler : MonoBehaviour {
 	/// charge food cost each turn.
 	/// </summary>
 	/// <param name="buildingName">Building name.</param>
-	public void BuildThis(string buildingName){
-		// Set currBuilding to true so we can't create options menus
-		currentlyBuilding = true;
+//	public void BuildThis(string buildingName){
+//		// Set currBuilding to true so we can't create options menus
+//		currentlyBuilding = true;
 
-		// Mouse position so I can instantiate on the mouse!
-		Vector3 m = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-		Vector3 spawnPos = new Vector3 (Mathf.Round (m.x), Mathf.Round (m.y), 0.0f);
+//		// Mouse position so I can instantiate on the mouse!
+//		Vector3 m = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+//		Vector3 spawnPos = new Vector3 (Mathf.Round (m.x), Mathf.Round (m.y), 0.0f);
 
-		// To build we are just using the function SwapTileType to change this tile's type to that of the building
-			// we need the name of the Half Tile that gets called here
-		string halfName = "half_Built";
-		switch (buildingName) {
-		case "Extractor":
-			if (resourceManager.ore >= extractCost[0]){
-				// in order to re-use half tiles all we need is to
-				// grab the Half tile from the pool
-				// Add Building Position Handler and fill its vars
-				GameObject sExtractor = objPool.GetObjectForType(halfName, true, spawnPos);
-				if (sExtractor != null){
+//		// To build we are just using the function SwapTileType to change this tile's type to that of the building
+//			// we need the name of the Half Tile that gets called here
+//		string halfName = "half_Built";
+//		switch (buildingName) {
+//		case "Extractor":
+//			if (resourceManager.ore >= extractCost[0]){
+//				// in order to re-use half tiles all we need is to
+//				// grab the Half tile from the pool
+//				// Add Building Position Handler and fill its vars
+//				GameObject sExtractor = objPool.GetObjectForType(halfName, true, spawnPos);
+//				if (sExtractor != null){
 			
-					sExtractor.GetComponent<SpriteRenderer>().sprite = extractSprite;
+//					sExtractor.GetComponent<SpriteRenderer>().sprite = extractSprite;
+
+////					// add building pos handler
+//					Building_PositionHandler bPosHand = sExtractor.GetComponent<Building_PositionHandler>(); 
+
+//					bPosHand.spawnPos = spawnPos;
+//					bPosHand.resourceGrid = resourceGrid;
+//					bPosHand.followMouse = true;
+//					bPosHand.tileType = TileData.Types.extractor;
+//					bPosHand.resourceManager = resourceManager;
+//					bPosHand.currOreCost = extractCost[0];
+//					bPosHand.objPool = objPool;
+//					bPosHand.buildingUI = this;
+
+//				}
+//			}else{
+//				int diff = extractCost[0] - resourceManager.ore;
+//				CreateIndicator("Need " + diff + " more Ore!");
+//			}
+//			break;
+//		case "Machine Gun":
+//			if (resourceManager.ore >= mGunCost[0]){
+//				GameObject mGun = objPool.GetObjectForType(halfName, true, spawnPos);
+//				if(mGun != null){
+
+//					// set the sprite
+//					mGun.GetComponent<SpriteRenderer>().sprite = machineGunSprite;
+
+////					// add building pos handler
+//					Building_PositionHandler bPosHand = mGun.GetComponent<Building_PositionHandler>();
+
+//					bPosHand.spawnPos = spawnPos;
+//					bPosHand.resourceGrid = resourceGrid;
+//					bPosHand.followMouse = true;
+//					bPosHand.tileType = TileData.Types.machine_gun;
+//					bPosHand.resourceManager = resourceManager;
+//					bPosHand.currOreCost = mGunCost[0];
+//					bPosHand.objPool = objPool;
+//					bPosHand.buildingUI = this;
+//				}
+//			}else{
+//				int diff = mGunCost[0] - resourceManager.ore;
+//				CreateIndicator("Need " + diff + " more Ore!");
+//			}
+//			break;
+//		case "Cannons":
+//			if (resourceManager.ore >= cannonCost[0]){		
+//				GameObject can = objPool.GetObjectForType(halfName, true, spawnPos);
+//				if(can != null){
+
+//					// set the sprite
+//					can.GetComponent<SpriteRenderer>().sprite = cannonSprite;
+
+////					// add building pos handler
+//					Building_PositionHandler bPosHand = can.GetComponent<Building_PositionHandler>();
+
+//					bPosHand.spawnPos = spawnPos;
+//					bPosHand.resourceGrid = resourceGrid;
+//					bPosHand.followMouse = true;
+//					bPosHand.tileType = TileData.Types.cannons;
+//					bPosHand.resourceManager = resourceManager;
+//					bPosHand.currOreCost = cannonCost[0];
+//					bPosHand.objPool = objPool;
+//					bPosHand.buildingUI = this;
+//				}
+//			}else{
+//				int diff = cannonCost[0] - resourceManager.ore;
+//				CreateIndicator("Need " + diff + " more Ore!");
+//			}
+//			break;
+//		case "Harpooner's Hall":
+//			if (resourceManager.ore >= hHallCost[0]){		// ** HAS FOOD COST
+//				GameObject hHall = objPool.GetObjectForType(halfName, true, spawnPos);
+//				if(hHall != null){
+
+//					// set the sprite
+//					hHall.GetComponent<SpriteRenderer>().sprite = harpoonHSprite;
 
 //					// add building pos handler
-					Building_PositionHandler bPosHand = sExtractor.GetComponent<Building_PositionHandler>(); 
+//					Building_PositionHandler bPosHand = hHall.GetComponent<Building_PositionHandler>();
 
-					bPosHand.spawnPos = spawnPos;
-					bPosHand.resourceGrid = resourceGrid;
-					bPosHand.followMouse = true;
-					bPosHand.tileType = TileData.Types.extractor;
-					bPosHand.resourceManager = resourceManager;
-					bPosHand.currOreCost = extractCost[0];
-					bPosHand.objPool = objPool;
-					bPosHand.buildingUI = this;
+//					bPosHand.spawnPos = spawnPos;
+//					bPosHand.resourceGrid = resourceGrid;
+//					bPosHand.followMouse = true;
+//					bPosHand.tileType = TileData.Types.harpoonHall;
+//					bPosHand.resourceManager = resourceManager;
+//					bPosHand.currOreCost = hHallCost[0];
+//					bPosHand.objPool = objPool;
+//					bPosHand.buildingUI = this;
+//				}
+//			}else{
+//				int diff = hHallCost[0] - resourceManager.ore;
+//				CreateIndicator("Need " + diff + " more Ore!");
+//			}
+//			break;
+//		case "Seaweed Farm":
+//			if (resourceManager.ore >= sFarmCost[0]){		// ** HAS FOOD COST
+//				GameObject sWeed = objPool.GetObjectForType(halfName, true, spawnPos);
+//				if(sWeed != null){
 
-				}
-			}else{
-				int diff = extractCost[0] - resourceManager.ore;
-				CreateIndicator("Need " + diff + " more Ore!");
-			}
-			break;
-		case "Machine Gun":
-			if (resourceManager.ore >= mGunCost[0]){
-				GameObject mGun = objPool.GetObjectForType(halfName, true, spawnPos);
-				if(mGun != null){
+//					// set the sprite
+//					sWeed.GetComponent<SpriteRenderer>().sprite = sFarmSprite;
 
-					// set the sprite
-					mGun.GetComponent<SpriteRenderer>().sprite = machineGunSprite;
+//				// add building pos handler
+//					Building_PositionHandler bPosHand = sWeed.GetComponent<Building_PositionHandler>();
+
+//					bPosHand.spawnPos = spawnPos;
+//					bPosHand.resourceGrid = resourceGrid;
+//					bPosHand.followMouse = true;
+//					bPosHand.tileType = TileData.Types.farm_s;
+//					bPosHand.resourceManager = resourceManager;
+//					bPosHand.currOreCost = sFarmCost[0];
+//					bPosHand.objPool = objPool;
+//					bPosHand.buildingUI = this;
+//				}
+//			}else{
+//				int diff = sFarmCost[0] - resourceManager.ore;
+//				CreateIndicator("Need " + diff + " more Ore!");
+//			}
+//			break;
+//		case "Storage":
+//			if (resourceManager.ore >= storageCost[0]){		
+//				GameObject storage = objPool.GetObjectForType(halfName, true, spawnPos);
+//				if(storage != null){
+
+//					// set the sprite
+//					storage.GetComponent<SpriteRenderer>().sprite = storSprite;
+
+//					//add building pos handler
+//					Building_PositionHandler bPosHand = storage.GetComponent<Building_PositionHandler>();
+
+//					bPosHand.spawnPos = spawnPos;
+//					bPosHand.resourceGrid = resourceGrid;
+//					bPosHand.followMouse = true;
+//					bPosHand.tileType = TileData.Types.storage;
+//					bPosHand.resourceManager = resourceManager;
+//					bPosHand.currOreCost = storageCost[0];
+//					bPosHand.objPool = objPool;
+//					bPosHand.buildingUI = this;
+//				}
+//			}else{
+//				int diff = storageCost[0] - resourceManager.ore;
+//				CreateIndicator("Need " + diff + " more Ore!");
+//			}
+//			break;
+//		case "Desalination Pump":
+//			if (resourceManager.ore >= sDesaltCost[0]){		
+//				GameObject dSalt = objPool.GetObjectForType(halfName, true, spawnPos);
+//				if(dSalt != null){
+
+//					// set the sprite
+//					dSalt.GetComponent<SpriteRenderer>().sprite = sDesaltSprite;
+
+//				// add building pos handler
+//					Building_PositionHandler bPosHand = dSalt.GetComponent<Building_PositionHandler>();
+
+//					bPosHand.spawnPos = spawnPos;
+//					bPosHand.resourceGrid = resourceGrid;
+//					bPosHand.followMouse = true;
+//					bPosHand.tileType = TileData.Types.desalt_s;
+//					bPosHand.resourceManager = resourceManager;
+//					bPosHand.currOreCost = sDesaltCost[0];
+//					bPosHand.objPool = objPool;
+//					bPosHand.buildingUI = this;
+//				}
+//			}else{
+//				int diff = sDesaltCost[0] - resourceManager.ore;
+//				CreateIndicator("Need " + diff + " more Ore!");
+//			}
+//			break;
+//		case "Sniper Gun":
+//			if (resourceManager.ore >= sniperCost[0]){		
+//				GameObject sniper = objPool.GetObjectForType(halfName, true, spawnPos);
+//				if(sniper != null){
+
+//					// set the sprite
+//					sniper.GetComponent<SpriteRenderer>().sprite = sniperSprite;
 
 //					// add building pos handler
-					Building_PositionHandler bPosHand = mGun.GetComponent<Building_PositionHandler>();
+//					Building_PositionHandler bPosHand = sniper.GetComponent<Building_PositionHandler>();
 
-					bPosHand.spawnPos = spawnPos;
-					bPosHand.resourceGrid = resourceGrid;
-					bPosHand.followMouse = true;
-					bPosHand.tileType = TileData.Types.machine_gun;
-					bPosHand.resourceManager = resourceManager;
-					bPosHand.currOreCost = mGunCost[0];
-					bPosHand.objPool = objPool;
-					bPosHand.buildingUI = this;
-				}
-			}else{
-				int diff = mGunCost[0] - resourceManager.ore;
-				CreateIndicator("Need " + diff + " more Ore!");
-			}
-			break;
-		case "Cannons":
-			if (resourceManager.ore >= cannonCost[0]){		
-				GameObject can = objPool.GetObjectForType(halfName, true, spawnPos);
-				if(can != null){
-
-					// set the sprite
-					can.GetComponent<SpriteRenderer>().sprite = cannonSprite;
-
+//					bPosHand.spawnPos = spawnPos;
+//					bPosHand.resourceGrid = resourceGrid;
+//					bPosHand.followMouse = true;
+//					bPosHand.tileType = TileData.Types.sniper;
+//					bPosHand.resourceManager = resourceManager;
+//					bPosHand.currOreCost = sniperCost[0];
+//					bPosHand.objPool = objPool;
+//					bPosHand.buildingUI = this;
+//				}
+//			}else{
+//				int diff = sniperCost[0] - resourceManager.ore;
+//				CreateIndicator("Need " + diff + " more Ore!");
+//			}
+//			break;
+//		case "Sea-Witch Crag":
+//			if (resourceManager.ore >= seaWCost[0]){		
+//				GameObject seaW = objPool.GetObjectForType(halfName, true, spawnPos);
+//				if(seaW != null){
+					
+//					// set the sprite
+//					seaW.GetComponent<SpriteRenderer>().sprite = seaWSprite;
+					
 //					// add building pos handler
-					Building_PositionHandler bPosHand = can.GetComponent<Building_PositionHandler>();
+//					Building_PositionHandler bPosHand = seaW.GetComponent<Building_PositionHandler>();
 
-					bPosHand.spawnPos = spawnPos;
-					bPosHand.resourceGrid = resourceGrid;
-					bPosHand.followMouse = true;
-					bPosHand.tileType = TileData.Types.cannons;
-					bPosHand.resourceManager = resourceManager;
-					bPosHand.currOreCost = cannonCost[0];
-					bPosHand.objPool = objPool;
-					bPosHand.buildingUI = this;
-				}
-			}else{
-				int diff = cannonCost[0] - resourceManager.ore;
-				CreateIndicator("Need " + diff + " more Ore!");
-			}
-			break;
-		case "Harpooner's Hall":
-			if (resourceManager.ore >= hHallCost[0]){		// ** HAS FOOD COST
-				GameObject hHall = objPool.GetObjectForType(halfName, true, spawnPos);
-				if(hHall != null){
-
-					// set the sprite
-					hHall.GetComponent<SpriteRenderer>().sprite = harpoonHSprite;
-
-					// add building pos handler
-					Building_PositionHandler bPosHand = hHall.GetComponent<Building_PositionHandler>();
-
-					bPosHand.spawnPos = spawnPos;
-					bPosHand.resourceGrid = resourceGrid;
-					bPosHand.followMouse = true;
-					bPosHand.tileType = TileData.Types.harpoonHall;
-					bPosHand.resourceManager = resourceManager;
-					bPosHand.currOreCost = hHallCost[0];
-					bPosHand.objPool = objPool;
-					bPosHand.buildingUI = this;
-				}
-			}else{
-				int diff = hHallCost[0] - resourceManager.ore;
-				CreateIndicator("Need " + diff + " more Ore!");
-			}
-			break;
-		case "Seaweed Farm":
-			if (resourceManager.ore >= sFarmCost[0]){		// ** HAS FOOD COST
-				GameObject sWeed = objPool.GetObjectForType(halfName, true, spawnPos);
-				if(sWeed != null){
-
-					// set the sprite
-					sWeed.GetComponent<SpriteRenderer>().sprite = sFarmSprite;
-
-				// add building pos handler
-					Building_PositionHandler bPosHand = sWeed.GetComponent<Building_PositionHandler>();
-
-					bPosHand.spawnPos = spawnPos;
-					bPosHand.resourceGrid = resourceGrid;
-					bPosHand.followMouse = true;
-					bPosHand.tileType = TileData.Types.farm_s;
-					bPosHand.resourceManager = resourceManager;
-					bPosHand.currOreCost = sFarmCost[0];
-					bPosHand.objPool = objPool;
-					bPosHand.buildingUI = this;
-				}
-			}else{
-				int diff = sFarmCost[0] - resourceManager.ore;
-				CreateIndicator("Need " + diff + " more Ore!");
-			}
-			break;
-		case "Storage":
-			if (resourceManager.ore >= storageCost[0]){		
-				GameObject storage = objPool.GetObjectForType(halfName, true, spawnPos);
-				if(storage != null){
-
-					// set the sprite
-					storage.GetComponent<SpriteRenderer>().sprite = storSprite;
-
-					//add building pos handler
-					Building_PositionHandler bPosHand = storage.GetComponent<Building_PositionHandler>();
-
-					bPosHand.spawnPos = spawnPos;
-					bPosHand.resourceGrid = resourceGrid;
-					bPosHand.followMouse = true;
-					bPosHand.tileType = TileData.Types.storage;
-					bPosHand.resourceManager = resourceManager;
-					bPosHand.currOreCost = storageCost[0];
-					bPosHand.objPool = objPool;
-					bPosHand.buildingUI = this;
-				}
-			}else{
-				int diff = storageCost[0] - resourceManager.ore;
-				CreateIndicator("Need " + diff + " more Ore!");
-			}
-			break;
-		case "Desalination Pump":
-			if (resourceManager.ore >= sDesaltCost[0]){		
-				GameObject dSalt = objPool.GetObjectForType(halfName, true, spawnPos);
-				if(dSalt != null){
-
-					// set the sprite
-					dSalt.GetComponent<SpriteRenderer>().sprite = sDesaltSprite;
-
-				// add building pos handler
-					Building_PositionHandler bPosHand = dSalt.GetComponent<Building_PositionHandler>();
-
-					bPosHand.spawnPos = spawnPos;
-					bPosHand.resourceGrid = resourceGrid;
-					bPosHand.followMouse = true;
-					bPosHand.tileType = TileData.Types.desalt_s;
-					bPosHand.resourceManager = resourceManager;
-					bPosHand.currOreCost = sDesaltCost[0];
-					bPosHand.objPool = objPool;
-					bPosHand.buildingUI = this;
-				}
-			}else{
-				int diff = sDesaltCost[0] - resourceManager.ore;
-				CreateIndicator("Need " + diff + " more Ore!");
-			}
-			break;
-		case "Sniper Gun":
-			if (resourceManager.ore >= sniperCost[0]){		
-				GameObject sniper = objPool.GetObjectForType(halfName, true, spawnPos);
-				if(sniper != null){
-
-					// set the sprite
-					sniper.GetComponent<SpriteRenderer>().sprite = sniperSprite;
-
-					// add building pos handler
-					Building_PositionHandler bPosHand = sniper.GetComponent<Building_PositionHandler>();
-
-					bPosHand.spawnPos = spawnPos;
-					bPosHand.resourceGrid = resourceGrid;
-					bPosHand.followMouse = true;
-					bPosHand.tileType = TileData.Types.sniper;
-					bPosHand.resourceManager = resourceManager;
-					bPosHand.currOreCost = sniperCost[0];
-					bPosHand.objPool = objPool;
-					bPosHand.buildingUI = this;
-				}
-			}else{
-				int diff = sniperCost[0] - resourceManager.ore;
-				CreateIndicator("Need " + diff + " more Ore!");
-			}
-			break;
-		case "Sea-Witch Crag":
-			if (resourceManager.ore >= seaWCost[0]){		
-				GameObject seaW = objPool.GetObjectForType(halfName, true, spawnPos);
-				if(seaW != null){
+//					bPosHand.spawnPos = spawnPos;
+//					bPosHand.resourceGrid = resourceGrid;
+//					bPosHand.followMouse = true;
+//					bPosHand.tileType = TileData.Types.seaWitch;
+//					bPosHand.resourceManager = resourceManager;
+//					bPosHand.currOreCost = seaWCost[0];
+//					bPosHand.objPool = objPool;
+//					bPosHand.buildingUI = this;
+//				}
+//			}else{
+//				int diff = seaWCost[0] - resourceManager.ore;
+//				CreateIndicator("Need " + diff + " more Ore!");
+//			}
+//			break;
+//		case "Nutrient Generator":
+//			if (resourceManager.ore >= nutriCost[0]){
+//				GameObject nutri = objPool.GetObjectForType(halfName, true, spawnPos);
+//				if(nutri != null){
 					
-					// set the sprite
-					seaW.GetComponent<SpriteRenderer>().sprite = seaWSprite;
+//					// set the sprite
+//					nutri.GetComponent<SpriteRenderer>().sprite = nutriSprite;
 					
-					// add building pos handler
-					Building_PositionHandler bPosHand = seaW.GetComponent<Building_PositionHandler>();
+//					// add building pos handler
+//					Building_PositionHandler bPosHand = nutri.GetComponent<Building_PositionHandler>();
 
-					bPosHand.spawnPos = spawnPos;
-					bPosHand.resourceGrid = resourceGrid;
-					bPosHand.followMouse = true;
-					bPosHand.tileType = TileData.Types.seaWitch;
-					bPosHand.resourceManager = resourceManager;
-					bPosHand.currOreCost = seaWCost[0];
-					bPosHand.objPool = objPool;
-					bPosHand.buildingUI = this;
-				}
-			}else{
-				int diff = seaWCost[0] - resourceManager.ore;
-				CreateIndicator("Need " + diff + " more Ore!");
-			}
-			break;
-		case "Nutrient Generator":
-			if (resourceManager.ore >= nutriCost[0]){
-				GameObject nutri = objPool.GetObjectForType(halfName, true, spawnPos);
-				if(nutri != null){
+//					bPosHand.spawnPos = spawnPos;
+//					bPosHand.resourceGrid = resourceGrid;
+//					bPosHand.followMouse = true;
+//					bPosHand.tileType = TileData.Types.nutrient;
+//					bPosHand.resourceManager = resourceManager;
+//					bPosHand.currOreCost = nutriCost[0];
+//					bPosHand.objPool = objPool;
+//					bPosHand.buildingUI = this;
+//				}
+//			}else{
+//				int diff = nutriCost[0] - resourceManager.ore;
+//				CreateIndicator("Need " + diff + " more Ore!");
+//			}
+//			break;
+//		case "Energy Generator":
+//			if (resourceManager.ore >= generatorCost[0]){	
+//				GameObject gen = objPool.GetObjectForType(halfName, true, spawnPos);
+//				if(gen != null){
 					
-					// set the sprite
-					nutri.GetComponent<SpriteRenderer>().sprite = nutriSprite;
+//					// set the sprite
+//					gen.GetComponent<SpriteRenderer>().sprite = genSprite;
 					
-					// add building pos handler
-					Building_PositionHandler bPosHand = nutri.GetComponent<Building_PositionHandler>();
-
-					bPosHand.spawnPos = spawnPos;
-					bPosHand.resourceGrid = resourceGrid;
-					bPosHand.followMouse = true;
-					bPosHand.tileType = TileData.Types.nutrient;
-					bPosHand.resourceManager = resourceManager;
-					bPosHand.currOreCost = nutriCost[0];
-					bPosHand.objPool = objPool;
-					bPosHand.buildingUI = this;
-				}
-			}else{
-				int diff = nutriCost[0] - resourceManager.ore;
-				CreateIndicator("Need " + diff + " more Ore!");
-			}
-			break;
-		case "Energy Generator":
-			if (resourceManager.ore >= generatorCost[0]){	
-				GameObject gen = objPool.GetObjectForType(halfName, true, spawnPos);
-				if(gen != null){
+//					// add building pos handler
+//					Building_PositionHandler bPosHand = gen.GetComponent<Building_PositionHandler>();
 					
-					// set the sprite
-					gen.GetComponent<SpriteRenderer>().sprite = genSprite;
-					
-					// add building pos handler
-					Building_PositionHandler bPosHand = gen.GetComponent<Building_PositionHandler>();
-					
-					bPosHand.spawnPos = spawnPos;
-					bPosHand.resourceGrid = resourceGrid;
-					bPosHand.followMouse = true;
-					bPosHand.tileType = TileData.Types.generator;
-					bPosHand.resourceManager = resourceManager;
-					bPosHand.currOreCost = generatorCost[0];
-					bPosHand.objPool = objPool;
-					bPosHand.buildingUI = this;
-				}
-			}else{
-				int diff = generatorCost[0] - resourceManager.ore;
-				CreateIndicator("Need " + diff + " more Ore!");
-			}
-			break;
-		default:
-			print("UI handler cant find this type!");
-			break;
-		}
-	}
+//					bPosHand.spawnPos = spawnPos;
+//					bPosHand.resourceGrid = resourceGrid;
+//					bPosHand.followMouse = true;
+//					bPosHand.tileType = TileData.Types.generator;
+//					bPosHand.resourceManager = resourceManager;
+//					bPosHand.currOreCost = generatorCost[0];
+//					bPosHand.objPool = objPool;
+//					bPosHand.buildingUI = this;
+//				}
+//			}else{
+//				int diff = generatorCost[0] - resourceManager.ore;
+//				CreateIndicator("Need " + diff + " more Ore!");
+//			}
+//			break;
+//		default:
+//			print("UI handler cant find this type!");
+//			break;
+//		}
+//	}
 
 
 

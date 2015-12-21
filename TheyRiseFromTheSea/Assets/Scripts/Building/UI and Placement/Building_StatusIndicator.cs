@@ -28,13 +28,9 @@ public class Building_StatusIndicator : MonoBehaviour {
 
 	void Start () {
 
-		if (objPool == null) {
-			objPool = GetComponentInParent<Building_ClickHandler> ().objPool;
-		} else {
-			objPool = GameObject.FindGameObjectWithTag("Pool").GetComponent<ObjectPool>();
-		}
-	
-		if (healthBarRect == null) {
+        objPool = ObjectPool.instance;
+
+        if (healthBarRect == null) {
 			Debug.Log("BUILDING INDICATOR: No health bar referenced!!");
 		}
 	}

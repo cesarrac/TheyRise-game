@@ -32,7 +32,7 @@ public class Terraformer_Handler : MonoBehaviour {
 
 		if (GameObject.FindGameObjectWithTag ("Spawner") != null) {
 			waveSpawner = GameObject.FindGameObjectWithTag ("Spawner").GetComponent<Enemy_WAVESpawnerV2> ();
-			waveSpawner.terraformer = this;
+			//waveSpawner.terraformer = this;
 		}
 
 		if (!master_State)
@@ -42,12 +42,22 @@ public class Terraformer_Handler : MonoBehaviour {
 	
 	void Update () 
 	{
-		if (waveSpawner) {
-			MyStateMachine (_state);
-		} else {
-			waveSpawner = GameObject.FindGameObjectWithTag ("Spawner").GetComponent<Enemy_WAVESpawnerV2> ();
-			waveSpawner.terraformer = this;
-		}
+        //if (waveSpawner) {
+        //	MyStateMachine (_state);
+        //}
+        //      else {
+        //          if (GameObject.FindGameObjectWithTag("Spawner") != null)
+        //          {
+        //              waveSpawner = GameObject.FindGameObjectWithTag("Spawner").GetComponent<Enemy_WAVESpawnerV2>();
+        //              waveSpawner.terraformer = this;
+        //          }
+        //          else
+        //          {
+        //              MyStateMachine(State.IDLING);
+        //          }
+
+        //}
+        MyStateMachine(_state);
 	}
 
 	void MyStateMachine(State _curState)

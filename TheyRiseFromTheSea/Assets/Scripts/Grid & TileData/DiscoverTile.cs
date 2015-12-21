@@ -25,9 +25,10 @@ public class DiscoverTile : MonoBehaviour {
 
 	void Awake()
 	{
-//		if (!r_sprite_handler) {
-//			r_sprite_handler = GameObject.FindGameObjectWithTag("Map").GetComponent<Resource_Sprite_Handler>();
-//		}
+        //		if (!r_sprite_handler) {
+        //			r_sprite_handler = GameObject.FindGameObjectWithTag("Map").GetComponent<Resource_Sprite_Handler>();
+        //		}
+        resourceGrid = ResourceGrid.Grid;
 	}
 
 	void Start () {
@@ -74,8 +75,11 @@ public class DiscoverTile : MonoBehaviour {
 		}
 	}
 
-	public void TileToDiscover(string newTileName, int mapPosX, int mapPosY, Transform tileHolder, ResourceGrid grid,  TileData.Types tileType, GameObject playerCapital){		// this is called by Resource grid with the proper tile obj
-		tileToSpawn = objPool.GetObjectForType (newTileName, false, Vector3.zero);
+	public void TileToDiscover(string newTileName, int mapPosX, int mapPosY, Transform tileHolder, TileData.Types tileType, int spriteWidth = 0, int spriteHeight = 0){      // this is called by Resource grid with the proper tile obj
+        if (resourceGrid == null)
+            resourceGrid = ResourceGrid.Grid;
+
+        tileToSpawn = objPool.GetObjectForType (newTileName, false, Vector3.zero);
 		if (tileToSpawn != null) {
 			tileToSpawn.transform.position = transform.position;
 			tileToSpawn.transform.parent = tileHolder;
@@ -94,8 +98,8 @@ public class DiscoverTile : MonoBehaviour {
                 {
                     bClickHandler.mapPosX = mapPosX;
                     bClickHandler.mapPosY = mapPosY;
-                    bClickHandler.resourceGrid = grid;
-                    bClickHandler.objPool = objPool;
+                    //bClickHandler.resourceGrid = resourceGrid;
+                    //bClickHandler.objPool = objPool;
                 }
 			
 
@@ -109,12 +113,13 @@ public class DiscoverTile : MonoBehaviour {
                 {
                     extra.mapPosX = mapPosX;
                     extra.mapPosY = mapPosY;
-                    extra.resourceGrid = grid;
-                    extra.playerResources = playerCapital.GetComponent<Player_ResourceManager>();
+                    extra.resourceGrid = resourceGrid;
+                    extra.playerResources = resourceGrid.playerCapital.GetComponent<Player_ResourceManager>();
                 }
 				
 			} 
 			if (tileType == TileData.Types.capital){
+                resourceGrid.playerCapital = tileToSpawn;
 				// IF IT'S THE TERRAFORMER it will need the master state manager
 				Terraformer_Handler terra = tileToSpawn.GetComponent<Terraformer_Handler>();
                 if (terra)
@@ -124,7 +129,21 @@ public class DiscoverTile : MonoBehaviour {
 	
 
 			// ADD this tile to the Grid's spawnedTiles array
-			grid.spawnedTiles [mapPosX, mapPosY] = tileToSpawn;
+            if (spriteWidth > 0 && spriteHeight > 0)
+            {
+                for (int w = 0; w < spriteWidth; w++)
+                {
+                    for (int h = 0; h < spriteHeight; h++)
+                    {
+                        resourceGrid.spawnedTiles[mapPosX + w, mapPosY + h] = tileToSpawn;
+                    }
+                }
+            }
+            else
+            {
+			resourceGrid.spawnedTiles [mapPosX, mapPosY] = tileToSpawn;
+            }
+
 		}
 	}
 

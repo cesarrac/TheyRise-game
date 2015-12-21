@@ -15,10 +15,13 @@ public class Map_Generator : MonoBehaviour {
 	public int randomFillPercent;
 	
 	int[,] map;
+    int[,] topLayerMap;
 
 	ResourceGrid grid;
 
     public GameObject _Floor;
+
+    System.Random pseudoRandom;
 
     void Awake()
     {
@@ -32,6 +35,16 @@ public class Map_Generator : MonoBehaviour {
             // and move the floor as well, except don't touch its z position
             //_Floor.transform.position = new Vector3(_x, _y, _Floor.transform.position.z);
         }
+
+        if (useRandomSeed)
+        {
+            // Grabs a random seed using the value of Time
+            //seed = Time.time.ToString();
+            int randomSeed = UnityEngine.Random.Range(100, 100992112);
+            seed = randomSeed.ToString();
+        }
+
+        pseudoRandom  = new System.Random(seed.GetHashCode());
     }
 	
 	void Start()
@@ -56,14 +69,14 @@ public class Map_Generator : MonoBehaviour {
 		
 		RandomFillMap ();
 		
-		for (int i =0; i < 5; i++) {
+		for (int i =0; i < 10; i++) {
 			SmoothMap();
 		}
 		
 		ProcessMap ();
-		
-		// BORDERS:
-		int borderSize = 64;
+
+        // BORDERS:
+        int borderSize = 64;
 		int [,] borderedMap = new int[width + borderSize * 2, height + borderSize * 2];
 
         int[,] islandMap = new int[width, height];
@@ -103,7 +116,7 @@ public class Map_Generator : MonoBehaviour {
 		meshGen.GenerateMesh (borderedMap, 1);
 
         meshGen.GenerateIslandMesh(islandMap);
-        meshGen.GenerateShoreWaterMesh(borderedMap.GetLength(0), borderedMap.GetLength(1));
+        //meshGen.GenerateShoreWaterMesh(borderedMap.GetLength(0), borderedMap.GetLength(1));
         // Build island Texture
        // TileTexture tileTexture = _Floor.GetComponent<TileTexture>();
         // tileTexture.BuildTexture(islandMap.GetLength(0), islandMap.GetLength(1));
@@ -129,13 +142,13 @@ public class Map_Generator : MonoBehaviour {
 		for (int x =0; x < width; x++) {
 			for (int y =0; y < height; y ++){
 				if (map[x,y] == 0){
-					grid.tiles[x,y] = new TileData(TileData.Types.empty, 0, 1);
+					grid.tiles[x,y] = new TileData(x, y, TileData.Types.empty, 0, 1);
 
                     // fill empty tiles list
                     grid.emptyTilePositions.Add(new Vector2(x, y));
 
 				}else {
-					grid.tiles[x,y] = new TileData(TileData.Types.water, 200, 2);
+					grid.tiles[x,y] = new TileData(x, y, TileData.Types.water, 200, 2);
 
                     // fill a list of water tiles positions as vector 2 to be used as potential spawn positions for enemies
                     grid.waterTilePositions.Add(new Vector2(x, y));
@@ -157,18 +170,108 @@ public class Map_Generator : MonoBehaviour {
         // do the same to the empty tiles list
         grid.emptyTilesArray = grid.emptyTilePositions.ToArray();
 
-        // Build island Texture
-        TileTexture tileTexture = _Floor.GetComponent<TileTexture>();
-        tileTexture.BuildTexture(grid.emptyTilesArray, iMap.GetLength(0), iMap.GetLength(1));
+//        // Build island Texture
+//        TileTexture tileTexture = _Floor.GetComponent<TileTexture>();
+//        tileTexture.BuildTexture(grid.emptyTilesArray, iMap.GetLength(0), iMap.GetLength(1));
+		TileTexture_3 tileTexture = _Floor.GetComponent<TileTexture_3>();
+        tileTexture.seed = seed;
+        tileTexture.randomFillPercent = randomFillPercent;
+		tileTexture.DefineTilesAndGenerateBaseTexture(grid.emptyTilesArray, iMap.GetLength(0), iMap.GetLength(1));
+
+        //GenerateTopLayerMap();
     }
+
+    public void GenerateTopLayerMap(Vector2[] centerPositions)
+    {
+        // Init top layer map
+        topLayerMap = new int[width, height];
+        
+        // Second tile positions will be filled by a positions that is topLayerMask = 0 & map = 0 & is NOT an edgeposition
+        List<Vector2> secondTilePositions = new List<Vector2>();
+
+        // Loop through map and define each int[,]
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (map[x,y] == 0)
+                {
+                    // If Top Layer Map = 0 it will be part of the second texture
+                    topLayerMap[x, y] = (pseudoRandom.Next(0, 100) < randomFillPercent) ? 1 : 0;
+
+                }
+                else
+                {
+                    topLayerMap[x, y] = 1;
+                }
+            }
+        }
+
+        // Smooth Map:
+        for (int i = 0; i < 10; i++)
+        {
+            SmoothTopMap();
+        }
+
+        // Process Map to connect passages and rooms:
+        ProcessTopMap();
+
+        // Loop again to fill second Tile positions:
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (topLayerMap[x, y] == 0 && map[x, y] == 0 && IsCenterTile(centerPositions, new Vector2(x, y)))
+                {
+                    secondTilePositions.Add(new Vector2(x, y));                
+                }
+                
+               
+            }
+        }
+
+
+        //BuildTexture(tWidth, tHeight, centerTilePositions);
+        TileTexture_3 tileTexture = _Floor.GetComponent<TileTexture_3>();
+        tileTexture.DefineTilesAndGenerateSecondTexture(secondTilePositions.ToArray(), width, height);
+    }
+
+    bool IsCenterTile(Vector2[] edges, Vector2 posToCheck)
+    {
+        foreach (Vector2 pos in edges)
+        {
+            if (pos == posToCheck)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    bool IsThisPartOfCenterTiles(Vector2[] positions, Vector2 posTocheck)
+    {
+        foreach(Vector2 pos in positions)
+        {
+            if (pos == posTocheck)
+            {
+                return true;
+            }
+        }
+
+        return false;
+        
+    }
+
 
     // Gets rid of smaller patches of land (small defined by threshold)
     void ProcessMap()
 	{
-		List<List<Coord>> wallRegions = GetRegions (1);
+		List<List<Coord>> wallRegions = GetRegions (1, false);
 		
         
-		int wallThresholdSize =200;
+		int wallThresholdSize =16;
 		foreach (List<Coord> wallRegion in wallRegions) {
 			if (wallRegion.Count < wallThresholdSize){
 				foreach(Coord tile in wallRegion){
@@ -178,8 +281,8 @@ public class Map_Generator : MonoBehaviour {
 		}
       
 		
-		List<List<Coord>> roomRegions = GetRegions (0);
-		int roomThresholdSize =64;
+		List<List<Coord>> roomRegions = GetRegions (0, false);
+		int roomThresholdSize =50;
 		List<Room> survivingRooms = new List<Room> ();
 		
 		foreach (List<Coord> roomRegion in roomRegions) {
@@ -198,12 +301,58 @@ public class Map_Generator : MonoBehaviour {
 		survivingRooms [0].isAccessibleFromMainRoom = true;
 		
 		
-		ConnectClosestRooms (survivingRooms);
+		ConnectClosestRooms (survivingRooms, false);
        
 	}
-	
-	// Connects all "rooms" with passages so NO room is disconnected
-	void ConnectClosestRooms (List<Room> allRooms, bool forceAccessibilityFromMainRoom = false)
+
+    void ProcessTopMap()
+    {
+        List<List<Coord>> wallRegions = GetRegions(1, true);
+
+
+        int wallThresholdSize = 200; // <------ TODO: still needs adjustment
+        foreach (List<Coord> wallRegion in wallRegions)
+        {
+            if (wallRegion.Count < wallThresholdSize)
+            {
+                foreach (Coord tile in wallRegion)
+                {
+                    topLayerMap[tile.tileX, tile.tileY] = 0;
+                }
+            }
+        }
+
+
+        List<List<Coord>> roomRegions = GetRegions(0, true);
+        int roomThresholdSize = 64; // <------ TODO: still needs adjustment
+        List<Room> survivingRooms = new List<Room>();
+
+        foreach (List<Coord> roomRegion in roomRegions)
+        {
+            if (roomRegion.Count < roomThresholdSize)
+            {
+                foreach (Coord tile in roomRegion)
+                {
+                    topLayerMap[tile.tileX, tile.tileY] = 1;
+                }
+            }
+            else
+            {
+                survivingRooms.Add(new Room(roomRegion, topLayerMap));
+            }
+        }
+
+        survivingRooms.Sort();
+        survivingRooms[0].isMainRoom = true;
+        survivingRooms[0].isAccessibleFromMainRoom = true;
+
+
+        ConnectClosestRooms(survivingRooms, true);
+
+    }
+
+    // Connects all "rooms" with passages so NO room is disconnected
+    void ConnectClosestRooms (List<Room> allRooms, bool isTopMap,  bool forceAccessibilityFromMainRoom = false)
 	{
 		List<Room> roomListA = new List<Room> ();
 		List<Room> roomListB = new List<Room> ();
@@ -264,44 +413,57 @@ public class Map_Generator : MonoBehaviour {
 			}
 			
 			if (possibleConnectionFound && !forceAccessibilityFromMainRoom){
-				CreatePassage(bestRoomA, bestRoomB, bestTileA, bestTileB);
+				CreatePassage(bestRoomA, bestRoomB, bestTileA, bestTileB, isTopMap);
 			}
 		}
 		
 		if (possibleConnectionFound && forceAccessibilityFromMainRoom){
-			CreatePassage(bestRoomA, bestRoomB, bestTileA, bestTileB);
-			ConnectClosestRooms(allRooms, true);
+			CreatePassage(bestRoomA, bestRoomB, bestTileA, bestTileB, isTopMap);
+			ConnectClosestRooms(allRooms, isTopMap);
 		} 
 		
 		if (!forceAccessibilityFromMainRoom) {
 			// Any room still not connected will be forced to connect
-			ConnectClosestRooms(allRooms, true);
+			ConnectClosestRooms(allRooms, isTopMap, true);
 		}
 	}
 	
-	void CreatePassage (Room roomA, Room roomB, Coord tileA, Coord tileB)
+	void CreatePassage (Room roomA, Room roomB, Coord tileA, Coord tileB, bool isTopMap)
 	{
 		Room.ConnectRooms (roomA, roomB);
 		//		Debug.DrawLine (CoordToWorldPoint (tileA), CoordToWorldPoint (tileB), Color.green, 100);
 		
 		List<Coord> line = GetLine (tileA, tileB);
 		foreach (Coord c in line) {
-			DrawCircle(c, 4);
+			DrawCircle(c, 4, isTopMap);
 		}
 		
 		
 	}
 	
-	void DrawCircle(Coord c, int r)
+	void DrawCircle(Coord c, int r, bool isTopMap)
 	{
 		for (int x = -r; x <= r; x++){
 			for (int y = -r; y <= r; y++){
 				if (x*x + y*y <= r*r){
 					int drawX = c.tileX + x;
 					int drawY = c.tileY + y;
-					if (IsInMapRange(drawX, drawY)){
-						map[drawX, drawY] = 0;
-					}
+
+                    if (IsInMapRange(drawX, drawY))
+                    {
+                        if (!isTopMap)
+                        {
+                            map[drawX, drawY] = 0;
+                        }
+                        else
+                        {
+                            
+                            topLayerMap[drawX, drawY] = 0;
+                            
+                        }
+                    }
+                   
+					
 				}
 			}
 		}
@@ -362,23 +524,42 @@ public class Map_Generator : MonoBehaviour {
 	}
 	
 	
-	List<List<Coord>> GetRegions (int tileType)
+	List<List<Coord>> GetRegions (int tileType, bool isTopMap)
 	{
 		List<List<Coord>> regions = new List<List<Coord>> ();
 		int[,] mapFlags = new int[width,height];
 		
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
+				if (!isTopMap)
+                {
+                    if (mapFlags[x, y] == 0 && map[x, y] == tileType)
+                    {
+                        List<Coord> newRegion = GetRegionTiles(x, y, isTopMap);
+                        regions.Add(newRegion);
+
+                        // marked as looked at
+                        foreach (Coord tile in newRegion)
+                        {
+                            mapFlags[tile.tileX, tile.tileY] = 1;
+                        }
+                    }
+                }
+                else
+                {
+                    if (mapFlags[x, y] == 0 && topLayerMap[x, y] == tileType)
+                    {
+                        List<Coord> newRegion = GetRegionTiles(x, y, isTopMap);
+                        regions.Add(newRegion);
+
+                        // marked as looked at
+                        foreach (Coord tile in newRegion)
+                        {
+                            mapFlags[tile.tileX, tile.tileY] = 1;
+                        }
+                    }
+                }
 				
-				if (mapFlags[x,y] == 0 && map[x,y] == tileType){
-					List<Coord> newRegion = GetRegionTiles(x, y);
-					regions.Add(newRegion);
-					
-					// marked as looked at
-					foreach(Coord tile in newRegion){
-						mapFlags[tile.tileX, tile.tileY] = 1;
-					}
-				}
 			}
 		}
 		return regions;
@@ -386,11 +567,16 @@ public class Map_Generator : MonoBehaviour {
 	
 	
 	
-	List<Coord> GetRegionTiles(int startX, int startY)
+	List<Coord> GetRegionTiles(int startX, int startY, bool isTopMap)
 	{
 		List<Coord> tiles = new List<Coord> ();
 		int[,] mapFlags = new int[width, height];
-		int tileType = map [startX, startY];
+        int tileType = map[startX, startY];
+        if (isTopMap)
+        {
+            tileType = topLayerMap[startX, startY];
+        }
+		
 		
 		Queue<Coord> queue = new Queue<Coord> ();
 		queue.Enqueue (new Coord (startX, startY));
@@ -404,10 +590,23 @@ public class Map_Generator : MonoBehaviour {
 			for (int x = tile.tileX - 1; x <= tile.tileX + 1; x++){
 				for (int y = tile.tileY - 1; y <= tile.tileY + 1; y++){
 					if (IsInMapRange(x, y) && (y == tile.tileY || x == tile.tileX)){
-						if (mapFlags[x,y] == 0 && map[x,y] == tileType){
-							mapFlags[x,y] = 1;
-							queue.Enqueue(new Coord(x, y));
-						}
+                        if (!isTopMap)
+                        {
+                            if (mapFlags[x, y] == 0 && map[x, y] == tileType)
+                            {
+                                mapFlags[x, y] = 1;
+                                queue.Enqueue(new Coord(x, y));
+                            }
+                        }
+                        else
+                        {
+                            if (mapFlags[x, y] == 0 && topLayerMap[x, y] == tileType)
+                            {
+                                mapFlags[x, y] = 1;
+                                queue.Enqueue(new Coord(x, y));
+                            }
+                        }
+						
 					}
 				}
 			}
@@ -420,37 +619,75 @@ public class Map_Generator : MonoBehaviour {
 	{
 		return x >= 0 && x < width && y >= 0 && y < height;
 	}
-	
-	
-	
-	void RandomFillMap()
+
+
+
+
+    void RandomFillMap()
 	{
-		if (useRandomSeed) {
-            // Grabs a random seed using the value of Time
-            //seed = Time.time.ToString();
-            int randomSeed = UnityEngine.Random.Range(100, 100992112);
-            seed = randomSeed.ToString();
-        }
+		//if (useRandomSeed) {
+  //          // Grabs a random seed using the value of Time
+  //          //seed = Time.time.ToString();
+  //          int randomSeed = UnityEngine.Random.Range(100, 100992112);
+  //          seed = randomSeed.ToString();
+  //      }
 		
-		System.Random pseudoRandom = new System.Random (seed.GetHashCode ());
+		//System.Random pseudoRandom = new System.Random (seed.GetHashCode ());
 		
 		for (int x = 0; x < width; x++){
 			for (int y = 0; y < height; y++){
-				
-				// Borders
-				if (x == 0 || x == width -1 || y == 0 || y == height -1){
+               // map[x, y] = (pseudoRandom.Next(0, 100) < randomFillPercent) ? 1 : 0;
+                // Borders
+                
+                if (x == 0 || x == width -1 || y == 0 || y == height -1){
 					
 					map [x, y] = 1;
 				}else{
                     map[x,y] = (pseudoRandom.Next(0,100) < randomFillPercent) ? 1: 0;
                     
                 }
+               
 				
 			}
 		}
 	}
-	
-	void SmoothMap()
+
+    void RandomFillTopMap()
+    {
+        //if (useRandomSeed)
+        //{
+        //    // Grabs a random seed using the value of Time
+        //    //seed = Time.time.ToString();
+        //    int randomSeed = UnityEngine.Random.Range(100, 100992112);
+        //    seed = randomSeed.ToString();
+        //}
+
+       // System.Random pseudoRandom = new System.Random(seed.GetHashCode());
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                // map[x, y] = (pseudoRandom.Next(0, 100) < randomFillPercent) ? 1 : 0;
+                // Borders
+
+                if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
+                {
+
+                    topLayerMap[x, y] = 0;
+                }
+                else
+                {
+                    topLayerMap[x, y] = (pseudoRandom.Next(0, 100) < randomFillPercent) ? 1 : 0;
+                  
+                }
+
+
+            }
+        }
+    }
+
+    void SmoothMap()
 	{
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
@@ -465,8 +702,30 @@ public class Map_Generator : MonoBehaviour {
 			}
 		}
 	}
-	
-	int GetSurroundingWallCount(int gridX, int gridY)
+
+
+    void SmoothTopMap()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+
+                int neighbourWallTiles = GetTopSurroundingWallCount(x, y);
+
+                if (neighbourWallTiles > 4)
+                {
+                    topLayerMap[x, y] = 1;
+                }
+                else if (neighbourWallTiles < 4)
+                {
+                    topLayerMap[x, y] = 0;
+                }
+            }
+        }
+    }
+
+    int GetSurroundingWallCount(int gridX, int gridY)
 	{
 		int wallCount = 0;
 		
@@ -479,16 +738,44 @@ public class Map_Generator : MonoBehaviour {
 						wallCount += map[neighbourX, neighbourY];
 					}
 				}
-				else{
-					wallCount++;
-				}
-			}
-		}
+                else
+                {
+                    wallCount++;
+                }
+            }
+        }
 		
 		return wallCount;
 	}
-	
-	struct Coord{
+
+    int GetTopSurroundingWallCount(int gridX, int gridY)
+    {
+        int wallCount = 0;
+
+        for (int neighbourX = gridX - 1; neighbourX <= gridX + 1; neighbourX++)
+        {
+            for (int neighbourY = gridY - 1; neighbourY <= gridY + 1; neighbourY++)
+            {
+
+                if (IsInMapRange(neighbourX, neighbourY))
+                {
+                    // We ignore the tile passed in as an argument
+                    if (neighbourX != gridX || neighbourY != gridY)
+                    {
+                        wallCount += topLayerMap[neighbourX, neighbourY];
+                    }
+                }
+                else
+                {
+                    wallCount++;
+                }
+            }
+        }
+
+        return wallCount;
+    }
+
+    struct Coord{
 		public int tileX;
 		public int tileY;
 		

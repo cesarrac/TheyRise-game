@@ -7,12 +7,14 @@ public class NanoBot_MoveHandler : MonoBehaviour {
 	float speed = 10;
 
 	public ObjectPool objPool;
-	// Use this for initialization
-	void Start () {
-//		speed = Random.Range (3, 14);
+
+	void Awake ()
+    {
+        //		speed = Random.Range (3, 14);
+        objPool = ObjectPool.instance;
 	}
 	
-	// Update is called once per frame
+
 	void Update () {
 		// turn towards the player
 		if (player) 

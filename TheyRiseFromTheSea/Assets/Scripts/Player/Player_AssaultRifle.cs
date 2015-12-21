@@ -18,11 +18,15 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 
         gameMaster = GetComponentInParent<Player_HeroAttackHandler>().gameMaster;
 
+        sprite_renderer = GetComponent<SpriteRenderer>();
+       
+
     }
 
     void Start()
 	{
-		objPool = GetComponentInParent<Player_HeroAttackHandler> ().objPool;
+        objPool = ObjectPool.instance;
+
 		if (!gameMaster)
 			gameMaster = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster> ();
 	}

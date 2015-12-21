@@ -6,8 +6,8 @@ public class Building_ClickHandler : MonoBehaviour {
 
 	public int mapPosX;
 	public int mapPosY;
-	public Building_UIHandler buildingUIhandler;
-	public ResourceGrid resourceGrid;
+	Build_MainController buildMainController;
+	ResourceGrid resourceGrid;
 
 	// UI Handler feeds this when this is a new building so it may Swap Tiles
 	[HideInInspector]
@@ -27,7 +27,7 @@ public class Building_ClickHandler : MonoBehaviour {
 	public Building_StatusIndicator buildingStatusIndicator;
 
 	// Adding this object Pool here so we can feed it to the buildings as they are built
-	public ObjectPool objPool;
+	ObjectPool objPool;
 
 	[Header ("For Gun Towers Only:")]
 	public Tower_TargettingHandler tower;
@@ -53,10 +53,14 @@ public class Building_ClickHandler : MonoBehaviour {
     public State debugState;
 
 	NanoBuilding_Handler nano_builder; // this will allow the building to give back the nanobots when sold, getting it from resourceGrid
+    public int nanoBotCost;
 	int nanoBotsCreated = 0;
 	int nanoBotsNeeded = 10; // CHANGE THIS TO COST !!
 
-	void OnEnable()
+    TileData myTile;
+
+
+    void OnEnable()
 	{
 		// Make sure to reset the color
 		s_renderer = GetComponent<SpriteRenderer> ();
@@ -69,6 +73,8 @@ public class Building_ClickHandler : MonoBehaviour {
 		// Assemble
 		_state = State.ASSEMBLING;
 
+        // set cost
+        //nanoBotsNeeded = nanoBotCost / 10;
 
 	}
 	void Awake()
@@ -79,7 +85,11 @@ public class Building_ClickHandler : MonoBehaviour {
 		s_renderer = GetComponent<SpriteRenderer> ();
 		s_renderer.color = B;
 		FadeIn ();
-	}
+
+        buildMainController = Build_MainController.Instance;
+        objPool = ObjectPool.instance;
+        resourceGrid = ResourceGrid.Grid;
+    }
 
 	void FadeIn()
 	{
@@ -98,26 +108,14 @@ public class Building_ClickHandler : MonoBehaviour {
 
 	void Start () {
 
-		if (!resourceGrid) {
-			resourceGrid = GameObject.FindGameObjectWithTag ("Map").GetComponent<ResourceGrid> ();
+        // get my tiletype
+        myTileType = CheckTileType((int)transform.position.x, (int)transform.position.y);
 
-            // get my tiletype
-            myTileType = CheckTileType((int)transform.position.x, (int)transform.position.y);
-
-            if (myTileType != TileData.Types.capital)
-			    nano_builder = resourceGrid.Hero.GetComponent<NanoBuilding_Handler> ();
-
-		} else {
-
-            // get my tiletype
-            myTileType = CheckTileType((int)transform.position.x, (int)transform.position.y);
-
-            if (myTileType != TileData.Types.capital)
-                nano_builder = resourceGrid.Hero.GetComponent<NanoBuilding_Handler> ();
-		}
+        if (myTileType != TileData.Types.capital)
+            nano_builder = resourceGrid.Hero.GetComponent<NanoBuilding_Handler>();
 
 
-		if (buildingCanvas == null) {
+        if (buildingCanvas == null) {
 			Debug.Log("CLICK HANDLER: Building Canvas not set!");
 		} 
 		if (buildingPanel == null) {
@@ -131,19 +129,15 @@ public class Building_ClickHandler : MonoBehaviour {
 		if (buildingCanvas != null) {
 			buildingCanvas.worldCamera = Camera.main;
 		}
-
-					// IF THIS BUILDING is spawned by the UI Handler, it won't need to make this search
-		if (buildingUIhandler == null) {
-			buildingUIhandler = GameObject.FindGameObjectWithTag ("UI").GetComponent<Building_UIHandler> ();
-		}
+        
 
 		myCollider = GetComponent<BoxCollider2D> ();
 		vertExtents = myCollider.bounds.extents.y;
 
-		
+        myTile = resourceGrid.TileFromWorldPoint(transform.position);
 
 
-	}
+    }
 
 	void Update()
 	{
@@ -163,7 +157,7 @@ public class Building_ClickHandler : MonoBehaviour {
 			//DissasemblyControl();
 
 			if (Input.GetKeyDown (KeyCode.F) && playerIsNear) {
-				if (!buildingUIhandler.currentlyBuilding){
+				if (!buildMainController.currentlyBuilding){
 					if (!buildingPanel.gameObject.activeSelf) {
 						ActivateBuildingUI ();
 						
@@ -221,8 +215,6 @@ public class Building_ClickHandler : MonoBehaviour {
 
 	public void ActivateBuildingUI(){
 		Vector3 offset = new Vector3 (transform.position.x, transform.position.y + vertExtents);
-//		if (!buildingUIhandler.currentlyBuilding)
-//			buildingUIhandler.CreateOptionsButtons (offset, CheckTileType(mapPosX, mapPosY), mapPosX, mapPosY, buildingPanel, buildingCanvas);
 
 		if (!buildingPanel.gameObject.activeSelf) {
 			buildingPanel.gameObject.SetActive(true);
@@ -241,7 +233,8 @@ public class Building_ClickHandler : MonoBehaviour {
 		nanoBotsCreated = 0;
 
 		if (resourceGrid != null) {
-			resourceGrid.SwapTileType(mapPosX, mapPosY, TileData.Types.empty);
+            
+			resourceGrid.SwapTileType(myTile.posX, myTile.posY, TileData.Types.empty, myTile.nanoBotCost);
 		}
 	}
 
@@ -269,7 +262,7 @@ public class Building_ClickHandler : MonoBehaviour {
 		GameObject nanobot = objPool.GetObjectForType("NanoBot", true, transform.position);
 		if (nanobot){
 			nanobot.GetComponent<NanoBot_MoveHandler>().player = resourceGrid.Hero.transform;
-			nanobot.GetComponent<NanoBot_MoveHandler>().objPool = objPool;
+			//nanobot.GetComponent<NanoBot_MoveHandler>().objPool = objPool;
 		}
 
 		nanoBotsCreated++;
@@ -333,34 +326,36 @@ public class Building_ClickHandler : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D coll)
 	{
-		if (coll.gameObject.CompareTag ("Citizen")) {
-			playerIsNear = true;
+		if (coll.gameObject.CompareTag ("Citizen") && !playerIsNear) {
+           
+            playerIsNear = true;
 		}
 	}
 	
 	void OnTriggerExit2D(Collider2D coll)
 	{
-		if (coll.gameObject.CompareTag ("Citizen")) {
+		if (coll.gameObject.CompareTag ("Citizen") && playerIsNear) {
 			playerIsNear = false;
 		}
 	}
 
 
-    void OnMouseOver()
+    public void BreakBuilding(int _nanoBotCost)
     {
+        nanoBotCost = _nanoBotCost;
+        nanoBotsNeeded = nanoBotCost / 10;
        
         if (_state == State.READY) {
-            if (Input.GetButtonDown("Break")) {
-                
-                if (!isDissasembling) {
-                    isDissasembling = true;
-                    isFading = true;
-                    _state = State.RECYCLE_NANOBOTS;
-                   
-                }
+            if (!isDissasembling)
+            {
+                isDissasembling = true;
+                isFading = true;
+                _state = State.RECYCLE_NANOBOTS;
+
             }
         }
     }
+
 
 //	void OnMouseOver()
 //	{

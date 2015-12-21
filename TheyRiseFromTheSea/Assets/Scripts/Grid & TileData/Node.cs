@@ -1,27 +1,50 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
+public class Node : IHeapItem<Node>
+{
 
-public class Node  {
+    public bool isWalkable;
+    public Vector3 worldPosition;
 
-		public List<Node> neighbors;
-		public int x;
-		public int y;
-		public int nodeID;
-		
-		public Node(){
-			neighbors = new List<Node>();
-		}
-		public float DistanceTo(Node n){
-			return Vector2.Distance (
-				new Vector2(x, y),
-				new Vector2(n.x, n.y)
-				);
-		}
-		
-		//		public int IComparable.CompareTo(Node n){
-		//			return this.nodeID.CompareTo (n.nodeID);
-		//		}
+    public int gCost;
+    public int hCost;
 
+    public int gridX, gridY;
+
+    public Node nodeParent;
+
+    int heapIndex;
+
+    public Node(bool _walkable, Vector3 _worldPos, int _gridX, int _gridY)
+    {
+        isWalkable = _walkable;
+        worldPosition = _worldPos;
+        gridX = _gridX;
+        gridY = _gridY;
+    }
+
+    public int fCost { get { return gCost + hCost; } }
+
+    public int HeapIndex
+    {
+        get
+        {
+            return heapIndex;
+        }
+        set
+        {
+            heapIndex = value;
+        }
+    }
+
+    public int CompareTo(Node nodeToCompare)
+    {
+        int compare = fCost.CompareTo(nodeToCompare.fCost);
+        if (compare == 0)
+        {
+            compare = hCost.CompareTo(nodeToCompare.hCost);
+        }
+        return -compare;
+    }
 }

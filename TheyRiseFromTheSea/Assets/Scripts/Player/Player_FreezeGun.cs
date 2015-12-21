@@ -46,10 +46,10 @@ public class Player_FreezeGun : Player_GunBaseClass {
 			Enemy_MoveHandler enemy = targetHit.GetComponent<Enemy_MoveHandler> ();
 
 			// freeze the enemy by changing its Move Handler's state to FROZEN
-			enemy.state = Enemy_MoveHandler.State.FROZEN;
+			//enemy.state = Enemy_MoveHandler.State.FROZEN;
 
 			// tell the enemy for how long it will be frozen
-			enemy.frozenTime = frozenTime;
+			//enemy.frozenTime = frozenTime;
 
 			// instantiate a visual FX from the pool
 			GameObject fx = objPool.GetObjectForType("Frozen Particles", true, enemy.transform.position);

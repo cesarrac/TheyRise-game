@@ -46,17 +46,13 @@ public class Tower_AoETargettingHandler : Unit_Base {
 		if (bStatusIndicator == null)
 			Debug.Log ("GUN: Building Status Indicator NOT SET!");
 
-		// In case Resource Grid is null
-		if (resourceGrid == null)
-			resourceGrid = GameObject.FindGameObjectWithTag ("Map").GetComponent<ResourceGrid> ();
+        resourceGrid = ResourceGrid.Grid;
 
 		// Initialize building stats
 		stats.Init ();
 		InitTileStats((int)transform.position.x, (int)transform.position.y);
-
-		// If Object Pool is null we can get it from the Click Handler
-		if (objPool == null)
-			objPool = GetComponentInParent<Building_ClickHandler> ().objPool;
+        
+        objPool = ObjectPool.instance;
 		
 
 		// Set Length of enemies in range array to Maximum Targets
@@ -227,7 +223,7 @@ public class Tower_AoETargettingHandler : Unit_Base {
 	void HandleDamageToUnit(GameObject target)
 	{
 		if (target != null && target.activeSelf) {
-
+            target.GetComponent<Enemy_AttackHandler>().attacker = gameObject;
 			AttackOtherUnit (target.GetComponent<Unit_Base> ());
 			VisualShooting (target);
 		} 

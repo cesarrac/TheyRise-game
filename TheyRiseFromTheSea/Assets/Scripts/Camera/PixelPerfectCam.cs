@@ -84,7 +84,7 @@ public class PixelPerfectCam : MonoBehaviour {
 			}
 			// now we have our percentage let's make the viewport scale to that
 			float camSize = ((Screen.height/2)/floored)/pixelsPerUnit;
-			_camera.orthographicSize = camSize;
+			_camera.orthographicSize = camSize - (camSize / 4);
 			_pixelLockedPPU = floored * pixelsPerUnit;
 
 			// store size for zoom

@@ -13,7 +13,7 @@ public class Enemy_PlayerDetector : MonoBehaviour {
 	void OnTriggerEnter2D(Collider2D coll)
 	{
 		if (coll.gameObject.CompareTag ("Citizen")) {
-			move_handler.targetPlayer = coll.gameObject;
+			//move_handler.targetPlayer = coll.gameObject;
 		}
 	}
 }
