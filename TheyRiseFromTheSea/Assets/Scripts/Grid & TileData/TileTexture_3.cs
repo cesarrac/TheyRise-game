@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class TileTexture_3 : MonoBehaviour
 {
-    Texture2D Texture1, Texture2;
+    Texture2D Texture1, Texture2, Texture3;
 
     [Header("Tile Sheet Settings:")]
     public int tileResolution = 32;
@@ -26,6 +26,10 @@ public class TileTexture_3 : MonoBehaviour
 
     [Header("Transparent tile:")]
     public Texture2D clearTile;
+
+    [Header("Water Ripples tilesheet:")]
+    public TileSheet rippleSheet;
+
 
     [System.Serializable]
     public class GraphicTile
@@ -217,7 +221,7 @@ public class TileTexture_3 : MonoBehaviour
 
     // Renderer Components for Base, Second, and Third Layers
     [Header("Mesh Renderers:")]
-    public MeshRenderer base_renderer, second_renderer;
+    public MeshRenderer base_renderer, second_renderer, shore_renderer;
 
     // A variable that is set by the map or by a method that calculates distance to equator, sets the base land type (setting it to Ash right now)
     [Header ("Select Base Land Type:")]
@@ -231,6 +235,9 @@ public class TileTexture_3 : MonoBehaviour
     public int randomFillPercent;
 
     public Map_Generator mapGenerator;
+
+    int ripplesWidth, ripplesHeight;
+
 
     void Awake()
     {
@@ -269,9 +276,26 @@ public class TileTexture_3 : MonoBehaviour
         return tiles;
     }
 
+    Color[][] SplitRippleSheet()
+    {
+        Color[][] tiles = new Color[rippleSheet.tilesPerRow * rippleSheet.numberOfRows][];
+
+        // All i need is the first ripple tile's pixels, since this will be animated
+        tiles[0] = rippleSheet.tileSheetTexture.GetPixels(0 * tileResolution, 0, tileResolution, tileResolution);
+
+         
+       
+
+        return tiles;
+    }
+
     // THIS IS CALLED BY MAP GENERATOR
     public void DefineTilesAndGenerateBaseTexture(Vector2[] emptyTilesArray, int islandWidth, int islandHeight)
     {
+        ripplesWidth = islandWidth;
+        ripplesHeight = islandHeight;
+
+
         int texWidth = islandWidth * tileResolution;
         int texHeight = islandHeight * tileResolution;
         Texture2D texture = new Texture2D(texWidth, texHeight);
@@ -335,7 +359,7 @@ public class TileTexture_3 : MonoBehaviour
             // Apply texture
             texture.Apply();
 
-            base_renderer.sharedMaterial.mainTexture = texture;
+            //base_renderer.sharedMaterial.mainTexture = texture;
             
             Texture1 = texture;
         }
@@ -409,7 +433,7 @@ public class TileTexture_3 : MonoBehaviour
             // Apply texture
             texture2.Apply();
 
-            second_renderer.sharedMaterial.mainTexture = texture2;
+           // second_renderer.sharedMaterial.mainTexture = texture2;
 
             Texture2 = texture2;
 
@@ -428,6 +452,8 @@ public class TileTexture_3 : MonoBehaviour
         // Extracting the Vector 2 positions on the tiles list and keeping only the ones that are of Center pos type
         List<Vector2> secondaryTilePositions = new List<Vector2>();
 
+        List<Vector2> shoreTilePositions = new List<Vector2>();
+
         foreach(GraphicTile gTile in tiles)
         {
             if (gTile.MyTilePosType == GraphicTile.TilePositionTypes.CENTER)
@@ -435,172 +461,229 @@ public class TileTexture_3 : MonoBehaviour
                 //tilesForOthers.Add(gTile);
                 secondaryTilePositions.Add(gTile.MyPos);
             }
+            else
+            {
+                shoreTilePositions.Add(gTile.MyPos);
+            }
           
         }
         // Pass the list of positions as an array
         // These are ONLY Center tiles, so the top layer can avoid the shores and leave that for the base land type
 
+        GenerateShoreRippleTexture(shoreTilePositions.ToArray());
+
         mapGenerator.GenerateTopLayerMap(secondaryTilePositions.ToArray());
+
+       
     }
 
-    void FillSecondLayer(List<Vector2> potentialPositions, int width, int height)
+    void GenerateShoreRippleTexture(Vector2[] shoreTilePositions)
     {
-        // Second Texture Variables:
-        // Make sure this Mesh object shares the same mesh as Base mesh
-        Mesh islandMesh = base_renderer.gameObject.GetComponent<MeshFilter>().mesh;
-        second_renderer.gameObject.GetComponent<MeshFilter>().mesh = islandMesh;
-        
-        int textureWidth = width * tileResolution;
-        int textureHeight = height * tileResolution;
-        Texture2D texture2 = new Texture2D(textureWidth, textureHeight);
-        texture2.name = "Secondary Land Texture";
+        int ripTexWidth = ripplesWidth * tileResolution;
+        int ripTexHeight = ripplesHeight * tileResolution;
 
-        // Turn land regions into an array for faster searching
-        //LandRegion[] Regions = landRegions.ToArray();
+        Texture2D textureRipples = new Texture2D(ripTexWidth, ripTexHeight);
+        textureRipples.name = "Ripples Texture";
+        Debug.Log("RIPPLES TEXTURE created! width and height: " + ripTexWidth + " " + ripTexHeight);
 
-        GraphicTile.TileLandTypes currLandType = baseLandType;
-
-
-        Color[][] tiles = SplitTileSheet(currLandType);
+        // Split Base land type's tile sheet, based on the already set base land type
+        Color[][] tiles = SplitRippleSheet();
         // Use this array to Set Pixels
         Color[] thisTilePixels;
 
-        // Create land regions, limit them to a total of regions, using the otherTiles positions
-       landRegions = new List<LandRegion>();
-
-       
-
-        for (int x = 0; x < width; x++)
+        for (int mapX = 0; mapX < ripplesWidth; mapX++)
         {
-            for (int y = 0; y < height; y++)
+            for (int mapY = 0; mapY < ripplesHeight; mapY++)
             {
-                Vector2 thisPosition = new Vector2(x, y);
-
-                //This is a "hacky" way of doing it, if posIndex does not come back with a hit it'll return as 99999
-                int posIndex = GetIndexOfExistingTile(potentialPositions.ToArray(), thisPosition);
-
-                int skipOrNo = Random.Range(0, 2);
-                if (posIndex < potentialPositions.Count && skipOrNo > 0)
+                Vector2 thisPosition = new Vector2(mapX, mapY);
+                if (!CheckIfTileExists(shoreTilePositions, thisPosition))
                 {
-                    // We hit a potential tile position.
+                    // set pixels to clear
+                    thisTilePixels = clearPixels;
 
-                    // This is the starting position
-                    Vector2 startingPosition = thisPosition;
-                    Debug.Log("New Starting Position: " + startingPosition);
-
-                    //Decide how many tiles this region will have (MINIMUM = 9, MAX can be the number that looks best
-                    //int maxtiles = Random.Range(9, 28);
-                    int maxtiles = 10;
-                    //Construct a new Land Region
-                    LandRegion newRegion = new LandRegion(startingPosition, maxtiles);
-
-                    // Loop through the region's max tiles assigning a position
-                    for (int m = 0; m < maxtiles; m++)
-                    {
-                        // Fill the new Region's positions, including starting pos
-
-                        // To make sure this region will be a nice grid we need to force the positions
-                        // First one is potentialPositions[posIndex]
-                        if (m == 0)
-                        {
-                            newRegion.tilePosList.Add(potentialPositions[posIndex]);
-                        }
-                        else if (m >= 1 && m <= 2)
-                        {
-                            // Second potentialPositions[posIndex].x, potentialPositions[posIndex].y + 1
-                            // Third potentialPositions[posIndex].x, potentialPositions[posIndex].y + 2
-                            Vector2 newPosition = new Vector2(potentialPositions[posIndex].x, potentialPositions[posIndex].y + m);
-                            newRegion.tilePosList.Add(newPosition);
-                            
-                        }
-                        // Now second column
-                        else if (m == 3)
-                        {
-                            // Fourth potentialPositions[posIndex].x + 1, potentialPositions[posIndex].y
-                            Vector2 newPosition = new Vector2(potentialPositions[posIndex].x + 1, potentialPositions[posIndex].y);
-                            newRegion.tilePosList.Add(newPosition);
-                        }
-                        else if (m == 4)
-                        {
-                            // Fifth potentialPositions[posIndex].x + 1, potentialPositions[posIndex].y + 1
-                            Vector2 newPosition = new Vector2(potentialPositions[posIndex].x + 1, potentialPositions[posIndex].y + 1);
-                            newRegion.tilePosList.Add(newPosition);
-                            
-                        }
-                        else if (m == 5)
-                        {
-                            // Sixth potentialPositions[posIndex].x + 1, potentialPositions[posIndex].y + 2
-                            Vector2 newPosition = new Vector2(potentialPositions[posIndex].x + 1, potentialPositions[posIndex].y + 2);
-                            newRegion.tilePosList.Add(newPosition);
-                        }
-                        // Third column
-                        else if (m == 6)
-                        {
-                            // Seventh potentialPositions[posIndex].x + 2, potentialPositions[posIndex].y
-                            Vector2 newPosition = new Vector2(potentialPositions[posIndex].x + 2, potentialPositions[posIndex].y);
-                            newRegion.tilePosList.Add(newPosition);
-                        }else if (m == 7)
-                        {
-                            // Eigth potentialPositions[posIndex].x + 2, potentialPositions[posIndex].y + 1
-                            Vector2 newPosition = new Vector2(potentialPositions[posIndex].x + 2, potentialPositions[posIndex].y + 1);
-                            newRegion.tilePosList.Add(newPosition);
-                        }
-                        else
-                        {
-                            // Ninth potentialPositions[posIndex].x + 2, potentialPositions[posIndex].y + 2
-                            Vector2 newPosition = new Vector2(potentialPositions[posIndex].x + 2, potentialPositions[posIndex].y + 2);
-                            newRegion.tilePosList.Add(newPosition);
-                        }
-
-
-                        //// Add this position to the region's Tile Positions List but make sure PosIndex + M is < total of potential Positions
-                        //if (posIndex + m < potentialPositions.Count)
-                        //{
-                        //    newRegion.tilePosList.Add(potentialPositions[posIndex + m]);
-                        //    Debug.Log("New Region Position: " + potentialPositions[posIndex + m]);
-
-                        //    // Instead of removing I can make it a null vector 2
-                        //    potentialPositions[posIndex + m] = Vector2.zero;
-                            
-
-                           
-                        //}
-
-
-                    }
-                    // After assigning the positions to the region, we need to clean up the list inside the region and make it an array of V2
-                    newRegion.CleanUpListAndCreateArray();
-
-                    // Now that this region's positions are defined, add it to the list of regions
-                    landRegions.Add(newRegion);
-
-                    // remove as a potential position to avoid overlap between regions, this will be a clear tile once the tex is generated
-                    //for (int i = 0; i < maxtiles; i++)
-                    //{
-                    //    potentialPositions.RemoveAt(posIndex + i); // **** This is probably fucking up the index later on since it reduces the list
-                    //}
-                    
+                    textureRipples.SetPixels(mapX * tileResolution, mapY * tileResolution, tileResolution, tileResolution, thisTilePixels);
 
                 }
                 else
                 {
-                    // Not a potential position, set this to clear tile
-                    // Set clear pixels
-                    thisTilePixels = clearPixels;
-                    texture2.SetPixels(x * tileResolution, y * tileResolution, tileResolution, tileResolution, thisTilePixels);
+                    // Tile IS a ripple tile:
+                    
+                    thisTilePixels = tiles[0];
+
+                    textureRipples.SetPixels(mapX * tileResolution, mapY * tileResolution, tileResolution, tileResolution, thisTilePixels);
+
                 }
             }
+
+            textureRipples.filterMode = FilterMode.Bilinear;
+            textureRipples.wrapMode = TextureWrapMode.Clamp;
+
+            // Apply texture
+            textureRipples.Apply();
+
+            Texture3 = textureRipples;
+
         }
-
-        // Now we define each region's graphic tiles
-        if (landRegions.Count > 0)
-            DefineLandRegionTiles(width, height, landRegions.ToArray(), texture2);
-
-
-        //Debug.Log("Region #" + (landRegions.Count - 1) + ", Max Tiles = " + newRegion.MaxTiles + ", TilePosArray = " + newRegion.TilePositions.Length + ", Tiles = " + newRegion.RegionTiles.Length);
-
-
     }
+
+    //void FillSecondLayer(List<Vector2> potentialPositions, int width, int height)
+    //{
+    //    // Second Texture Variables:
+    //    // Make sure this Mesh object shares the same mesh as Base mesh
+    //    Mesh islandMesh = base_renderer.gameObject.GetComponent<MeshFilter>().mesh;
+    //    second_renderer.gameObject.GetComponent<MeshFilter>().mesh = islandMesh;
+        
+    //    int textureWidth = width * tileResolution;
+    //    int textureHeight = height * tileResolution;
+    //    Texture2D texture2 = new Texture2D(textureWidth, textureHeight);
+    //    texture2.name = "Secondary Land Texture";
+
+    //    // Turn land regions into an array for faster searching
+    //    //LandRegion[] Regions = landRegions.ToArray();
+
+    //    GraphicTile.TileLandTypes currLandType = baseLandType;
+
+
+    //    Color[][] tiles = SplitTileSheet(currLandType);
+    //    // Use this array to Set Pixels
+    //    Color[] thisTilePixels;
+
+    //    // Create land regions, limit them to a total of regions, using the otherTiles positions
+    //   landRegions = new List<LandRegion>();
+
+       
+
+    //    for (int x = 0; x < width; x++)
+    //    {
+    //        for (int y = 0; y < height; y++)
+    //        {
+    //            Vector2 thisPosition = new Vector2(x, y);
+
+    //            //This is a "hacky" way of doing it, if posIndex does not come back with a hit it'll return as 99999
+    //            int posIndex = GetIndexOfExistingTile(potentialPositions.ToArray(), thisPosition);
+
+    //            int skipOrNo = Random.Range(0, 2);
+    //            if (posIndex < potentialPositions.Count && skipOrNo > 0)
+    //            {
+    //                // We hit a potential tile position.
+
+    //                // This is the starting position
+    //                Vector2 startingPosition = thisPosition;
+    //                Debug.Log("New Starting Position: " + startingPosition);
+
+    //                //Decide how many tiles this region will have (MINIMUM = 9, MAX can be the number that looks best
+    //                //int maxtiles = Random.Range(9, 28);
+    //                int maxtiles = 10;
+    //                //Construct a new Land Region
+    //                LandRegion newRegion = new LandRegion(startingPosition, maxtiles);
+
+    //                // Loop through the region's max tiles assigning a position
+    //                for (int m = 0; m < maxtiles; m++)
+    //                {
+    //                    // Fill the new Region's positions, including starting pos
+
+    //                    // To make sure this region will be a nice grid we need to force the positions
+    //                    // First one is potentialPositions[posIndex]
+    //                    if (m == 0)
+    //                    {
+    //                        newRegion.tilePosList.Add(potentialPositions[posIndex]);
+    //                    }
+    //                    else if (m >= 1 && m <= 2)
+    //                    {
+    //                        // Second potentialPositions[posIndex].x, potentialPositions[posIndex].y + 1
+    //                        // Third potentialPositions[posIndex].x, potentialPositions[posIndex].y + 2
+    //                        Vector2 newPosition = new Vector2(potentialPositions[posIndex].x, potentialPositions[posIndex].y + m);
+    //                        newRegion.tilePosList.Add(newPosition);
+                            
+    //                    }
+    //                    // Now second column
+    //                    else if (m == 3)
+    //                    {
+    //                        // Fourth potentialPositions[posIndex].x + 1, potentialPositions[posIndex].y
+    //                        Vector2 newPosition = new Vector2(potentialPositions[posIndex].x + 1, potentialPositions[posIndex].y);
+    //                        newRegion.tilePosList.Add(newPosition);
+    //                    }
+    //                    else if (m == 4)
+    //                    {
+    //                        // Fifth potentialPositions[posIndex].x + 1, potentialPositions[posIndex].y + 1
+    //                        Vector2 newPosition = new Vector2(potentialPositions[posIndex].x + 1, potentialPositions[posIndex].y + 1);
+    //                        newRegion.tilePosList.Add(newPosition);
+                            
+    //                    }
+    //                    else if (m == 5)
+    //                    {
+    //                        // Sixth potentialPositions[posIndex].x + 1, potentialPositions[posIndex].y + 2
+    //                        Vector2 newPosition = new Vector2(potentialPositions[posIndex].x + 1, potentialPositions[posIndex].y + 2);
+    //                        newRegion.tilePosList.Add(newPosition);
+    //                    }
+    //                    // Third column
+    //                    else if (m == 6)
+    //                    {
+    //                        // Seventh potentialPositions[posIndex].x + 2, potentialPositions[posIndex].y
+    //                        Vector2 newPosition = new Vector2(potentialPositions[posIndex].x + 2, potentialPositions[posIndex].y);
+    //                        newRegion.tilePosList.Add(newPosition);
+    //                    }else if (m == 7)
+    //                    {
+    //                        // Eigth potentialPositions[posIndex].x + 2, potentialPositions[posIndex].y + 1
+    //                        Vector2 newPosition = new Vector2(potentialPositions[posIndex].x + 2, potentialPositions[posIndex].y + 1);
+    //                        newRegion.tilePosList.Add(newPosition);
+    //                    }
+    //                    else
+    //                    {
+    //                        // Ninth potentialPositions[posIndex].x + 2, potentialPositions[posIndex].y + 2
+    //                        Vector2 newPosition = new Vector2(potentialPositions[posIndex].x + 2, potentialPositions[posIndex].y + 2);
+    //                        newRegion.tilePosList.Add(newPosition);
+    //                    }
+
+
+    //                    //// Add this position to the region's Tile Positions List but make sure PosIndex + M is < total of potential Positions
+    //                    //if (posIndex + m < potentialPositions.Count)
+    //                    //{
+    //                    //    newRegion.tilePosList.Add(potentialPositions[posIndex + m]);
+    //                    //    Debug.Log("New Region Position: " + potentialPositions[posIndex + m]);
+
+    //                    //    // Instead of removing I can make it a null vector 2
+    //                    //    potentialPositions[posIndex + m] = Vector2.zero;
+                            
+
+                           
+    //                    //}
+
+
+    //                }
+    //                // After assigning the positions to the region, we need to clean up the list inside the region and make it an array of V2
+    //                newRegion.CleanUpListAndCreateArray();
+
+    //                // Now that this region's positions are defined, add it to the list of regions
+    //                landRegions.Add(newRegion);
+
+    //                // remove as a potential position to avoid overlap between regions, this will be a clear tile once the tex is generated
+    //                //for (int i = 0; i < maxtiles; i++)
+    //                //{
+    //                //    potentialPositions.RemoveAt(posIndex + i); // **** This is probably fucking up the index later on since it reduces the list
+    //                //}
+                    
+
+    //            }
+    //            else
+    //            {
+    //                // Not a potential position, set this to clear tile
+    //                // Set clear pixels
+    //                thisTilePixels = clearPixels;
+    //                texture2.SetPixels(x * tileResolution, y * tileResolution, tileResolution, tileResolution, thisTilePixels);
+    //            }
+    //        }
+    //    }
+
+    //    // Now we define each region's graphic tiles
+    //    if (landRegions.Count > 0)
+    //        DefineLandRegionTiles(width, height, landRegions.ToArray(), texture2);
+
+
+    //    //Debug.Log("Region #" + (landRegions.Count - 1) + ", Max Tiles = " + newRegion.MaxTiles + ", TilePosArray = " + newRegion.TilePositions.Length + ", Tiles = " + newRegion.RegionTiles.Length);
+
+
+    //}
     /*
     // For each region's region tile, decide wether it's a land or clear tile
     int random = Random.Range(0, 100);
@@ -2067,5 +2150,7 @@ public class TileTexture_3 : MonoBehaviour
         base_renderer.sharedMaterial.mainTexture = Texture1;
         //base_renderer.materials[1].mainTexture = Texture2;
         second_renderer.sharedMaterial.mainTexture = Texture2;
+
+        shore_renderer.sharedMaterial.mainTexture = Texture3;
     }
 }

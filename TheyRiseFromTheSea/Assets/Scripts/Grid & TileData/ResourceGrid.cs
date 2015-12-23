@@ -604,7 +604,7 @@ public class ResourceGrid : MonoBehaviour{
         return spawnedTiles[x, y];
     }
 
-    public int MineARock(int x, int y, int mineAmmnt)
+    public int MineARock(int x, int y, int mineAmmnt, bool isHandDrill = false)
     {
         int resourceMined = 0;
 
@@ -614,14 +614,19 @@ public class ResourceGrid : MonoBehaviour{
             tiles[x, y].maxResourceQuantity -= mineAmmnt;
             if (tiles[x,y].maxResourceQuantity > 0)
             {
-                // FOR TESTING, just shrink down the rock every time we mine & spawn rock chunks of this type
-                if (spawnedTiles[x, y] != null)
+                // Spawn rock chunks IF this is a handrill
+                if (isHandDrill)
                 {
-                    Rock_Handler rockHandler = spawnedTiles[x, y].GetComponent<Rock_Handler>();
-                    rockHandler.ShrinkDownSize();
-                    // chunks
-                    StartCoroutine(SpawnRockChunks(mineAmmnt, rockHandler.myRockType, spawnedTiles[x, y].transform.position));
+                    // FOR TESTING, just shrink down the rock every time we mine & spawn rock chunks of this type
+                    if (spawnedTiles[x, y] != null)
+                    {
+                        Rock_Handler rockHandler = spawnedTiles[x, y].GetComponent<Rock_Handler>();
+                        rockHandler.ShrinkDownSize();
+                        // chunks
+                        StartCoroutine(SpawnRockChunks(mineAmmnt, rockHandler.myRockType, spawnedTiles[x, y].transform.position));
+                    }
                 }
+              
             }
             else
             {

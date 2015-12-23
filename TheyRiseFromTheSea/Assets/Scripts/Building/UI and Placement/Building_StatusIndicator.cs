@@ -121,7 +121,7 @@ public class Building_StatusIndicator : MonoBehaviour {
 				_statusMsgText.GetComponent<EasyPool> ().objPool = objPool;
 
 		} else {
-			Debug.Log ("STATUS INDICATOR: Could NOT find Damage Text in Pool!");
+			Debug.Log ("STATUS INDICATOR: Could NOT find Status Text in Pool!");
 		}
 	}
 }
