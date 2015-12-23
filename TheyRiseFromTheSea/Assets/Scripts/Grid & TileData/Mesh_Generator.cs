@@ -87,12 +87,15 @@ public class Mesh_Generator : MonoBehaviour {
 
         Vector3[] landVertices = new Vector3[(map.GetLength(0) + 1) * (map.GetLength(1) + 1)];
         Vector2[] uvs = new Vector2[landVertices.Length];
+
+
         for (int i = 0, y = 0; y <= map.GetLength(1); y++)
         {
             for (int x = 0; x <= map.GetLength(0); x++, i++)
             {
                 landVertices[i] = new Vector3(x, y);
                 uvs[i] = new Vector2((float)x /map.GetLength(0), (float)y / map.GetLength(1));
+            
             }
         }
 
@@ -113,42 +116,63 @@ public class Mesh_Generator : MonoBehaviour {
         islandMesh.triangles = landTriangles;
         islandMesh.RecalculateNormals();
 
+        GenerateShoreWaterMesh(islandMesh, map);
+
     }
 
-    public void GenerateShoreWaterMesh(int width, int height)
+    public void GenerateShoreWaterMesh(Mesh newMesh, int[,] map)
     {
 
-        shoreWatermap.GetComponent<MeshFilter>().mesh = waterShoreMesh = new Mesh();
-        waterShoreMesh.name = "Shore Mesh";
+        shoreWatermap.GetComponent<MeshFilter>().mesh = newMesh;
+        //Mesh wallMesh;
+        //shoreWatermap.GetComponent<MeshFilter>().mesh = wallMesh = new Mesh();
+        //wallMesh.name = "Shore Mesh";
 
-        Vector3[] landVertices = new Vector3[(width + 1) * (width + 1)];
-        Vector2[] uvs = new Vector2[landVertices.Length];
-        for (int i = 0, y = 0; y <= height; y++)
-        {
-            for (int x = 0; x <= width; x++, i++)
-            {
-                landVertices[i] = new Vector3(x, y);
-                uvs[i] = new Vector2((float)x /width, (float)y / height);
-            }
-        }
+        //CalculateMeshOutlines();
 
-        waterShoreMesh.vertices = landVertices;
-        waterShoreMesh.uv = uvs;
+        //List<Vector3> wallVertices = new List<Vector3>();
+        //List<int> wallTriangles = new List<int>();
 
-        int[] landTriangles = new int[width * height * 6];
-        for (int ti = 0, vi = 0, y = 0; y <height; y++, vi++)
-        {
-            for (int x = 0; x < width; x++, ti += 6, vi++)
-            {
-                landTriangles[ti] = vi;
-                landTriangles[ti + 3] = landTriangles[ti + 2] = vi + 1;
-                landTriangles[ti + 4] = landTriangles[ti + 1] = vi + width + 1;
-                landTriangles[ti + 5] = vi + width + 2;
-            }
-        }
-        waterShoreMesh.triangles = landTriangles;
-        waterShoreMesh.RecalculateNormals();
-      
+
+        //foreach (List<int> outline in outlines)
+        //{
+        //    for (int i = 0; i < outline.Count - 1; i++)
+        //    {
+        //        int startIndex = wallVertices.Count;
+        //        wallVertices.Add(vertices[outline[i]]); // left vertex
+        //        wallVertices.Add(vertices[outline[i + 1]]); // right vertex
+        //        wallVertices.Add(vertices[outline[i]] + Vector3.up); // top left
+        //        wallVertices.Add(vertices[outline[i + 1]] + Vector3.up); // top right
+
+        //        // First triangle
+        //        wallTriangles.Add(startIndex + 0);
+        //        wallTriangles.Add(startIndex + 1);
+        //        wallTriangles.Add(startIndex + 3);
+        //        // Second triangle
+        //        wallTriangles.Add(startIndex + 0);
+        //        wallTriangles.Add(startIndex + 3);
+        //        wallTriangles.Add(startIndex + 2);
+
+        //    }
+        //}
+
+        //wallMesh.vertices = wallVertices.ToArray();
+        //wallMesh.triangles = wallTriangles.ToArray();
+        //wallMesh.RecalculateNormals();
+
+        //int tileAmount = 32;
+        //Vector2[] uvs = new Vector2[wallVertices.Count];
+        //for (int i = 0; i < wallVertices.Count; i++)
+        //{
+        //    float percentX = Mathf.InverseLerp(-map.GetLength(0) / 2, map.GetLength(0) / 2, wallVertices[i].x) * tileAmount;
+        //    float percentY = Mathf.InverseLerp(-map.GetLength(0) / 2, map.GetLength(0) / 2, wallVertices[i].z) * tileAmount;
+        //    uvs[i] = new Vector2(percentX, percentY);
+        //}
+        //wallMesh.uv = uvs;
+
+
+
+
 
     }
     void Generate2DColliders()
@@ -193,38 +217,38 @@ public class Mesh_Generator : MonoBehaviour {
 		}
 	}
 
-	void GenerateShoreLine(List<int> outline, float edgePointX, float edgePointY, int i)
-	{
-		// get the shore fab from the obj pool and assign it a sprite from the shore sheet
-//		GameObject shore = objPool.GetObjectForType ("shore_fab", false, new Vector3(edgePointX,edgePointY, 0.0f));
-		GameObject shore = Instantiate (shorefabtest, new Vector3 (edgePointX, edgePointY, 0.0f), Quaternion.identity) as GameObject;
-		int randomSpriteSelection = Random.Range (0, shoreTiles.Length - 1);
-		if (shore) {
-			shore.GetComponent<SpriteRenderer> ().sprite = shoreTiles [randomSpriteSelection];
+//	void GenerateShoreLine(List<int> outline, float edgePointX, float edgePointY, int i)
+//	{
+//		// get the shore fab from the obj pool and assign it a sprite from the shore sheet
+////		GameObject shore = objPool.GetObjectForType ("shore_fab", false, new Vector3(edgePointX,edgePointY, 0.0f));
+//		GameObject shore = Instantiate (shorefabtest, new Vector3 (edgePointX, edgePointY, 0.0f), Quaternion.identity) as GameObject;
+//		int randomSpriteSelection = Random.Range (0, shoreTiles.Length - 1);
+//		if (shore) {
+//			shore.GetComponent<SpriteRenderer> ().sprite = shoreTiles [randomSpriteSelection];
 
-			shore.transform.SetParent(shoreHolder);
+//			shore.transform.SetParent(shoreHolder);
 		
-			// Using the NEXT item in the vertices array I can know which direction the edge is heading to
+//			// Using the NEXT item in the vertices array I can know which direction the edge is heading to
 		
-			nextVert = new Vector3 (vertices [outline [i]].x, vertices [outline [i]].z, 0.0f);
+//			nextVert = new Vector3 (vertices [outline [i]].x, vertices [outline [i]].z, 0.0f);
 		
 		
-			// Give the shore its angle 
-			Vector3 dir = nextVert - shore.transform.position;
-			float angle = Mathf.Atan2 (dir.y, dir.x) * Mathf.Rad2Deg;
-			shore.transform.eulerAngles = new Vector3 (0, 0, angle);
+//			// Give the shore its angle 
+//			Vector3 dir = nextVert - shore.transform.position;
+//			float angle = Mathf.Atan2 (dir.y, dir.x) * Mathf.Rad2Deg;
+//			shore.transform.eulerAngles = new Vector3 (0, 0, angle);
 		
-			/* To figure out its X scale we need to get the distance from the new X position (bottom left corner)
-				 * to the last x position. Then add that distance to the x scale of the shore. */
-			// distance = newX - lastX
-			//				if (i > 0){
-			//					float distanceFromLastShore = Vector2.Distance(edgepoints[i], edgepoints[i-1]);
-			//					shore.transform.localScale = new Vector3(shore.transform.localScale.x + distanceFromLastShore, 1, 1);
-			//				}
-		} else {
-			Debug.Log ("Could not get shore from pool!");
-		}
-	}
+//			/* To figure out its X scale we need to get the distance from the new X position (bottom left corner)
+//				 * to the last x position. Then add that distance to the x scale of the shore. */
+//			// distance = newX - lastX
+//			//				if (i > 0){
+//			//					float distanceFromLastShore = Vector2.Distance(edgepoints[i], edgepoints[i-1]);
+//			//					shore.transform.localScale = new Vector3(shore.transform.localScale.x + distanceFromLastShore, 1, 1);
+//			//				}
+//		} else {
+//			Debug.Log ("Could not get shore from pool!");
+//		}
+//	}
 
 	void CreateWallMesh()
 	{
