@@ -3,7 +3,7 @@ using System.Collections;
 
 public class DeSalt_Plant : ExtractionBuilding {
 
-    //LineRenderer lineR;
+   
     //public bool selecting;
     //public float pumpRate;
     //public int waterPumped;
@@ -35,11 +35,7 @@ public class DeSalt_Plant : ExtractionBuilding {
 
     void Awake(){
 
-        // Store the Line Renderer
-        //lineR = GetComponent<LineRenderer> ();
         PersonalStorageCap = startingStorageCap;
-
-       // resource_grid = ResourceGrid.Grid;
 
         Init(TileData.Types.water, ExtractRate, ExtractAmmnt, PersonalStorageCap, transform);
 
@@ -49,12 +45,11 @@ public class DeSalt_Plant : ExtractionBuilding {
 
 	void Start ()
     {
-        //b_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
 
-        //// In case Player Resources is null
-        //if (playerResources == null) {
-        //	playerResources = GameObject.FindGameObjectWithTag("Capital").GetComponent<Player_ResourceManager>();
-        //}
+        // Get the Line renderer
+        lineR = GetComponent<LineRenderer>();
+        // Then turn it off
+        lineR.enabled = false;
 
         //lineR.SetPosition (0, transform.position);
 

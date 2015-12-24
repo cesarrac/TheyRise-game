@@ -23,11 +23,10 @@ class Buildings_SpriteDatabase : MonoBehaviour
   
     void InitSprites()
     {
-        buildingSprites = new BuildingSprite[8];
+        buildingSprites = new BuildingSprite[9];
 
         // Machine Gun
         buildingSprites[0] = new BuildingSprite("Machine Gun", buildings[0]);
-        Debug.Log("Machine gun's sprite size: " + buildingSprites[0].sprite.bounds.size);
         // Sniper Gun
         buildingSprites[1] = new BuildingSprite("Sniper Gun", buildings[10]);
         // Cannons
@@ -42,6 +41,8 @@ class Buildings_SpriteDatabase : MonoBehaviour
         buildingSprites[6] = new BuildingSprite("Energy Generator", buildings[5]);
         // Seaweed Farm
         buildingSprites[7] = new BuildingSprite("Seaweed Farm", buildings[8]);
+        // Storage
+        buildingSprites[8] = new BuildingSprite("Storage", buildings[8]);
 
 
     }

@@ -38,6 +38,7 @@ public class FoodProduction_Manager : ExtractionBuilding {
     void OnEnable()
     {
         currResourceStored = 0;
+        currMaterialsStored = 0;
     }
 
     void Awake()
@@ -45,7 +46,7 @@ public class FoodProduction_Manager : ExtractionBuilding {
         PersonalStorageCap = startingStorageCap;
         SecondStorageCap = startingSecondStorageCap;
 
-        InitSelfProducer(ProductionRate, ProductionAmmnt, PersonalStorageCap, SecondStorageCap, waterConsumed, transform);
+        InitSelfProducer(ProductionRate, ProductionAmmnt, PersonalStorageCap, SecondStorageCap, waterConsumed, TileData.Types.water, transform);
 
         _state = State.SEARCHING;
     }
@@ -151,7 +152,7 @@ public class FoodProduction_Manager : ExtractionBuilding {
 
             case State.HALT:
 
-                statusMessage = "No Water!";
+                statusMessage = "Water!";
                 StopCoroutine("ShowStatusMessage");
                 StartCoroutine("ShowStatusMessage");
 

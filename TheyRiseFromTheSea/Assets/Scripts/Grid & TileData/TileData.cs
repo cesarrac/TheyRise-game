@@ -9,6 +9,7 @@ public class TileData  {
 		mineral,
 		empty,
 		water,
+        food,
 		building,
 		capital,
 		farm_s,

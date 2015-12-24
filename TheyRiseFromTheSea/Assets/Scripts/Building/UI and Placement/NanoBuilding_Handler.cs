@@ -48,7 +48,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
     void InitBluePrints()
     {
-        availableBlueprints = new Blueprint[8];
+        availableBlueprints = new Blueprint[9];
         availableBlueprints[0] = new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun);
         availableBlueprints[1] = new Blueprint("Sniper Gun", 3, 10, TileData.Types.sniper);
         availableBlueprints[2] = new Blueprint("Cannons", 3, 10, TileData.Types.cannons);
@@ -57,6 +57,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
         availableBlueprints[5] = new Blueprint("Desalination Pump", 3, 10, TileData.Types.desalt_s);
         availableBlueprints[6] = new Blueprint("Energy Generator", 3, 10, TileData.Types.generator);
         availableBlueprints[7] = new Blueprint("Seaweed Farm", 3, 10, TileData.Types.farm_s);
+        availableBlueprints[8] = new Blueprint("Storage", 3, 10, TileData.Types.storage);
         // FOR NOW im forcing this blueprints array unto the sprite database from here
         Buildings_SpriteDatabase.Instance.SetSprites(availableBlueprints);
     }

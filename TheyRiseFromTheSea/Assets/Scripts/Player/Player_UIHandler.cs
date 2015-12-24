@@ -116,13 +116,13 @@ public class Player_UIHandler : MonoBehaviour {
 
 	}
 
-	public void DisplayStorageInfo(Storage storageSelected){
-		if (storageSelected != null) {
-			oreStored_txt.text = storageSelected.oreStored.ToString();
-			oreCap_txt.text = "/ " + storageSelected.oreCapacity.ToString();
+	//public void DisplayStorageInfo(Storage storageSelected){
+	//	if (storageSelected != null) {
+	//		oreStored_txt.text = storageSelected.oreStored.ToString();
+	//		oreCap_txt.text = "/ " + storageSelected.oreCapacity.ToString();
 
-			waterStored_txt.text = storageSelected.waterStored.ToString();
-			waterCap_txt.text = "/ " + storageSelected.waterCapacity.ToString();
-		}
-	}
+	//		waterStored_txt.text = storageSelected.waterStored.ToString();
+	//		waterCap_txt.text = "/ " + storageSelected.waterCapacity.ToString();
+	//	}
+	//}
 }

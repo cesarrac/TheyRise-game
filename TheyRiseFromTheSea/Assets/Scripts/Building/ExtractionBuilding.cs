@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class ExtractionBuilding : MonoBehaviour {
     
@@ -37,11 +38,19 @@ public class ExtractionBuilding : MonoBehaviour {
             _materialsConsumed = materialConsumed;
         }
 
+        // Constructor for a Storage Unit
+        public ExtractorStats(int storageCap)
+        {
+            _secondStorageCap = storageCap;
+        }
+
 
     }
 
 
     // VARS:
+    public LineRenderer lineR; // < --- to display connections from inputs to outputs
+
     public TileData.Types resourceType { get; protected set; }
 
     public ExtractorStats extractorStats { get; protected set; }
@@ -61,6 +70,12 @@ public class ExtractionBuilding : MonoBehaviour {
     public bool storageIsFull { get; protected set; }
     public bool noMaterialsLeft { get; protected set; }
 
+    // The type of material being sent by an Input (this gets set by the Input when sending to the output by passing its resourceType as an argument)
+    public TileData.Types inputType { get; protected set; }
+
+    // This is for checking that the Input being received IS the material that this Producer NEEDS
+    public TileData.Types requiredMaterial { get; protected set; }
+
     // position of the tile containing the resource being extracted
     public int r_PosX { get; protected set; }
     public int r_PosY { get; protected set; }
@@ -76,6 +91,9 @@ public class ExtractionBuilding : MonoBehaviour {
 
     bool isConnectingInput;
 
+    // Callback method ONLY for storage units
+    Action<TileData.Types, int> callback;
+
     // STATE MACHINE:
     public enum State
     {
@@ -84,7 +102,8 @@ public class ExtractionBuilding : MonoBehaviour {
         NOSTORAGE,
         STARVED,
         PRODUCING,
-        HALT
+        HALT, 
+        IDLE
     }
 
     public State _state { get; protected set; }
@@ -101,7 +120,7 @@ public class ExtractionBuilding : MonoBehaviour {
     }
 
     // this Initializer works for buildings that extract from another building to produce their OWN resource
-    public void InitSelfProducer(float rate, int ammnt, int storageCap, int secondStorageCap, int matConsumed, Transform _trans)
+    public void InitSelfProducer(float rate, int ammnt, int storageCap, int secondStorageCap, int matConsumed, TileData.Types requiredMat,Transform _trans)
     {
         extractorStats = new ExtractorStats(rate, ammnt, storageCap, secondStorageCap, matConsumed);
         resourceType = TileData.Types.empty;
@@ -109,6 +128,22 @@ public class ExtractionBuilding : MonoBehaviour {
 
         resource_grid = ResourceGrid.Grid;
         b_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
+
+        requiredMaterial = requiredMat;
+    }
+
+    // This is the Initializer for Storage Units
+    public void InitStorageUnit(int storageCap, Transform _trans, Action<TileData.Types, int> _callback)
+    {
+        extractorStats = new ExtractorStats(storageCap);
+        myTransform = _trans;
+        callback = _callback;
+
+        resource_grid = ResourceGrid.Grid;
+        b_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
+
+        // all storage units require an empty material since they can take any
+        requiredMaterial = TileData.Types.empty;
     }
 
 
@@ -394,9 +429,28 @@ public class ExtractionBuilding : MonoBehaviour {
                 if (input != null)
                 {
                     if (input.GetComponent<ExtractionBuilding>() != null)
-                    {
-                        input.GetComponent<ExtractionBuilding>().SetOutput(this);
-                        Debug.Log("Output has been set.");
+                    {                     
+                        ExtractionBuilding extractor = input.GetComponent<ExtractionBuilding>();
+
+                        // Check that this new input extracts/produces the required material OR that my required material is just empty (meaning im just a storage unit)
+                        if (extractor.resourceType == requiredMaterial || requiredMaterial == TileData.Types.empty)  // <----- Storage units require an empty since they can take any type of material
+                        {
+                            extractor.SetOutput(this);
+
+                            // Now set up the line renderer connection between the buildings
+                            extractor.lineR.enabled = true;
+                            extractor.lineR.SetWidth(0.05f, 0.5f);
+                            extractor.lineR.SetPosition (0, (extractor.myTransform.position) + Vector3.up);
+                            extractor.lineR.SetPosition(1, myTransform.position);
+
+                            Debug.Log("Output has been set.");
+                        }
+                        else
+                        {
+                            // RESOURCE TYPE DOES NOT MATCH REQUIRED MATERIAL
+                            Debug.Log("Output NOT set. Materials don't match!");
+                        }
+                     
                     }
                     else
                     {
@@ -429,32 +483,43 @@ public class ExtractionBuilding : MonoBehaviour {
         // make sure it's not a null gameobject
         if (output != null)
         {
-            int ammnt = currResourceStored + output.currMaterialsStored;
-
-
-            if (ammnt <= output.extractorStats.secondStorageCapacity)
+            // Make sure that my resource Type IS of the same type as my Output's required material
+            if (resourceType == output.requiredMaterial || output.requiredMaterial == TileData.Types.empty)
             {
-                OutputResources(currResourceStored);
-                return true;
-            }
-            else
-            {
-                // check if there's at least SOME space in the output's second storage
-                int extra = ammnt - output.extractorStats.secondStorageCapacity;
-                int remainder = ammnt - extra;
+                int ammnt = currResourceStored + output.currMaterialsStored;
 
-                if (remainder > 0)
+
+                if (ammnt <= output.extractorStats.secondStorageCapacity)
                 {
-                    OutputResources(remainder);
-
+                    OutputResources(currResourceStored);
                     return true;
                 }
                 else
+                {
+                    // check if there's at least SOME space in the output's second storage
+                    int extra = ammnt - output.extractorStats.secondStorageCapacity;
+                    int remainder = currResourceStored - extra;
+
+                    if (remainder > 0)
+                        OutputResources(remainder);
+
+                    // We return false anyway because NOW the storage is completely full
                     return false;
+                }
             }
+            else
+            {
+                // NOT THE RIGHT TYPE OF MATERIAL OR OUTPUT IS NOT STORAGE UNIT
+                isConnectedToOutput = false;
+                return false;
+
+            }
+
+          
         }
         else
         {
+            // NO OUTPUT FOUND
             isConnectedToOutput = false;
             return false;
         }
@@ -463,8 +528,10 @@ public class ExtractionBuilding : MonoBehaviour {
 
     public void OutputResources(int ammntToOutput)
     {
+        // Tell the output what it's receiving
+
         // Give to output
-        output.currMaterialsStored += ammntToOutput;
+        output.ReceiveResources(ammntToOutput, resourceType);
 
         // Subtract from this building's storage
         currResourceStored -= ammntToOutput;
@@ -473,6 +540,17 @@ public class ExtractionBuilding : MonoBehaviour {
         if (currResourceStored <= 0)
             storageIsFull = false;
 
+    }
+
+    public void ReceiveResources(int ammnt, TileData.Types type)
+    {
+        // The type of resources being received
+        inputType = type;
+        // The ammount is stored in the Material storage (Storage units only have materials storage)
+        currMaterialsStored += ammnt;
+
+        if (callback != null)
+            callback(type, ammnt);
     }
 
 

@@ -148,7 +148,7 @@ public class Map_Generator : MonoBehaviour {
                     grid.emptyTilePositions.Add(new Vector2(x, y));
 
 				}else {
-					grid.tiles[x,y] = new TileData(x, y, TileData.Types.water, 200, 2);
+					grid.tiles[x,y] = new TileData(x, y, TileData.Types.water, 2000000, 2);
 
                     // fill a list of water tiles positions as vector 2 to be used as potential spawn positions for enemies
                     grid.waterTilePositions.Add(new Vector2(x, y));
