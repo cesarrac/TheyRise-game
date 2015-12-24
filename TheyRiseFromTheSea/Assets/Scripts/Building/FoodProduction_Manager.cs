@@ -1,112 +1,184 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class FoodProduction_Manager : MonoBehaviour {
+public class FoodProduction_Manager : ExtractionBuilding {
 	/// <summary>
 	/// Extracts x # of food each production cycle and adds it to the Player's resources. Will not start or continue
 	/// to produce food if the player has no water in storage.
 	/// </summary>
 
-	public float productionRate;
-	public int foodProduced;
 	public int waterConsumed; // water Consumed every farming cycle in order to produce a harvest
-//	bool farming;
 
-	public Player_ResourceManager resourceManager;
+    public float ProductionRate;
 
-	bool foodStatsInitialized = false;
+    public int ProductionAmmnt;
 
-	public enum State { HARVESTING, NOWATER }
-	
-	private State _state = State.HARVESTING;
+    public int startingStorageCap, startingSecondStorageCap;
+    public int PersonalStorageCap { get; protected set; }
+    public int SecondStorageCap { get; protected set; }
 
-	[HideInInspector]
-	public State state { get { return _state; } set { _state = value; } }
-
+    public int currWaterStored { get; protected set; }
+    public int WaterStorageCap { get; protected set; }
 
 
-	private float harvestCountDown;
+    //	bool farming;
 
-	void Start () 
-	{
+    //public Player_ResourceManager resourceManager;
 
-		// Get Resource managaer from Capital gameObject
-		resourceManager = GameObject.FindGameObjectWithTag ("Capital").GetComponent<Player_ResourceManager> ();
-		
-		// MAKE SURE THE PLAYER HAS ENOUGH WATER BEFORE ADDING THIS FARM'S PRODUCTION TO THE STATS
-		if (resourceManager.water >=  waterConsumed) {
+    //bool foodStatsInitialized = false;
 
-			// Tell the Resource Manager how much I produce per cycle
-			resourceManager.CalculateFoodProduction (foodProduced, productionRate, waterConsumed, false);
-			foodStatsInitialized = true;
+    //public enum State { HARVESTING, NOWATER }
 
-		}
+    //private State _state = State.HARVESTING;
 
-		// Set harvest countdown to the starting production rate
-		harvestCountDown = productionRate;
+    //[HideInInspector]
+    //public State state { get { return _state; } set { _state = value; } }
 
-	}
-	
+
+    void OnEnable()
+    {
+        currResourceStored = 0;
+    }
+
+    void Awake()
+    {
+        PersonalStorageCap = startingStorageCap;
+        SecondStorageCap = startingSecondStorageCap;
+
+        InitSelfProducer(ProductionRate, ProductionAmmnt, PersonalStorageCap, SecondStorageCap, waterConsumed, transform);
+
+        _state = State.SEARCHING;
+    }
 
 	void Update () 
 	{
 
-		if (!foodStatsInitialized) {
-			if (resourceManager.water > 0){
-				resourceManager.CalculateFoodProduction (foodProduced, productionRate, waterConsumed, false);
-				foodStatsInitialized = true;
-			}
-		}
-
-		MyStateManager (_state);
+        MyStateManager(_state);
 	}
 
 	void MyStateManager(State curState)
 	{
-		switch (curState) {
-		case State.HARVESTING:
+        switch (curState)
+        {
 
-			// Farms NEED WATER! Here we have to check with Resources to see if Player has enough water
-			if (resourceManager.water >= waterConsumed) {
-				CountDownToHarvest();
-			} else {
-				_state = State.NOWATER;
-			}
+            case State.PRODUCING:
+                //CountDownToExtract();
+                if (!isExtracting && !productionHalt)
+                {
+                    if (!storageIsFull)
+                    {
+                        StopCoroutine("Produce");
+                        StartCoroutine("Produce");
+                        isExtracting = true;
 
-			break;
-		case State.NOWATER:
+                        StopCoroutine("ShowStatusMessage");
+                        StartCoroutine("ShowStatusMessage");
+                        statusMessage = "Producing!";
+                    }
+                    else
+                    {
+                        statusMessage = "Full!";
+                        StopCoroutine("ShowStatusMessage");
+                        StartCoroutine("ShowStatusMessage");
+                        _state = State.NOSTORAGE;
+                    }
 
-			if (resourceManager.water >= waterConsumed)
-				_state = State.HARVESTING;
 
-			break;
 
-		default:
-			Debug.Log("Starving");
-			break;
-		}
-	}
+                }
+                else if (productionHalt)
+                {
+                    // Halt production is a state that handles what happens when this Food Producer runs out of Water
+                    _state = State.HALT;
+                }
+                break;
 
-	void CountDownToHarvest()
-	{
-		if (harvestCountDown <= 0) {
-		
-			Farm ();
-			harvestCountDown = productionRate;
+            case State.NOSTORAGE:
+                if (!storageIsFull)
+                {
 
-		} else {
-			harvestCountDown -= Time.deltaTime;
-		}
-	}
+                    _state = State.SEARCHING;
+                }
+                else if (statusIndicated && storageIsFull)
+                {
+                    // repeating full status message for player to see!!
+                    statusMessage = "Full!";
+                    StopCoroutine("ShowStatusMessage");
+                    StartCoroutine("ShowStatusMessage");
+                }
+                else
+                {
+                    if (output != null && isConnectedToOutput)
+                    {
+                        if (CheckOutputStorage())
+                        {
+                            statusMessage = "Sending!";
+                            StopCoroutine("ShowStatusMessage");
+                            StartCoroutine("ShowStatusMessage");
+                        }
+                        else
+                        {
+                            // OUTPUT STORAGE FULL:
+                            statusMessage = "Output Full!";
+                            StopCoroutine("ShowStatusMessage");
+                            StartCoroutine("ShowStatusMessage");
+                        }
+                    }
+                }
 
-	void Farm(){
+                break;
 
-		// Take the water needed from Resources
-		resourceManager.ChangeResource ("Water", -waterConsumed);
+            case State.SEARCHING:
 
-		// Then add the food to Resources
-		resourceManager.ChangeResource("Food", foodProduced);
+                statusMessage = "Callibrating...";
+                StopCoroutine("ShowStatusMessage");
+                StartCoroutine("ShowStatusMessage");
 
-	}
+                if (currMaterialsStored > 0)
+                {
+                    _state = State.PRODUCING;
+                }
+                else
+                {
+                    Debug.Log("NO water.");
+
+                    noMaterialsLeft = true;
+                    productionHalt = true;
+                    _state = State.HALT;
+
+                }
+                break;
+
+            case State.HALT:
+
+                statusMessage = "No Water!";
+                StopCoroutine("ShowStatusMessage");
+                StartCoroutine("ShowStatusMessage");
+
+                if (noMaterialsLeft && statusIndicated)
+                {
+                    statusMessage = "No Water!";
+                    StopCoroutine("ShowStatusMessage");
+                    StartCoroutine("ShowStatusMessage");
+                }
+                else if (currMaterialsStored > 0)
+                {
+                    noMaterialsLeft = false;
+                    productionHalt = false;
+                    _state = State.SEARCHING;
+                }
+
+                break;
+
+            default:
+                // starved / no power
+                break;
+        }
+    }
+
+
+
+
+
 
 }

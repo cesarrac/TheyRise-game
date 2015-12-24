@@ -106,18 +106,18 @@ public class DiscoverTile : MonoBehaviour {
 			} else if (tileType == TileData.Types.rock || tileType == TileData.Types.mineral){
 				GetSpriteForRockOrMineral(tileType);
 			}
-			if (tileType == TileData.Types.extractor) {
-				// IF IT'S AN EXTRACTOR it will ALSO need the extractor variables
-				Extractor extra = tileToSpawn.GetComponent<Extractor> ();
-                if (extra)
-                {
-                    extra.mapPosX = mapPosX;
-                    extra.mapPosY = mapPosY;
-                    extra.resourceGrid = resourceGrid;
-                    extra.playerResources = resourceGrid.playerCapital.GetComponent<Player_ResourceManager>();
-                }
+			//if (tileType == TileData.Types.extractor) {
+			//	// IF IT'S AN EXTRACTOR it will ALSO need the extractor variables
+			//	Extractor extra = tileToSpawn.GetComponent<Extractor> ();
+   //             if (extra)
+   //             {
+   //                 extra.mapPosX = mapPosX;
+   //                 extra.mapPosY = mapPosY;
+   //                 extra.resourceGrid = resourceGrid;
+   //                 extra.playerResources = resourceGrid.playerCapital.GetComponent<Player_ResourceManager>();
+   //             }
 				
-			} 
+			//} 
 			if (tileType == TileData.Types.capital){
                 resourceGrid.playerCapital = tileToSpawn;
 				// IF IT'S THE TERRAFORMER it will need the master state manager

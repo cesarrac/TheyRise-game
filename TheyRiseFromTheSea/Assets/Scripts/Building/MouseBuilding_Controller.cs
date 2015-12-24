@@ -23,9 +23,6 @@ public class MouseBuilding_Controller:MonoBehaviour
         {
             currMouseP = mouseP;
         }
-           
-        
-       
 
     }
 
@@ -60,10 +57,19 @@ public class MouseBuilding_Controller:MonoBehaviour
         tileUnderMouseAsGameObj = ResourceGrid.Grid.GetTileGameObjFromWorldPos(currMouseP);
 
     }
-    //GameObject GetTileObjectAtMouse(int x, int y)
-    //{
-    //    return ResourceGrid.Grid.GetTileGameObj(x, y);
-    //}
+   
+    public GameObject GetTileGameObj()
+    {
+        if (ResourceGrid.Grid.GetTileGameObjFromWorldPos(currMouseP) != null)
+        {
+            return ResourceGrid.Grid.GetTileGameObjFromWorldPos(currMouseP);
+        }
+        else
+        {
+            return null;
+        }
+        
+    }
 
 
 

@@ -604,15 +604,16 @@ public class ResourceGrid : MonoBehaviour{
         return spawnedTiles[x, y];
     }
 
-    public int MineARock(int x, int y, int mineAmmnt, bool isHandDrill = false)
+    public int ExtractFromTile(int x, int y, int ammnt, bool isHandDrill = false)
     {
         int resourceMined = 0;
 
-        if (tiles[x,y].maxResourceQuantity >= mineAmmnt)
+        if (tiles[x,y].maxResourceQuantity >= ammnt)
         {
             // mine it
-            tiles[x, y].maxResourceQuantity -= mineAmmnt;
-            if (tiles[x,y].maxResourceQuantity > 0)
+            tiles[x, y].maxResourceQuantity -= ammnt;
+
+            if (tiles[x, y].maxResourceQuantity > 0)
             {
                 // Spawn rock chunks IF this is a handrill
                 if (isHandDrill)
@@ -623,7 +624,7 @@ public class ResourceGrid : MonoBehaviour{
                         Rock_Handler rockHandler = spawnedTiles[x, y].GetComponent<Rock_Handler>();
                         rockHandler.ShrinkDownSize();
                         // chunks
-                        StartCoroutine(SpawnRockChunks(mineAmmnt, rockHandler.myRockType, spawnedTiles[x, y].transform.position));
+                        StartCoroutine(SpawnRockChunks(ammnt, rockHandler.myRockType, spawnedTiles[x, y].transform.position));
                     }
                 }
               
@@ -634,7 +635,7 @@ public class ResourceGrid : MonoBehaviour{
                 SwapTileType(x, y, TileData.Types.empty);
             }
 
-            resourceMined = mineAmmnt;
+            resourceMined = ammnt;
         }
         else if (tiles[x,y].maxResourceQuantity > 0)
         {
@@ -841,50 +842,50 @@ public class ResourceGrid : MonoBehaviour{
 			//	playerResources.totalEnergyCost = playerResources.totalEnergyCost - tiles[x,y].energyCost;
 			//}
 
-			// ALSO if it's a Farm we need to subtract its FOOD production and its WATER consumed
-			if (playerResources.foodProducedPerDay > 0){
+//			// ALSO if it's a Farm we need to subtract its FOOD production and its WATER consumed
+//			if (playerResources.foodProducedPerDay > 0){
 
-				if (tiles[x,y].tileType == TileData.Types.farm_s || tiles[x,y].tileType == TileData.Types.nutrient){
+//				if (tiles[x,y].tileType == TileData.Types.farm_s || tiles[x,y].tileType == TileData.Types.nutrient){
 
-					FoodProduction_Manager foodM = spawnedTiles [x, y].GetComponent<FoodProduction_Manager>();
-					playerResources.CalculateFoodProduction(foodM.foodProduced, foodM.productionRate, foodM.waterConsumed, true);
+//					FoodProduction_Manager foodM = spawnedTiles [x, y].GetComponent<FoodProduction_Manager>();
+//					playerResources.CalculateFoodProduction(foodM.foodProduced, foodM.productionRate, foodM.waterConsumed, true);
 
-				}
-			}
+//				}
+//			}
 
-			// AND if it's a STORAGE we need to subtract all the ORE and WATER from the resources
-			if (tiles[x,y].tileType == TileData.Types.storage){
+//			// AND if it's a STORAGE we need to subtract all the ORE and WATER from the resources
+//			if (tiles[x,y].tileType == TileData.Types.storage){
 
-				Storage storage = spawnedTiles[x,y].GetComponent<Storage>();
-//				
-				// remove the storage building from the list
-				playerResources.RemoveStorageBuilding(storage);
-			}
+//				Storage storage = spawnedTiles[x,y].GetComponent<Storage>();
+////				
+//				// remove the storage building from the list
+//				playerResources.RemoveStorageBuilding(storage);
+//			}
 
-			// If it's an EXTRACTOR also need to subtract from Ore Produced
-			if (tiles[x,y].tileType == TileData.Types.extractor){
+//			// If it's an EXTRACTOR also need to subtract from Ore Produced
+//			if (tiles[x,y].tileType == TileData.Types.extractor){
 
-				Extractor extra = spawnedTiles [x, y].GetComponent<Extractor>();
+//				Extractor extra = spawnedTiles [x, y].GetComponent<Extractor>();
 
-				playerResources.CalculateOreProduction(extra.extractAmmnt, extra.extractRate, true);
-			}
+//				playerResources.CalculateOreProduction(extra.extractAmmnt, extra.extractRate, true);
+//			}
 
-			// Same thing for a WATER PUMP
-			if (tiles[x,y].tileType == TileData.Types.desalt_s || tiles[x,y].tileType == TileData.Types.desalt_m 
-			    || tiles[x,y].tileType == TileData.Types.desalt_l){
+//			// Same thing for a WATER PUMP
+//			if (tiles[x,y].tileType == TileData.Types.desalt_s || tiles[x,y].tileType == TileData.Types.desalt_m 
+//			    || tiles[x,y].tileType == TileData.Types.desalt_l){
 
-				DeSalt_Plant pump = spawnedTiles [x, y].GetComponent<DeSalt_Plant>();
+//				DeSalt_Plant pump = spawnedTiles [x, y].GetComponent<DeSalt_Plant>();
 
-				playerResources.CalculateWaterProduction(pump.waterPumped, pump.pumpRate, true);
-			}
+//				playerResources.CalculateWaterProduction(pump.waterPumped, pump.pumpRate, true);
+//			}
 
-			// If it's a ENERGY GENERATOR we have to subtract Energy //TODO: Add an energy produced per day panel
-			if (tiles[x,y].tileType == TileData.Types.generator){
+//			// If it's a ENERGY GENERATOR we have to subtract Energy //TODO: Add an energy produced per day panel
+//			if (tiles[x,y].tileType == TileData.Types.generator){
 
-				Energy_Generator gen = spawnedTiles [x,y].GetComponent<Energy_Generator>();
+//				Energy_Generator gen = spawnedTiles [x,y].GetComponent<Energy_Generator>();
 
-				playerResources.ChangeResource("Energy", -gen.energyUnitsGenerated);
-			}
+//				playerResources.ChangeResource("Energy", -gen.energyUnitsGenerated);
+//			}
 
 
             //*********   NANO BOTS RETURNED:
