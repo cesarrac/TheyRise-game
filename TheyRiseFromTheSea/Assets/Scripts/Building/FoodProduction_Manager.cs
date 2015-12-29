@@ -46,7 +46,7 @@ public class FoodProduction_Manager : ExtractionBuilding {
         PersonalStorageCap = startingStorageCap;
         SecondStorageCap = startingSecondStorageCap;
 
-        InitSelfProducer(ProductionRate, ProductionAmmnt, PersonalStorageCap, SecondStorageCap, waterConsumed, TileData.Types.water, transform);
+        InitSelfProducer(TileData.Types.food, ProductionRate, ProductionAmmnt, PersonalStorageCap, SecondStorageCap, waterConsumed, TileData.Types.water, transform);
 
         _state = State.SEARCHING;
     }

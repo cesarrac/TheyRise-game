@@ -249,8 +249,8 @@ public class ResourceGrid : MonoBehaviour{
 		{
 			/* formation offset,  indicating how far the neighbor ore tile is from its lead tile.
 			 * Depending on their density they will have a minor offset(more density) or major offset (less density) */
-			int minorOffset = Random.Range (3, 8);
-			int majorOffset = Random.Range (9, 15);
+			int minorOffset = Random.Range (1, 4);
+			int majorOffset = Random.Range (4, 11);
 
 			switch (density) {
 			case 1:
@@ -479,12 +479,19 @@ public class ResourceGrid : MonoBehaviour{
 		if (tiles [_patch.leadPositionX, _patch.leadPositionY].tileType == TileData.Types.empty) {
 
 			if (typeName == "rock"){
-				tiles [_patch.leadPositionX, _patch.leadPositionY] = new TileData (_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 10000);
-				SpawnDiscoverTile (typeName, new Vector3 (_patch.leadPositionX, _patch.leadPositionY, 0.0F), TileData.Types.rock);
+				tiles [_patch.leadPositionX, _patch.leadPositionY] = new TileData (_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50);
+                //DefineResourceTiles(_patch.leadPositionX, _patch.leadPositionY, 1, 1, TileData.Types.rock, 6000);
+               // CreateUnWalkableBorder(_patch.leadPositionX, _patch.leadPositionY, true);
+
+                SpawnDiscoverTile (typeName, new Vector3 (_patch.leadPositionX, _patch.leadPositionY, 0.0F), TileData.Types.rock);
 
 			}else if (typeName == "mineral"){
-				tiles [_patch.leadPositionX, _patch.leadPositionY] = new TileData (_patch.leadPositionX, _patch.leadPositionY, TileData.Types.mineral, 3000, 10000);
-				SpawnDiscoverTile (typeName, new Vector3 (_patch.leadPositionX, _patch.leadPositionY, 0.0F), TileData.Types.mineral);
+				tiles [_patch.leadPositionX, _patch.leadPositionY] = 
+                    new TileData (_patch.leadPositionX, _patch.leadPositionY, TileData.Types.mineral, 3000, 50);
+                //DefineResourceTiles(_patch.leadPositionX, _patch.leadPositionY, 1, 1, TileData.Types.mineral, 3000);
+                //CreateUnWalkableBorder(_patch.leadPositionX, _patch.leadPositionY, true);
+
+                SpawnDiscoverTile (typeName, new Vector3 (_patch.leadPositionX, _patch.leadPositionY, 0.0F), TileData.Types.mineral);
 
 			}
 
@@ -496,18 +503,29 @@ public class ResourceGrid : MonoBehaviour{
 					if (!CheckForWater(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY)){
 						// Place this rock / mineral if there isn't a rock / mineral already on this tile
 
-						if (tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY].tileType == TileData.Types.empty){
-							if (typeName == "rock"){
-								tiles [_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = 
-                                    new TileData (_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY,TileData.Types.rock, 6000, 10000);
-								
-								SpawnDiscoverTile ("rock", new Vector3 (_patch.neighborOreTiles[i].posX,
-								                                        _patch.neighborOreTiles[i].posY, 0.0F), TileData.Types.rock);
-							}else if (typeName == "mineral"){
-								tiles  [_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = 
-                                    new TileData (_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.mineral, 3000, 10000);
-								
-								SpawnDiscoverTile ("mineral", new Vector3 (_patch.neighborOreTiles[i].posX,
+						if (tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY].tileType == TileData.Types.empty)
+                        {
+							if (typeName == "rock")
+                            {
+
+                                tiles [_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = 
+                                    new TileData (_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY,TileData.Types.rock, 6000, 50);
+                                
+                                //DefineResourceTiles(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 1, 1, TileData.Types.rock, 6000);
+                                //CreateUnWalkableBorder(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, true);
+
+                                SpawnDiscoverTile ("rock", new Vector3 (_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), TileData.Types.rock);
+							}
+                            else if (typeName == "mineral")
+                            {
+                                tiles  [_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = 
+                                                            new TileData (_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.mineral, 3000, 50);
+
+                                //DefineResourceTiles(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 1, 1, TileData.Types.mineral, 3000);
+
+                                //CreateUnWalkableBorder(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, true);
+
+                                SpawnDiscoverTile("mineral", new Vector3 (_patch.neighborOreTiles[i].posX,
 								                                        _patch.neighborOreTiles[i].posY, 0.0F), TileData.Types.mineral);
 								
 							}
@@ -518,6 +536,24 @@ public class ResourceGrid : MonoBehaviour{
 		}
 
 	}
+
+    void CreateUnWalkableBorder(int sourceX, int sourceY, bool prePathInit)
+    {
+        int width = 1;
+        int height = 1;
+        // This will only work previous to initializing the pathfinding graph
+        if (prePathInit)
+        {
+            for (int w = 0; w <= width; w++)
+            {
+                for (int h = 0; h <= height; h++)
+                {
+                    tiles[sourceX + w, sourceY + h].isWalkable = false;
+                }
+            }
+        }
+     
+    }
 
 	
 
@@ -560,7 +596,9 @@ public class ResourceGrid : MonoBehaviour{
                     }
                     else
                     {
-                        SwapTileType(tile.posX, tile.posY, TileData.Types.empty);   // to KILL TILE I just swap it to an empty! ;)
+                        spawnedTiles[tile.posX, tile.posY].GetComponent<Building_ClickHandler>().BreakBuilding(tile.nanoBotCost); // Call Break Building from within the building's click handler
+
+                        //SwapTileType(tile.posX, tile.posY, TileData.Types.empty);   // to KILL TILE I just swap it to an empty! ;) < ----- NOPE! :P
 
                     }
                 }
@@ -590,11 +628,6 @@ public class ResourceGrid : MonoBehaviour{
 	/// <param name="y">The y coordinate.</param>
 	public GameObject GetTileGameObjFromWorldPos(Vector3 worldPos)
 	{
-		//if (spawnedTiles [x, y] != null)
-		//	return spawnedTiles [x, y];
-		//else
-		//	return null;
-
         Vector3 worldBottomLeft = transform.position - Vector3.right * mapSizeX / 2 - Vector3.up * mapSizeY / 2;
         Vector3 worldPoint = worldBottomLeft + Vector3.right * worldPos.x + Vector3.up * worldPos.y;
 
@@ -602,6 +635,14 @@ public class ResourceGrid : MonoBehaviour{
         int y = Mathf.RoundToInt(worldPoint.y);
 
         return spawnedTiles[x, y];
+    }
+
+    public GameObject GetTileGameObjFromIntCoords(int x, int y)
+    {
+        if (spawnedTiles[x, y] != null)
+            return spawnedTiles[x, y];
+        else
+            return null;
     }
 
     public int ExtractFromTile(int x, int y, int ammnt, bool isHandDrill = false)
@@ -612,6 +653,7 @@ public class ResourceGrid : MonoBehaviour{
         {
             // mine it
             tiles[x, y].maxResourceQuantity -= ammnt;
+            Debug.Log(tiles[x, y].tileType + " extracted by " + ammnt + " out of " + tiles[x, y].maxResourceQuantity);
 
             if (tiles[x, y].maxResourceQuantity > 0)
             {
@@ -833,7 +875,8 @@ public class ResourceGrid : MonoBehaviour{
             //	playerResources.totalEnergyCost = playerResources.totalEnergyCost + tiles[x,y].energyCost;
             //}
 
-        } else { 
+        }
+        else { 
 
 			// if we are swapping an already spawned tile we are MOST LIKELY turning it into an empty tile
 			// BUT if this was a building that has an ENERGY cost that must be reflected in Player resources 
@@ -894,27 +937,17 @@ public class ResourceGrid : MonoBehaviour{
             int returnNanoCost = tiles[x, y].nanoBotCost;
 
             NanoBuilding_Handler nanoBuilder = Hero.GetComponent<NanoBuilding_Handler>();
-            if (nanoBotCost > 0)
-                nanoBuilder.nanoBots += nanoBotCost;
-            else
-                nanoBuilder.nanoBots += returnNanoCost;
+        
+            nanoBuilder.nanoBots += returnNanoCost;
 
             Debug.Log("GRID: Returning " + returnNanoCost + " NANOBOTS ");
 
-
-
-
-            //*********   POOL SPAWNED TILE:
-
-            //			Destroy(spawnedTiles[x,y].gameObject);
-            objPool.PoolObject(spawnedTiles[x, y].gameObject);
-
-
+            
 
             // ***********  DEFINE NEW EMPTY TILES:
 
             // If a tile was set as a group of multiple tiles to cover the space of its sprite, we nee to turn ALL of them to empty
-            if (spriteSizeX > 0 || spriteSizeX > 0) // < ----- the way we are swapping for an empty tile, these are always = 0 in this case
+            if (spriteSizeX > 0 || spriteSizeY > 0) // < ----- the way we are swapping for an empty tile, these are always = 0 in this case
             {
 
                 tiles[x, y] = new TileData(x, y, newType, 0, 1);
@@ -924,6 +957,7 @@ public class ResourceGrid : MonoBehaviour{
                 // we need the size of the tile that WAS here. We can get the gameobject from spawnedTiles[,], and from that get the Sprite
                 if (spawnedTiles[x, y].GetComponent<SpriteRenderer>() != null)
                 {
+                   
                     int width = Mathf.RoundToInt(spawnedTiles[x, y].GetComponent<SpriteRenderer>().sprite.bounds.size.x);
                     int height = Mathf.RoundToInt(spawnedTiles[x, y].GetComponent<SpriteRenderer>().sprite.bounds.size.y);
                     // Define these as empty using this new width and height (doing this since the arguments passed in would be 0 for an empty SwapTile)
@@ -937,9 +971,17 @@ public class ResourceGrid : MonoBehaviour{
 
 
             }
-			
+
+
+            //*********   POOL SPAWNED TILE:
+
+            //			Destroy(spawnedTiles[x,y].gameObject);
+            objPool.PoolObject(spawnedTiles[x, y].gameObject);
+        
+
+
             // ******** DEFINE AS NULL GAMEOBJECT
-            
+
             // Make it null as a spawnedTiles
             spawnedTiles[x, y] = null;
         }
@@ -951,9 +993,14 @@ public class ResourceGrid : MonoBehaviour{
         {
             for (int h = 0; h < spriteHeight; h++)
             {
-                tiles[x + w, y + h] = new TileData(x + w, y + h, name, newType, quantity, moveCost, hp, defence, attack, shield, nanoBotCost);
-                
-                grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable;
+                // ******** MAKE SURE we are not changing tiles that are NOT empty
+                if(tiles[x + w, y + h].tileType == TileData.Types.empty)
+                {
+                    tiles[x + w, y + h] = new TileData(x + w, y + h, name, newType, quantity, moveCost, hp, defence, attack, shield, nanoBotCost);
+
+                    grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable;
+                }
+              
 
             }
 
@@ -962,17 +1009,47 @@ public class ResourceGrid : MonoBehaviour{
 
     void DefineMultipleEmptyTiles(int x, int y, int spriteWidth, int spriteHeight)
     {
+        // Store the current tiletype to check against
+        TileData.Types formerType = tiles[x, y].tileType;
+        Debug.Log("Defining multiple empty tiles of " + formerType);
         for (int w = 0; w < spriteWidth; w++)
         {
             for (int h = 0; h < spriteHeight; h++)
             {
-                tiles[x + w, y + h] = new TileData(x + w, y + h, TileData.Types.empty, 0, 0);
+                // ONLY swap the tiles that are equal to tile type stored above
+                if (tiles[x + w, y + h].tileType == formerType)
+                {
+                    tiles[x + w, y + h] = new TileData(x + w, y + h, TileData.Types.empty, 0, 1);
 
-                grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable;
+                    grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable;
+                }
+
             }
 
         }
     }
+
+    void DefineResourceTiles(int x, int y, int areaWidth, int areaHeight, TileData.Types newType, int quantity)
+    {
+        for (int w = 0; w < areaWidth; w++)
+        {
+            for (int h = 0; h < areaHeight; h++)
+            {
+                // ******** MAKE SURE we are not changing tiles that are NOT empty
+                if (tiles[x + w, y + h].tileType == TileData.Types.empty)
+                {
+                    tiles[x + w, y + h] = new TileData(x, y, newType, quantity, 10000);
+
+                   // grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable; < ----------- NOT affecting the grid here because it will become unwalkable when Grid is initialized on Start()
+                }
+
+
+            }
+
+        }
+    }
+
+
 
 	public void DiscoverTile(int x, int y, bool trueIfSwapping, int spriteWidth = 0, int spriteHeight = 0)
 	{
@@ -1051,7 +1128,7 @@ public class ResourceGrid : MonoBehaviour{
                 Vector3 worldPoint = worldBottomLeft + Vector3.right * x + Vector3.up * y;
                 //print("World Point: " + worldPoint);
                 bool walkable = tiles[x, y].isWalkable;
-                grid[x, y] = new Node(walkable, worldPoint, x, y);
+                grid[x, y] = new Node(walkable, worldPoint, x, y, tiles[x, y].movementCost);
             }
         }
     }
@@ -1076,6 +1153,12 @@ public class ResourceGrid : MonoBehaviour{
         int y = Mathf.RoundToInt(worldPoint.y);
 
         return tiles[x, y];
+    }
+
+    public void SwitchTileWalkability (int x, int y, bool trueIfWalkable)
+    {
+        tiles[x, y].isWalkable = trueIfWalkable;
+        grid[x, y].isWalkable = trueIfWalkable;
     }
 
     public List<Node> GetNeighbors(Node node)

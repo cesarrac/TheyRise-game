@@ -131,16 +131,28 @@ public class DeSalt_Plant : ExtractionBuilding {
                     {
                         if (CheckOutputStorage())
                         {
-                            statusMessage = "Sending!";
+
                             StopCoroutine("ShowStatusMessage");
                             StartCoroutine("ShowStatusMessage");
+                            statusMessage = "Sending!";
                         }
                         else
                         {
-                            // OUTPUT STORAGE FULL:
-                            statusMessage = "Output Full!";
-                            StopCoroutine("ShowStatusMessage");
-                            StartCoroutine("ShowStatusMessage");
+                            if (output == null)
+                            {
+                                // No output connected. My storage is full
+                                StopCoroutine("ShowStatusMessage");
+                                StartCoroutine("ShowStatusMessage");
+                                statusMessage = "Full!";
+                            }
+                            else
+                            {
+                                // OUTPUT STORAGE FULL:
+                                StopCoroutine("ShowStatusMessage");
+                                StartCoroutine("ShowStatusMessage");
+                                statusMessage = "Output Full!";
+                            }
+
                         }
                     }
                 }

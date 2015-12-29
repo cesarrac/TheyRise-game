@@ -156,17 +156,27 @@ public class Building_ClickHandler : MonoBehaviour {
 
 			//DissasemblyControl();
 
-			if (Input.GetKeyDown (KeyCode.F) && playerIsNear) {
-				if (!buildMainController.currentlyBuilding){
-					if (!buildingPanel.gameObject.activeSelf) {
-						ActivateBuildingUI ();
+			    if (Input.GetKeyDown (KeyCode.F) && playerIsNear) {
+				    if (!buildMainController.currentlyBuilding){
+					    if (!buildingPanel.gameObject.activeSelf) {
+						    ActivateBuildingUI ();
 						
-					}else{
-						ClosePanel();
-					}
+					    }else{
+						    ClosePanel();
+					    }
 					
-				}
-			}
+				    }
+			    }
+
+
+                if (Input.GetButtonDown("Beam") && playerIsNear)
+                {
+                    if (GetComponent<ExtractionBuilding>() != null)
+                    {
+                        GetComponent<ExtractionBuilding>().BeamAllStoredToShip(); // <------------ BEAMS ALL CONTENTS (if any) STORED ON THIS BUILDING TO THE SHIP
+                    }
+                }
+
 			break;
 		case State.RECYCLE_NANOBOTS:
 //			FadeOutControl();

@@ -45,38 +45,22 @@ public class Player_HeroAttackHandler : Unit_Base {
 //			anim.ResetTrigger("attack");
 //		}
 
-		if (scrollWheel != 0)
-			// Swap what item they are using
-			SwapItems(scrollWheel);
+		//if (scrollWheel != 0)
+        if (Input.GetButtonDown("Next Tool"))
+        {
+            // Swap what item they are using
+            SwapItems();
+        }
+		
 
 
 		if (stats.curHP <= 0)
 			Suicide ();
 	}
 
-	void SwapItems(float scrollDelta)
+	void SwapItems()
 	{
-        /*
-		if (scrollDelta > 0) {
-			if (_curWeapon1.activeSelf) {
-
-				_curWeapon1.SetActive (false);
-				_curWeapon2.SetActive (true);
-			}else if (_curWeapon2.activeSelf){
-				_curWeapon1.SetActive (true);
-				_curWeapon2.SetActive (false);
-			}
-		} else {
-			if (_curWeapon2.activeSelf) {
-				
-				_curWeapon2.SetActive (false);
-				_curWeapon1.SetActive (true);
-			}else if (_curWeapon1.activeSelf){
-				_curWeapon2.SetActive (true);
-				_curWeapon1.SetActive (false);
-			}
-		}
-        */
+        
         if (_curWeapon1.activeSelf)
         {
             _curWeapon1.SetActive(false);

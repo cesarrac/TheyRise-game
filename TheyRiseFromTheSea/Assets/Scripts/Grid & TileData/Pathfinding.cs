@@ -24,6 +24,15 @@ public class Pathfinding : MonoBehaviour
         StartCoroutine(FindPath(startPos, targetPos));
     }
 
+    int GetMovementPenalty(Node currNode, Node nextNode)
+    {
+        if (currNode.gridX != nextNode.gridX && currNode.gridY != nextNode.gridY)
+            return (nextNode.moveCost + 1);
+        else
+            return nextNode.moveCost;
+            
+    }
+
     IEnumerator FindPath(Vector3 startPos, Vector3 targetPos)
     {
         if (grid == null)
@@ -75,7 +84,7 @@ public class Pathfinding : MonoBehaviour
                     }
 
                     // If this new path is SHORTER than last path OR neighbor is NOT in OPEN SET
-                    int newMovementCostToNeighbor = currentNode.gCost + GetDistance(currentNode, neighbor);
+                    int newMovementCostToNeighbor = currentNode.gCost + GetDistance(currentNode, neighbor) + (GetMovementPenalty(currentNode, neighbor));
 
                     if (newMovementCostToNeighbor < neighbor.gCost || !openSet.Contains(neighbor))
                     {

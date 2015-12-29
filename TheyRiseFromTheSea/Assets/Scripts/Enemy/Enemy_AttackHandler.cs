@@ -229,12 +229,17 @@ public class Enemy_AttackHandler : Unit_Base {
     void Suicide()
     {
         // get a Dead sprite to mark my death spot
-        GameObject deadE = objPool.GetObjectForType("dead", false, transform.position); // Get the dead unit object
+        GameObject deadE = objPool.GetObjectForType("Blood FX particles", true, transform.position); // Get the dead unit object
 
-        if (deadE != null)
-        {
-            deadE.GetComponent<EasyPool>().objPool = objPool;
-        }
+        //if (deadE != null)
+        //{
+        //    deadE.GetComponent<EasyPool>().objPool = objPool;
+        //}
+
+        // Calculate the z rotation needed for the blood particle effects to shoot at the angle the shot came from
+        var dir = attacker.transform.position - transform.position;
+        float bloodAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        deadE.transform.eulerAngles = new Vector3(0, 0, bloodAngle);
 
         // make sure we Pool any Damage Text that might be on this gameObject
         if (GetComponentInChildren<Text>() != null)
@@ -243,8 +248,9 @@ public class Enemy_AttackHandler : Unit_Base {
             objPool.PoolObject(dmgTxt.gameObject);
         }
 
+        Destroy(this.gameObject);
         // and Pool myself
-        objPool.PoolObject(gameObject);
+        //objPool.PoolObject(gameObject);
     }
 
     ////	void PoolTarget(GameObject target)

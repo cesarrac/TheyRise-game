@@ -24,6 +24,14 @@ public class MouseBuilding_Controller:MonoBehaviour
             currMouseP = mouseP;
         }
 
+        ZoomWithMouseWheel();
+    }
+
+    void ZoomWithMouseWheel()
+    {
+        Camera.main.orthographicSize -= Camera.main.orthographicSize * Input.GetAxis("Mouse ScrollWheel");
+
+        Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize, 6f, 12.5f);
     }
 
     public void GetTileUnderMouse()

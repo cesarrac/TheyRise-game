@@ -177,7 +177,7 @@ public class Player_GunBaseClass : MonoBehaviour {
 		// Get the bullet from object pool using the name of the ammo type
 		GameObject projectile = objPool.GetObjectForType (_projectileType, true, sightEnd.position);
 		if (projectile) {
-			Debug.Log("Firing " + _projectileType + " !");
+			//Debug.Log("Firing " + _projectileType + " !");
             //			// give it the position of the player
             //			projectile.transform.position = sightStart.position;
             projectile.GetComponent<SpriteRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;

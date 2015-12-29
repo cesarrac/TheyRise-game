@@ -37,6 +37,12 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 	{
 		if (targetHit != null) {
 
+            // Tell the enemy unit I'm hitting it
+            if (targetHit.GetComponent<Enemy_AttackHandler>().attacker == null)
+            {
+
+                targetHit.GetComponent<Enemy_AttackHandler>().attacker = gameObject;
+            }
 			// Do Gun Effect
 			DamageEnemy();
 

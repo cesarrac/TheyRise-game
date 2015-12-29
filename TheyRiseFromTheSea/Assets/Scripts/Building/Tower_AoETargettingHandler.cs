@@ -39,8 +39,13 @@ public class Tower_AoETargettingHandler : Unit_Base {
 
 	public State debugState;
 
+    void OnEnable()
+    {
+        enemiesInRange = null;
+        enemiesCount = 0;
+    }
 
-	void Start () 
+    void Start () 
 	{
 
 		if (bStatusIndicator == null)

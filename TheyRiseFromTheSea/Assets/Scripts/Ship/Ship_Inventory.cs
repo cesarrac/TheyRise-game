@@ -12,6 +12,9 @@ public class Ship_Inventory : MonoBehaviour {
 
     public int storageTotal { get; protected set; }
 
+    public int commonOreStored { get; protected set; }
+    public int enrichedOreStored { get; protected set; }
+
     void Awake()
     {
         Instance = this;
@@ -38,6 +41,13 @@ public class Ship_Inventory : MonoBehaviour {
 
         // add to the total
         storageTotal += ammnt;
+    }
+
+    public void SplitOre(int common, int enriched)
+    {
+        commonOreStored += common;
+        enrichedOreStored += enriched;
+        Debug.Log("Ore has been split! Common = " + commonOreStored + " Enriched = " + enrichedOreStored);
     }
 
 }

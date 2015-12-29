@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Rock_Handler : MonoBehaviour {
 
-    Rock myRock;
+    public Rock myRock;
 
     SpriteRenderer sprite_renderer;
 

@@ -37,7 +37,11 @@ public class Enemy_PathHandler : MonoBehaviour
     public enum State { GETTING_PATH, FOLLOWING_PATH, FINISHED_PATH, MOVING_TO_TARGET, BLOCKED, ATTACKING, IDLE }
     public State _state { get; protected set; }
 
+    public State debugState;
+
     public TileData blockingTile { get; protected set; }
+
+    Vector3 escapePos;
 
     // Steering Behaviors:
     //  seek : normal follow path to the target
@@ -90,6 +94,8 @@ public class Enemy_PathHandler : MonoBehaviour
 
         if (_state == State.MOVING_TO_TARGET && finishedPath)
             SwitchToAttacking();
+
+        debugState = _state;
     }
 
     public void SwitchToAttacking()
@@ -120,9 +126,10 @@ public class Enemy_PathHandler : MonoBehaviour
         while (true)
         {
            
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.7f);
             Vector3 targetPosition = target.position;
-            if (_state == State.MOVING_TO_TARGET || _state == State.BLOCKED)
+
+            if (_state == State.MOVING_TO_TARGET)
             {
                 // Since this New Target is NOT walkable, choose to move to the left or right of it
                 int leftOrRight = Random.Range(0, 2);
@@ -133,6 +140,7 @@ public class Enemy_PathHandler : MonoBehaviour
                     //right
                     targetPosition.x = target.position.x + 1;
             }
+
             PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
             print("Path requested.");
         }
@@ -154,10 +162,64 @@ public class Enemy_PathHandler : MonoBehaviour
         {
             bool currIswalkable = grid.NodeFromWorldPoint(transform.position).isWalkable;
             print("Could not find a path from this location. This node is walkable: " + currIswalkable);
-            if (_state != State.BLOCKED)
-                _state = State.BLOCKED;
 
-            //GetBlockingTile(transform.position);
+         
+
+            if (!currIswalkable && grid.NodeFromWorldPoint(escapePos).isWalkable)
+            {
+                var direction = -(target.position - transform.position).normalized;
+                escapePos = transform.position + direction;
+                //StopCoroutine("RequestPath");
+                FullStop();
+                StartCoroutine("EscapeObstacle");
+            }
+                
+
+        }
+    }
+
+    //void StartEscaping(Vector3 blockedPosition)
+    //{
+    //    // Reset the Follow Path coroutine & targetIndex
+    //    targetIndex = 0;
+    //    StopCoroutine("FollowPath");
+
+    //    // State becomes Blocked
+    //    if (_state != State.BLOCKED)
+    //        _state = State.BLOCKED;
+
+    //    // Define what direction this unit was walking on by comparing the current position to the target's position
+    //    Vector3 direction = -(target.position - blockedPosition).normalized;
+
+    //    // So we DONT try to get a path from this tile again make this tile unwakable
+    //    //GetBlockingTile(blockedPosition);
+
+    //    // Vector3 blockingTilePos = new Vector3(blockingTile.posX, blockingTile.posY, 0);
+
+    //    escapePos = blockedPosition + direction;
+
+    //    Debug.Log("Escape Position " + escapePos);
+
+    //    // Stop requesting path while we Escape Obstacle
+    //    StopCoroutine("RequestPath");
+    //    StopCoroutine("EscapeObstacle");
+    //    StartCoroutine("EscapeObstacle");
+    //}
+
+    IEnumerator EscapeObstacle()
+    {
+        while (true)
+        {
+            if ((transform.position - escapePos).sqrMagnitude > 0.5f )
+            {
+                transform.position = Vector3.MoveTowards(transform.position, escapePos, mStats.curMoveSpeed * Time.deltaTime);
+                yield return null;
+            }
+            else
+            {
+                StartCoroutine("RequestPath");
+                yield break;
+            }
         }
     }
 
@@ -189,12 +251,15 @@ public class Enemy_PathHandler : MonoBehaviour
                         {
                             // the next node is walkable, keep going
                             currWayPoint = path[targetIndex];
+
                         }
                         else
                         {
                             // next node is NOT walkable
                             _state = State.BLOCKED;
-                            GetBlockingTile(path[targetIndex]);
+                            Debug.Log("DETECTED next position in path is blocked");
+                            //StartEscaping(path[targetIndex]);
+
                             yield break;
                         }
 
@@ -214,7 +279,9 @@ public class Enemy_PathHandler : MonoBehaviour
 
     void GetBlockingTile(Vector3 position)
     {
-        blockingTile = ResourceGrid.Grid.TileFromWorldPoint(transform.position);
+        blockingTile = ResourceGrid.Grid.TileFromWorldPoint(position);
+
+       // ResourceGrid.Grid.SwitchTileWalkability(blockingTile.posX, blockingTile.posY, false);
     }
 
     //public void OnDrawGizmos()
@@ -241,5 +308,36 @@ public class Enemy_PathHandler : MonoBehaviour
     bool CheckIfPathIsBlocked(Node nextNode)
     {
         return nextNode.isWalkable;
+    }
+
+
+    public void FullStop()
+    {
+        targetIndex = 0;
+        StopCoroutine("FollowPath");
+        StopCoroutine("RequestPath");
+        StopCoroutine("EscapeObstacle");
+
+    }
+
+    void OnCollisionEnter2D(Collision2D coll)
+    {
+        if (coll.gameObject.CompareTag("Rock"))
+        {
+            //Debug.Log("Colliding with ROCK!");
+            // In case the escaping coroutine is currently going
+            //StopCoroutine("EscapeObstacle");
+            // StartEscaping(coll.transform.position);
+            FullStop();
+
+            var direction = -(coll.transform.position - transform.position).normalized;
+
+            escapePos = transform.position + direction;
+
+            StartCoroutine("EscapeObstacle");
+
+            Debug.Log("Direction from me to rock " + direction);
+        
+        }
     }
 }

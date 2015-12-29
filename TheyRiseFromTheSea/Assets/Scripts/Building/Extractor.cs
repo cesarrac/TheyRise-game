@@ -3,27 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class Extractor : ExtractionBuilding {
-    //public int mapPosX, mapPosY;
-    //ResourceGrid resourceGrid;
-    //bool rockFound;
-    // Storing the rock tiles that this building can find (EXTRACTOR ONLY!)
-    //public Vector2[] rocksDetected;
-
-    // Storing the rock tiles detected 
-    //List<TileData> rockTilesDetected;
-
-    //int rockPosX, rockPosY, currRockIndex;
-
-
-    //public Player_ResourceManager playerResources;
-
-    //LineRenderer lineR;
-    //public bool selecting;
-    //Vector3 mouseEnd;
-
-
-
-    //Storage myStorage; // is set when player connects the plant to a storage building
 
     public float ExtractRate;
 
@@ -31,36 +10,18 @@ public class Extractor : ExtractionBuilding {
 
     public int startingStorageCap;
     public int PersonalStorageCap { get; protected set; }
-    //public int currOreStored { get; protected set; }
 
-	//bool statsInitialized;
+    int commonOreCount;
+    int enrichedOreCount;
 
-	//SpriteRenderer sr;
+    Rock currRock;
 
-	//public enum State 
-	//{
-	//	EXTRACTING,
-	//	SEARCHING,
-	//	NOSTORAGE,
-	//	STARVED
-	//}
-	
-	//private State _state = State.SEARCHING;
-
-	//private float extractCountDown;
-
-    //bool isExtracting, storageIsFull;
-
-    //Building_StatusIndicator buildingStatusIndicator;
-
-    //string statusMessage;
-    //bool statusIndicated;
-
-   
+    Vector3 currRockWorldPos;
 
     void OnEnable()
     {
         currResourceStored = 0;
+        
     }
 
     void Awake()
@@ -72,20 +33,25 @@ public class Extractor : ExtractionBuilding {
         Init(TileData.Types.rock, ExtractRate, ExtractAmmnt, PersonalStorageCap, transform);
 
         _state = State.SEARCHING;
+
+        inventoryTypeCallback = SplitRockByType;
+
+        splitShipInventoryCallback = DefineEnrichedAndCommonOre;
     }
 
 	void Start()
 	{
-       // b_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
+        // b_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
 
-		// INIT rocksdetected array
-		// This assumes that we are only checking tiles ONE TILE OVER in all directions
-		//rocksDetected = new Vector2[8];
+        // INIT rocksdetected array
+        // This assumes that we are only checking tiles ONE TILE OVER in all directions
+        //rocksDetected = new Vector2[8];
         //rockTilesDetected = new List<TileData>();
 
-        // Set line renderer's first position
-       // lineR.SetPosition (0, transform.position);
-       // lineR.enabled = false;
+        // Get the Line renderer
+        lineR = GetComponent<LineRenderer>();
+        // Then turn it off
+        lineR.enabled = false;
 
     }
 
@@ -121,6 +87,18 @@ public class Extractor : ExtractionBuilding {
                 {
                     if (!storageIsFull)
                     {
+                        // Store the rock type of the target rock
+                        // Define my target tile's gameobject
+                        if (currRock == null || currRockWorldPos != resourceWorldPos)
+                        {
+                            GameObject currTarget = resource_grid.GetTileGameObjFromWorldPos(resourceWorldPos);
+                            if (currTarget != null)
+                                currRock = currTarget.GetComponent<Rock_Handler>().myRock;
+
+                            currRockWorldPos = resourceWorldPos;
+                        }
+                      
+
                         StopCoroutine("ExtractResource");
                         StartCoroutine("ExtractResource");
                         isExtracting = true;
@@ -131,9 +109,9 @@ public class Extractor : ExtractionBuilding {
                     }
                     else
                     {
-                        statusMessage = "Full!";
                         StopCoroutine("ShowStatusMessage");
                         StartCoroutine("ShowStatusMessage");
+                        statusMessage = "Full!";
                         _state = State.NOSTORAGE;
                     }
                   
@@ -150,24 +128,37 @@ public class Extractor : ExtractionBuilding {
                 else if (statusIndicated && storageIsFull)
                 {
                     // repeating full status message for player to see!!
-                    statusMessage = "Full!";
+                  
                     StopCoroutine("ShowStatusMessage");
                     StartCoroutine("ShowStatusMessage");
+                    statusMessage = "Full!";
                 }
                 else
                 {
                     if (CheckOutputStorage())
                     {
-                        statusMessage = "Sending!";
+                       
                         StopCoroutine("ShowStatusMessage");
                         StartCoroutine("ShowStatusMessage");
+                        statusMessage = "Sending!";
                     }
                     else
                     {
-                        // OUTPUT STORAGE FULL:
-                        statusMessage = "Output Full!";
-                        StopCoroutine("ShowStatusMessage");
-                        StartCoroutine("ShowStatusMessage");
+                        if (output == null)
+                        {
+                            // No output connected. My storage is full
+                            StopCoroutine("ShowStatusMessage");
+                            StartCoroutine("ShowStatusMessage");
+                            statusMessage = "Full!";
+                        }
+                        else
+                        {
+                            // OUTPUT STORAGE FULL:
+                            StopCoroutine("ShowStatusMessage");
+                            StartCoroutine("ShowStatusMessage");
+                            statusMessage = "Output Full!";
+                        }
+                       
                     }
                 }
 
@@ -205,6 +196,41 @@ public class Extractor : ExtractionBuilding {
 			break;
 		}
 	}
+
+    void SplitRockByType(int quantity)
+    {
+        if (currRock != null)
+        {
+            if (currRock._rockProductionType == Rock.RockProductionType.common)
+            {
+                print("Adding Common ore!");
+                commonOreCount += quantity;
+            }
+            else if (currRock._rockProductionType == Rock.RockProductionType.enriched)
+            {
+                print("Adding Enriched ore!");
+                enrichedOreCount += quantity;
+            }
+        }
+ 
+    }
+
+
+    void DefineEnrichedAndCommonOre(int currTotal)
+    {
+        if (enrichedOreCount + commonOreCount == currTotal)
+        {
+            Ship_Inventory.Instance.SplitOre(commonOreCount, enrichedOreCount);
+            // Now make sure that both enriched and common count go back to 0 since this extractor is now empty
+            commonOreCount = 0;
+            enrichedOreCount = 0;
+        }
+        else
+        {
+            Debug.Log("Total inventory = " + currResourceStored + " Common ore = " + commonOreCount + " Enriched = " + enrichedOreCount);
+            Debug.LogError("This EXTRACTOR's enriched and common count DO NOT equal its current inventory!");
+        }
+    }
 
 	//void CountDownToExtract()
 	//{

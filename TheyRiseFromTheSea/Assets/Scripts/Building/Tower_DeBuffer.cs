@@ -33,9 +33,12 @@ public class Tower_DeBuffer : Unit_Base {
 	
 	private bool statusIndicated = false;
 
+    void OnEnable()
+    {
+        targetUnit = null;
+    }
 
-
-	void Start () {
+    void Start () {
 
 		if (bStatusIndicator == null)
 			Debug.Log ("GUN: Building Status Indicator NOT SET!");

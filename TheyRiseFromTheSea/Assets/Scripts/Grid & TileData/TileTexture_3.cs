@@ -353,7 +353,7 @@ public class TileTexture_3 : MonoBehaviour
                 }
             }
 
-            texture.filterMode = FilterMode.Bilinear;
+            texture.filterMode = FilterMode.Trilinear;
             texture.wrapMode = TextureWrapMode.Clamp;
 
             // Apply texture
@@ -427,7 +427,7 @@ public class TileTexture_3 : MonoBehaviour
                 }
             }
 
-            texture2.filterMode = FilterMode.Bilinear;
+            texture2.filterMode = FilterMode.Trilinear;
             texture2.wrapMode = TextureWrapMode.Clamp;
 
             // Apply texture
@@ -515,7 +515,7 @@ public class TileTexture_3 : MonoBehaviour
                 }
             }
 
-            textureRipples.filterMode = FilterMode.Bilinear;
+            textureRipples.filterMode = FilterMode.Trilinear;
             textureRipples.wrapMode = TextureWrapMode.Clamp;
 
             // Apply texture
@@ -816,7 +816,7 @@ public class TileTexture_3 : MonoBehaviour
         // Give all their data and respective tile types to a texture.
         //BuildSecondaryTexture(width, height, regions);
 
-        secondTexture.filterMode = FilterMode.Bilinear;
+        secondTexture.filterMode = FilterMode.Trilinear;
 
         Texture2 = secondTexture;
         ApplyTextures();
@@ -988,7 +988,7 @@ public class TileTexture_3 : MonoBehaviour
             }
         }
  
-        texture2.filterMode = FilterMode.Bilinear;
+        texture2.filterMode = FilterMode.Trilinear;
 
         Texture2 = texture2;
         /*

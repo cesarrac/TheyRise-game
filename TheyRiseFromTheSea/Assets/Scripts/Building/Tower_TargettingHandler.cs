@@ -61,6 +61,12 @@ public class Tower_TargettingHandler : Unit_Base
 
     Building_ClickHandler build_click_handler;
 
+
+    void OnEnable()
+    {
+        targetUnit = null;
+    }
+
     void Start()
     {
         //		if (bStatusIndicator == null)

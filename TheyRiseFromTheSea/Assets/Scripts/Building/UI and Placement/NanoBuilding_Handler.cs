@@ -8,7 +8,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
     /* This will actually build any of the Available Blueprints in the Player's gear. When player right clicks anywhere to build,
     check what type of building the player might want to build and place that icon on the mouse to left click and build.*/
 
-    public int nanoBots = 50;
+    public int nanoBots = 500;
 
     private AudioSource audio_source;
     public AudioClip buildSound, nanoBotReturnSound;

@@ -131,6 +131,7 @@ public class Map_Generator : MonoBehaviour {
         grid.mapSizeX = width;
         grid.mapSizeY = height;
 		grid.tiles = new TileData[width, height];
+        
 
 		int countWaterTiles = 0;
         // Initialize the grid's water tile positions list

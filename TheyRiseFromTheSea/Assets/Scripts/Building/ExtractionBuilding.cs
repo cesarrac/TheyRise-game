@@ -63,8 +63,10 @@ public class ExtractionBuilding : MonoBehaviour {
 
     public bool statusIndicated { get; protected set; }
 
-    public int currResourceStored { get; protected set; }
-    public int currMaterialsStored { get; protected set; } // < --- stored in secondary storage
+    int _currResourcesStored;
+    public int currResourceStored { get { return _currResourcesStored; } set { _currResourcesStored = Mathf.Clamp(value, 0, extractorStats.personalStorageCapacity); } }
+    int _currMaterialsStored;
+    public int currMaterialsStored { get { return _currMaterialsStored; } set { _currMaterialsStored = Mathf.Clamp(value, 0, extractorStats.secondStorageCapacity); } } // < --- stored in secondary storage
 
     public bool isExtracting { get; protected set; }
     public bool storageIsFull { get; protected set; }
@@ -94,6 +96,15 @@ public class ExtractionBuilding : MonoBehaviour {
     // Callback method ONLY for storage units
     Action<TileData.Types, int> callback;
 
+    public GameObject extractTargetAsGameObj;
+
+    // Another callback method used by rock extractors and such to split the extracted ammount by its type
+    public Action<int> inventoryTypeCallback;
+
+    public Action<int> splitShipInventoryCallback;
+
+    public Vector3 resourceWorldPos { get; protected set; }
+
     // STATE MACHINE:
     public enum State
     {
@@ -120,10 +131,10 @@ public class ExtractionBuilding : MonoBehaviour {
     }
 
     // this Initializer works for buildings that extract from another building to produce their OWN resource
-    public void InitSelfProducer(float rate, int ammnt, int storageCap, int secondStorageCap, int matConsumed, TileData.Types requiredMat,Transform _trans)
+    public void InitSelfProducer(TileData.Types productType, float rate, int ammnt, int storageCap, int secondStorageCap, int matConsumed, TileData.Types requiredMat,Transform _trans)
     {
         extractorStats = new ExtractorStats(rate, ammnt, storageCap, secondStorageCap, matConsumed);
-        resourceType = TileData.Types.empty;
+        resourceType = productType;
         myTransform = _trans;
 
         resource_grid = ResourceGrid.Grid;
@@ -156,9 +167,14 @@ public class ExtractionBuilding : MonoBehaviour {
 
         if (resourceTile  != null)
         {
-            // Define my resource's tile position
-            r_PosX = resourceTile.posX;
-            r_PosY = resourceTile.posY;
+            if (r_PosX != resourceTile.posX || r_PosY != resourceTile.posY)
+            {
+                // Define my resource's tile position
+                r_PosX = resourceTile.posX;
+                r_PosY = resourceTile.posY;
+            }
+      
+
 
             return true;
         }
@@ -171,11 +187,19 @@ public class ExtractionBuilding : MonoBehaviour {
 
     TileData SearchForResource()
     {
-       
+        float spriteWidth = GetComponent<SpriteRenderer>().sprite.bounds.size.x;
+
         Vector3 top = myTransform.position + Vector3.up;
         Vector3 bottom = myTransform.position - Vector3.up;
         Vector3 left = myTransform.position + Vector3.left;
         Vector3 right = myTransform.position + Vector3.right;
+        right.x += spriteWidth;
+
+        Vector3 top2 = top + Vector3.up;
+        Vector3 bottom2 = bottom - Vector3.up;
+        Vector3 left2 = left + Vector3.left;
+        Vector3 right2 = right + Vector3.right;
+
         Vector3 topLeft = top + Vector3.left;
         Vector3 topRight = top + Vector3.right;
         Vector3 botLeft = bottom + Vector3.left;
@@ -225,6 +249,28 @@ public class ExtractionBuilding : MonoBehaviour {
           // rockTilesDetected.Add(CheckTileType(botRight));
             return CheckTileType(botRight);
         }
+        if (CheckTileType(top2) != null)
+        { // top
+
+            //rockTilesDetected.Add(CheckTileType(top));
+            return CheckTileType(top2);
+        }
+        else if (CheckTileType(bottom2) != null)
+        { // bottom
+
+            //rockTilesDetected.Add(CheckTileType(bottom));
+            return CheckTileType(bottom2);
+        }
+        else if (CheckTileType(left2) != null)
+        { // left
+            //rockTilesDetected.Add(CheckTileType(left));
+            return CheckTileType(left2);
+        }
+        else if (CheckTileType(right2) != null)
+        { //right
+            //rockTilesDetected.Add(CheckTileType(right));
+            return CheckTileType(right2);
+        }
         else
         {
             return null;
@@ -235,9 +281,16 @@ public class ExtractionBuilding : MonoBehaviour {
     TileData CheckTileType(Vector3 position)
     {
         if (resource_grid.TileFromWorldPoint(position).tileType == resourceType)
+        {
+            resourceWorldPos = position;
             return resource_grid.TileFromWorldPoint(position);
+
+        }
         else
+        {
             return null;
+        }
+       
     }
 
 
@@ -280,7 +333,10 @@ public class ExtractionBuilding : MonoBehaviour {
                 {
                     // Extract from the Tile using Resource Grid's method ExtractFromTile
                     currResourceStored += resource_grid.ExtractFromTile(r_PosX, r_PosY, extractorStats.extractAmmount);
-                    // Debug.Log("Extracting. Current ore stored = " + currResourceStored);
+
+                    // If the Extraction Building has a function for splitting the resource into types, call it here
+                    if (inventoryTypeCallback != null)
+                        inventoryTypeCallback(extractorStats.extractAmmount);
 
                     // Check again if personal storage is full AFTER adding the ore
                     if (currResourceStored >= extractorStats.personalStorageCapacity)
@@ -551,6 +607,21 @@ public class ExtractionBuilding : MonoBehaviour {
 
         if (callback != null)
             callback(type, ammnt);
+    }
+
+    public void BeamAllStoredToShip()
+    {
+        Ship_Inventory.Instance.ReceiveItems(resourceType, currResourceStored);
+
+        // This will split the current resources before sending them to ship (for example split between common ore and enriched ore)
+        if (splitShipInventoryCallback != null)
+        {
+            splitShipInventoryCallback(currResourceStored);
+        }
+
+        currResourceStored = 0;
+        if (storageIsFull)
+            storageIsFull = false;
     }
 
 
