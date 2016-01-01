@@ -46,6 +46,8 @@ public class Building_PositionHandler : MonoBehaviour {
 
     public NanoBuilding_Handler nanoBuild_handler;
 
+    MouseBuilding_Controller mouse_controller;
+
 	void Awake()
 	{
 		sr = GetComponent<SpriteRenderer> ();
@@ -58,6 +60,8 @@ public class Building_PositionHandler : MonoBehaviour {
         resourceGrid = ResourceGrid.Grid;
         objPool = ObjectPool.instance;
         build_controller = Build_MainController.Instance;
+
+        mouse_controller = MouseBuilding_Controller.MouseController;
     }
 
 	
@@ -69,29 +73,29 @@ public class Building_PositionHandler : MonoBehaviour {
 	}
 	
 	void FollowMouse(){
-		m = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-		mX = Mathf.RoundToInt(m.x);
-		mY = Mathf.RoundToInt(m.y);
-		// Making sure that we are not trying to Build outside the BOUNDARIES of the GRID
-		if (mX > resourceGrid.mapSizeX - 3){
-			mX = resourceGrid.mapSizeX - 3;
-		}
-		if (mY > resourceGrid.mapSizeY -3){
-			mY = resourceGrid.mapSizeY - 3;
-		}
-		if (mX < 3){
-			mX = 3;
-		}
-		if (mY < 3){
-			mY = 3;
-		}
-		// Move building with the mouse
-		Vector3 followPos = new Vector3 (mX, mY);
+        //m = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+    
+        //      m.z = 0;
+        //// Making sure that we are not trying to Build outside the BOUNDARIES of the GRID
+        //if (mX > resourceGrid.mapSizeX - 3){
+        //	mX = resourceGrid.mapSizeX - 3;
+        //}
+        //if (mY > resourceGrid.mapSizeY -3){
+        //	mY = resourceGrid.mapSizeY - 3;
+        //}
+        //if (mX < 3){
+        //	mX = 3;
+        //}
+        //if (mY < 3){
+        //	mY = 3;
+        //}
 
-		transform.position = followPos;
+        // Move building with the mouse
+		transform.position = mouse_controller.currMouseP;
+        mX = Mathf.RoundToInt(transform.position.x);
+        mY = Mathf.RoundToInt(transform.position.y);
 
-
-		if (CheckEmptyBeneath (mX, mY) && !onEnemy) {
+        if (CheckEmptyBeneath (mX, mY) && !onEnemy) {
 			
 			if (tileType == TileData.Types.extractor) {
 				if (CheckForResource (mX, mY + 1, "ore")) { // top
@@ -211,10 +215,13 @@ public class Building_PositionHandler : MonoBehaviour {
             // Right BEFORE pooling this object we tell Building UI that we are NOT currently building anymore
             build_controller.SetCurrentlyBuildingBool(false);
 
-			// stop following and tell grid to swap this tile to this new building
-			mapPosX = mX;
-			mapPosY = mY;
-			resourceGrid.SwapTileType (mX, mY, tileType, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
+            // stop following and tell grid to swap this tile to this new building
+            //mapPosX = mX;
+            //mapPosY = mY;
+
+            TileData currTile = mouse_controller.GetTileUnderMouse();
+
+			resourceGrid.SwapTileType (currTile.posX, currTile.posY, tileType, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
 			followMouse = false;
             
 			// Pool this object

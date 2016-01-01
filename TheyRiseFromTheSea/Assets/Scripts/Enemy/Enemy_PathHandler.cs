@@ -43,6 +43,10 @@ public class Enemy_PathHandler : MonoBehaviour
 
     Vector3 escapePos;
 
+    public bool isEscapingObstacle { get; protected set; }
+
+    Vector3 currPathPosition; // < ------ To check against so we don't request a path when our target's position hasn't changed
+
     // Steering Behaviors:
     //  seek : normal follow path to the target
     //  Separate: follows and path but always maintains a distance to a certain other object by shifting its speed
@@ -75,7 +79,15 @@ public class Enemy_PathHandler : MonoBehaviour
     void Start()
     {
         if (target != null)
+        {
             StartCoroutine("RequestPath");
+
+            // Set my Attack Handler's main target
+            GetComponent<Enemy_AttackHandler>().SetMainTarget(target);
+
+            Debug.Log("main target has been set!");
+        }
+            
 
         _state = State.GETTING_PATH;
       
@@ -90,26 +102,40 @@ public class Enemy_PathHandler : MonoBehaviour
             finishedPath = false;
             print("My target's position is: " + target);
             StartCoroutine("RequestPath");
+
         }
 
-        if (_state == State.MOVING_TO_TARGET && finishedPath)
-            SwitchToAttacking();
+        if (finishedPath && savedTarget != null)
+        {
+            if (_state != State.GETTING_PATH)
+                SwitchToMoving();
+        }
 
         debugState = _state;
+
+        if (_state == State.MOVING_TO_TARGET && target.gameObject == null)
+        {
+            if (_state != State.GETTING_PATH)
+                SwitchToMoving();
+        }
+
     }
 
-    public void SwitchToAttacking()
-    {
-        StopCoroutine("RequestPath");
-        StopCoroutine("FollowPath");
-        _state = State.ATTACKING;
-    }
 
     public void SwitchToMoving()
     {
-        target = savedTarget;
+
+        // If the savedTarget is null that means we never called SwitchPath, so we are currently chasing the main target set at spawn
+        if (savedTarget != null)
+        {
+            target = savedTarget;
+        }
+        StopCoroutine("RequestPath");
         StartCoroutine("RequestPath");
         _state = State.GETTING_PATH;
+        Debug.Log("Continuing PATH TO Main Target.");
+
+
     }
 
     public void SwitchPathTarget(Transform newTarget)
@@ -117,7 +143,7 @@ public class Enemy_PathHandler : MonoBehaviour
         savedTarget = target;
         target = newTarget;
         _state = State.MOVING_TO_TARGET;
-        StopCoroutine("FollowPath");
+       // StopCoroutine("FollowPath");
         Debug.Log("SWITCHED TARGET! New Target's position is: " + newTarget.position);
     }
 
@@ -127,22 +153,69 @@ public class Enemy_PathHandler : MonoBehaviour
         {
            
             yield return new WaitForSeconds(0.7f);
-            Vector3 targetPosition = target.position;
 
-            if (_state == State.MOVING_TO_TARGET)
+          
+            if (currPathPosition != target.position)
             {
-                // Since this New Target is NOT walkable, choose to move to the left or right of it
-                int leftOrRight = Random.Range(0, 2);
-                if (leftOrRight == 0)
-                    // left
-                    targetPosition.x = target.position.x - 1;
-                else
-                    //right
-                    targetPosition.x = target.position.x + 1;
+                currPathPosition = target.position;
+
+            
             }
 
-            PathRequestManager.RequestPath(transform.position, targetPosition, OnPathFound);
-            print("Path requested.");
+            // Need to offset the target position only if the target is sitting on an unwalkable node
+            if (!grid.NodeFromWorldPoint(currPathPosition).isWalkable || _state == State.MOVING_TO_TARGET)
+            {
+                //// check if my target is to my left or right
+
+                //// If the target is to this unit's right, my target position should be to the target's left. Same thing but opposite if they are to my left.
+                if (target.position.x > transform.position.x)
+                {
+                    // they are to my right
+                    // move to the target's left
+                    currPathPosition.x = currPathPosition.x - 2;
+                }
+                else
+                {
+                    // they are to my left
+                    // move to the target's right
+                    currPathPosition.x = currPathPosition.x + 2;
+
+                }
+
+                // If it is STILL an unwakable tile try pointing to right under it
+                if (!grid.NodeFromWorldPoint(currPathPosition).isWalkable)
+                {
+                    // JUST GO UNDER IT!
+                    currPathPosition.y = currPathPosition.y - 2;
+                    Debug.Log("Trying to Go UNDER the tower attacking me.");
+                }
+
+            }
+
+            if (!grid.NodeFromWorldPoint(transform.position).isWalkable)
+            {
+                // If the spot this Unit is on is NOT WALKABLE, we need to escape!!
+                if (!isEscapingObstacle)
+                {
+                    if (CheckNeighborsForWalkable() != Vector3.zero)
+                        escapePos = CheckNeighborsForWalkable();
+                    Debug.Log("ESCAPE POS = " + escapePos);
+                 
+                    FullStop();
+                    isEscapingObstacle = true;
+                    StartCoroutine("EscapeObstacle");
+
+                 
+                }
+
+               // FullStop();
+            }
+
+            PathRequestManager.RequestPath(transform.position, currPathPosition, OnPathFound);
+            //print("Path requested.");
+
+
+
         }
 
     }
@@ -151,6 +224,7 @@ public class Enemy_PathHandler : MonoBehaviour
     {
         if (pathSuccesful)
         {
+            isEscapingObstacle = false;
             path = newPath;
             targetIndex = 0;
             StopCoroutine("FollowPath");
@@ -161,21 +235,87 @@ public class Enemy_PathHandler : MonoBehaviour
         else
         {
             bool currIswalkable = grid.NodeFromWorldPoint(transform.position).isWalkable;
-            print("Could not find a path from this location. This node is walkable: " + currIswalkable);
+            print("Could not find a path from this location. This node is walkable: " + currIswalkable + " Target node is walkable: " + grid.NodeFromWorldPoint(currPathPosition).isWalkable);
 
-         
 
-            if (!currIswalkable && grid.NodeFromWorldPoint(escapePos).isWalkable)
+            if (_state != State.BLOCKED && _state != State.MOVING_TO_TARGET)
             {
-                var direction = -(target.position - transform.position).normalized;
-                escapePos = transform.position + direction;
-                //StopCoroutine("RequestPath");
-                FullStop();
-                StartCoroutine("EscapeObstacle");
+                _state = State.BLOCKED;
             }
+            
+
+            if (!isEscapingObstacle && grid.NodeFromWorldPoint(currPathPosition).isWalkable)
+            {
+                Debug.Log("Escaping Obstacle");
+
+                if (CheckNeighborsForWalkable() != Vector3.zero)
+                    escapePos = CheckNeighborsForWalkable();
+                Debug.Log("ESCAPE POS = " + escapePos);
+
+                FullStop();
+                isEscapingObstacle = true;
+                StartCoroutine("EscapeObstacle");
+
+            }
+   
+
                 
 
         }
+    }
+
+
+    Vector3 CheckNeighborsForWalkable()
+    {
+        var closestDistance = 1f;
+        var closestNeighbor = Vector3.zero;
+        bool isToMyRight = false;
+
+        if (target.position.x > transform.position.x)
+        {
+            // target is to my right
+            closestDistance = (target.position - (transform.position + Vector3.right)).sqrMagnitude;
+            isToMyRight = true;
+        }
+        else
+        {
+            // target is to my left
+            closestDistance = (target.position - (transform.position + Vector3.left)).sqrMagnitude;
+            isToMyRight = false;
+        }
+
+
+        for (int y = -1; y <= 1; y++)   
+        {
+            for (int x = -1; x <= 1; x++)
+            {
+                Vector3 neighbor = new Vector3(transform.position.x + x, transform.position.y + y, 0);
+                if (grid.NodeFromWorldPoint(neighbor).isWalkable)
+                {
+                    var newDistance = (target.position - neighbor).sqrMagnitude;
+                    if ( newDistance <= closestDistance)
+                    {
+                        closestDistance = newDistance;
+                        closestNeighbor = neighbor;
+                    }
+              
+                }
+            }
+        }
+
+        // To assure we dont get a vector 3 zero position as a return, at least return the left or right of my current position
+        if (closestNeighbor == Vector3.zero)
+        {
+            if (isToMyRight)
+            {
+                closestNeighbor = transform.position + Vector3.left;
+            }
+            else
+            {
+                closestNeighbor = transform.position + Vector3.right;
+            }
+        }
+        return closestNeighbor;
     }
 
     //void StartEscaping(Vector3 blockedPosition)
@@ -183,6 +323,7 @@ public class Enemy_PathHandler : MonoBehaviour
     //    // Reset the Follow Path coroutine & targetIndex
     //    targetIndex = 0;
     //    StopCoroutine("FollowPath");
+
 
     //    // State becomes Blocked
     //    if (_state != State.BLOCKED)
@@ -210,14 +351,16 @@ public class Enemy_PathHandler : MonoBehaviour
     {
         while (true)
         {
-            if ((transform.position - escapePos).sqrMagnitude > 0.5f )
+            if (Vector3.Distance(transform.position, escapePos) > 0.1f  && isEscapingObstacle)
             {
                 transform.position = Vector3.MoveTowards(transform.position, escapePos, mStats.curMoveSpeed * Time.deltaTime);
                 yield return null;
             }
             else
             {
+                Debug.Log("STOPPED ESCAPING.");
                 StartCoroutine("RequestPath");
+                isEscapingObstacle = false;
                 yield break;
             }
         }
@@ -272,6 +415,10 @@ public class Enemy_PathHandler : MonoBehaviour
 
                 yield return null;
             }
+        }
+        else
+        {
+            yield break;
         }
 
 
@@ -328,16 +475,65 @@ public class Enemy_PathHandler : MonoBehaviour
             // In case the escaping coroutine is currently going
             //StopCoroutine("EscapeObstacle");
             // StartEscaping(coll.transform.position);
-            FullStop();
 
-            var direction = -(coll.transform.position - transform.position).normalized;
 
-            escapePos = transform.position + direction;
 
-            StartCoroutine("EscapeObstacle");
+            if (!isEscapingObstacle)
+            {
+                FullStop();
 
-            Debug.Log("Direction from me to rock " + direction);
+                if (CheckNeighborsForWalkable() != Vector3.zero)
+                    escapePos = CheckNeighborsForWalkable();
+
+                isEscapingObstacle = true;
+                StartCoroutine("EscapeObstacle");
+            }
+
+
+       
         
         }
+
+        //if (_state == State.BLOCKED)
+        //{
+        //    // A blocked enemy will detect hitting another Enemy to check if they have a way out
+        //    if (coll.gameObject.CompareTag("Enemy"))
+        //    {
+        //        // When a unit hits another unit they should compare target's. 
+        //        if (coll.gameObject.GetComponent<Enemy_PathHandler>().currPathPosition == currPathPosition)
+        //        {
+        //            // If the targets are the same, the unit that is closest to the target will give their current path to the other unit.
+        //            var theirDistance = Vector3.Distance(coll.transform.position, currPathPosition);
+        //            var myDistance = Vector3.Distance(transform.position, currPathPosition);
+
+        //            if (theirDistance < myDistance)
+        //            {
+        //                Enemy_PathHandler theirPath = coll.gameObject.GetComponent<Enemy_PathHandler>();
+        //                if (theirPath.path != null)
+        //                {
+        //                    Debug.Log("I'VE COLLIDED AGAINST A BROTHER! They are closer to the target than me!");
+
+        //                    // Stop moving on path
+        //                    FullStop();
+
+        //                    // Now set my escape position to be equal to their next path position, so I will try to escape using their path which should be good to go.
+
+        //                    escapePos = theirPath.path[theirPath.targetIndex];
+
+        //                    // Start my escape if I'm not already escaping
+        //                    if (!isEscapingObstacle)
+        //                    {
+        //                        isEscapingObstacle = true;
+        //                        StartCoroutine("EscapeObstacle");
+
+        //                    }
+        //                }
+
+
+        //            }
+        //        }
+        //    }
+        //}
+ 
     }
 }

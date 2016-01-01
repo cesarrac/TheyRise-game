@@ -38,8 +38,8 @@ public class Pathfinding : MonoBehaviour
         if (grid == null)
             grid = ResourceGrid.Grid;
 
-        Stopwatch sw = new Stopwatch();
-        sw.Start();
+        //Stopwatch sw = new Stopwatch();
+        //sw.Start();
 
         Vector3[] waypoints = new Vector3[0];
         bool pathSuccess = false;
@@ -67,8 +67,8 @@ public class Pathfinding : MonoBehaviour
 
                 if (currentNode == targetNode)
                 {
-                    sw.Stop();
-                    print("Path found: " + sw.ElapsedMilliseconds + " ms");
+                    //sw.Stop();
+                    //print("Path found: " + sw.ElapsedMilliseconds + " ms");
                     pathSuccess = true;
                     // Found the end node
 

@@ -77,10 +77,8 @@ public class NanoBuilding_Handler : MonoBehaviour {
         
         if (Input.GetMouseButtonDown(1))
         {
-            MouseBuilding_Controller.MouseController.GetTileUnderMouse();
-
             
-            GetBuildingFromType(MouseBuilding_Controller.TileTypeUnderMouse);
+            GetBuildingFromType(MouseBuilding_Controller.MouseController.GetTileUnderMouse().tileType);
 
             // Play build sound
             audio_source.PlayOneShot(buildSound, 0.5f);
@@ -179,32 +177,12 @@ public class NanoBuilding_Handler : MonoBehaviour {
         if (Input.GetButtonDown("Break"))
         {
             // Check the tile mouse is on and all 8 tiles around it for a building
-            MouseBuilding_Controller mouse_controller = MouseBuilding_Controller.MouseController;
-
-            //for (int x = -1; x <= 1; x++)
-            //{
-            //    for (int y = -1; y <= 1; y++)
-            //    {
-            //        mouse_controller.GetTileUnderMouse(x, y);
-            //        TileData.Types tile = MouseBuilding_Controller.TileTypeUnderMouse;
-            //        if (tile != TileData.Types.empty && tile != TileData.Types.rock && tile != TileData.Types.mineral && tile != TileData.Types.water && tile != TileData.Types.capital) 
-            //        {
-
-            //            mouse_controller.GetTileGObj();
-            //            GameObject building = mouse_controller.tileUnderMouseAsGameObj;
-            //            BreakThisBuilding(tile, building);
-            //            break; 
-            //        }
-            //    }
-            //}
-            mouse_controller.GetTileUnderMouse();
-            TileData.Types tile = MouseBuilding_Controller.TileTypeUnderMouse;
-            if (tile != TileData.Types.empty && tile != TileData.Types.rock && tile != TileData.Types.mineral && tile != TileData.Types.water && tile != TileData.Types.capital)
+            TileData tileUnderMouse = MouseBuilding_Controller.MouseController.GetTileUnderMouse();
+            if (tileUnderMouse.tileType != TileData.Types.empty && tileUnderMouse.tileType != TileData.Types.rock && tileUnderMouse.tileType != TileData.Types.mineral && tileUnderMouse.tileType != TileData.Types.water && tileUnderMouse.tileType != TileData.Types.capital)
             {
-
-                mouse_controller.GetTileGObj();
-                GameObject building = mouse_controller.tileUnderMouseAsGameObj;
-                BreakThisBuilding(tile, building);
+                // ******************** FIX ME!!!! IM NOT BREAKING PROPERLY SOMETIMES : (
+                GameObject building = ResourceGrid.Grid.GetTileGameObjFromIntCoords(tileUnderMouse.posX, tileUnderMouse.posY);
+                BreakThisBuilding(tileUnderMouse.tileType, building);
             }
         }
     }

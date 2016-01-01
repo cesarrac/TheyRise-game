@@ -12,7 +12,7 @@ public class MasterState_Manager : MonoBehaviour {
 	/// - Pause CoRoutines in other scripts by changing Master State
 	/// </summary>
 
-	public enum MasterState { WAITING, LOADING, START, PAUSED, MISSION_FAILED, MISSION_SUCCESS, CONTINUE, QUIT }
+	public enum MasterState { WAITING, LOADING, START, PAUSED, MISSION_FAILED, PLAYER_DEAD,  MISSION_SUCCESS, CONTINUE, QUIT }
 
 	private MasterState _mState = MasterState.WAITING;
 
@@ -23,8 +23,12 @@ public class MasterState_Manager : MonoBehaviour {
 
 	public GameObject missionFailedPanel;
 
+    public static MasterState_Manager Instance { get; protected set; }
+
 	void Awake () 
 	{
+        Instance = this;
+
 		game_master = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster> ();
 
 		// If for some reason the mission failed panel is still active, deactivate it
@@ -68,7 +72,11 @@ public class MasterState_Manager : MonoBehaviour {
 			// Pause game and tell GameMaster to load level or go back to ship level
 			MissionFailed();
 			break;
-		case MasterState.MISSION_SUCCESS:
+        case MasterState.PLAYER_DEAD:
+            // Pause game and tell GameMaster to load level or go back to ship level
+            MissionFailed();
+            break;
+            case MasterState.MISSION_SUCCESS:
 			break;
 		case MasterState.QUIT:
 			//TODO: Here we would begin the save progress function and then quit the application

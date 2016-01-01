@@ -115,7 +115,7 @@ public class Tower_TargettingHandler : Unit_Base
     {
         // NOTE: Can't Shoot if I'm in a Starved or Reloading!
 
-        if (enemyInRange && _state != State.STARVED && _state != State.MANUAL_CONTROL)
+        if (enemyInRange && _state != State.STARVED && _state != State.MANUAL_CONTROL && targetUnit == null)
         {
 
             SeekEnemies();
@@ -473,24 +473,19 @@ public class Tower_TargettingHandler : Unit_Base
     /// </summary>
     void HandleDamageToUnit()
     {
-        if (targetUnit != null)
+        if (AttackUnit(targetUnit.GetComponent<Unit_Base>()))
         {
 
-            // Get Unit Base
-            Unit_Base unitToHit = targetUnit.GetComponent<Unit_Base>();
-
-            // Do Damage
-            AttackOtherUnit(unitToHit);
-
-            // Tell the enemy this Tower is attacking it
-            targetUnit.GetComponent<Enemy_AttackHandler>().attacker = gameObject;
+            // Tell the enemy this Tower is attacking it if it doesn't already have an attacker
+            if (targetUnit.GetComponent<Enemy_AttackHandler>().attackingTower == null)
+                targetUnit.GetComponent<Enemy_AttackHandler>().attackingTower = gameObject;
 
             // Lose a bullet
             ammoCount--;
-
         }
         else
         {
+            targetUnit = null;
 
             // Target is null, go back to Seeking IF NOT in Manual Control or Starved
             if (_state != State.MANUAL_SHOOTING && _state != State.STARVED)

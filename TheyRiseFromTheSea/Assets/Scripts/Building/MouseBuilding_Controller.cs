@@ -4,10 +4,10 @@ using System.Collections;
 public class MouseBuilding_Controller:MonoBehaviour
 {
     public static MouseBuilding_Controller MouseController { get; protected set; }
-    public static TileData.Types TileTypeUnderMouse { get; protected set; }
+  
 
-    Vector3 currMouseP;
-    public GameObject tileUnderMouseAsGameObj { get; protected set; }
+    public Vector3 currMouseP { get; protected set; }
+
    
 
     void Awake()
@@ -25,6 +25,24 @@ public class MouseBuilding_Controller:MonoBehaviour
         }
 
         ZoomWithMouseWheel();
+
+        // FOR DEBUGGING PURPOSES:
+        // Tile Under Mouse Tool: print to console the tile type and position of the tile under mouse
+        if (!Build_MainController.Instance.currentlyBuilding)
+        {
+            DebugTileUnderMouse();
+        }
+
+    }
+
+    void DebugTileUnderMouse()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            TileData tile = GetTileUnderMouse();
+            print("Tile under mouse is of type: " + tile.tileType + " tile Position: " + tile.posX + " " + tile.posY);
+            print("ACCORDING TO THE GRID: This tile points to this gameobject: " + ResourceGrid.Grid.spawnedTiles[tile.posX, tile.posY]);
+        }
     }
 
     void ZoomWithMouseWheel()
@@ -34,50 +52,13 @@ public class MouseBuilding_Controller:MonoBehaviour
         Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize, 6f, 12.5f);
     }
 
-    public void GetTileUnderMouse()
+
+    public TileData GetTileUnderMouse()
     {
-        // Offset is only set to more than 0 in the case that we need to check tiles adjacent to mouse position
-        //int x = (Mathf.FloorToInt(currMouseP.x)) + xOffset;
-        //int y = (Mathf.FloorToInt(currMouseP.y)) + yOffset;
-        //if (ResourceGrid.Grid.CheckIsInMapBounds(x, y))
-        //{
-        //    // If player right clicks we find out what tile type the mouse is over
-        //    //TileTypeUnderMouse = GetTileAtMouse(x, y);
-        //    //Debug.Log("Tile under mouse is: " + TileTypeUnderMouse);
-        //    TileTypeUnderMouse = ResourceGrid.Grid.TileFromWorldPoint(currMouseP).tileType;
-        //}
-        TileTypeUnderMouse = ResourceGrid.Grid.TileFromWorldPoint(currMouseP).tileType;
+        return ResourceGrid.Grid.TileFromWorldPoint(currMouseP);
     }
 
-    //TileData.Types GetTileAtMouse(int x, int y)
-    //{
-    //    return ResourceGrid.Grid.GetTileType(x, y);
-    //}
-
-    public void GetTileGObj()
-    {
-        //int x = (Mathf.FloorToInt(currMouseP.x)) + xOffset;
-        //int y = (Mathf.FloorToInt(currMouseP.y)) + yOffset;
-        //if (ResourceGrid.Grid.CheckIsInMapBounds(x, y))
-        //{
-        //    tileUnderMouseAsGameObj = GetTileObjectAtMouse(x, y);
-        //}
-        tileUnderMouseAsGameObj = ResourceGrid.Grid.GetTileGameObjFromWorldPos(currMouseP);
-
-    }
-   
-    public GameObject GetTileGameObj()
-    {
-        if (ResourceGrid.Grid.GetTileGameObjFromWorldPos(currMouseP) != null)
-        {
-            return ResourceGrid.Grid.GetTileGameObjFromWorldPos(currMouseP);
-        }
-        else
-        {
-            return null;
-        }
-        
-    }
+  
 
 
 

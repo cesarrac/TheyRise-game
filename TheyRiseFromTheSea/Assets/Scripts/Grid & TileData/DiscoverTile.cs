@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class DiscoverTile : MonoBehaviour {
 	/// <summary>
@@ -23,7 +24,8 @@ public class DiscoverTile : MonoBehaviour {
 
 	public Resource_Sprite_Handler r_sprite_handler;
 
-	void Awake()
+
+    void Awake()
 	{
         //		if (!r_sprite_handler) {
         //			r_sprite_handler = GameObject.FindGameObjectWithTag("Map").GetComponent<Resource_Sprite_Handler>();
@@ -131,17 +133,18 @@ public class DiscoverTile : MonoBehaviour {
 			// ADD this tile to the Grid's spawnedTiles array
             if (spriteWidth > 0 && spriteHeight > 0)
             {
-                for (int w = 0; w < spriteWidth; w++)
+                for (int w = -(spriteWidth - 1); w < spriteWidth; w++)
                 {
                     for (int h = 0; h < spriteHeight; h++)
                     {
                         resourceGrid.spawnedTiles[mapPosX + w, mapPosY + h] = tileToSpawn;
                     }
                 }
+
             }
             else
             {
-			resourceGrid.spawnedTiles [mapPosX, mapPosY] = tileToSpawn;
+			    resourceGrid.spawnedTiles [mapPosX, mapPosY] = tileToSpawn;
             }
 
 		}
@@ -153,7 +156,7 @@ public class DiscoverTile : MonoBehaviour {
         Rock_Handler rock_handler = tileToSpawn.GetComponent<Rock_Handler>();
         if (_tileType == TileData.Types.rock) {
 			// Is this a single, tiny, small, medium, large or larger rock?
-			int randomRocksize = Random.Range (0, 6);
+			int randomRocksize = UnityEngine.Random.Range (0, 6);
             switch (randomRocksize)
             {
                 case 0:
@@ -205,7 +208,7 @@ public class DiscoverTile : MonoBehaviour {
 			
 		} else if (_tileType == TileData.Types.mineral) {
             // Is this a single, tiny, small, medium, large or larger mineral?
-            int randomRocksize = Random.Range(0, 6);
+            int randomRocksize = UnityEngine.Random.Range(0, 6);
             switch (randomRocksize)
             {
                 case 0:

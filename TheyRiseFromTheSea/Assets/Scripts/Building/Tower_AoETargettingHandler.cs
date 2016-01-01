@@ -228,9 +228,11 @@ public class Tower_AoETargettingHandler : Unit_Base {
 	void HandleDamageToUnit(GameObject target)
 	{
 		if (target != null && target.activeSelf) {
-            target.GetComponent<Enemy_AttackHandler>().attacker = gameObject;
-			AttackOtherUnit (target.GetComponent<Unit_Base> ());
-			VisualShooting (target);
+
+            if (AttackUnit(target.GetComponent<Unit_Base>()))
+            {
+                VisualShooting(target);
+            }
 		} 
 	}
 	

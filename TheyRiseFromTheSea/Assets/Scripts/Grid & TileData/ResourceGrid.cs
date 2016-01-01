@@ -105,12 +105,19 @@ public class ResourceGrid : MonoBehaviour{
     public List<Vector2> emptyTilePositions;
     public Vector2[] emptyTilesArray;
 
+    public bool worldGridInitialized { get; protected set; }
+
     public int MaxSize
     {
         get
         {
             return mapSizeX * mapSizeY;
         }
+    }
+
+    void OnEnable()
+    {
+        worldGridInitialized = false;
     }
 
     void Awake()
@@ -161,35 +168,34 @@ public class ResourceGrid : MonoBehaviour{
         // This creates the Initial Pathfinding graph taking into account unwakable tiles already spawned (ex. Rock, Water, Capital)
         //InitPathFindingGraph ();
         InitPathFindingGrid();
-        
 
-//		BuildTheCapital ();
-	}
+        worldGridInitialized = true;
+    }
 
 	// DEBUG NOTE: using this Update method to find map coordinates to match them with map graphics
 	void Update()
 	{
-		if (Input.GetMouseButtonDown (1)) {
-			Vector3 m = Input.mousePosition;
-            m.z = 0;
-            Vector3 mouse = Camera.main.ScreenToWorldPoint(m);
-            TileData Tile = TileFromWorldPoint(mouse);
-            TileData.Types tileType = Tile.tileType;
-            int tilePosX = Tile.posX;
-            int tilePosY = Tile.posY;
-            print("Tile under mouse is of type: " + tileType + " tile Position: " + tilePosX + " " + tilePosY);
+		//if (Input.GetMouseButtonDown (1)) {
+		//	Vector3 m = Input.mousePosition;
+  //          m.z = 0;
+  //          Vector3 mouse = Camera.main.ScreenToWorldPoint(m);
+  //          TileData Tile = TileFromWorldPoint(mouse);
+  //          TileData.Types tileType = Tile.tileType;
+  //          int tilePosX = Tile.posX;
+  //          int tilePosY = Tile.posY;
+  //          print("Tile under mouse is of type: " + tileType + " tile Position: " + tilePosX + " " + tilePosY);
 
-			//int mX = Mathf.RoundToInt(m.x);
-			//int mY = Mathf.RoundToInt(m.y);
+		//	//int mX = Mathf.RoundToInt(m.x);
+		//	//int mY = Mathf.RoundToInt(m.y);
 
-			//if (mX <= mapSizeX && mY <= mapSizeY && mX > 0 && mY > 0){
-			//	if (coordinatesText != null && tiletypeText != null){
-			//		coordinatesText.text = "X: " + mX + " Y: " + mY;
-			//		tiletypeText.text = "Type: " + tiles[mX, mY].tileType;
-			//	}
-			//}
-			//print ("map coord:" + TileCoordToWorldCoord(mX, mY).ToString() + "world coord: " + m);
-		}
+		//	//if (mX <= mapSizeX && mY <= mapSizeY && mX > 0 && mY > 0){
+		//	//	if (coordinatesText != null && tiletypeText != null){
+		//	//		coordinatesText.text = "X: " + mX + " Y: " + mY;
+		//	//		tiletypeText.text = "Type: " + tiles[mX, mY].tileType;
+		//	//	}
+		//	//}
+		//	//print ("map coord:" + TileCoordToWorldCoord(mX, mY).ToString() + "world coord: " + m);
+		//}
 
 		if (!terraformer_built && islandVisible)
 			BuildTheCapital();
@@ -942,9 +948,12 @@ public class ResourceGrid : MonoBehaviour{
 
             Debug.Log("GRID: Returning " + returnNanoCost + " NANOBOTS ");
 
-            
+
 
             // ***********  DEFINE NEW EMPTY TILES:
+
+            // Store the gameobject before doing anything to it.
+            GameObject tileToBeDestroyed = spawnedTiles[x, y];
 
             // If a tile was set as a group of multiple tiles to cover the space of its sprite, we nee to turn ALL of them to empty
             if (spriteSizeX > 0 || spriteSizeY > 0) // < ----- the way we are swapping for an empty tile, these are always = 0 in this case
@@ -955,7 +964,7 @@ public class ResourceGrid : MonoBehaviour{
             else
             {
                 // we need the size of the tile that WAS here. We can get the gameobject from spawnedTiles[,], and from that get the Sprite
-                if (spawnedTiles[x, y].GetComponent<SpriteRenderer>() != null)
+                if (tileToBeDestroyed != null)
                 {
                    
                     int width = Mathf.RoundToInt(spawnedTiles[x, y].GetComponent<SpriteRenderer>().sprite.bounds.size.x);
@@ -975,21 +984,15 @@ public class ResourceGrid : MonoBehaviour{
 
             //*********   POOL SPAWNED TILE:
 
-            //			Destroy(spawnedTiles[x,y].gameObject);
-            objPool.PoolObject(spawnedTiles[x, y].gameObject);
+            // Use the stored gameobject variable from above to pool it. This represents the base tile of this object, the other placemarkers in the spawnedTiles array have been removed.
+            objPool.PoolObject(tileToBeDestroyed);
         
-
-
-            // ******** DEFINE AS NULL GAMEOBJECT
-
-            // Make it null as a spawnedTiles
-            spawnedTiles[x, y] = null;
         }
 	}
 
     void DefineMultipleTiles(int x, int y, int spriteWidth, int spriteHeight, string name, TileData.Types newType, int quantity, int moveCost, float hp, float defence, float attack, float shield, int nanoBotCost  )
     {
-        for (int w = 0; w < spriteWidth; w++)
+        for (int w = -(spriteWidth - 1); w < spriteWidth; w++)
         {
             for (int h = 0; h < spriteHeight; h++)
             {
@@ -1007,12 +1010,23 @@ public class ResourceGrid : MonoBehaviour{
         }
     }
 
+    //void DefineMultipleTilesAsGameObjects(int x, int y, int spriteWidth, int spriteHeight, GameObject tileGameObj)
+    //{
+    //    for (int w = -(spriteWidth - 1); w < spriteWidth; w++)
+    //    {
+    //        for (int h = -1; h < spriteHeight; h++)
+    //        {
+    //            spawnedTiles[x + w, y + h] = tileGameObj;
+    //        }
+    //    }
+    //}
+
     void DefineMultipleEmptyTiles(int x, int y, int spriteWidth, int spriteHeight)
     {
         // Store the current tiletype to check against
         TileData.Types formerType = tiles[x, y].tileType;
         Debug.Log("Defining multiple empty tiles of " + formerType);
-        for (int w = 0; w < spriteWidth; w++)
+        for (int w = -(spriteWidth - 1); w < spriteWidth; w++)
         {
             for (int h = 0; h < spriteHeight; h++)
             {
@@ -1022,6 +1036,9 @@ public class ResourceGrid : MonoBehaviour{
                     tiles[x + w, y + h] = new TileData(x + w, y + h, TileData.Types.empty, 0, 1);
 
                     grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable;
+
+                    if (spawnedTiles[x + w, y + h] != null)
+                        spawnedTiles[x + w, y + h] = null;
                 }
 
             }

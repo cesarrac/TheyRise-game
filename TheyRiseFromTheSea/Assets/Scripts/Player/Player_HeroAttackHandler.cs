@@ -102,7 +102,10 @@ public class Player_HeroAttackHandler : Unit_Base {
 		
 		// and Pool myself
 		objPool.PoolObject (this.gameObject);
-	}
+
+
+        MasterState_Manager.Instance.mState = MasterState_Manager.MasterState.PLAYER_DEAD;
+    }
 
 
  

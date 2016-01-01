@@ -481,7 +481,9 @@ public class ExtractionBuilding : MonoBehaviour {
         {
           if (Input.GetMouseButtonDown(1))
             {
-                GameObject input = mouse_control.GetTileGameObj();
+                TileData tileUnderMouse = mouse_control.GetTileUnderMouse();
+                GameObject input = ResourceGrid.Grid.GetTileGameObjFromIntCoords(tileUnderMouse.posX, tileUnderMouse.posY);
+
                 if (input != null)
                 {
                     if (input.GetComponent<ExtractionBuilding>() != null)

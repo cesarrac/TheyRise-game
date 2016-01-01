@@ -108,11 +108,12 @@ public class Unit_Base : MonoBehaviour {
       
     }
 
+    // ********************** WARNING! This is the old Attack Unit method that really does not work as well!! ******************************
     public void AttackOtherUnit(Unit_Base unit){
 		Debug.Log ("UNIT: target unit hp at " + unit.stats.curHP);
 		Debug.Log ("UNIT: My damage is " + stats.curDamage + " and my HP is " + stats.curHP);
 
-		if (unit.stats.curHP >= 1f) {
+		if (unit.stats.curHP > 0) {
 
 			float def = (unit.stats.curDefence + unit.stats.curShield);
 
@@ -124,7 +125,7 @@ public class Unit_Base : MonoBehaviour {
 
 			}else{
 				// hit for difference between def and attack
-				float calc = def - stats.curAttack;
+				float calc = stats.curAttack - def;
 				float damageCalc = stats.curDamage - calc;
 
 				// always do MINIMUM 1 pt of damage
@@ -143,6 +144,53 @@ public class Unit_Base : MonoBehaviour {
 		}
 	
 	}
+    // *************************************************************************
+
+
+    // *********** THIS IS THE NEW ONE! ***************************
+    public bool AttackUnit(Unit_Base target)
+    {
+        if (target.stats.curHP > 0)
+        {
+
+            float def = (target.stats.curDefence + target.stats.curShield);
+
+            if (stats.curAttack > def)
+            {
+                //Debug.Log("UNIT: Attacking " + target.name + " DEF: " + def + " ATTK: " + stats.curAttack);
+
+                // Apply full damage
+                TakeDamage(target, stats.curDamage);
+
+             
+            }
+            else
+            {
+                // hit for difference between def and attack
+                float calc = stats.curAttack - def;
+                float damageCalc = stats.curDamage - calc;
+
+                // always do MINIMUM 1 pt of damage
+                float clampedDamage = Mathf.Clamp(damageCalc, 1f, stats.curDamage);
+
+               // Debug.Log("UNIT: Can't beat " + target.name + "'s Defence, so I hit for " + clampedDamage);
+
+                TakeDamage(target, clampedDamage);
+
+            }
+
+            return true;
+        }
+        else
+        {
+            // target is dead by now
+            Debug.Log("UNIT: Target Dead!");
+            //Die(unit.gameObject);
+
+            return false;
+
+        }
+    }
 
 	// ONLY USED BY KAMIKAZE UNITS ATTACKING PLAYER UNITS
 	public void SpecialAttackOtherUnit(Unit_Base unit){

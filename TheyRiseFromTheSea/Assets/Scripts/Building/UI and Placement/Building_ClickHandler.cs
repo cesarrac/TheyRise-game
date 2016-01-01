@@ -47,7 +47,7 @@ public class Building_ClickHandler : MonoBehaviour {
 
 	private bool playerIsNear = false;// Only turns true if the player walks up to the building
 
-	public enum State { ASSEMBLING, READY, DISSASEMBLING, RECYCLE_NANOBOTS, CREATING }
+	public enum State { ASSEMBLING, READY, DISSASEMBLING, RECYCLE_NANOBOTS, CREATING, DISSASEMBLED}
 	private State _state;
 	public State state { get { return _state; } set { _state = value; } }
     public State debugState;
@@ -58,6 +58,8 @@ public class Building_ClickHandler : MonoBehaviour {
 	int nanoBotsNeeded = 10; // CHANGE THIS TO COST !!
 
     TileData myTile;
+
+    Transform playerTransform; // < --------------- can get it when player collides with this building. if not it can just find it.
 
 
     void OnEnable()
@@ -75,8 +77,12 @@ public class Building_ClickHandler : MonoBehaviour {
 
         // set cost
         //nanoBotsNeeded = nanoBotCost / 10;
+        nanoBotsCreated = 0;
 
-	}
+
+        
+
+    }
 	void Awake()
 	{
 		dissasemblyCountDown = dissasemblyTime;
@@ -109,7 +115,7 @@ public class Building_ClickHandler : MonoBehaviour {
 	void Start () {
 
         // get my tiletype
-        myTileType = CheckTileType((int)transform.position.x, (int)transform.position.y);
+        myTileType = resourceGrid.TileFromWorldPoint(transform.position).tileType;
 
         if (myTileType != TileData.Types.capital)
             nano_builder = resourceGrid.Hero.GetComponent<NanoBuilding_Handler>();
@@ -134,8 +140,11 @@ public class Building_ClickHandler : MonoBehaviour {
 		myCollider = GetComponent<BoxCollider2D> ();
 		vertExtents = myCollider.bounds.extents.y;
 
-        myTile = resourceGrid.TileFromWorldPoint(transform.position);
 
+        //if (resourceGrid.worldGridInitialized)
+        //{
+        //    myTile = resourceGrid.TileFromWorldPoint(transform.position);
+        //}
 
     }
 
@@ -152,9 +161,6 @@ public class Building_ClickHandler : MonoBehaviour {
 			FadeIn();
 			break;
 		case State.READY:
-            /* Player can Dissasemble by right clicking on its Collider */
-
-			//DissasemblyControl();
 
 			    if (Input.GetKeyDown (KeyCode.F) && playerIsNear) {
 				    if (!buildMainController.currentlyBuilding){
@@ -180,7 +186,8 @@ public class Building_ClickHandler : MonoBehaviour {
 			break;
 		case State.RECYCLE_NANOBOTS:
 //			FadeOutControl();
-			StartCoroutine(CreateNanoBotsEachSecond());
+			StartCoroutine("CreateNanoBotsEachSecond");
+            state = State.DISSASEMBLING;
 			break;
 
 		case State.DISSASEMBLING:
@@ -192,17 +199,17 @@ public class Building_ClickHandler : MonoBehaviour {
 		}
 	}
 
-	void DissasemblyControl()
-	{
-		// NOTE: Affecting ONLY the Battle towers
-		if (myTileType == TileData.Types.machine_gun || myTileType == TileData.Types.sniper || 
-		    myTileType == TileData.Types.cannons || myTileType == TileData.Types.seaWitch) {
-			if (!isDissasembling){
-				Dissasemble ();
-			}
-		} 
+	//void DissasemblyControl()
+	//{
+	//	// NOTE: Affecting ONLY the Battle towers
+	//	if (myTileType == TileData.Types.machine_gun || myTileType == TileData.Types.sniper || 
+	//	    myTileType == TileData.Types.cannons || myTileType == TileData.Types.seaWitch) {
+	//		if (!isDissasembling){
+	//			Dissasemble ();
+	//		}
+	//	} 
 
-	}
+	//}
 
 	void FadeOutControl()
 	{
@@ -240,30 +247,33 @@ public class Building_ClickHandler : MonoBehaviour {
 
 	public void Sell(){
 
-		nanoBotsCreated = 0;
+        //nanoBotsCreated = 0;
+
 
 		if (resourceGrid != null) {
-            
+            // Define the tile again in case this was a pooled object and for some reason it didn't re-define its tile. This might make it unnecessary to do it on start.
+            myTile = resourceGrid.TileFromWorldPoint(transform.position);
+            Debug.Log("My tile pos X " + myTile.posX + " pos Y " + myTile.posY);
 			resourceGrid.SwapTileType(myTile.posX, myTile.posY, TileData.Types.empty, myTile.nanoBotCost);
 		}
 	}
 
 
-	void Dissasemble()
-	{
-		if (dissasemblyCountDown <= 0) {
-			dissasemblyCountDown = dissasemblyTime;
-			isDissasembling = true;
-			isFading = true;
-			// Start making the nanobots for disassembly
-			_state = State.RECYCLE_NANOBOTS;
+	//void Dissasemble()
+	//{
+	//	if (dissasemblyCountDown <= 0) {
+	//		dissasemblyCountDown = dissasemblyTime;
+	//		isDissasembling = true;
+	//		isFading = true;
+	//		// Start making the nanobots for disassembly
+	//		_state = State.RECYCLE_NANOBOTS;
 
-		} else {
+	//	} else {
 
-			dissasemblyCountDown -= Time.deltaTime;
-		}
+	//		dissasemblyCountDown -= Time.deltaTime;
+	//	}
 
-	}
+	//}
 
 	// Once this building is dissasembled it will return the bots to the Hero
 	void CreateNanoBot()
@@ -271,33 +281,45 @@ public class Building_ClickHandler : MonoBehaviour {
 		// TODO: Change the hardcoded value of nanobots to the building nanobot cost
 		GameObject nanobot = objPool.GetObjectForType("NanoBot", true, transform.position);
 		if (nanobot){
-			nanobot.GetComponent<NanoBot_MoveHandler>().player = resourceGrid.Hero.transform;
-			//nanobot.GetComponent<NanoBot_MoveHandler>().objPool = objPool;
-		}
+            if (playerTransform != null)
+                nanobot.GetComponent<NanoBot_MoveHandler>().player = playerTransform;
+            else
+                nanobot.GetComponent<NanoBot_MoveHandler>().player = resourceGrid.Hero.transform;
+        }
 
-		nanoBotsCreated++;
+		//nanoBotsCreated++;
 
-		if (nanoBotsCreated >= 10) {
-			// After nanobots are created now Sell to swap the tile
-			Sell ();
-		} else {
-			// keep making them
-			_state = State.RECYCLE_NANOBOTS;
-		}
+		//if (nanoBotsCreated >= 10) {
+		//	// After nanobots are created now Sell to swap the tile
+		//	Sell ();
+		//} else {
+		//	// keep making them
+		//	_state = State.RECYCLE_NANOBOTS;
+		//}
 
 	}
 
 	IEnumerator CreateNanoBotsEachSecond()
 	{
-		_state = State.DISSASEMBLING;
-		yield return new WaitForSeconds (0.1f);
-		CreateNanoBot ();
+	
+
+        while(true)
+        {
+            CreateNanoBot();
+            nanoBotsCreated++;
+            yield return new WaitForSeconds(0.1f);
+
+            if (nanoBotsCreated >= 10)
+            {
+                nanoBotsCreated = 0;
+                Sell();
+                yield break;
+            }
+
+        }
 	}
 
-	TileData.Types CheckTileType(int x, int y){
-		TileData.Types type = resourceGrid.tiles [x, y].tileType;
-		return type;
-	}
+
 
 	public void ChangeBuildingStatus(string change){
 
@@ -339,6 +361,9 @@ public class Building_ClickHandler : MonoBehaviour {
 		if (coll.gameObject.CompareTag ("Citizen") && !playerIsNear) {
            
             playerIsNear = true;
+
+            if (playerTransform == null)
+                playerTransform = coll.transform;
 		}
 	}
 	
@@ -353,9 +378,10 @@ public class Building_ClickHandler : MonoBehaviour {
     public void BreakBuilding(int _nanoBotCost)
     {
         nanoBotCost = _nanoBotCost;
-        nanoBotsNeeded = nanoBotCost / 10;
-       
-        if (_state == State.READY) {
+        // nanoBotsNeeded = nanoBotCost / 10;
+
+        if (_state == State.READY)
+        {
             if (!isDissasembling)
             {
                 isDissasembling = true;
@@ -364,6 +390,7 @@ public class Building_ClickHandler : MonoBehaviour {
 
             }
         }
+        //Sell();
     }
 
 
