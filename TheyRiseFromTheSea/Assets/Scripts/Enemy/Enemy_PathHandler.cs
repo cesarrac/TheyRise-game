@@ -34,7 +34,7 @@ public class Enemy_PathHandler : MonoBehaviour
     bool finishedPath = false, canWalk = true;
     Vector3 lastTargetPos;
 
-    public enum State { GETTING_PATH, FOLLOWING_PATH, FINISHED_PATH, MOVING_TO_TARGET, BLOCKED, ATTACKING, IDLE }
+    public enum State { GETTING_PATH, FOLLOWING_PATH, FINISHED_PATH, MOVING_TO_TARGET, BLOCKED, ATTACKING, IDLE, ESCAPING, STOPPED }
     public State _state { get; protected set; }
 
     public State debugState;
@@ -47,37 +47,69 @@ public class Enemy_PathHandler : MonoBehaviour
 
     Vector3 currPathPosition; // < ------ To check against so we don't request a path when our target's position hasn't changed
 
+    Rigidbody2D rb;
+
+    Enemy_AttackHandler enemy_AttackHandler;
+
+    bool isFullyStopped = false; // < ---- flag sets to true when Full Stop is called
+    bool isInRange = false;
+    public bool InRange { get { return isInRange; } set { isInRange = value; } }
+
     // Steering Behaviors:
     //  seek : normal follow path to the target
     //  Separate: follows and path but always maintains a distance to a certain other object by shifting its speed
 
     void OnEnable()
     {
-       
         grid = ResourceGrid.Grid;
-        if (target == null)
-        {
-            if (chasesPlayer)
-            {   
-                if (GameObject.FindGameObjectWithTag("Citizen") != null)
-                    target = GameObject.FindGameObjectWithTag("Citizen").transform;
-            }
-            else
-            {
-                // it goes for the capital/launchpad
-                target = grid.playerCapital.transform;
-            }
-
-
-        }
-
+ 
         // Initialize Movement Speed stat
         mStats.InitMoveStats ();
 
+        ResetFlagsAndTargets();
+
+    }
+
+    Transform GetMainTarget()
+    {
+        if (chasesPlayer)
+        {
+            if (GameObject.FindGameObjectWithTag("Citizen") != null)
+                return GameObject.FindGameObjectWithTag("Citizen").transform;
+            else
+                return null;
+        }
+        else
+        {
+            // it goes for the capital/launchpad
+            return grid.playerCapital.transform;
+        }
+    }
+
+    void ResetFlagsAndTargets()
+    {
+        FullStop();
+        isInRange = false;
+        target = null;
+        currPathPosition = new Vector3();
+        isFullyStopped = false;
+
+    }
+
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        enemy_AttackHandler = GetComponent<Enemy_AttackHandler>();
     }
 
     void Start()
     {
+        if (target == null)
+        {
+            target = GetMainTarget();
+
+        }
+
         if (target != null)
         {
             StartCoroutine("RequestPath");
@@ -90,39 +122,114 @@ public class Enemy_PathHandler : MonoBehaviour
             
 
         _state = State.GETTING_PATH;
-      
-        print("My target's position is: " + target.position);
+
+        //StartCoroutine("DebugMyStatus");
     }
 
     void Update()
     {
-        
-        if (finishedPath && target.position != lastTargetPos)
-        {
-            finishedPath = false;
-            print("My target's position is: " + target);
-            StartCoroutine("RequestPath");
-
-        }
-
-        if (finishedPath && savedTarget != null)
-        {
-            if (_state != State.GETTING_PATH)
-                SwitchToMoving();
-        }
 
         debugState = _state;
 
-        if (_state == State.MOVING_TO_TARGET && target.gameObject == null)
+        if (enemy_AttackHandler != null)
         {
-            if (_state != State.GETTING_PATH)
-                SwitchToMoving();
+            if (enemy_AttackHandler.stats.curHP > 0)
+            {
+                CheckForNullTarget();
+
+                StopWhenInRange();
+            }
         }
 
     }
 
+    //IEnumerator DebugMyStatus()
+    //{
+    //    while (true)
+    //    {
+    //        yield return new WaitForSeconds(5f);
+    //        string status = "inRange = " + isInRange + " target = " + target.gameObject + " isFullyStopped = " + isFullyStopped + " finishedPath = " + finishedPath;
+    //        Debug.Log("ENEMY PATH STATUS: " + status);
+    //    }
+    //}
 
-    public void SwitchToMoving()
+    void CheckForNullTarget()
+    {
+        // Check if the target's gameobject has been POOLED, if it has make the target null so it starts getting a path again
+        if (target != null)
+        {
+            if (target.gameObject.activeSelf == false)
+            {
+                //target = null;
+                SwitchTargetBackToMain();
+            }
+        }
+    }
+
+    void StopWhenInRange()
+    {
+        isInRange = CheckIsInRangeOfTarget();
+
+        // Check that the target is in range and that its gameObject is currently active
+        if (isInRange)
+        {
+            // Target is in range!
+
+            // Halt all moving and getting path CoRoutines while we are in range and attacking
+            if (!isFullyStopped)
+            {
+                Debug.Log("ENEMY: Target in range!");
+                FullStop();
+            }
+        }
+        else
+        {
+            // Target NOT in range or NOT currently active
+
+            // If this unit had finished its path and the target has moved (most likely it's a Player), unflag finishedPath
+            if (target != null)
+            {
+                if (finishedPath)
+                {
+                    finishedPath = false;
+                    ContinueOnPath();
+                    print("My target's position is: " + target);
+
+                }
+            }
+
+
+            // Swith Back to main target (if needed) and continue getting a path.
+            if (isFullyStopped)
+            {
+                // This will check if Target needs to be reset to main target and continue on the path towards it
+                SwitchTargetBackToMain();
+            }
+        }
+    }
+
+
+    // Always be checking if we are in range of our target
+
+    bool CheckIsInRangeOfTarget()
+    {
+        float threshold = enemy_AttackHandler.AttackRange;
+        if (target != null)
+        {
+            if ((target.position - transform.position).sqrMagnitude <= threshold)
+            {
+                return true;
+            }
+            else
+                return false;
+        }
+        else
+            return false;
+      
+    }
+
+
+    public void SwitchTargetBackToMain()
     {
 
         // If the savedTarget is null that means we never called SwitchPath, so we are currently chasing the main target set at spawn
@@ -130,20 +237,36 @@ public class Enemy_PathHandler : MonoBehaviour
         {
             target = savedTarget;
         }
-        StopCoroutine("RequestPath");
-        StartCoroutine("RequestPath");
-        _state = State.GETTING_PATH;
+        ContinueOnPath();
         Debug.Log("Continuing PATH TO Main Target.");
+    }
 
-
+    void ContinueOnPath()
+    {
+        if (target != null)
+        {
+            isFullyStopped = false;
+            StopCoroutine("RequestPath");
+            StartCoroutine("RequestPath");
+            _state = State.GETTING_PATH;
+        }
+        else
+            Debug.Log("ENEMY: Can't continue path because my target is null. I've already tried to load the saved target... Is the Main Target set to a non-null object?");
+       
     }
 
     public void SwitchPathTarget(Transform newTarget)
     {
-        savedTarget = target;
-        target = newTarget;
-        _state = State.MOVING_TO_TARGET;
-       // StopCoroutine("FollowPath");
+        if (newTarget != target)
+        {
+            savedTarget = target;
+            target = newTarget;
+        }
+     
+        _state = State.GETTING_PATH;
+        StopCoroutine("FollowPath");
+        StopCoroutine("RequestPath");
+        StartCoroutine("RequestPath");
         Debug.Log("SWITCHED TARGET! New Target's position is: " + newTarget.position);
     }
 
@@ -162,13 +285,17 @@ public class Enemy_PathHandler : MonoBehaviour
             
             }
 
-            // Need to offset the target position only if the target is sitting on an unwalkable node
-            if (!grid.NodeFromWorldPoint(currPathPosition).isWalkable || _state == State.MOVING_TO_TARGET)
-            {
-                //// check if my target is to my left or right
+            // Case #1 for failed path:
+            // - Target node is unwalkable.
+            // Solution: offset the target position
 
-                //// If the target is to this unit's right, my target position should be to the target's left. Same thing but opposite if they are to my left.
-                if (target.position.x > transform.position.x)
+            // Offset:
+            if (!grid.NodeFromWorldPoint(currPathPosition).isWalkable)
+            {
+                // Check if my target is to my LEFT or RIGHT
+
+                // If the target is to this unit's right, my target position should be to the target's left. Same thing but opposite if they are to my left.
+                if (currPathPosition.x > transform.position.x)
                 {
                     // they are to my right
                     // move to the target's left
@@ -185,36 +312,22 @@ public class Enemy_PathHandler : MonoBehaviour
                 // If it is STILL an unwakable tile try pointing to right under it
                 if (!grid.NodeFromWorldPoint(currPathPosition).isWalkable)
                 {
-                    // JUST GO UNDER IT!
+                    // Reset the x
+                    currPathPosition.x = target.position.x;
                     currPathPosition.y = currPathPosition.y - 2;
-                    Debug.Log("Trying to Go UNDER the tower attacking me.");
+                    Debug.Log("ENEMY: Trying to Go UNDER the target.");
+
+                    // If STILL unwalkable go OVER it
+                    if (!grid.NodeFromWorldPoint(currPathPosition).isWalkable)
+                    {
+                        currPathPosition.y = currPathPosition.y + 4;
+                        Debug.Log("ENEMY: Trying to Go OVER the target.");
+                    }
                 }
 
             }
 
-            if (!grid.NodeFromWorldPoint(transform.position).isWalkable)
-            {
-                // If the spot this Unit is on is NOT WALKABLE, we need to escape!!
-                if (!isEscapingObstacle)
-                {
-                    if (CheckNeighborsForWalkable() != Vector3.zero)
-                        escapePos = CheckNeighborsForWalkable();
-                    Debug.Log("ESCAPE POS = " + escapePos);
-                 
-                    FullStop();
-                    isEscapingObstacle = true;
-                    StartCoroutine("EscapeObstacle");
-
-                 
-                }
-
-               // FullStop();
-            }
-
-            PathRequestManager.RequestPath(transform.position, currPathPosition, OnPathFound);
-            //print("Path requested.");
-
-
+            PathRequestManager.RequestPath(transform.position, currPathPosition, gameObject, OnPathFound);
 
         }
 
@@ -242,130 +355,39 @@ public class Enemy_PathHandler : MonoBehaviour
             {
                 _state = State.BLOCKED;
             }
-            
 
-            if (!isEscapingObstacle && grid.NodeFromWorldPoint(currPathPosition).isWalkable)
+            // In the case of a failed path there's three reasons for why. 
+            // 1) A collider is blocking the way. Solution:  Detect the collision, STOP PATH, and bounce away from it. Once out of collision CONTINUE PATH.
+            // 2) The current Node is unwalkable. Solution:  Just bounce up everytime this case occurs, until it gets the correct path and continues.
+            // 3) The target Node is unwalkable.  Solution:  The actual path request function will offset the target in this case. 
+
+            // Case # 2: "The current Node i'm on is unwalkable."
+            if (!currIswalkable)
             {
-                Debug.Log("Escaping Obstacle");
-
-                if (CheckNeighborsForWalkable() != Vector3.zero)
-                    escapePos = CheckNeighborsForWalkable();
-                Debug.Log("ESCAPE POS = " + escapePos);
-
-                FullStop();
-                isEscapingObstacle = true;
-                StartCoroutine("EscapeObstacle");
+                // Bounce up away from my current position
+                BounceOffObstacle(transform.position + Vector3.down);
 
             }
-   
-
-                
-
         }
     }
 
-
-    Vector3 CheckNeighborsForWalkable()
+    void BounceOffObstacle(Vector3 obstaclePos, bool moveTowards = false)
     {
-        var closestDistance = 1f;
-        var closestNeighbor = Vector3.zero;
-        bool isToMyRight = false;
-
-        if (target.position.x > transform.position.x)
+        if (!moveTowards)
         {
-            // target is to my right
-            closestDistance = (target.position - (transform.position + Vector3.right)).sqrMagnitude;
-            isToMyRight = true;
+            var heading = -(obstaclePos - transform.position);
+            rb.AddForce(heading * 800f);
         }
         else
         {
-            // target is to my left
-            closestDistance = (target.position - (transform.position + Vector3.left)).sqrMagnitude;
-            isToMyRight = false;
+            var heading = obstaclePos - transform.position;
+            rb.AddForce(heading * 200f);
         }
-
-
-        for (int y = -1; y <= 1; y++)   
-        {
-            for (int x = -1; x <= 1; x++)
-            {
-                Vector3 neighbor = new Vector3(transform.position.x + x, transform.position.y + y, 0);
-                if (grid.NodeFromWorldPoint(neighbor).isWalkable)
-                {
-                    var newDistance = (target.position - neighbor).sqrMagnitude;
-                    if ( newDistance <= closestDistance)
-                    {
-                        closestDistance = newDistance;
-                        closestNeighbor = neighbor;
-                    }
-              
-                }
-            }
-        }
-
-        // To assure we dont get a vector 3 zero position as a return, at least return the left or right of my current position
-        if (closestNeighbor == Vector3.zero)
-        {
-            if (isToMyRight)
-            {
-                closestNeighbor = transform.position + Vector3.left;
-            }
-            else
-            {
-                closestNeighbor = transform.position + Vector3.right;
-            }
-        }
-        return closestNeighbor;
+  
     }
 
-    //void StartEscaping(Vector3 blockedPosition)
-    //{
-    //    // Reset the Follow Path coroutine & targetIndex
-    //    targetIndex = 0;
-    //    StopCoroutine("FollowPath");
 
-
-    //    // State becomes Blocked
-    //    if (_state != State.BLOCKED)
-    //        _state = State.BLOCKED;
-
-    //    // Define what direction this unit was walking on by comparing the current position to the target's position
-    //    Vector3 direction = -(target.position - blockedPosition).normalized;
-
-    //    // So we DONT try to get a path from this tile again make this tile unwakable
-    //    //GetBlockingTile(blockedPosition);
-
-    //    // Vector3 blockingTilePos = new Vector3(blockingTile.posX, blockingTile.posY, 0);
-
-    //    escapePos = blockedPosition + direction;
-
-    //    Debug.Log("Escape Position " + escapePos);
-
-    //    // Stop requesting path while we Escape Obstacle
-    //    StopCoroutine("RequestPath");
-    //    StopCoroutine("EscapeObstacle");
-    //    StartCoroutine("EscapeObstacle");
-    //}
-
-    IEnumerator EscapeObstacle()
-    {
-        while (true)
-        {
-            if (Vector3.Distance(transform.position, escapePos) > 0.1f  && isEscapingObstacle)
-            {
-                transform.position = Vector3.MoveTowards(transform.position, escapePos, mStats.curMoveSpeed * Time.deltaTime);
-                yield return null;
-            }
-            else
-            {
-                Debug.Log("STOPPED ESCAPING.");
-                StartCoroutine("RequestPath");
-                isEscapingObstacle = false;
-                yield break;
-            }
-        }
-    }
-
+   
     IEnumerator FollowPath()
     {
         if (path.Length > 0)
@@ -410,14 +432,17 @@ public class Enemy_PathHandler : MonoBehaviour
                     }
                 }
 
-                //if(canWalk)
-                transform.position = Vector3.MoveTowards(transform.position, currWayPoint, mStats.curMoveSpeed * Time.deltaTime);
+
+                transform.position = Vector2.MoveTowards(transform.position, currWayPoint, mStats.curMoveSpeed * Time.deltaTime);
 
                 yield return null;
             }
         }
         else
         {
+            Debug.Log("ENEMY: Path is broke because it has 0 positions in it!");
+            // Push towards the current target so we can get there!
+            BounceOffObstacle(target.transform.position, true);
             yield break;
         }
 
@@ -427,30 +452,7 @@ public class Enemy_PathHandler : MonoBehaviour
     void GetBlockingTile(Vector3 position)
     {
         blockingTile = ResourceGrid.Grid.TileFromWorldPoint(position);
-
-       // ResourceGrid.Grid.SwitchTileWalkability(blockingTile.posX, blockingTile.posY, false);
     }
-
-    //public void OnDrawGizmos()
-    //{
-    //    if (path != null)
-    //    {
-    //        for (int i = targetIndex; i < path.Length; i++)
-    //        {
-    //            Gizmos.color = Color.black;
-    //            Gizmos.DrawCube(path[i], Vector3.one);
-
-    //            if (i == targetIndex)
-    //            {
-    //                Gizmos.DrawLine(transform.position, path[i]);
-    //            }
-    //            else
-    //            {
-    //                Gizmos.DrawLine(path[i - 1], path[i]);
-    //            }
-    //        }
-    //    }
-    //}
 
     bool CheckIfPathIsBlocked(Node nextNode)
     {
@@ -460,6 +462,8 @@ public class Enemy_PathHandler : MonoBehaviour
 
     public void FullStop()
     {
+        _state = State.STOPPED;
+        isFullyStopped = true;
         targetIndex = 0;
         StopCoroutine("FollowPath");
         StopCoroutine("RequestPath");
@@ -471,27 +475,19 @@ public class Enemy_PathHandler : MonoBehaviour
     {
         if (coll.gameObject.CompareTag("Rock"))
         {
-            //Debug.Log("Colliding with ROCK!");
-            // In case the escaping coroutine is currently going
-            //StopCoroutine("EscapeObstacle");
-            // StartEscaping(coll.transform.position);
+            Debug.Log("Colliding with ROCK!");
 
+            FullStop();
 
+            // Try bouncing off the rock!
+            BounceOffObstacle(coll.transform.position);
+          
 
-            if (!isEscapingObstacle)
-            {
-                FullStop();
+            // Make the position of my collision with the rock an unwalkable tile so we don't path through it again
+            grid.NodeFromWorldPoint(coll.transform.position).isWalkable = false;
 
-                if (CheckNeighborsForWalkable() != Vector3.zero)
-                    escapePos = CheckNeighborsForWalkable();
+            _state = State.ESCAPING;
 
-                isEscapingObstacle = true;
-                StartCoroutine("EscapeObstacle");
-            }
-
-
-       
-        
         }
 
         //if (_state == State.BLOCKED)
@@ -535,5 +531,15 @@ public class Enemy_PathHandler : MonoBehaviour
         //    }
         //}
  
+    }
+
+    void OnCollisionExit2D(Collision2D coll)
+    {
+        if (coll.gameObject.CompareTag("Rock"))
+        {
+            // Go back to getting a path
+            SwitchTargetBackToMain();
+
+        }
     }
 }

@@ -3,6 +3,9 @@ using System.Collections;
 using UnityEngine.UI;
 
 public class Player_UIHandler : MonoBehaviour {
+
+    public static Player_UIHandler instance;
+
 	// Resources Panel 
 	public Text oreText, foodText, foodCostText, creditsText, waterText, energyText;
 	int ore, food, credits, totalFood, farmCount, water, extractCount, waterPumpCount, energy;
@@ -24,6 +27,11 @@ public class Player_UIHandler : MonoBehaviour {
 	public Text hpText;
 	private float _curHP;
 
+    void Awake()
+    {
+        instance = this;
+    }
+
 	void Start () 
 	{
 		if (resourceManager == null) {
@@ -41,6 +49,34 @@ public class Player_UIHandler : MonoBehaviour {
 		}
         */
 	}
+
+    public void InitUIText(int _food, int _water, int _ore)         // FIX THIS: Add the rest of the resources!
+    {
+        oreText.text = _ore.ToString();
+        foodText.text = _food.ToString();
+        waterText.text = _water.ToString();
+
+    }
+
+    public void DisplayShipInventoryText(TileData.Types statThatChanges, int ammnt)
+    {
+        // This method will only be called when a stat is changing. This will update the text. 
+        switch (statThatChanges)
+        {
+            case TileData.Types.rock:
+                oreText.text = ammnt.ToString();
+                break;
+            case TileData.Types.food:
+                foodText.text = ammnt.ToString();
+                break;
+            case TileData.Types.water:
+                waterText.text = ammnt.ToString();
+                break;
+            default:
+                // do nothing
+                break;
+        }
+    }
 
 	void GetResourcesText()
 	{
@@ -93,28 +129,28 @@ public class Player_UIHandler : MonoBehaviour {
 	
 
 	void Update () {
-		if (resourceManager.ore != ore || resourceManager.food != food || resourceManager.credits != credits 
-		    || resourceManager.totalFoodCost != totalFood || resourceManager.farmCount != farmCount || resourceManager.water != water
-		    || resourceManager.extractorCount != extractCount || resourceManager.waterPumpCount != waterPumpCount ||
-		    resourceManager.energy != energy) {
-			GetResourcesText();
-		}
+		//if (resourceManager.ore != ore || resourceManager.food != food || resourceManager.credits != credits 
+		//    || resourceManager.totalFoodCost != totalFood || resourceManager.farmCount != farmCount || resourceManager.water != water
+		//    || resourceManager.extractorCount != extractCount || resourceManager.waterPumpCount != waterPumpCount ||
+		//    resourceManager.energy != energy) {
+		//	GetResourcesText();
+		//}
 
-		if (playerhero) {
-			if (_curHP != playerhero.stats.curHP){
-				DisplayPlayerHealth();
-			}
-		}
+		//if (playerhero) {
+		//	if (_curHP != playerhero.stats.curHP){
+		//		DisplayPlayerHealth();
+		//	}
+		//}
 	}
 
-	void DisplayPlayerHealth()
-	{
-		if (hpText) {
-			hpText.text = "HP: " + playerhero.stats.curHP + "/" + playerhero.stats.maxHP;
-			_curHP = playerhero.stats.curHP;
-		}
+	//void DisplayPlayerHealth()
+	//{
+	//	if (hpText) {
+	//		hpText.text = "HP: " + playerhero.stats.curHP + "/" + playerhero.stats.maxHP;
+	//		_curHP = playerhero.stats.curHP;
+	//	}
 
-	}
+	//}
 
 	//public void DisplayStorageInfo(Storage storageSelected){
 	//	if (storageSelected != null) {

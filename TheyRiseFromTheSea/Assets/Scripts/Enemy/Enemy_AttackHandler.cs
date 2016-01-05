@@ -38,7 +38,8 @@ public class Enemy_AttackHandler : Unit_Base {
     public Transform mainTarget { get; protected set; } // < ---- always the same as my path's original target.
 
 
-    float attackRange = 5f; // < ------- threshold target's can't pass without being attacked by this unit
+    float attackRange = 5.0f; // < ------- threshold target's can't pass without being attacked by this unit
+    public float AttackRange { get { return attackRange; } set { attackRange = Mathf.Clamp(value, 2.0f, 8.0f); } }
 
     bool movingToAttack;
 
@@ -46,7 +47,7 @@ public class Enemy_AttackHandler : Unit_Base {
 
     bool mainTargetFound;
 
-    bool mainTargetIsTile;
+    bool mainTargetIsTile = false, currTargetIsTile = false;
 
     Rigidbody2D rigid_body;
 
@@ -85,7 +86,14 @@ public class Enemy_AttackHandler : Unit_Base {
         if (mainTarget.gameObject.tag == "Citizen")
         {
             mainTargetIsTile = false;
-            playerUnit = mainTarget.gameObject;
+
+            // If this unit is NO-Aggro to buildings we can go ahead and set playerUnit here so it attacks the player as soon as it is in range
+            if (!aggroOnBuildings)
+            {
+                playerUnit = mainTarget.gameObject;
+                currTargetIsTile = false;
+            }
+                
         }
         else
         {
@@ -111,241 +119,170 @@ public class Enemy_AttackHandler : Unit_Base {
         if (!_camShake)
             _camShake = CameraShake.Instance;
 
+        StartCoroutine("DebugMyStatus");
+
     }
 
     void Update()
     {
         debugState = _state;
 
-        // If I don't have any HP left, Pool myself
+        // If I don't have any HP left, Pool myself and stop doing everything else
         if (stats.curHP <= 0)
+        {
             Suicide();
+        }
+        else
+        {
 
-        // Only listen for attackingTower once our path handler has set our main target and unit is NOT attacking
-        if (mainTarget != null)
-            ListenForAttacker();
+            // Only listen for attackingTower once our path handler has set our main target and unit is NOT attacking
+            if (mainTarget != null && !isAttacking)
+                ListenForAttacker();
 
-        // Once an attackingTower has been assigned we need to move to the attackingTower if they are NOT in range.
-        if (towerAttackingMe != null && !isAttacking)
-            SeekTarget(towerAttackingMe, true);
+            // Makes sure that if the tower target was POOLED that the target is nulled
+            if (towerAttackingMe != null)
+            {
+                if (!towerAttackingMe.activeSelf)
+                {
+                    towerAttackingMe = null;
+                    // And just in case this happened in the middle of an attack, Stop Attack routines
+                    StopAttackCoRoutines();
+                }
+
+            }
+
+            // If at any time the path handler is in range of the target and isAttacking is false, call attack!
+            if (pathHandler.InRange && !isAttacking)
+            {
+                if (currTargetIsTile)
+                {
+                    if (towerAttackingMe != null)
+                    {
+                        Debug.Log("ENEMY: Starting tower attack...");
+                        StartCoroutine("TowerAttack");
+                        isAttacking = true;
+                    }
+
+                }
+                else
+                {
+                    if (playerUnit != null)
+                    {
+                        Debug.Log("ENEMY: Starting player attack...");
+                        StartCoroutine("PlayerAttack");
+                        isAttacking = true;
+                    }
+
+                }
+            }
+        }
+
 
 
     }
 
+    IEnumerator DebugMyStatus()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(5f);
+            string status = "isAttacking = " + isAttacking + " towerAttackingMe = " + towerAttackingMe + " attackingTower = " + attackingTower + 
+                " playerUnit = " + playerUnit +" In Range = " + pathHandler.InRange + " currTargetIsTile = " + currTargetIsTile;
+            Debug.Log("ENEMY ATTACK STATUS: " + status);
+        }
+    }
+
+
+    //    //  GENERAL ATTACK BEHAVIOR:
+    //    /// Units always start with an assigned MAIN target, they get it from their path handler's target transform. This is their main objective.
+    //    /// If they stop to attack something else on the way and survive they will always continue towards that MAIN TARGET.
+    //    /// When they are IN RANGE of that MAIN TARGET they stop moving along their path and start attacking UNTIL:
+    //    ///    - their target is dead.
+    //    ///    - they are dead.
+    //    ///    - or their target is no longer in range. 
+    //    ///      IN this case they would need to continue moving 
+    //    ///      towards their target to get in range, starting the process again.
+    //    /// Once a unit gets in range of their main target ONCE, they will ignore all other targets.
     void ListenForAttacker()
     {
-        //  GENERAL ATTACK BEHAVIOR:
-        /// Units always start with an assigned MAIN target, they get it from their path handler's target transform. This is their main objective.
-        /// If they stop to attack something else on the way and survive they will always continue towards that MAIN TARGET.
-        /// When they are IN RANGE of that MAIN TARGET they stop moving along their path and start attacking UNTIL:
-        ///    - their target is dead.
-        ///    - they are dead.
-        ///    - or their target is no longer in range. 
-        ///      IN this case they would need to continue moving 
-        ///      towards their target to get in range, starting the process again.
-        /// Once a unit gets in range of their main target ONCE, they will ignore all other targets.
-
-        // No matter WHAT, if the main target is in range, stop everything and go and attack it.
-        if (CheckRange(mainTarget.position, attackRange) && mainTarget.gameObject != null)
+        if (!isAttacking)
         {
-            // Main target is in range!
-            mainTargetFound = true;
-
-            // Stop all movement from the path handler.
-           // pathHandler.FullStop();
-
-            if (!isAttacking)
-            {                                                           
-                // Check if the main target is Player
-                if (!mainTargetIsTile)
-                {
-                    if (playerUnit == null)
-                    {
-                        // Main target is Player
-                        playerUnit = mainTarget.gameObject;
-                    }
-
-                    // Do the attack HERE.
-                    StopCoroutine("PlayerAttack");
-                    StartCoroutine("PlayerAttack");    
-                }
-                else
-                {
-                    // Main target is NOT player, so it MUST be an attack tower or a building. It's the same attack method regardless of it being a battle or utility building.
-                    towerAttackingMe = mainTarget.gameObject;
-
-                    // Do the attack HERE.
-                    StopCoroutine("TowerAttack");
-                    StartCoroutine("TowerAttack");
-                }
-
-                if (_state != State.ATTACKING)
-                {
-                    _state = State.ATTACKING;
-                }
-
-                isAttacking = true;
-                movingToAttack = false;
-            }
-           
-
-
-        }
-        else
-        {
-            // AS OF NOW! Once the main target has been spotted, this unit will ignore other targets and go for main target, always chasing after it if it moved
-            if (mainTargetFound && mainTarget.gameObject != null)
+            if (aggroOnBuildings)
             {
-                
-                SeekTarget(mainTarget.gameObject, mainTargetIsTile);
-                if (_state != State.MOVING)
+                //                 AGGRESSIVE TO BUILDING ATTACK BEHAVIOR:
+                //  Rule: If any tower attacks this unit or is in range and the unit currently does NOT have an attack target besides the player, they ALWAYS will go and attack the tower. 
+                // If they DONT have a tower attacking them and the player attacks them, they will go and attack the player until a tower attacks or their main target is in range.
+
+                if (attackingTower != null && towerAttackingMe == null)
                 {
-                    pathHandler.SwitchToMoving();
-                    _state = State.MOVING;
+
+                    Debug.Log("A tower is attacking me!!");
+
+                    StopAttackCoRoutines();
+
+                    towerAttackingMe = attackingTower;
+                    attackingTower = null;
+
+                    currTargetIsTile = true;
+
+                    // Switch the path handlers target to this tower IF this tower is NOT the main target
+                    if (towerAttackingMe.transform != mainTarget || towerAttackingMe.transform.parent != mainTarget)
+                        pathHandler.SwitchPathTarget(towerAttackingMe.transform.parent);
+
+
                 }
-
-            }
-            else
-            {
-                if (aggroOnBuildings)
+                // If BOTH are null, THEN I can get a player as a target
+                else if (attackingTower == null && towerAttackingMe == null)
                 {
-                    ///                 AGGRESSIVE TO BUILDING ATTACK BEHAVIOR:
-                    ///  Rule: If any tower attacks this unit or is in range and the unit currently does NOT have an attack target besides the player, they ALWAYS will go and attack the tower. 
-                    /// If they DONT have a tower attacking them and the player attacks them, they will go and attack the player until a tower attacks or their main target is in range.
-
-                    if (attackingTower != null && towerAttackingMe == null)
+                   if (playerUnit != null)
                     {
-                        // The tile unit that is attacking me stores their gameobject in my attackingTower variable. 
-                        // Then I take that variable and store it as towerAttackingMe
+                        currTargetIsTile = false;
 
-                        Debug.Log("A tower is attacking me!!");
-
-                        // Since there's a chance that a coroutine might be running when a tower attacks and overrides this unit's target, we should stop all attack routines here before starting another one.
                         StopAttackCoRoutines();
 
-                        towerAttackingMe = attackingTower;
-                        attackingTower = null;
-
-                        movingToAttack = false;
-
+                        // Switch the path handlers target to this Player IF this Player is NOT the main target
+                        if (playerUnit.transform != mainTarget)
+                            pathHandler.SwitchPathTarget(playerUnit.transform);
                     }
-                    else if (playerUnit != null && towerAttackingMe == null)
-                    {
-                        SeekTarget(playerUnit, false);
-                    }
-
                 }
-                else
-                {
-                    /// NON-AGGRESSIVE TO BUILDING ATTACK BEHAVIOR:
-                    /// Rule: If Player is attacking this unit, they will go attack the player. BUT if a tower attacks this unit, they ignore it and keep moving towards their main target.
-                    /// These units never attack towers UNLESS a tower is their Main Target.
 
-                    if (playerUnit != null && !isAttacking)
-                    {
-                        SeekTarget(playerUnit, false);
-                    }
-
-                }
-            }
-    
-        }
-
-     
-    }
-
-
-    bool CheckRange(Vector3 target, float threshold)
-    {
-        if ((target - transform.position).sqrMagnitude <= threshold)
-        {
-            return true;
-        }
-        else
-            return false;
-    }
-
-    void SeekTarget(GameObject target, bool isTile)
-    {
-        // Check if this new target is in range
-        if (CheckRange(target.transform.position, attackRange))
-        {
-            // attackingTower is in range! 
-            movingToAttack = false;
-
-            if (_state != State.ATTACKING)
-            {
-                _state = State.ATTACKING;
-            }
-
-            // Do the attack HERE.
-            if (isTile)
-            {
-                if (!isAttacking)
-                {
-                    // Tell path handler to stop moving first!
-                    pathHandler.FullStop();
-
-                    StopCoroutine("TowerAttack");
-                    StartCoroutine("TowerAttack");
-                    isAttacking = true;
-                }
             }
             else
             {
-                // Tell path handler to stop moving first!
-                pathHandler.FullStop();
+                // NON-AGGRESSIVE TO BUILDING ATTACK BEHAVIOR:
+                // Rule: If Player is attacking this unit, they will go attack the player. BUT if a tower attacks this unit, they ignore it and keep moving towards their main target.
+                // These units never attack towers UNLESS a tower is their Main Target.
 
-                StopCoroutine("PlayerAttack");
-                StartCoroutine("PlayerAttack");
-                isAttacking = true;
+                if (playerUnit != null)
+                {
+                    StopAttackCoRoutines();
+
+                    // Switch the path handlers target to this Player IF this Player is NOT the main target
+                    if (playerUnit.transform != mainTarget)
+                        pathHandler.SwitchPathTarget(playerUnit.transform);
+                }
+
             }
-        
-
-
         }
-        else if (!movingToAttack)
-        {
-            //attackingTower in NOT in range so I should create a path to them
-            // But dont bother if the target is equal to the main target because we already have a path to them
-            if (target.transform.position != mainTarget.transform.position)
-            {
-                if (mainTargetIsTile)
-                    pathHandler.SwitchPathTarget(target.transform.parent);
-                else
-                    pathHandler.SwitchPathTarget(target.transform);
-            }
-        
 
-            movingToAttack = true;
-
-        }
     }
 
 
-
-
-  
     IEnumerator TowerAttack()
     {
         while (true)
         {
             yield return new WaitForSeconds(stats.curRateOfAttk);
 
-            if (towerAttackingMe != null && CheckRange(towerAttackingMe.transform.position, attackRange)) 
+            if (towerAttackingMe != null && pathHandler.InRange) 
             {
+                Debug.Log("ENEMY: Attacking the tower!");
                 StartCoroutine(JumpAttack(towerAttackingMe.transform.parent.position));
                 HandleDamageToTile();
             }
             else
             {
-                // Just in case this unit didnt destroy the tower or it somehow became null for some other reason make sure to keep moving
-                if (towerAttackingMe == null)
-                {
-                    pathHandler.SwitchToMoving();
-                    _state = State.MOVING;
-                }
-
+               
                 isAttacking = false;
                 yield break;
             }
@@ -358,8 +295,9 @@ public class Enemy_AttackHandler : Unit_Base {
         {
             yield return new WaitForSeconds(stats.curRateOfAttk);
 
-            if (playerUnit != null && CheckRange(playerUnit.transform.position, attackRange))
+            if (playerUnit != null && pathHandler.InRange)
             {
+                Debug.Log("ENEMY: Attacking the player!");
                 StartCoroutine(JumpAttack(playerUnit.transform.position));
                 HandleDamageToUnit();
             }
@@ -373,6 +311,7 @@ public class Enemy_AttackHandler : Unit_Base {
 
     void StopAttackCoRoutines()
     {
+        isAttacking = false;
         StopCoroutine("PlayerAttack");
         StopCoroutine("TowerAttack");
     }
@@ -381,9 +320,9 @@ public class Enemy_AttackHandler : Unit_Base {
     {
 
         Vector2 jumpDirection = targetPosition - transform.root.position;
-        rigid_body.AddForce(jumpDirection * 1800f);
+        rigid_body.AddForce(jumpDirection * 1200);
         yield return new WaitForSeconds(0.1f);
-        rigid_body.AddForce(-jumpDirection * 1800f);
+        rigid_body.AddForce(-jumpDirection * 1200);
         yield break;
 
     }
@@ -396,20 +335,19 @@ public class Enemy_AttackHandler : Unit_Base {
             // Check if tile can still take damage, if so Unit_Base damages it
             if (!AttackTile(resourceGrid.TileFromWorldPoint(towerAttackingMe.transform.position)))
             {
-                // Tile has been destroyed, start Moving again towards my main target
-                pathHandler.SwitchToMoving();
-
-                // Set state back to moving to stop attacking
+                // Set state back to moving
                 _state = State.MOVING;
 
-                // Set attacking flag to false
+                // Set attacking flag to false to stop attacking
                 isAttacking = false;
 
                 if (towerAttackingMe != null)
                 {
                     towerAttackingMe = null;
-                    //attackingTower = null;
+                    attackingTower = null;
                 }
+
+                Debug.Log("ENEMY: Stopped damaging tower!");
 
                 // Stop Tower Attack coroutine
                 StopCoroutine("TowerAttack");
@@ -424,13 +362,11 @@ public class Enemy_AttackHandler : Unit_Base {
 
         if (!AttackUnit(playerUnit.GetComponent<Unit_Base>()))
         {
-            // Set state back to moving to stop attacking
+
+            // Set state back to moving
             _state = State.MOVING;
 
-            // Player is dead, so this is probably unnecessary!
-            pathHandler.SwitchToMoving();
-
-            // Set attacking flag to false
+            // Set attacking flag to false to stop attacking
             isAttacking = false;
 
             playerUnit = null;
@@ -443,13 +379,15 @@ public class Enemy_AttackHandler : Unit_Base {
 
     void Suicide()
     {
-        // get a Dead sprite to mark my death spot
-        GameObject deadE = objPool.GetObjectForType("Blood FX particles 2", true, transform.position); // Get the dead unit object
+        // Get the Blood splat!
+        GameObject deadE = objPool.GetObjectForType("Blood FX particles 2", true, transform.position);
 
-        //if (deadE != null)
-        //{
-        //    deadE.GetComponent<EasyPool>().objPool = objPool;
-        //}
+        // Stop Attack and Path coroutines!
+        isAttacking = false;
+        playerUnit = null;
+        towerAttackingMe = null;
+        StopAttackCoRoutines();
+        pathHandler.FullStop();
 
         // Calculate the z rotation needed for the blood particle effects to shoot at the angle the shot came from
         if (towerAttackingMe != null)

@@ -39,7 +39,7 @@ public class Enemy_SquadSpawner : MonoBehaviour {
 
         while (totalMembers > 0)
         {
-            GameObject e = ObjectPool.instance.GetObjectForType("Default Enemy", true, spawnPositions[totalMembers - 1]);
+            GameObject e = ObjectPool.instance.GetObjectForType("Weak Enemy - no Aggro", true, spawnPositions[totalMembers - 1]);
             totalMembers--;
             spawnedEnemies.Add(e);
             yield return new WaitForSeconds(0.5f);

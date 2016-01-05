@@ -89,10 +89,6 @@ public class Player_HeroAttackHandler : Unit_Base {
 	{
 		// get a Dead sprite to mark my death spot
 		GameObject deadE = objPool.GetObjectForType("dead", false, transform.position); // Get the dead unit object
-		if (deadE != null) {
-			deadE.GetComponent<EasyPool> ().objPool = objPool;
-
-		}
 		
 		// make sure we Pool any Damage Text that might be on this gameObject
 		if (GetComponentInChildren<Text>() != null){

@@ -13,8 +13,6 @@ public class Mesh_Generator : MonoBehaviour {
 
 	public GameObject _FLOOR;
 	
-	public bool is2D;
-	
 	List<Vector3> vertices;
 	List<int> triangles;
 	
@@ -69,13 +67,10 @@ public class Mesh_Generator : MonoBehaviour {
 		mesh.uv = uvs;
 
 		
-		// NOTE: should only create walls if it is a 3D camera view
-		if (is2D) {
-			Generate2DColliders();
-		} else {
-			CreateWallMesh ();
-			
-		}
+
+        // Generate 2D Edge Colliders
+	    Generate2DColliders();
+
 		
 	}
 
@@ -250,40 +245,7 @@ public class Mesh_Generator : MonoBehaviour {
 //		}
 //	}
 
-	void CreateWallMesh()
-	{
-		
-		CalculateMeshOutlines ();
-		
-		List<Vector3> wallVertices = new List<Vector3> ();
-		List<int> wallTriangles = new List<int> ();
-		Mesh wallMesh = new Mesh ();
-		float wallHeight = 5;
-		
-		foreach (List <int> outline in outlines) {
-			for (int i =0 ; i < outline.Count -1; i++){
-				int startIndex = wallVertices.Count;
-				wallVertices.Add(vertices[outline[i]]); // left vertex
-				wallVertices.Add(vertices[outline[i + 1]]); // right vertex
-				wallVertices.Add(vertices[outline[i]] - Vector3.up * wallHeight); // bottom left
-				wallVertices.Add(vertices[outline[i + 1]] - Vector3.up * wallHeight); // bottom right
-				
-				// First triangle
-				wallTriangles.Add(startIndex + 0);
-				wallTriangles.Add(startIndex + 2);
-				wallTriangles.Add(startIndex + 3);
-				// Second triangle
-				wallTriangles.Add(startIndex + 3);
-				wallTriangles.Add(startIndex + 1);
-				wallTriangles.Add(startIndex + 0);
-				
-			}
-		}
-		
-		wallMesh.vertices = wallVertices.ToArray ();
-		wallMesh.triangles = wallTriangles.ToArray ();
-		walls.mesh = wallMesh;
-	}
+
 	
 	void TriangulateSquare(Square square) {
 		switch (square.configuration) {
@@ -423,9 +385,12 @@ public class Mesh_Generator : MonoBehaviour {
 				}
 			}
 		}
-	}
-	
-	void FollowOutline(int vertexIndex, int outlineIndex)
+        
+    }
+
+
+
+    void FollowOutline(int vertexIndex, int outlineIndex)
 	{
 		outlines [outlineIndex].Add (vertexIndex);
 		checkedVertices.Add (vertexIndex);

@@ -362,6 +362,10 @@ public class ExtractionBuilding : MonoBehaviour {
                     if (remainder > 0)
                         currResourceStored += remainder;
 
+                    // Call the inventory split callback if not null to account for the remainder
+                    if (inventoryTypeCallback != null)
+                        inventoryTypeCallback(remainder);
+
                     // STORAGE FULL
                     isExtracting = false;
                     storageIsFull = true;

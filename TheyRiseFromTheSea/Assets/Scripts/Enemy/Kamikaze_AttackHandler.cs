@@ -94,9 +94,6 @@ public class Kamikaze_AttackHandler : Unit_Base {
 		//Destroy (unitToPool.GetComponent<Player_AttackHandler>().unitParent);
 		// Get dead sprite
 		GameObject deadE = objPool.GetObjectForType("dead", false, deathPos);
-		if (deadE != null) {
-			deadE.GetComponent<EasyPool> ().objPool = objPool;
-		}
 
 		this.unitToPool = null;
 

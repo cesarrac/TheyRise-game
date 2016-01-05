@@ -202,7 +202,6 @@ public class Player_GunBaseClass : MonoBehaviour {
                 float trailAngle = Mathf.Atan2 (dir.y, dir.x) * Mathf.Rad2Deg;
 				bulletTrail.transform.eulerAngles = new Vector3 (0, 0, trailAngle);
 				bulletTrail.transform.SetParent(projectile.transform);
-				bulletTrail.GetComponent<EasyPool>().objPool = objPool;
 			}
 
 		} else {

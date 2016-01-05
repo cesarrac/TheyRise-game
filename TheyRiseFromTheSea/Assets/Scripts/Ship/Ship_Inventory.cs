@@ -20,6 +20,12 @@ public class Ship_Inventory : MonoBehaviour {
         Instance = this;
     }
 
+    void Start()
+    {
+        if (Application.loadedLevel == 1)
+            InitPlanetLevelUI();
+    }
+
     public void ReceiveItems(TileData.Types rType, int ammnt)
     {
         Debug.Log(ammnt + " of " + rType + " beamed to the SHIP!");
@@ -39,6 +45,9 @@ public class Ship_Inventory : MonoBehaviour {
                 break;
         }
 
+        if (ammnt != 0)
+            Player_UIHandler.instance.DisplayShipInventoryText(rType, ammnt);
+
         // add to the total
         storageTotal += ammnt;
     }
@@ -48,6 +57,12 @@ public class Ship_Inventory : MonoBehaviour {
         commonOreStored += common;
         enrichedOreStored += enriched;
         Debug.Log("Ore has been split! Common = " + commonOreStored + " Enriched = " + enrichedOreStored);
+    }
+
+    void InitPlanetLevelUI()
+    {
+        Player_UIHandler.instance.InitUIText(foodStored, waterStored, oreStored);
+        
     }
 
 }

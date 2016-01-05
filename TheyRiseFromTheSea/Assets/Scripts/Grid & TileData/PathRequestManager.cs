@@ -24,9 +24,10 @@ public class PathRequestManager : MonoBehaviour
     }
 
     // The action (callback) stores the method that Receives Path in unit so this Manager can call it once it has calculated that unit's path
-    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, Action<Vector3[], bool> callback)
+    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, GameObject requesterObj, Action<Vector3[], bool> callback)
     {
-        PathRequest newRequest = new PathRequest(pathStart, pathEnd, callback);
+        PathRequest newRequest = new PathRequest(pathStart, pathEnd, callback, requesterObj);
+
         Instance.pathRequestQueue.Enqueue(newRequest);
         //print("Path request " + (Instance.pathRequestQueue.Count) + " added.");
         Instance.TryProcessNext();
@@ -45,7 +46,16 @@ public class PathRequestManager : MonoBehaviour
 
     public void FinishedProcessingPath(Vector3[] path, bool success)
     {
-        currPathRequest.callback(path, success);
+        // Before calling the callback check to make sure that the unit requesting a path is not null or inactive
+        if (currPathRequest.unitGObjRequesting != null)
+        {
+            if (currPathRequest.unitGObjRequesting.activeSelf)
+            {
+                currPathRequest.callback(path, success);
+            }
+               
+        }
+     
         isProcessingPath = false;
         TryProcessNext();
     }
@@ -55,12 +65,14 @@ public class PathRequestManager : MonoBehaviour
         public Vector3 pathStart;
         public Vector3 pathEnd;
         public Action<Vector3[], bool> callback;
+        public GameObject unitGObjRequesting;
 
-        public PathRequest(Vector3 _start, Vector3 _end, Action<Vector3[], bool> _callback)
+        public PathRequest(Vector3 _start, Vector3 _end, Action<Vector3[], bool> _callback, GameObject unitGObj)
         {
             pathStart = _start;
             pathEnd = _end;
             callback = _callback;
+            unitGObjRequesting = unitGObj;
         }
     }
 }

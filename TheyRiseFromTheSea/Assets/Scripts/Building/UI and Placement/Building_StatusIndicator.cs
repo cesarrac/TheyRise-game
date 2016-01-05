@@ -79,11 +79,6 @@ public class Building_StatusIndicator : MonoBehaviour {
 			_damageText.GetComponent<Text>().color = Color.red;
 			_damageText.GetComponent<Text>().text = _damage.ToString ();
 
-
-			// since I know I'm going to give the Text object the Easy Pool script, I might as well
-			// fill up its object pool variable here
-			if (_damageText.GetComponent<EasyPool> () != null)
-				_damageText.GetComponent<EasyPool> ().objPool = objPool;
 		} else {
 			Debug.Log ("STATUS INDICATOR: Could NOT find Damage Text in Pool!");
 		}
@@ -114,11 +109,6 @@ public class Building_StatusIndicator : MonoBehaviour {
 			_statusMsgText.GetComponent<Text>().text = _message;
 			if (color != Color.clear)
 				_statusMsgText.GetComponent<Text>().color = color;
-			
-			// since I know I'm going to give the Text object the Easy Pool script, I might as well
-			// fill up its object pool variable here
-			if (_statusMsgText.GetComponent<EasyPool> () != null)
-				_statusMsgText.GetComponent<EasyPool> ().objPool = objPool;
 
 		} else {
 			Debug.Log ("STATUS INDICATOR: Could NOT find Status Text in Pool!");
