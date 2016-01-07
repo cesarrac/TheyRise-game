@@ -21,7 +21,8 @@ public class Extractor : ExtractionBuilding {
     void OnEnable()
     {
         currResourceStored = 0;
-        
+
+        _state = State.SEARCHING;
     }
 
     void Awake()
@@ -32,7 +33,6 @@ public class Extractor : ExtractionBuilding {
 
         Init(TileData.Types.rock, ExtractRate, ExtractAmmnt, PersonalStorageCap, transform);
 
-        _state = State.SEARCHING;
 
         inventoryTypeCallback = SplitRockByType;
 
@@ -41,12 +41,8 @@ public class Extractor : ExtractionBuilding {
 
 	void Start()
 	{
-        // b_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
-
-        // INIT rocksdetected array
-        // This assumes that we are only checking tiles ONE TILE OVER in all directions
-        //rocksDetected = new Vector2[8];
-        //rockTilesDetected = new List<TileData>();
+        currRock = null;
+        currRockWorldPos = new Vector3();
 
         // Get the Line renderer
         lineR = GetComponent<LineRenderer>();
@@ -85,18 +81,25 @@ public class Extractor : ExtractionBuilding {
 			//CountDownToExtract();
                 if (!isExtracting && !productionHalt)
                 {
-                    if (!storageIsFull)
+                    if (currRock == null)
+                    {
+                        GameObject currTarget = resource_grid.GetTileGameObjFromWorldPos(resourceWorldPos);
+                        if (currTarget != null)
+                        {
+                            if (currTarget.GetComponent<Rock_Handler>() != null)
+                            {
+                                currRock = currTarget.GetComponent<Rock_Handler>().myRock;
+                                currRockWorldPos = resourceWorldPos;
+                            }
+                        }
+           
+                    }
+
+                    if (!storageIsFull && currRock != null)
                     {
                         // Store the rock type of the target rock
                         // Define my target tile's gameobject
-                        if (currRock == null || currRockWorldPos != resourceWorldPos)
-                        {
-                            GameObject currTarget = resource_grid.GetTileGameObjFromWorldPos(resourceWorldPos);
-                            if (currTarget != null)
-                                currRock = currTarget.GetComponent<Rock_Handler>().myRock;
 
-                            currRockWorldPos = resourceWorldPos;
-                        }
                       
 
                         StopCoroutine("ExtractResource");
@@ -109,10 +112,21 @@ public class Extractor : ExtractionBuilding {
                     }
                     else
                     {
-                        StopCoroutine("ShowStatusMessage");
-                        StartCoroutine("ShowStatusMessage");
-                        statusMessage = "Full!";
-                        _state = State.NOSTORAGE;
+                        if (currRock == null)
+                        {
+                            // go back to searching for rock
+                            Debug.Log("EXTRACTOR: Curr rock is null, going back to searching!");
+                            _state = State.SEARCHING;
+                        }
+                        else
+                        {
+                            // storage is full!
+                            StopCoroutine("ShowStatusMessage");
+                            StartCoroutine("ShowStatusMessage");
+                            statusMessage = "Full!";
+                            _state = State.NOSTORAGE;
+                        }
+                     
                     }
                   
 
@@ -173,6 +187,9 @@ public class Extractor : ExtractionBuilding {
 
                 if (CheckSearchForResource())
                 {
+                    // Define my resource tile position
+                    currRockWorldPos = resourceWorldPos;
+
                     // If it's true it means the position of rock has been defined
                     _state = State.EXTRACTING;
                 }

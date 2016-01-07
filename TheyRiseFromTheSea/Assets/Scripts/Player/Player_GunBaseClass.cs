@@ -107,23 +107,26 @@ public class Player_GunBaseClass : MonoBehaviour {
 		// BRACKEY's way:
 		if (gunStats.curFireRate == 0) {
 			if (Input.GetButtonDown ("Fire1")) {
-				if (gameMaster){
-					if (gameMaster._canFireWeapon) 
-						FireWeapon ();
-				}else{
-					Debug.Log("GUN: GM is null!!!");
-				}
-			}
+                //if (gameMaster){
+                //	if (gameMaster._canFireWeapon) 
+                //		FireWeapon ();
+                //}else{
+                //	Debug.Log("GUN: GM is null!!!");
+                //}
+                FireWeapon();
+            }
 			
 		} else {
 			if (Input.GetButton ("Fire1") && Time.time > countDownToFire) {
-				if (gameMaster){
-					if (gameMaster._canFireWeapon) {
-						countDownToFire = Time.time + 1 / gunStats.curFireRate;
-						FireWeapon ();
-					}
-				}
-			}
+                //if (gameMaster){
+                //	if (gameMaster._canFireWeapon) {
+                //		countDownToFire = Time.time + 1 / gunStats.curFireRate;
+                //		FireWeapon ();
+                //	}
+                //}
+                countDownToFire = Time.time + 1 / gunStats.curFireRate;
+                FireWeapon();
+            }
 		}
 
 	}

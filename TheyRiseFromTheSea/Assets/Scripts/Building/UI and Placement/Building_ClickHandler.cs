@@ -13,8 +13,7 @@ public class Building_ClickHandler : MonoBehaviour {
 	[HideInInspector]
 	public TileData.Types tileType, myTileType;
 
-	// get the bounds of this collider to know where to place the options panel
-	BoxCollider2D myCollider;
+    // Set this to my vertical Sprite size to calculate in what position to render a GUI menu on top of this building
 	float vertExtents;
 
 	[SerializeField]
@@ -136,9 +135,9 @@ public class Building_ClickHandler : MonoBehaviour {
 			buildingCanvas.worldCamera = Camera.main;
 		}
         
+  
 
-		myCollider = GetComponent<BoxCollider2D> ();
-		vertExtents = myCollider.bounds.extents.y;
+        vertExtents = GetComponent<SpriteRenderer>().sprite.bounds.size.y;
 
 
         //if (resourceGrid.worldGridInitialized)

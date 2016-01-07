@@ -188,12 +188,15 @@ public class ExtractionBuilding : MonoBehaviour {
     TileData SearchForResource()
     {
         float spriteWidth = GetComponent<SpriteRenderer>().sprite.bounds.size.x;
+        float spriteHeight = GetComponent<SpriteRenderer>().sprite.bounds.size.y;
 
         Vector3 top = myTransform.position + Vector3.up;
         Vector3 bottom = myTransform.position - Vector3.up;
         Vector3 left = myTransform.position + Vector3.left;
         Vector3 right = myTransform.position + Vector3.right;
         right.x += spriteWidth;
+        top.y += spriteHeight;
+        left.x += -1;
 
         Vector3 top2 = top + Vector3.up;
         Vector3 bottom2 = bottom - Vector3.up;
@@ -357,14 +360,17 @@ public class ExtractionBuilding : MonoBehaviour {
                 else
                 {
                     // Check if there's any space left at all in personal storage
-                    int extra = extract - extractorStats.personalStorageCapacity;
-                    int remainder = extract - extra;
-                    if (remainder > 0)
-                        currResourceStored += remainder;
+                    int spaceLeft = extractorStats.personalStorageCapacity - currResourceStored;
+                    if (spaceLeft > 0 && extract >= spaceLeft)
+                    {
+                        // Fill up the space left
+                        currResourceStored += spaceLeft;
 
-                    // Call the inventory split callback if not null to account for the remainder
-                    if (inventoryTypeCallback != null)
-                        inventoryTypeCallback(remainder);
+                        // Call the inventory split callback if not null to account for the remainder
+                        if (inventoryTypeCallback != null)
+                            inventoryTypeCallback(spaceLeft);
+                    }
+    
 
                     // STORAGE FULL
                     isExtracting = false;

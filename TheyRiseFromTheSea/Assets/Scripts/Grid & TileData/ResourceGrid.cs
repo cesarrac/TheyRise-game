@@ -311,6 +311,8 @@ public class ResourceGrid : MonoBehaviour{
 	{
 		// SPAWN PLAYER CAPITAL HERE:
 		tiles [_terraPosX, _terraPosY] = new TileData(_terraPosX, _terraPosY, "Capital", TileData.Types.capital, 0, 10000, 200, 5,0,0,0);
+        DefineMultipleTiles(_terraPosX, _terraPosY, 2, 2, "Capital", TileData.Types.capital, 0, 100, 200, 5, 0, 0, 0);
+
 		SpawnDiscoverTile(tiles [_terraPosX, _terraPosY].tileName, new Vector3(_terraPosX, _terraPosY, 0.0f),tiles [_terraPosX, _terraPosY].tileType);
 
         // Spawn Player / Hero 1 tile down from the terraformer
