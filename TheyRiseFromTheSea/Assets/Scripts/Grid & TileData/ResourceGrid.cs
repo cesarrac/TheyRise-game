@@ -310,10 +310,10 @@ public class ResourceGrid : MonoBehaviour{
 	void InitCapital(int _terraPosX, int _terraPosY)
 	{
 		// SPAWN PLAYER CAPITAL HERE:
-		tiles [_terraPosX, _terraPosY] = new TileData(_terraPosX, _terraPosY, "Capital", TileData.Types.capital, 0, 10000, 200, 5,0,0,0);
-        DefineMultipleTiles(_terraPosX, _terraPosY, 2, 2, "Capital", TileData.Types.capital, 0, 100, 200, 5, 0, 0, 0);
+		tiles [_terraPosX, _terraPosY] = new TileData(_terraPosX, _terraPosY, "Transporter", TileData.Types.capital, 0, 10000, 200, 5,0,0,0);
+        DefineMultipleTiles(_terraPosX, _terraPosY, 2, 2, "Transporter", TileData.Types.capital, 0, 100, 200, 5, 0, 0, 0);
 
-		SpawnDiscoverTile(tiles [_terraPosX, _terraPosY].tileName, new Vector3(_terraPosX, _terraPosY, 0.0f),tiles [_terraPosX, _terraPosY].tileType);
+		SpawnDiscoverTile(tiles [_terraPosX, _terraPosY].tileName, new Vector3(_terraPosX, _terraPosY, 0.0f),tiles [_terraPosX, _terraPosY].tileType, 2, 2);
 
         // Spawn Player / Hero 1 tile down from the terraformer
         Hero =  game_master.SpawnThePlayer(_terraPosX, _terraPosY - 1);

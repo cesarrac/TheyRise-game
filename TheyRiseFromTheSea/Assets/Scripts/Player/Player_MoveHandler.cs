@@ -46,6 +46,8 @@ public class Player_MoveHandler : MonoBehaviour {
 
 	public Transform myWeapon;
 
+    public bool isOnShip { get; protected set; }
+
 	void Awake()
 	{
 		anim = GetComponent<Animator> ();
@@ -54,8 +56,18 @@ public class Player_MoveHandler : MonoBehaviour {
 
 		mStats.Init ();
 
-        if (!resourceGrid)
-            resourceGrid = GameObject.FindGameObjectWithTag("Map").GetComponent<ResourceGrid>();
+        if (Application.loadedLevel == 0)
+        {
+            isOnShip = true;
+        }
+        else
+        {
+            isOnShip = false;
+        }
+
+
+        if (!resourceGrid && !isOnShip)
+            resourceGrid = ResourceGrid.Grid;
 	}
 
 
@@ -64,8 +76,12 @@ public class Player_MoveHandler : MonoBehaviour {
 
 		lastTapTime = 0;
 
-		mapX = resourceGrid.mapSizeX;
-		mapY = resourceGrid.mapSizeY;
+        if (!isOnShip)
+        {
+            mapX = resourceGrid.mapSizeX;
+            mapY = resourceGrid.mapSizeY;
+        }
+	
 	}
 
 
@@ -80,13 +96,7 @@ public class Player_MoveHandler : MonoBehaviour {
 
 	}
 
-	void FixedUpdate()
-	{
 
-
-//		if (myWeapon)
-//			MouseWeaponAim (myWeapon);
-	}
 
 	void MyStateMachine (State _curState){
 		switch (_curState) {
@@ -180,25 +190,25 @@ public class Player_MoveHandler : MonoBehaviour {
 	
 	}
 
-	bool CheckWalkabale(Vector3 pos){
-		int posX = Mathf.RoundToInt (pos.x);
-		int posY = Mathf.RoundToInt (pos.y);
+	//bool CheckWalkabale(Vector3 pos){
+	//	int posX = Mathf.RoundToInt (pos.x);
+	//	int posY = Mathf.RoundToInt (pos.y);
 
-		if (resourceGrid.UnitCanEnterTile (posX, posY)) {
-			return true;
-		} else {
-			return false;
-		}
+	//	if (resourceGrid.UnitCanEnterTile (posX, posY)) {
+	//		return true;
+	//	} else {
+	//		return false;
+	//	}
 
-	}
+	//}
 
-	void MouseWeaponAim(Transform weapon)
-	{
-		var mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-		Quaternion rot = Quaternion.LookRotation (weapon.position - mousePos, Vector3.forward);
-		weapon.rotation = rot;
-		Vector3 facingRot = new Vector3 (0, 0, weapon.eulerAngles.z);
-		weapon.eulerAngles = facingRot;
+	//void MouseWeaponAim(Transform weapon)
+	//{
+	//	var mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+	//	Quaternion rot = Quaternion.LookRotation (weapon.position - mousePos, Vector3.forward);
+	//	weapon.rotation = rot;
+	//	Vector3 facingRot = new Vector3 (0, 0, weapon.eulerAngles.z);
+	//	weapon.eulerAngles = facingRot;
 
-	}
+	//}
 }

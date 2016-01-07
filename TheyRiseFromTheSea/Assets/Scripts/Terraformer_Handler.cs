@@ -30,15 +30,18 @@ public class Terraformer_Handler : MonoBehaviour {
 	{
 		currProgressTime = 0;
 
-		if (GameObject.FindGameObjectWithTag ("Spawner") != null) {
-			waveSpawner = GameObject.FindGameObjectWithTag ("Spawner").GetComponent<Enemy_WAVESpawnerV2> ();
-			//waveSpawner.terraformer = this;
-		}
-
-		if (!master_State)
-			master_State = GameObject.FindGameObjectWithTag ("GameController").GetComponent<MasterState_Manager> ();
+		//if (GameObject.FindGameObjectWithTag ("Spawner") != null) {
+		//	waveSpawner = GameObject.FindGameObjectWithTag ("Spawner").GetComponent<Enemy_WAVESpawnerV2> ();
+		//	//waveSpawner.terraformer = this;
+		//}
 
 	}
+
+    void Start()
+    {
+        if (!master_State)
+            master_State = MasterState_Manager.Instance;
+    }
 	
 	void Update () 
 	{

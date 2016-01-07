@@ -34,6 +34,9 @@ public class Player_UIHandler : MonoBehaviour {
 
 	void Start () 
 	{
+        // Ask Ship Inventory to init ui
+        Ship_Inventory.Instance.InitUI();
+
 		if (resourceManager == null) {
 			resourceManager = GetComponent<Player_ResourceManager>();
 		}

@@ -25,17 +25,26 @@ public class MasterState_Manager : MonoBehaviour {
 
     public static MasterState_Manager Instance { get; protected set; }
 
+    int planetLevelIndex = 1, shipLevelIndex = 0;
+
 	void Awake () 
 	{
         Instance = this;
 
-		game_master = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster> ();
+        // ON PLANET:
+        if (Application.loadedLevel == planetLevelIndex)
+        {
+            game_master = GameObject.FindGameObjectWithTag("GM").GetComponent<GameMaster>();
+            // If for some reason the mission failed panel is still active, deactivate it
+            if (missionFailedPanel)
+            {
+                if (missionFailedPanel.activeSelf)
+                    missionFailedPanel.SetActive(false);
+            }
+        }
 
-		// If for some reason the mission failed panel is still active, deactivate it
-		if (missionFailedPanel) {
-			if (missionFailedPanel.activeSelf)
-				missionFailedPanel.SetActive(false);
-		}
+
+
 	}
 	
 
