@@ -160,18 +160,26 @@ public class Building_ClickHandler : MonoBehaviour {
 			FadeIn();
 			break;
 		case State.READY:
+                if (myTileType != TileData.Types.terraformer)
+                {
+                    if (Input.GetButtonDown("Interact") && playerIsNear)
+                    {
+                        if (!buildMainController.currentlyBuilding)
+                        {
+                            if (buildingPanel != null && !buildingPanel.gameObject.activeSelf)
+                            {
+                                ActivateBuildingUI();
 
-			    if (Input.GetButtonDown("Interact") && playerIsNear) {
-				    if (!buildMainController.currentlyBuilding){
-					    if (!buildingPanel.gameObject.activeSelf) {
-						    ActivateBuildingUI ();
-						
-					    }else{
-						    ClosePanel();
-					    }
-					
-				    }
-			    }
+                            }
+                            else
+                            {
+                                ClosePanel();
+                            }
+
+                        }
+                    }
+                }
+			 
 
 
                 if (Input.GetButtonDown("Beam") && playerIsNear)

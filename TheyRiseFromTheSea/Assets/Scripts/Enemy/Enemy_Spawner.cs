@@ -1,0 +1,110 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class Enemy_Spawner : MonoBehaviour {
+
+    public static Enemy_Spawner instance;
+
+    int totalToSpawn = 0;
+    Enemy curr_Enemy_toSpwn;
+
+    Vector3 spawnPosition;
+   // Vector2[] waterSpawnPositions;
+
+    void Awake()
+    {
+        instance = this;
+    }
+
+    void Start()
+    {
+        totalToSpawn = 0;
+    }
+
+    //public void InitSpawnPositions(Vector2[] waterTilePositions)
+    //{
+    //    waterSpawnPositions = waterTilePositions;
+    //}
+
+
+    public void ReceiveSpawnCommand(int spawnCount, Enemy enemyToSpwn)
+    {
+        totalToSpawn = spawnCount;
+        curr_Enemy_toSpwn = enemyToSpwn;
+        StartCoroutine("Spawn");
+    }
+
+    IEnumerator Spawn()
+    {
+
+        while (totalToSpawn > 0)
+        {
+            if (curr_Enemy_toSpwn != null)
+            {
+                // Select a Spawn Position
+                spawnPosition = GetSpawnPosition();
+
+                GameObject e = ObjectPool.instance.GetObjectForType(curr_Enemy_toSpwn.name, true, spawnPosition);
+
+                if (e != null)
+                {
+                    // Assign the unit's stats
+                    if (e.GetComponent<Unit_Base>() != null)
+                    {
+                        Unit_Base enemyUnitBase = e.GetComponent<Unit_Base>();
+                        enemyUnitBase.stats = new Unit_Base.Stats();
+                        enemyUnitBase.stats.InitStartingStats(curr_Enemy_toSpwn.AttackStats.maxHP, curr_Enemy_toSpwn.AttackStats.startDefence,
+                            curr_Enemy_toSpwn.AttackStats.startAttack, curr_Enemy_toSpwn.AttackStats.startShield, curr_Enemy_toSpwn.AttackStats.startRate, curr_Enemy_toSpwn.AttackStats.startDamage, curr_Enemy_toSpwn.AttackStats.startSpecialDmg);
+                        enemyUnitBase.stats.Init();
+                        enemyUnitBase.isAggroToBuildings = curr_Enemy_toSpwn.isAggroToBuildings;
+                    }
+                    if (e.GetComponent<Enemy_PathHandler>() != null)
+                    {
+                        Enemy_PathHandler ePathHandler = e.GetComponent<Enemy_PathHandler>();
+                        ePathHandler.mStats = new Enemy_PathHandler.MovementStats();
+                        ePathHandler.mStats.InitStartingMoveStats(curr_Enemy_toSpwn.MovementStats.startMoveSpeed, curr_Enemy_toSpwn.MovementStats.startChaseSpeed);
+                        ePathHandler.mStats.InitMoveStats();
+                        // If this isn't a player chaser (meaning the player is its main path target) then it needs an alternate path target
+                        if (!curr_Enemy_toSpwn.chasesPlayer)
+                        {
+                            ePathHandler.nonPlayerTarget = curr_Enemy_toSpwn.nonHeroPathTarget;
+                        }
+                        else
+                        {
+                            ePathHandler.chasesPlayer = true;
+                        }
+
+                        ePathHandler.InitTarget();
+                    }
+                }
+          
+
+                totalToSpawn--;
+
+                yield return new WaitForSeconds(0.5f);
+            }
+            else
+                yield break;
+          
+
+        }
+
+        curr_Enemy_toSpwn = null;
+        yield break;
+    }
+
+    Vector3 GetSpawnPosition()
+    {
+        int index = Random.Range(0, ResourceGrid.Grid.waterTilesArray.Length);
+
+        return new Vector3(ResourceGrid.Grid.waterTilesArray[index].x, ResourceGrid.Grid.waterTilesArray[index].y, 0);
+    }
+
+
+    public void StopSpawning()
+    {
+        StopCoroutine("Spawn");
+        totalToSpawn = 0;
+        curr_Enemy_toSpwn = null;
+    }
+}

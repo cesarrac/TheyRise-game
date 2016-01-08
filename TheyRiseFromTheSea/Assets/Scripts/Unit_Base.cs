@@ -21,7 +21,7 @@ public class Unit_Base : MonoBehaviour {
 		public int curCreditValue { get{return _creditValue;} set {_creditValue = Mathf.Clamp(value, 0, 500);}}
 
 
-
+        // Use this to initialize current stats from a Unit's gameobject (Attack Handler)
 		public void Init(){
 			curHP = maxHP;
 			curDefence = startDefence;
@@ -32,9 +32,21 @@ public class Unit_Base : MonoBehaviour {
 			curSPdamage = startSpecialDmg;
 			curCreditValue = creditReward;
 		}
+
+        // Use this to initialize Stats from the Spawner
+        public void InitStartingStats(float hp, float def, float attk, float shi, float rate, float dmg, float sp_dmg)
+        {
+            maxHP = hp;
+            startDefence = def;
+            startAttack = attk;
+            startShield = _shield;
+            startRate = rate;
+            startDamage = dmg;
+            startSpecialDmg = sp_dmg;
+        }
 	}
 
-	public Stats stats = new Stats ();
+    public Stats stats;
 
 	public ResourceGrid resourceGrid;
 
@@ -62,6 +74,8 @@ public class Unit_Base : MonoBehaviour {
     public AudioClip takeDamageSound, doDamageSound;
     public AudioSource audio_source;
 
+    [Header("If ON, this unit will always attack buildings nearby")]
+    public bool isAggroToBuildings = false;
     
 
 	void Start(){

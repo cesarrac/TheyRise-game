@@ -15,9 +15,6 @@ public class Enemy_AttackHandler : Unit_Base {
     //	public bool isKamikaze;
 
 
-    [Header ("If ON, this unit will always attack buildings nearby")]
-    public bool aggroOnBuildings;
-
     public enum State { MOVING, ATTACK_TILE, ATTACK_UNIT, ATTACKING, POOLING_TARGET };
 
     private State _state = State.MOVING;
@@ -54,9 +51,6 @@ public class Enemy_AttackHandler : Unit_Base {
 
     void OnEnable()
     {
-        // Initialize Unit stats
-        stats.Init();
-
         ResetFlagsandTargets();
     }
 
@@ -88,7 +82,7 @@ public class Enemy_AttackHandler : Unit_Base {
             mainTargetIsTile = false;
 
             // If this unit is NO-Aggro to buildings we can go ahead and set playerUnit here so it attacks the player as soon as it is in range
-            if (!aggroOnBuildings)
+            if (!isAggroToBuildings)
             {
                 playerUnit = mainTarget.gameObject;
                 currTargetIsTile = false;
@@ -103,6 +97,8 @@ public class Enemy_AttackHandler : Unit_Base {
 
     void Start()
     {
+        // Initialize Unit stats
+        //stats.Init();
 
         //		// Get the value of isKamikaze set by the public bool in Move Handler
         //		isKamikaze = moveHandler.isKamikaze;
@@ -119,7 +115,7 @@ public class Enemy_AttackHandler : Unit_Base {
         if (!_camShake)
             _camShake = CameraShake.Instance;
 
-        StartCoroutine("DebugMyStatus");
+        //StartCoroutine("DebugMyStatus");
 
     }
 
@@ -127,12 +123,7 @@ public class Enemy_AttackHandler : Unit_Base {
     {
         debugState = _state;
 
-        // If I don't have any HP left, Pool myself and stop doing everything else
-        if (stats.curHP <= 0)
-        {
-            Suicide();
-        }
-        else
+        if (stats.curHP > 0)
         {
 
             // Only listen for attackingTower once our path handler has set our main target and unit is NOT attacking
@@ -181,6 +172,17 @@ public class Enemy_AttackHandler : Unit_Base {
 
     }
 
+    void LateUpdate()
+    {
+
+        // If I don't have any HP left, Pool myself and stop doing everything else
+        if (stats.curHP <= 0)
+        {
+            Suicide();
+        }
+    }
+
+
     IEnumerator DebugMyStatus()
     {
         while (true)
@@ -207,7 +209,7 @@ public class Enemy_AttackHandler : Unit_Base {
     {
         if (!isAttacking)
         {
-            if (aggroOnBuildings)
+            if (isAggroToBuildings)
             {
                 //                 AGGRESSIVE TO BUILDING ATTACK BEHAVIOR:
                 //  Rule: If any tower attacks this unit or is in range and the unit currently does NOT have an attack target besides the player, they ALWAYS will go and attack the tower. 

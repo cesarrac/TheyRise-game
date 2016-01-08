@@ -21,14 +21,8 @@ public class Building_StatusIndicator : MonoBehaviour {
 	private Canvas canvas;
 	
 	private GameObject _damageText, _statusMsgText;
-	
-	[HideInInspector]
-	public ObjectPool objPool;
-
 
 	void Start () {
-
-        objPool = ObjectPool.instance;
 
         if (healthBarRect == null) {
 			Debug.Log("BUILDING INDICATOR: No health bar referenced!!");
@@ -63,7 +57,7 @@ public class Building_StatusIndicator : MonoBehaviour {
 		Vector3 scale = new Vector3(1, 1, 1);
 		Vector3 _scaleCalc = canvas.transform.localScale - scale;
 		
-		_damageText = objPool.GetObjectForType ("Building Damage Text", true, Vector3.zero);
+		_damageText = ObjectPool.instance.GetObjectForType ("Building Damage Text", true, Vector3.zero);
 		
 		if (_damageText != null) {
 
@@ -92,7 +86,7 @@ public class Building_StatusIndicator : MonoBehaviour {
 		Vector3 scale = new Vector3(1, 1, 1);
 		Vector3 _scaleCalc = canvas.transform.localScale - scale;
 		
-		_statusMsgText = objPool.GetObjectForType ("Status Text", true, Vector3.zero);
+		_statusMsgText = ObjectPool.instance.GetObjectForType ("Status Text", true, Vector3.zero);
 		
 		if (_statusMsgText != null) {
 			

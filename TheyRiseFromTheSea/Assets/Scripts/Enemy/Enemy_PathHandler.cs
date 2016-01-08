@@ -20,12 +20,19 @@ public class Enemy_PathHandler : MonoBehaviour
             curMoveSpeed = startMoveSpeed;
             curChaseSpeed = startChaseSpeed;
         }
+
+        public void InitStartingMoveStats(float move_spd, float chase_spd)
+        {
+            startMoveSpeed = move_spd;
+            startChaseSpeed = chase_spd;
+        }
     }
 
     public MovementStats mStats = new MovementStats();
 
 
     Transform target, savedTarget;
+    public Transform nonPlayerTarget;
 
     Vector3[] path;
     int targetIndex;
@@ -62,12 +69,53 @@ public class Enemy_PathHandler : MonoBehaviour
     void OnEnable()
     {
         grid = ResourceGrid.Grid;
- 
-        // Initialize Movement Speed stat
-        mStats.InitMoveStats ();
 
         ResetFlagsAndTargets();
 
+    }
+
+    void ResetFlagsAndTargets()
+    {
+        FullStop();
+        isInRange = false;
+        target = null;
+        currPathPosition = new Vector3();
+        isFullyStopped = false;
+
+    }
+
+    public void InitTarget()
+    {
+        target = GetMainTarget();
+        StartCoroutine("RequestPath");
+
+        // Set my Attack Handler's main target
+        GetComponent<Enemy_AttackHandler>().SetMainTarget(target);
+    }
+
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        enemy_AttackHandler = GetComponent<Enemy_AttackHandler>();
+    }
+
+    void Start()
+    {
+        // Initialize Movement Speed stat
+        //mStats.InitMoveStats();
+
+        if (target == null)
+        {
+
+            InitTarget();
+        }
+
+    
+            
+
+        _state = State.GETTING_PATH;
+
+        //StartCoroutine("DebugMyStatus");
     }
 
     Transform GetMainTarget()
@@ -81,50 +129,10 @@ public class Enemy_PathHandler : MonoBehaviour
         }
         else
         {
-            return null;
-           // return grid.playerCapital.transform;
-           // Maybe replace this with a way to find the Terraformer or the Transporter/Launchpad
+            return nonPlayerTarget;
+            // return grid.playerCapital.transform;
+            // Maybe replace this with a way to find the Terraformer or the Transporter/Launchpad
         }
-    }
-
-    void ResetFlagsAndTargets()
-    {
-        FullStop();
-        isInRange = false;
-        target = null;
-        currPathPosition = new Vector3();
-        isFullyStopped = false;
-
-    }
-
-    void Awake()
-    {
-        rb = GetComponent<Rigidbody2D>();
-        enemy_AttackHandler = GetComponent<Enemy_AttackHandler>();
-    }
-
-    void Start()
-    {
-        if (target == null)
-        {
-            target = GetMainTarget();
-
-        }
-
-        if (target != null)
-        {
-            StartCoroutine("RequestPath");
-
-            // Set my Attack Handler's main target
-            GetComponent<Enemy_AttackHandler>().SetMainTarget(target);
-
-            Debug.Log("main target has been set!");
-        }
-            
-
-        _state = State.GETTING_PATH;
-
-        //StartCoroutine("DebugMyStatus");
     }
 
     void Update()
@@ -366,7 +374,7 @@ public class Enemy_PathHandler : MonoBehaviour
             if (!currIswalkable)
             {
                 // Bounce up away from my current position
-                BounceOffObstacle(transform.position + Vector3.down);
+                BounceOffObstacle(transform.position + Vector3.left);
 
             }
         }

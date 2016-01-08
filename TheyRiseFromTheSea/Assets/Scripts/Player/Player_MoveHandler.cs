@@ -107,7 +107,7 @@ public class Player_MoveHandler : MonoBehaviour {
 //			if (Input.GetKeyDown (KeyCode.W) || Input.GetKeyDown (KeyCode.A) || Input.GetKeyDown (KeyCode.S) || Input.GetKeyDown (KeyCode.D))
 			// If Player tries to move
 			if (move_vector != Vector2.zero) {
-				if ((Time.time - lastTapTime) < tapSpeed) {
+				if ((Time.time - lastTapTime) < tapSpeed && !isOnShip) {
 					// dashing
 					_state = State.DASHING;
 //					Move (mStats.dashSpeed);

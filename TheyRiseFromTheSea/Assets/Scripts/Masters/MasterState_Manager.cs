@@ -12,7 +12,7 @@ public class MasterState_Manager : MonoBehaviour {
 	/// - Pause CoRoutines in other scripts by changing Master State
 	/// </summary>
 
-	public enum MasterState { WAITING, LOADING, START, PAUSED, MISSION_FAILED, PLAYER_DEAD,  MISSION_SUCCESS, CONTINUE, QUIT }
+	public enum MasterState { WAITING, LOADING, START, PAUSED, MISSION_FAILED, PLAYER_DEAD,  MISSION_SUCCESS, ONSHIP,CONTINUE, QUIT }
 
 	private MasterState _mState = MasterState.WAITING;
 
@@ -31,6 +31,7 @@ public class MasterState_Manager : MonoBehaviour {
 	{
         Instance = this;
 
+
         // ON PLANET:
         if (Application.loadedLevel == planetLevelIndex)
         {
@@ -41,6 +42,10 @@ public class MasterState_Manager : MonoBehaviour {
                 if (missionFailedPanel.activeSelf)
                     missionFailedPanel.SetActive(false);
             }
+        }
+        else if (Application.loadedLevel == shipLevelIndex)
+        {
+            _mState = MasterState.ONSHIP;
         }
 
 
@@ -88,7 +93,13 @@ public class MasterState_Manager : MonoBehaviour {
         case MasterState.MISSION_SUCCESS:
             // Load a progress scene where the player sees what items they got and what they have left
 			break;
-		case MasterState.QUIT:
+        case MasterState.ONSHIP:
+                if (Time.timeScale == 0)
+                {
+                    Time.timeScale = 1;
+                }
+            break;
+            case MasterState.QUIT:
 			//TODO: Here we would begin the save progress function and then quit the application
 			Application.Quit();
 			break;
@@ -131,6 +142,7 @@ public class MasterState_Manager : MonoBehaviour {
 
 	public void ReturnToShip()
 	{
+        _mState = MasterState.ONSHIP;
 		game_master.GoBackToShip ();
 	}
 }

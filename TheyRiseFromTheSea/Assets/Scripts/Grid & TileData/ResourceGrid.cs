@@ -152,24 +152,16 @@ public class ResourceGrid : MonoBehaviour{
 		if (playerResources == null)
 			playerResources = GameObject.FindGameObjectWithTag ("Capital").GetComponent<Player_ResourceManager> ();
 
-        //		InitTransporterAndMinerals ();
+        // tiles and spawnedTiles are initialized by MapGenerator
 
-        // Initialize Tile Data array with this map size
-        //		tiles = new TileData[mapSizeX, mapSizeY];
-
-        // Initialize spawned Tiles array, all values will be set to null until tiles are spawned
-        //		spawnedTiles = new GameObject[mapSizeX, mapSizeY];
-
-        // Initialize the Grid, filling tiles positions with Capital, Rocks, and Water
-        //		InitGrid ();
-
-        // This creates the Initial Pathfinding graph taking into account unwakable tiles already spawned (ex. Rock, Water, Capital)
-        //InitPathFindingGraph ();
         InitPathFindingGrid();
 
         worldGridInitialized = true;
 
         StartCoroutine("WaitForLandingSiteSelection");
+
+        // Give the waterTilePositions to Enemy_Spawner
+        //Enemy_Spawner.instance.InitSpawnPositions(waterTilesArray);
     }
 
     // This will wait for the Player to select where to land on initial level load. Once they left click, this stops and never checks again.

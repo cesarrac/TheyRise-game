@@ -108,7 +108,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
     void SwapSelectedBP()
     {
-        if (selectedBPIndex + 1 < availableBlueprintsTypes.Length)
+        if (selectedBPIndex < availableBlueprintsTypes.Length)
         {
             if (availableBlueprints.ContainsKey(availableBlueprintsTypes[selectedBPIndex]))
             {
