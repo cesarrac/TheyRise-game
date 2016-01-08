@@ -161,7 +161,7 @@ public class Building_ClickHandler : MonoBehaviour {
 			break;
 		case State.READY:
 
-			    if (Input.GetKeyDown (KeyCode.F) && playerIsNear) {
+			    if (Input.GetButtonDown("Interact") && playerIsNear) {
 				    if (!buildMainController.currentlyBuilding){
 					    if (!buildingPanel.gameObject.activeSelf) {
 						    ActivateBuildingUI ();

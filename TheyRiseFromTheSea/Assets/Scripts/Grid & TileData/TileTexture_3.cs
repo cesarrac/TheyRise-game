@@ -241,7 +241,7 @@ public class TileTexture_3 : MonoBehaviour
     bool isSettingShoreTile = false;
     bool isSettingShoreCorner = false;
 
-
+    public bool hasTopLayer = false;
 
     void Awake()
     {
@@ -505,6 +505,8 @@ public class TileTexture_3 : MonoBehaviour
         // Split the List of tiles to Consider between those tiles that are edges and those that are center( We are ONLY considering tiles that are NOT clear/water)
         SortGraphicTiles(tilesToConsider);
 
+
+
     }
 
     void SetExtraCentersOnTexture(Texture2D tex, int x, int y, Color[] tilePixels, int tileRes)
@@ -609,7 +611,13 @@ public class TileTexture_3 : MonoBehaviour
 
         GenerateShoreRippleTexture(shoreTilePositions.ToArray());
 
-        mapGenerator.GenerateTopLayerMap(secondaryTilePositions.ToArray());
+        if (hasTopLayer)
+        {
+            mapGenerator.GenerateTopLayerMap(secondaryTilePositions.ToArray());
+        }
+        else
+            ApplyTextures();
+   
 
        
     }
@@ -2293,10 +2301,19 @@ public class TileTexture_3 : MonoBehaviour
         //Texture1.Apply();
         //Texture2.Apply();
 
-        base_renderer.sharedMaterial.mainTexture = Texture1;
-        //base_renderer.materials[1].mainTexture = Texture2;
-        second_renderer.sharedMaterial.mainTexture = Texture2;
+        if (hasTopLayer)
+        {
+            base_renderer.sharedMaterial.mainTexture = Texture1;
+            //base_renderer.materials[1].mainTexture = Texture2;
+            second_renderer.sharedMaterial.mainTexture = Texture2;
 
-        shore_renderer.sharedMaterial.mainTexture = Texture3;
+        }
+        else
+        {
+            base_renderer.sharedMaterial.mainTexture = Texture1;
+            shore_renderer.sharedMaterial.mainTexture = Texture3;
+        }
+            
+
     }
 }

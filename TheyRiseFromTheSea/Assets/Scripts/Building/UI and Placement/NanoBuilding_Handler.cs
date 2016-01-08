@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class NanoBuilding_Handler : MonoBehaviour {
 
@@ -17,7 +18,8 @@ public class NanoBuilding_Handler : MonoBehaviour {
     // The total ammount of blueprints allowed is set by the NanoBuilders Processing Units
     // For now I'm setting these to be an array of Blueprints containing the three basic battle towers... this means it will only affect
     // the player if they are building battle buildings NOT extractors and such.
-    public Blueprint[] availableBlueprints;
+    public TileData.Types[] availableBlueprintsTypes;
+    public Dictionary<TileData.Types, Blueprint> availableBlueprints;
 
     // public string[] bluePrintsAvailable;
     int selectedBPIndex = 0;
@@ -34,7 +36,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
         bpPanel = GameObject.FindGameObjectWithTag("BP Panel");
         bluePrintTextBox = bpPanel.GetComponentsInChildren<Text>()[1];
 
-        selectedBluePrint = availableBlueprints[0];
+        selectedBluePrint = availableBlueprints[TileData.Types.terraformer];
 
         bluePrintTextBox.text = selectedBluePrint.buildingName;
 
@@ -48,17 +50,25 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
     void InitBluePrints()
     {
-        availableBlueprints = new Blueprint[9];
-        availableBlueprints[0] = new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun);
-        availableBlueprints[1] = new Blueprint("Sniper Gun", 3, 10, TileData.Types.sniper);
-        availableBlueprints[2] = new Blueprint("Cannons", 3, 10, TileData.Types.cannons);
-        availableBlueprints[3] = new Blueprint("Sea-Witch Crag", 3, 10, TileData.Types.seaWitch);
-        availableBlueprints[4] = new Blueprint("Extractor", 3, 10, TileData.Types.extractor);
-        availableBlueprints[5] = new Blueprint("Desalination Pump", 3, 10, TileData.Types.desalt_s);
-        availableBlueprints[6] = new Blueprint("Energy Generator", 3, 10, TileData.Types.generator);
-        availableBlueprints[7] = new Blueprint("Seaweed Farm", 3, 10, TileData.Types.farm_s);
-        availableBlueprints[8] = new Blueprint("Storage", 3, 10, TileData.Types.storage);
-        // FOR NOW im forcing this blueprints array unto the sprite database from here
+        availableBlueprintsTypes = new TileData.Types[10] {TileData.Types.terraformer, TileData.Types.sniper,  TileData.Types.cannons , TileData.Types.seaWitch,
+            TileData.Types.extractor, TileData.Types.desalt_s,TileData.Types.generator,TileData.Types.farm_s, TileData.Types.storage,TileData.Types.machine_gun};
+
+        availableBlueprints = new Dictionary<TileData.Types, Blueprint>
+        {
+            {TileData.Types.terraformer, new Blueprint("Terraformer", 0, 0, TileData.Types.terraformer) }, // < ---- Always include the Terraformer and no cost
+            {TileData.Types.sniper, new Blueprint("Sniper Gun", 3, 10, TileData.Types.sniper) },
+            { TileData.Types.cannons, new Blueprint("Cannons", 3, 10, TileData.Types.cannons)},
+            {TileData.Types.seaWitch, new Blueprint("Sea-Witch Crag", 3, 10, TileData.Types.seaWitch) },
+            {TileData.Types.extractor,  new Blueprint("Extractor", 3, 10, TileData.Types.extractor) },
+            {TileData.Types.desalt_s, new Blueprint("Desalination Pump", 3, 10, TileData.Types.desalt_s) },
+            {TileData.Types.generator, new Blueprint("Energy Generator", 3, 10, TileData.Types.generator) },
+            {TileData.Types.farm_s,  new Blueprint("Seaweed Farm", 3, 10, TileData.Types.farm_s)},
+            {TileData.Types.storage, new Blueprint("Storage", 3, 10, TileData.Types.storage) },
+            {TileData.Types.machine_gun, new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun) }
+        };
+
+      
+                                                             // FIX THIS !!!!!! FOR NOW im forcing this blueprints array unto the sprite database from here
         Buildings_SpriteDatabase.Instance.SetSprites(availableBlueprints);
     }
 	
@@ -90,21 +100,39 @@ public class NanoBuilding_Handler : MonoBehaviour {
     {   // Press Swap button to cycle through the array of Blue Prints from the index currently selected or back to 0
         if (Input.GetButtonDown("Swap"))
         {
-            if (selectedBPIndex + 1 < availableBlueprints.Length)
-            {
-                selectedBluePrint = availableBlueprints[selectedBPIndex + 1];
-                selectedBPIndex += 1;
-            }
-            else
-            {
-                selectedBluePrint = availableBlueprints[0];
-                selectedBPIndex = 0;
-            }
-
-            bluePrintTextBox.text = bluePrintTextBox.text = selectedBluePrint.buildingName;
+            SwapSelectedBP();
         }
 
         //Debug.Log(selectedBluePrint);
+    }
+
+    void SwapSelectedBP()
+    {
+        if (selectedBPIndex + 1 < availableBlueprintsTypes.Length)
+        {
+            if (availableBlueprints.ContainsKey(availableBlueprintsTypes[selectedBPIndex]))
+            {
+                selectedBluePrint = availableBlueprints[availableBlueprintsTypes[selectedBPIndex]];
+            }
+
+            selectedBPIndex += 1;
+        }
+        else
+        {
+            if (availableBlueprints.ContainsKey(availableBlueprintsTypes[0]))
+            {
+                selectedBluePrint = availableBlueprints[availableBlueprintsTypes[0]];
+                selectedBPIndex = 0;
+            }
+            else
+            {
+                selectedBluePrint = availableBlueprints[availableBlueprintsTypes[1]];
+                selectedBPIndex = 1;
+            }
+
+        }
+
+        bluePrintTextBox.text = bluePrintTextBox.text = selectedBluePrint.buildingName;
     }
 
     /// <summary>
@@ -149,6 +177,10 @@ public class NanoBuilding_Handler : MonoBehaviour {
                 {
                     build_controller.BuildThis(selectedBluePrint);
                     nanoBots -= selectedBluePrint.nanoBotCost;
+                    if (selectedBluePrint.tileType == TileData.Types.terraformer)
+                    {
+                        TerraformerHasBeenBuilt();
+                    }
                 }
                 break;
 
@@ -180,32 +212,40 @@ public class NanoBuilding_Handler : MonoBehaviour {
             TileData tileUnderMouse = MouseBuilding_Controller.MouseController.GetTileUnderMouse();
             if (tileUnderMouse.tileType != TileData.Types.empty && tileUnderMouse.tileType != TileData.Types.rock && tileUnderMouse.tileType != TileData.Types.mineral && tileUnderMouse.tileType != TileData.Types.water && tileUnderMouse.tileType != TileData.Types.capital)
             {
-                // ******************** FIX ME!!!! IM NOT BREAKING PROPERLY SOMETIMES : (
                 GameObject building = ResourceGrid.Grid.GetTileGameObjFromIntCoords(tileUnderMouse.posX, tileUnderMouse.posY);
                 BreakThisBuilding(tileUnderMouse.tileType, building);
             }
         }
     }
 
-    public void BreakThisBuilding (TileData.Types tileType, GameObject building)
+    public void BreakThisBuilding (TileData.Types _type, GameObject building)
     {
         // get me the cost of this building by finding its blueprint
-        Blueprint bp = CheckForAvailableBlueprint(tileType);
+        Blueprint bp = CheckForAvailableBlueprint(_type);
         Building_ClickHandler b_Handler = building.GetComponent<Building_ClickHandler>();
         if (bp != null)
             b_Handler.BreakBuilding(bp.nanoBotCost);
     }
 
-    Blueprint CheckForAvailableBlueprint (TileData.Types tileType)
+    Blueprint CheckForAvailableBlueprint (TileData.Types _type)
     {
-        for (int i = 0; i < availableBlueprints.Length; i++)
+        if (availableBlueprints.ContainsKey(_type))
         {
-            if (availableBlueprints[i].tileType == tileType)
-            {
-                return availableBlueprints[i];
-            }
+            return availableBlueprints[_type];
+        }
+        else
+            return null;
+    }
+
+    void TerraformerHasBeenBuilt()
+    {
+        // Make the Terraformer blueprint unavailable
+        if (availableBlueprints.ContainsKey(TileData.Types.terraformer))
+        {
+            availableBlueprints.Remove(TileData.Types.terraformer);
         }
 
-        return new Blueprint();
+        selectedBPIndex += 1;
+        SwapSelectedBP();
     }
 }

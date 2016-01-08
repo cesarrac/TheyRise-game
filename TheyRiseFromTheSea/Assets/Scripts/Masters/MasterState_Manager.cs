@@ -85,7 +85,8 @@ public class MasterState_Manager : MonoBehaviour {
             // Pause game and tell GameMaster to load level or go back to ship level
             MissionFailed();
             break;
-            case MasterState.MISSION_SUCCESS:
+        case MasterState.MISSION_SUCCESS:
+            // Load a progress scene where the player sees what items they got and what they have left
 			break;
 		case MasterState.QUIT:
 			//TODO: Here we would begin the save progress function and then quit the application

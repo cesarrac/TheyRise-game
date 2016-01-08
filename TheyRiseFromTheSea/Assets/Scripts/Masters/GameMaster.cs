@@ -124,7 +124,7 @@ public class GameMaster : MonoBehaviour {
 	void CheckIfBuilding()
 	{
 
-			if (ResourceGrid.Grid.terraformer_built && !Build_MainController.Instance.currentlyBuilding) {
+			if (ResourceGrid.Grid.transporter_built && !Build_MainController.Instance.currentlyBuilding) {
 				_canFireWeapon = true;
 			} else {
 				_canFireWeapon = false;

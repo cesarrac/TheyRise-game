@@ -73,22 +73,7 @@ public class Building_PositionHandler : MonoBehaviour {
 	}
 	
 	void FollowMouse(){
-        //m = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-    
-        //      m.z = 0;
-        //// Making sure that we are not trying to Build outside the BOUNDARIES of the GRID
-        //if (mX > resourceGrid.mapSizeX - 3){
-        //	mX = resourceGrid.mapSizeX - 3;
-        //}
-        //if (mY > resourceGrid.mapSizeY -3){
-        //	mY = resourceGrid.mapSizeY - 3;
-        //}
-        //if (mX < 3){
-        //	mX = 3;
-        //}
-        //if (mY < 3){
-        //	mY = 3;
-        //}
+
 
         // Move building with the mouse
 		transform.position = mouse_controller.currMouseP;

@@ -23,48 +23,47 @@ class Buildings_SpriteDatabase : MonoBehaviour
   
     void InitSprites()
     {
-        buildingSprites = new BuildingSprite[9];
+        buildingSprites = new BuildingSprite[10];
 
         // Machine Gun
-        buildingSprites[0] = new BuildingSprite("Machine Gun", buildings[0]);
+        buildingSprites[0] = new BuildingSprite("Machine Gun", buildings[0], TileData.Types.machine_gun);
         // Sniper Gun
-        buildingSprites[1] = new BuildingSprite("Sniper Gun", buildings[10]);
+        buildingSprites[1] = new BuildingSprite("Sniper Gun", buildings[10], TileData.Types.sniper);
         // Cannons
-        buildingSprites[2] = new BuildingSprite("Cannons", buildings[10]);
+        buildingSprites[2] = new BuildingSprite("Cannons", buildings[10], TileData.Types.cannons);
         // Sea-Witch Crag
-        buildingSprites[3] = new BuildingSprite("Sea-Witch Crag", buildings[7]);
+        buildingSprites[3] = new BuildingSprite("Sea-Witch Crag", buildings[7], TileData.Types.seaWitch);
         // Extractor
-        buildingSprites[4] = new BuildingSprite("Extractor", buildings[5]);
+        buildingSprites[4] = new BuildingSprite("Extractor", buildings[5], TileData.Types.extractor);
         // Water Pump
-        buildingSprites[5] = new BuildingSprite("Desalination Pump", buildings[5]);
+        buildingSprites[5] = new BuildingSprite("Desalination Pump", buildings[5], TileData.Types.desalt_s);
         //Energy Generator
-        buildingSprites[6] = new BuildingSprite("Energy Generator", buildings[5]);
+        buildingSprites[6] = new BuildingSprite("Energy Generator", buildings[5], TileData.Types.generator);
         // Seaweed Farm
-        buildingSprites[7] = new BuildingSprite("Seaweed Farm", buildings[8]);
+        buildingSprites[7] = new BuildingSprite("Seaweed Farm", buildings[8], TileData.Types.farm_s);
         // Storage
-        buildingSprites[8] = new BuildingSprite("Storage", buildings[8]);
+        buildingSprites[8] = new BuildingSprite("Storage", buildings[8], TileData.Types.storage);
+        // Terraformer
+        buildingSprites[9] = new BuildingSprite("Terraformer", buildings[4], TileData.Types.terraformer);
 
 
     }
 
     // Once the blueprints have been set, GM would call this method before spawning the hero
-    public void SetSprites(Blueprint[] blueprints)
+    public void SetSprites(Dictionary<TileData.Types,Blueprint> blueprints)
     {
         List<BuildingSprite> bSprites = new List<BuildingSprite>();
 
-        // For each blueprint
-        foreach(Blueprint bp in blueprints)
+        foreach (BuildingSprite bs in buildingSprites)
         {
-            // Check if this BP name matches any Building sprite in my array
-            foreach (BuildingSprite bs in buildingSprites)
+            // Check if dictionary contains this building sprite name
+            if (blueprints.ContainsKey(bs.tileType))
             {
-                if (bp.buildingName == bs.name)
-                {
-                    // add it to available sprites
-                    bSprites.Add(bs);
-                }
+                // If it does, add it as an available sprite
+                bSprites.Add(bs);
             }
         }
+    
 
         // These are now the available sprites with matching building names, restricted to Blueprints available, to use by this level's building managers
         availableSprites = bSprites.ToArray();

@@ -3,18 +3,22 @@ using System.Collections;
 
 public class Terraformer_Handler : MonoBehaviour {
 
-	/// <summary>
-	/// This script handles the progress of a terraformer and communicates when final stage is done to a Master script
-	/// that will load the victory screen and progress to next level.
-	/// </summary>
+    /// <summary>
+    /// This script handles the progress of a terraformer and communicates when final stage is done to a Master script
+    /// that will load the victory screen and progress to next level.
+    /// </summary>
 
-	private float _maxTerraformingTime = 360f; // time in seconds (6 minutes) it takes a terraformer to complete 5 cycles
+    private int _maxTerraformerStages = 5;
+    public int MaxTerraformerStages { get { return _maxTerraformerStages; } set { _maxTerraformerStages = Mathf.Clamp(value, 5, 11); } }
 
-	private float _maxTerraformCycles = 5; // # of cycles that must that must complete for terraforming to finish
-	private float _maxCycleTime = 72f; // time in seconds it takes for a cycle to finish
+	private int _maxTerraformCycles = 3; // # of cycles that must that must completed for terraforming to finish a stage
+    public int MaxTerraformerCycles { get { return _maxTerraformCycles; } set { _maxTerraformCycles = Mathf.Clamp(value, 2, 11); } }
+
+    private float _maxCycleTime = 20f; // time in seconds it takes for a cycle to finish
 	public float currProgressTime { get; private set;} // current elapsed time, resets to 0 when a cycle is completed
-	private int _currCycleCount = 1; // keeps track of the current cycle terraformer is on
-	public int currCycle {get {return _currCycleCount;} set {_currCycleCount = Mathf.Clamp(value, 1, 5);}}
+
+    int _currCycleCount = 0; // keeps track of the current cycle terraformer is on
+    int _currStageCount = 0;
 
 
 	public enum State {IDLING, WORKING, DONE};
@@ -26,100 +30,141 @@ public class Terraformer_Handler : MonoBehaviour {
 	// Used to activate Mission Succes state, Mission Failed is handled when Resource Grid swaps the capital tile
 	public MasterState_Manager master_State;
 
-	void Awake()
+    bool isWorking = false;
+    bool isPlayerNear = false;
+
+    void Awake()
 	{
-		currProgressTime = 0;
 
-		//if (GameObject.FindGameObjectWithTag ("Spawner") != null) {
-		//	waveSpawner = GameObject.FindGameObjectWithTag ("Spawner").GetComponent<Enemy_WAVESpawnerV2> ();
-		//	//waveSpawner.terraformer = this;
-		//}
+        if (!master_State)
+            master_State = MasterState_Manager.Instance;
 
-	}
+        //if (GameObject.FindGameObjectWithTag ("Spawner") != null) {
+        //	waveSpawner = GameObject.FindGameObjectWithTag ("Spawner").GetComponent<Enemy_WAVESpawnerV2> ();
+        //	//waveSpawner.terraformer = this;
+        //}
+
+    }
 
     void Start()
     {
-        if (!master_State)
-            master_State = MasterState_Manager.Instance;
+        currProgressTime = 0;
+        StopTerraformer();
     }
 	
 	void Update () 
 	{
-        //if (waveSpawner) {
-        //	MyStateMachine (_state);
-        //}
-        //      else {
-        //          if (GameObject.FindGameObjectWithTag("Spawner") != null)
-        //          {
-        //              waveSpawner = GameObject.FindGameObjectWithTag("Spawner").GetComponent<Enemy_WAVESpawnerV2>();
-        //              waveSpawner.terraformer = this;
-        //          }
-        //          else
-        //          {
-        //              MyStateMachine(State.IDLING);
-        //          }
+        if (!isWorking && isPlayerNear)
+        {
+            ListenForInteractButton();
+        }
+      
 
-        //}
         MyStateMachine(_state);
 	}
 
-	void MyStateMachine(State _curState)
+    void ListenForInteractButton()
+    {
+        if (Input.GetButtonDown("Interact"))
+        {
+            StartTerraformer();
+        }
+    }
+
+    void MyStateMachine(State _curState)
 	{
 		switch (_curState) {
 		case State.WORKING:
-			// Continue counting down to finish a cycle and allow enemies to spawn
-			TerraformingCountdown();
+			
+			    if (!isWorking)
+                {
+                    isWorking = true;
+                    StartCoroutine("Terraform");
+                }
 			break;
 		case State.DONE:
-			//Notify Master State that this level was succesfully terraformed, Game Master will load ship level after UI screen pops up
-			master_State.mState = MasterState_Manager.MasterState.MISSION_SUCCESS;
+                StopTerraformer();
+                Debug.Log("Congratulations! Terraformer has succesfully completed its final stage!");
+			    //Notify Master State that this level was succesfully terraformed, Game Master will load ship level after UI screen pops up
+			   // master_State.mState = MasterState_Manager.MasterState.MISSION_SUCCESS;
 			break;
+   
 		default:
 			// Terraformer is IDLING
 			break;
 		}
 	}
 
-	void TerraformingCountdown()
-	{
-		if (currProgressTime >= _maxCycleTime) {
-			// Cycle is complete, make sure this was not the final stage
-			if (currCycle < _maxTerraformCycles) {
-
-				Debug.Log ("TERRAFORMER: Cycle " + currCycle + " Completed succesfully!");
-				// Add one to the current cycle
-				currCycle++;
-
-				// Reset progress time
-				currProgressTime = 0;
-
-				// Go to idling state to await for player to start the machine again
-				_state = State.IDLING;
-
-			} else {
-				// complete terraforming 
-				_state = State.DONE;
-			}
-		} else {
-			currProgressTime += Time.deltaTime;
-		}
-	}
 
 	public void StartTerraformer()
 	{
 		if (_state != State.WORKING) {
-			Debug.Log("TERRAFORMER: Beginning terraforming cycle " + currCycle);
 			_state = State.WORKING;
-		}
+            Debug.Log("TERRAFORMER: Beginning terraforming stage " + _currStageCount);
+        }
+
 	}
 
-	void OnTriggerStay2D(Collider2D coll){
-		if (coll.gameObject.tag == "Citizen") {
-            if (Input.GetKeyDown(KeyCode.T))
-            {
-                StartTerraformer();
 
+    IEnumerator Terraform()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(_maxCycleTime);
+
+            _currCycleCount++;
+            Debug.Log("TERRAFORMER: Curr cycle: " + _currCycleCount);
+
+            if (_currCycleCount >= _maxTerraformCycles)
+            {
+                // Stage completed
+                _currStageCount++;
+                Debug.Log("TERRAFORMER: Stage " + (_currStageCount - 1) + " completed.");
+
+                // Reset current cycle
+                _currCycleCount = 0;
+                
+                // Check if this was the last stage
+                if (_currStageCount >= _maxTerraformerStages)
+                {
+                    _state = State.DONE;
+                }
+                else
+                {
+                    // Idle until player starts it up again
+                    _state = State.IDLING;
+                }
+
+                isWorking = false;
+
+                yield break;
             }
+
+        }
+    }
+
+    void StopTerraformer()
+    {
+        isWorking = false;
+        currProgressTime = 0;
+        _currCycleCount = 0;
+        StopCoroutine("Terraform");
+    }
+
+
+	void OnTriggerEnter2D(Collider2D coll)
+    {
+		if (coll.gameObject.tag == "Citizen")
+        {
+            isPlayerNear = true;
         }
 	}
+
+    void OnTriggerExit2D(Collider2D coll)
+    {
+        if (coll.gameObject.tag == "Citizen")
+        {
+            isPlayerNear = false;
+        }
+    }
 }

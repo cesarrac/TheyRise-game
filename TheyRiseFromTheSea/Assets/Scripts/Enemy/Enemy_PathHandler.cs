@@ -81,8 +81,9 @@ public class Enemy_PathHandler : MonoBehaviour
         }
         else
         {
-            // it goes for the capital/launchpad
-            return grid.playerCapital.transform;
+            return null;
+           // return grid.playerCapital.transform;
+           // Maybe replace this with a way to find the Terraformer or the Transporter/Launchpad
         }
     }
 

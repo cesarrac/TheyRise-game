@@ -41,10 +41,8 @@ public class ResourceGrid : MonoBehaviour{
 	public GameObject unitOnPath;
 	public List<Node>pathForEnemy;
 
-//	public Player_SpawnHandler playerSpawnHandler;
-	public GameObject playerCapital; 
-	public GameObject playerCapitalFab;// to spawn at the start of a new level
-	public int capitalSpawnX, capitalSpawnY;
+	public int transportSpawnX, transportSpawnY;
+    public GameObject transporterGObj;
 
 	public Building_UIHandler buildingUIHandler;
 		
@@ -88,7 +86,7 @@ public class ResourceGrid : MonoBehaviour{
 	[HideInInspector]
 	public Resource_Sprite_Handler res_sprite_handler;
 
-	public bool terraformer_built;
+	public bool transporter_built;
 
 	public GameObject enemy_waveSpawner;
 
@@ -154,7 +152,7 @@ public class ResourceGrid : MonoBehaviour{
 		if (playerResources == null)
 			playerResources = GameObject.FindGameObjectWithTag ("Capital").GetComponent<Player_ResourceManager> ();
 
-        //		InitCapitalAndMinerals ();
+        //		InitTransporterAndMinerals ();
 
         // Initialize Tile Data array with this map size
         //		tiles = new TileData[mapSizeX, mapSizeY];
@@ -170,53 +168,52 @@ public class ResourceGrid : MonoBehaviour{
         InitPathFindingGrid();
 
         worldGridInitialized = true;
+
+        StartCoroutine("WaitForLandingSiteSelection");
     }
 
-	// DEBUG NOTE: using this Update method to find map coordinates to match them with map graphics
-	void Update()
+    // This will wait for the Player to select where to land on initial level load. Once they left click, this stops and never checks again.
+    IEnumerator WaitForLandingSiteSelection()
+    {
+        while (true)
+        {
+            if (!transporter_built && islandVisible)
+            {
+                BuildTheTransporter();
+                yield break;
+            }
+               
+
+            yield return null;
+        }
+    }
+
+    void Update()
 	{
-		//if (Input.GetMouseButtonDown (1)) {
-		//	Vector3 m = Input.mousePosition;
-  //          m.z = 0;
-  //          Vector3 mouse = Camera.main.ScreenToWorldPoint(m);
-  //          TileData Tile = TileFromWorldPoint(mouse);
-  //          TileData.Types tileType = Tile.tileType;
-  //          int tilePosX = Tile.posX;
-  //          int tilePosY = Tile.posY;
-  //          print("Tile under mouse is of type: " + tileType + " tile Position: " + tilePosX + " " + tilePosY);
 
-		//	//int mX = Mathf.RoundToInt(m.x);
-		//	//int mY = Mathf.RoundToInt(m.y);
+        if (!islandVisible)
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                Vector3 camHolderPos = new Vector3(cameraHolder.position.x, cameraHolder.position.y, -10F);
+                MoveTheIslandMapToFront(camHolderPos);
+            }
+        }
 
-		//	//if (mX <= mapSizeX && mY <= mapSizeY && mX > 0 && mY > 0){
-		//	//	if (coordinatesText != null && tiletypeText != null){
-		//	//		coordinatesText.text = "X: " + mX + " Y: " + mY;
-		//	//		tiletypeText.text = "Type: " + tiles[mX, mY].tileType;
-		//	//	}
-		//	//}
-		//	//print ("map coord:" + TileCoordToWorldCoord(mX, mY).ToString() + "world coord: " + m);
-		//}
-
-		if (!terraformer_built && islandVisible)
-			BuildTheCapital();
-
-		if (Input.GetMouseButtonDown (0)) {
-			if (!islandVisible) {
-				Vector3 camHolderPos = new Vector3(cameraHolder.position.x,cameraHolder.position.y, -10F);
-				MoveTheIslandMapToFront (camHolderPos);
-			}
-		}
 	}
 
-	void BuildTheCapital()
+	void BuildTheTransporter()
 	{
 		Vector3 m = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 		int mX = Mathf.RoundToInt(m.x);
 		int mY = Mathf.RoundToInt(m.y);
 
 		if (mX < mapSizeX && mY < mapSizeY && mX > 0 && mY > 0){
-			if (Input.GetMouseButtonDown(0)){
-				InitCapital(mX, mY);
+			if (Input.GetMouseButtonDown(0))
+            {
+                // Just in case the Wait for Player Landing select coroutine hasn't stopped 
+                StopCoroutine("WaitForLandingSiteSelection");
+				InitTransporter(mX, mY);
 			}
 		}
 	}
@@ -307,7 +304,7 @@ public class ResourceGrid : MonoBehaviour{
 		}
 	}
 
-	void InitCapital(int _terraPosX, int _terraPosY)
+	void InitTransporter(int _terraPosX, int _terraPosY)
 	{
 		// SPAWN PLAYER CAPITAL HERE:
 		tiles [_terraPosX, _terraPosY] = new TileData(_terraPosX, _terraPosY, "Transporter", TileData.Types.capital, 0, 10000, 200, 5,0,0,0);
@@ -319,10 +316,10 @@ public class ResourceGrid : MonoBehaviour{
         Hero =  game_master.SpawnThePlayer(_terraPosX, _terraPosY - 1);
 
 		// TODO: replace capitalPos completely with terraformer pos
-		capitalSpawnX = _terraPosX;
-		capitalSpawnY = _terraPosY;
+		transportSpawnX = _terraPosX;
+		transportSpawnY = _terraPosY;
 
-		terraformer_built = true;
+		transporter_built = true;
 
        
 		// Turn on the Enemy Wave spawner
@@ -793,7 +790,7 @@ public class ResourceGrid : MonoBehaviour{
             int spriteHeight = Mathf.RoundToInt(spriteSizeY);
             Debug.Log(newType + " 's sprite size x: " + spriteWidth + " and size y: " + spriteHeight);
             switch (newType) {
-			case TileData.Types.extractor:
+			    case TileData.Types.extractor:
 
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Extractor", newType, 0, 10000, 5, 5, 0, 0, nanoBotCost);
@@ -802,7 +799,7 @@ public class ResourceGrid : MonoBehaviour{
                         tiles [x, y] = new TileData (x, y, "Extractor",newType, 0, 10000, 5, 5, 0, 0, nanoBotCost);
                    
 				break;
-			case TileData.Types.machine_gun:
+			    case TileData.Types.machine_gun:
 				    
                     if (spriteWidth > 0 && spriteHeight > 0)
                     {
@@ -813,61 +810,68 @@ public class ResourceGrid : MonoBehaviour{
                         tiles[x, y] = new TileData(x, y, "Machine Gun", newType, 0, 10000, 30, 5, 5, 0, nanoBotCost);
                     }
                     break;
-			case TileData.Types.cannons:
+			    case TileData.Types.cannons:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Cannons", newType, 0, 10000, 30, 5, 3, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Cannons", newType, 0, 10000, 30, 5, 3, 0, nanoBotCost);
 				break;
-			case TileData.Types.harpoonHall:
+			    case TileData.Types.harpoonHall:
                     if(spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Harpooner's Hall", newType, 0, 10000, 50, 6, 0, 0, nanoBotCost);
                     else
 				        tiles [x, y] = new TileData (x, y, "Harpooner's Hall", newType, 0, 10000, 50, 6, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.farm_s:
+			    case TileData.Types.farm_s:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Seaweed Farm", newType, 0, 10000, 25, 1, 0, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Seaweed Farm", newType, 0, 10000, 25, 1, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.storage:
+			    case TileData.Types.storage:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Storage", newType, 0, 10000, 35, 2, 0, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Storage", newType, 0, 10000, 35, 2, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.desalt_s:
+			    case TileData.Types.desalt_s:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Desalination Pump", newType, 0, 10000, 15, 1, 0, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Desalination Pump", newType, 0, 10000, 15, 1, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.sniper:
+			    case TileData.Types.sniper:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Sniper Gun", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Sniper Gun", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.seaWitch:
+			    case TileData.Types.seaWitch:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Sea-Witch Crag", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Sea-Witch Crag", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.nutrient:
+			    case TileData.Types.nutrient:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Nutrient Generator", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Nutrient Generator", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.generator:
+			    case TileData.Types.generator:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Energy Generator", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Energy Generator", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.building:
+                case TileData.Types.terraformer:
+                    if (spriteWidth > 0 && spriteHeight > 0)
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Terraformer", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+                    else
+                        tiles[x, y] = new TileData(x, y, "Terraformer", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+                    break;
+
+                case TileData.Types.building:
 				tiles [x, y] = new TileData (x, y, newType, 0, 10000);
 				break;
 			default:

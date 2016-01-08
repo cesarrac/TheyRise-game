@@ -121,7 +121,7 @@ public class DiscoverTile : MonoBehaviour {
 				
 			//} 
 			if (tileType == TileData.Types.capital){
-                resourceGrid.playerCapital = tileToSpawn;
+                resourceGrid.transporterGObj = tileToSpawn;
 				// IF IT'S THE TERRAFORMER it will need the master state manager
 				Terraformer_Handler terra = tileToSpawn.GetComponent<Terraformer_Handler>();
                 if (terra)

@@ -25,7 +25,8 @@ public class TileData  {
 		harpoonHall,
 		storage,
 		sniper,
-		generator
+		generator,
+        terraformer
 	}
 	public Types tileType;
 

@@ -172,14 +172,15 @@ public class Map_Generator : MonoBehaviour {
         grid.emptyTilesArray = grid.emptyTilePositions.ToArray();
 
 //        // Build island Texture
-//        TileTexture tileTexture = _Floor.GetComponent<TileTexture>();
-//        tileTexture.BuildTexture(grid.emptyTilesArray, iMap.GetLength(0), iMap.GetLength(1));
 		TileTexture_3 tileTexture = _Floor.GetComponent<TileTexture_3>();
         tileTexture.seed = seed;
         tileTexture.randomFillPercent = randomFillPercent;
+
+        // Decide whether to generate a second top layer on this map or not
+        tileTexture.hasTopLayer = false;
+
 		tileTexture.DefineTilesAndGenerateBaseTexture(grid.emptyTilesArray, iMap.GetLength(0), iMap.GetLength(1));
 
-        //GenerateTopLayerMap();
     }
 
     public void GenerateTopLayerMap(Vector2[] centerPositions)
