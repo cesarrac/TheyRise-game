@@ -32,7 +32,7 @@ public class Enemy_PathHandler : MonoBehaviour
 
 
     Transform target, savedTarget;
-    public Transform nonPlayerTarget;
+    public Transform alternateMainTarget;
 
     Vector3[] path;
     int targetIndex;
@@ -129,9 +129,15 @@ public class Enemy_PathHandler : MonoBehaviour
         }
         else
         {
-            return nonPlayerTarget;
-            // return grid.playerCapital.transform;
-            // Maybe replace this with a way to find the Terraformer or the Transporter/Launchpad
+            if (alternateMainTarget == null)
+            {
+                return grid.transporterGObj.transform;
+            }
+            else
+            {
+                return alternateMainTarget;
+            }
+    
         }
     }
 

@@ -81,13 +81,20 @@ public class Enemy_Master : MonoBehaviour {
         // FIX THIS TOO! Here I'm going to create the enemies hardcoded for testing, but this also would be nice to get from an external database!
         Enemy slimer_weak_noAggro = new Enemy("Slimer_weak", attk_weak, move_avg, true);  // The name of the Enemy class has to match the name of the prefab preloaded unto the Object Pool
         Enemy slimer_weak_Aggro = new Enemy("Slimer_weak", attk_weak, move_avg, true, true);
+
         Enemy slimer_mid_noAggro = new Enemy("Slimer_weak", attk_mid, move_avg, true);
+        Enemy slimer_mid_Aggro = new Enemy("Slimer_weak", attk_mid, move_avg, true, true);
+
         Enemy slimer_heavy_noAggro = new Enemy("Slimer_weak", attk_heavy, move_avg, true);
+        Enemy slimer_heavy_Aggro = new Enemy("Slimer_weak", attk_heavy, move_avg, true, true);
 
         enemiesAvailable.Add("Slimer_Weak_noAggro", slimer_weak_noAggro);
         enemiesAvailable.Add("Slimer_Mid_noAggro", slimer_mid_noAggro);
         enemiesAvailable.Add("Slimer_Heavy_noAggro", slimer_heavy_noAggro);
+
         enemiesAvailable.Add("Slimer_Weak_Aggro", slimer_weak_Aggro);
+        enemiesAvailable.Add("Slimer_Mid_Aggro", slimer_mid_Aggro);
+        enemiesAvailable.Add("Slimer_Heavy_Aggro", slimer_heavy_Aggro);
     }
 
     
@@ -102,6 +109,7 @@ public class Enemy_Master : MonoBehaviour {
         if (decisionCount > 0)
         {
             // Decide if I need to be agressive!
+            MakeADecision(true);
         }
         else
         {
@@ -115,17 +123,17 @@ public class Enemy_Master : MonoBehaviour {
 
     void MakeADecision(bool beAgressive = false)
     {
+        // Decision based on the Terraformer's current stage. The higher the stage number, the stronger the enemies should be.
+        int currentTerraformerStage = Terraformer_Handler.instance._currStageCount;
+
         if (!beAgressive) // Decides to spawn non Aggro units
         {
-            // Decision based on the Terraformer's current stage. The higher the stage number, the stronger the enemies should be.
-            int currentTerraformerStage = Terraformer_Handler.instance._currStageCount;
-
             if (currentTerraformerStage <= 1)
             {
                 // Decide to spawn weak enemies 
                 if (canSpawn)
                 {
-                    CurrUnitsOnField = 8;
+                    CurrUnitsOnField = 10;
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Weak_noAggro");
                     decisionCount++;
                 }
@@ -134,7 +142,7 @@ public class Enemy_Master : MonoBehaviour {
             {
                 if (canSpawn)
                 {
-                    CurrUnitsOnField = 6;
+                    CurrUnitsOnField = 8;
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Mid_noAggro");
                     decisionCount++;
 
@@ -144,12 +152,59 @@ public class Enemy_Master : MonoBehaviour {
             {
                 if (canSpawn)
                 {
-                    CurrUnitsOnField = 6;
+                    CurrUnitsOnField = 8;
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Heavy_noAggro");
                     decisionCount++;
 
                 }
             }
+        }
+        else
+        {
+            // Be aggressive!
+            // Decide how aggresive to be depending on the terraformer stage:
+            if (currentTerraformerStage <= 1)
+            {
+                // Decide to spawn weak enemies 
+                if (canSpawn)
+                {
+                    CurrUnitsOnField = 12;
+
+                    // Set an alternate target to this Aggro unit, so that its mission will be to destroy the Killer responsible for its comrades deaths
+                    enemiesAvailable["Slimer_Weak_Aggro"].SetAltTarget( target_killer);
+
+                    IssueSpawnCommand(CurrUnitsOnField, "Slimer_Weak_Aggro");
+
+                    decisionCount++;
+                }
+            }
+            else if (currentTerraformerStage > 1 && currentTerraformerStage <= 3)
+            {
+                if (canSpawn)
+                {
+                    CurrUnitsOnField = 10;
+
+                    enemiesAvailable["Slimer_Mid_Aggro"].SetAltTarget(target_killer);
+
+                    IssueSpawnCommand(CurrUnitsOnField, "Slimer_Mid_Aggro");
+                    decisionCount++;
+
+                }
+            }
+            else
+            {
+                if (canSpawn)
+                {
+                    CurrUnitsOnField = 8;
+
+                    enemiesAvailable["Slimer_Heavy_Aggro"].SetAltTarget(target_killer);
+
+                    IssueSpawnCommand(CurrUnitsOnField, "Slimer_Heavy_Aggro");
+                    decisionCount++;
+
+                }
+            }
+
         }
      
     }
