@@ -96,6 +96,10 @@ public class Terraformer_Handler : MonoBehaviour {
 		case State.DONE:
                 StopTerraformer();
                 Debug.Log("Congratulations! Terraformer has succesfully completed its final stage!");
+
+                // Notify the Launchpad/Transporter that it can now launch safely by unlocking its controls.
+                Transporter_Handler.instance.LockControls(false);
+
 			    //Notify Master State that this level was succesfully terraformed, Game Master will load ship level after UI screen pops up
 			   // master_State.mState = MasterState_Manager.MasterState.MISSION_SUCCESS;
 			break;
@@ -109,7 +113,7 @@ public class Terraformer_Handler : MonoBehaviour {
 
 	public void StartTerraformer()
 	{
-		if (_state != State.WORKING) {
+		if (_state != State.WORKING && _currStageCount < _maxTerraformerStages) {
 			_state = State.WORKING;
             build_statusIndicator.CreateStatusMessage("Beginning terraforming stage " + _currStageCount, Color.black);
 

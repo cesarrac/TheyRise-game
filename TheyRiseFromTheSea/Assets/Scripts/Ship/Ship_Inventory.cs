@@ -15,6 +15,9 @@ public class Ship_Inventory : MonoBehaviour {
     public int commonOreStored { get; protected set; }
     public int enrichedOreStored { get; protected set; }
 
+    int tempWater, tempOre, tempFood, tempCommorOre, tempEnrichedOre; // ## Use this to create a temporary inventory that gets added to ship inventory only once Player launches (succeeds in Terraforming)
+    
+
     void Awake()
     {
         if (Instance == null)
@@ -28,32 +31,41 @@ public class Ship_Inventory : MonoBehaviour {
         }
     }
 
-    //void Start()
-    //{
-    //    InitUI();
-    //}
+    void Start()
+    {
 
+    }
+
+    /// <summary>
+    /// Stores items in the temporary Ship Inventory. They will not be registered
+    /// to the actual inventory until the Player launches back to the ship.
+    /// </summary>
+    /// <param name="rType"></param>
+    /// <param name="ammnt"></param>
     public void ReceiveItems(TileData.Types rType, int ammnt)
     {
         Debug.Log(ammnt + " of " + rType + " beamed to the SHIP!");
         switch (rType)
         {
             case TileData.Types.water:
-                waterStored += ammnt;
+                tempWater += ammnt;
+                if (ammnt != 0)
+                    Player_UIHandler.instance.DisplayTransporterStorage(rType, tempWater);
                 break;
             case TileData.Types.rock:
-                oreStored += ammnt;
+                tempOre += ammnt;
+                if (ammnt != 0)
+                    Player_UIHandler.instance.DisplayTransporterStorage(rType, tempOre);
                 break;
             case TileData.Types.food:
-                foodStored += ammnt;
+                tempFood += ammnt;
+                if (ammnt != 0)
+                    Player_UIHandler.instance.DisplayTransporterStorage(rType, tempFood);
                 break;
             default:
                 // Cant find that resource
                 break;
         }
-
-        if (ammnt != 0)
-            Player_UIHandler.instance.DisplayShipInventoryText(rType, ammnt);
 
         // add to the total
         storageTotal += ammnt;
@@ -66,9 +78,41 @@ public class Ship_Inventory : MonoBehaviour {
         Debug.Log("Ore has been split! Common = " + commonOreStored + " Enriched = " + enrichedOreStored);
     }
 
+    /// <summary>
+    /// Call this from the Launchpad when the Player launches back to the ship. 
+    /// At this point Terraformer stages would be complete and the Launchpad should be ready to send items to ship.
+    /// </summary>
+    public void RegisterTempInventoryToShip()
+    {
+        waterStored += tempWater;
+
+        oreStored += tempOre;
+
+        foodStored += tempFood;
+
+        commonOreStored += tempCommorOre;
+        enrichedOreStored += tempEnrichedOre;
+
+        tempWater = 0;
+        tempOre = 0;
+        tempFood = 0;
+        tempCommorOre = 0;
+        tempEnrichedOre = 0;
+
+    }
+
+
     public void InitUI()
     {
-        Player_UIHandler.instance.InitUIText(foodStored, waterStored, oreStored);
+        if (Application.loadedLevel == 1)
+        {
+            Player_UIHandler.instance.InitPlanetUIText(tempFood, tempWater, tempOre);
+        }
+        else if (Application.loadedLevel == 0)
+        {
+            Player_UIHandler.instance.InitShipUI(foodStored, waterStored, oreStored);
+        }
+      
         
     }
 
