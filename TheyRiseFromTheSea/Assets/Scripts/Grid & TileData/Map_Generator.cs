@@ -162,9 +162,7 @@ public class Map_Generator : MonoBehaviour {
 
 		// let the grid know how many of these tiles are water so it can get spawn positions
 		grid.totalTilesThatAreWater = countWaterTiles;
-        
-		grid.InitializeRockandMinerals ();
-
+       
         // turn water tiles list into an array for faster searching
         grid.waterTilesArray = grid.waterTilePositions.ToArray();
 
@@ -176,10 +174,11 @@ public class Map_Generator : MonoBehaviour {
         tileTexture.seed = seed;
         tileTexture.randomFillPercent = randomFillPercent;
 
-        // Decide whether to generate a second top layer on this map or not
-        tileTexture.hasTopLayer = false;
-
+        // Generate the proper texture:
 		tileTexture.DefineTilesAndGenerateBaseTexture(grid.emptyTilesArray, iMap.GetLength(0), iMap.GetLength(1));
+
+        // After texture is rendered generate rocks
+        grid.InitializeRockandMinerals();
 
     }
 

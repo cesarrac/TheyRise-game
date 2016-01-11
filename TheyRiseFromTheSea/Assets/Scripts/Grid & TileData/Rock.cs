@@ -6,7 +6,10 @@ public class Rock {
 	public enum RockType
     {
         rock,
-        mineral
+        mineral,
+        hex,
+        tube,
+        sharp
     }
 
     public enum RockSize

@@ -30,7 +30,8 @@ public class MouseBuilding_Controller:MonoBehaviour
         // Tile Under Mouse Tool: print to console the tile type and position of the tile under mouse
         if (!Build_MainController.Instance.currentlyBuilding)
         {
-            DebugTileUnderMouse();
+            //DebugTileUnderMouse();
+            DebugGraphicTile();
         }
 
     }
@@ -43,6 +44,22 @@ public class MouseBuilding_Controller:MonoBehaviour
             print("Tile under mouse is of type: " + tile.tileType + " tile Position: " + tile.posX + " " + tile.posY);
             print("ACCORDING TO THE GRID: This tile points to this gameobject: " + ResourceGrid.Grid.spawnedTiles[tile.posX, tile.posY]);
         }
+    }
+
+    void DebugGraphicTile()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            GraphicTile gTile = TileTexture_3.instance.GetGraphicTileFromPos(currMouseP);
+            if (gTile != null)
+            {
+                Debug.Log("GRAPHIC TILE: " + gTile.MyTileLandType + " " + gTile.MyTilePosType);
+            }
+            else
+                Debug.Log("GRAPHIC TILE is NULL at " + (Mathf.Round(currMouseP.x)) + " " + (Mathf.Round(currMouseP.y)));
+          
+        }
+      
     }
 
     void ZoomWithMouseWheel()
