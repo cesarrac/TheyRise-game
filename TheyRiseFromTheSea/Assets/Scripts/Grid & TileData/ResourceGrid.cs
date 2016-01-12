@@ -297,6 +297,7 @@ public class ResourceGrid : MonoBehaviour{
                     SpawnRock("sharp rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.sharp);
                     break;
             }
+            CreateUnWalkableBorder(_patch.leadPositionX, _patch.leadPositionY);
         }
    
 
@@ -324,8 +325,12 @@ public class ResourceGrid : MonoBehaviour{
                                 SpawnRock("hex rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.hex);
                                 break;
                             default:
+                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50);
+                                SpawnRock("sharp rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.sharp);
                                 break;
                         }
+
+                        CreateUnWalkableBorder(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY);
                     }
                 
                 }
@@ -336,33 +341,30 @@ public class ResourceGrid : MonoBehaviour{
 
 	}
 
-    //void CreateUnWalkableBorder(int sourceX, int sourceY, bool prePathInit)
-    //{
-    //    int width = 1;
-    //    int height = 1;
-    //    // This will only work previous to initializing the pathfinding graph
-    //    if (prePathInit)
-    //    {
-    //        for (int w = 0; w <= width; w++)
-    //        {
-    //            for (int h = 0; h <= height; h++)
-    //            {
-    //                tiles[sourceX + w, sourceY + h].isWalkable = false;
-    //            }
-    //        }
-    //    }
-     
-    //}
+    void CreateUnWalkableBorder(int sourceX, int sourceY)
+    {
+        int width = 1;
+        int height = 1;
+        // This will only work previous to initializing the pathfinding graph
+        for (int w = 0; w <= width; w++)
+        {
+            for (int h = 0; h <= height; h++)
+            {
+                tiles[sourceX + w, sourceY + h].isWalkable = false;
+            }
+        }
 
-	
+    }
 
-	/// <summary>
-	/// Damages the tile.
-	/// </summary>
-	/// <param name="x">The x coordinate.</param>
-	/// <param name="y">The y coordinate.</param>
-	/// <param name="damage">Damage.</param>
-	public void DamageTile(TileData tile, float damage)
+
+
+    /// <summary>
+    /// Damages the tile.
+    /// </summary>
+    /// <param name="x">The x coordinate.</param>
+    /// <param name="y">The y coordinate.</param>
+    /// <param name="damage">Damage.</param>
+    public void DamageTile(TileData tile, float damage)
 	{
 		// make sure there IS a tile there
 		if (spawnedTiles [tile.posX, tile.posY] != null) {

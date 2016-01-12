@@ -246,9 +246,9 @@ namespace LOS {
 
 
 		public enum PhysicsOpt {
-			Physics_3D,
 			Physics_2D,
-		}
+            Physics_3D
+        }
 
 //		private class ViewBoxLine {
 //			public Vector2 start {get; set;}

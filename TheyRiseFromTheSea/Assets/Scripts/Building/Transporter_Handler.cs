@@ -58,7 +58,7 @@ public class Transporter_Handler : MonoBehaviour {
         Application.LoadLevel(shipLevelIndex);
     }
 
-    void LaunchToPlanet()
+    public void LaunchToPlanet()
     {
         Application.LoadLevel(planetLevelIndex);
     }

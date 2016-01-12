@@ -28,6 +28,11 @@ public class Player_UIHandler : MonoBehaviour {
 	public Text hpText;
 	private float _curHP;
 
+    // Blueprint panel & Nanobot count
+    public GameObject bpPanel;
+    public Text bluePrintTextBox;
+    public Text nanoBotCount;
+
     void Awake()
     {
         instance = this;
@@ -42,17 +47,18 @@ public class Player_UIHandler : MonoBehaviour {
 			resourceManager = GetComponent<Player_ResourceManager>();
 		}
 
-		// NOTE: Turning off the Panels for now
-//		GetResourcesText ();
 
-		//foodCostText.color = Color.red;
+        // NOTE: Turning off the Panels for now
+        //		GetResourcesText ();
 
-		// Get the player hero component
-		/*if (!playerhero) {
+        //foodCostText.color = Color.red;
+
+        // Get the player hero component
+        /*if (!playerhero) {
 			playerhero = GameObject.FindGameObjectWithTag("Player").GetComponent<Player_HeroAttackHandler>();
 		}
         */
-	}
+    }
 
     public void InitPlanetUIText(int _food, int _water, int _ore)         // FIX THIS: Add the rest of the resources!
     {
@@ -109,6 +115,17 @@ public class Player_UIHandler : MonoBehaviour {
                 break;
         }
     }
+
+    public void DisplayBlueprint(string curBPName)
+    {
+        bluePrintTextBox.text = curBPName;
+    }
+
+    public void DisplayNanoBotCount(int newTotal)
+    {
+        nanoBotCount.text = newTotal.ToString();
+    }
+
 
     //	void GetResourcesText()
     //	{

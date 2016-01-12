@@ -619,7 +619,8 @@ public class TileTexture_3 : MonoBehaviour
             // Apply texture
             texture2.Apply();
 
-           // second_renderer.sharedMaterial.mainTexture = texture2;
+            // Give the mesh collider the same mesh
+            second_renderer.gameObject.GetComponent<MeshCollider>().sharedMesh = islandMesh;
 
             Texture2 = texture2;
 

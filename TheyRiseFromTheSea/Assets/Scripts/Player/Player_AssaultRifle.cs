@@ -35,6 +35,7 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 	
 	void Update()
 	{
+        // Target hit is the gameobject of the enemy that was actually hit (collided) by a projectile
 		if (targetHit != null) {
 
             // Tell the enemy unit I'm hitting it

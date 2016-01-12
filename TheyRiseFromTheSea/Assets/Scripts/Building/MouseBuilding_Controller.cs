@@ -24,7 +24,11 @@ public class MouseBuilding_Controller:MonoBehaviour
             currMouseP = mouseP;
         }
 
-        ZoomWithMouseWheel();
+        if (ResourceGrid.Grid.transporter_built)
+        {
+            ZoomWithMouseWheel();
+        }
+
 
         // FOR DEBUGGING PURPOSES:
         // Tile Under Mouse Tool: print to console the tile type and position of the tile under mouse

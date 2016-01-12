@@ -384,25 +384,24 @@ public class Enemy_AttackHandler : Unit_Base {
         // Get the Blood splat!
         GameObject deadE = objPool.GetObjectForType("Blood FX particles 2", true, transform.position);
 
-        // Stop Attack and Path coroutines!
-        isAttacking = false;
-        playerUnit = null;
-        towerAttackingMe = null;
-        StopAttackCoRoutines();
-        pathHandler.FullStop();
-
         // Calculate the z rotation needed for the blood particle effects to shoot at the angle the shot came from
         if (towerAttackingMe != null)
         {
             var dir = towerAttackingMe.transform.position - transform.position;
             float bloodAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
             deadE.transform.eulerAngles = new Vector3(0, 0, bloodAngle);
+
+            // Register my death with Enemy master and tell them a Tower killed me
+            Enemy_Master.instance.RegisterDeath(towerAttackingMe.transform);
         }
         else if (playerUnit != null)
         {
             var dir = playerUnit.transform.position - transform.position;
             float bloodAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
             deadE.transform.eulerAngles = new Vector3(0, 0, bloodAngle);
+
+            // Register my death with Enemy master and tell them a Player killed me
+            Enemy_Master.instance.RegisterDeath(playerUnit.transform);
         }
 
         // make sure we Pool any Damage Text that might be on this gameObject
@@ -412,7 +411,13 @@ public class Enemy_AttackHandler : Unit_Base {
             objPool.PoolObject(dmgTxt.gameObject);
         }
 
-        
+        // Stop Attack and Path coroutines!
+        isAttacking = false;
+        playerUnit = null;
+        towerAttackingMe = null;
+        StopAttackCoRoutines();
+        pathHandler.FullStop();
+
         // and Pool myself
         objPool.PoolObject(gameObject);
     }

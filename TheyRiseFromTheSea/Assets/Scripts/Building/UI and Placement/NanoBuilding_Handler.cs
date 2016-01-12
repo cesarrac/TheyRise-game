@@ -10,6 +10,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
     check what type of building the player might want to build and place that icon on the mouse to left click and build.*/
 
     public int nanoBots = 500;
+    int curNanoBots = 0;
 
     private AudioSource audio_source;
     public AudioClip buildSound, nanoBotReturnSound;
@@ -25,20 +26,18 @@ public class NanoBuilding_Handler : MonoBehaviour {
     int selectedBPIndex = 0;
     Blueprint selectedBluePrint;
 
-    GameObject bpPanel;
-    Text bluePrintTextBox;
+
 
     Build_MainController build_controller;
 
     void Start()
     {
-        InitBluePrints();
-        bpPanel = GameObject.FindGameObjectWithTag("BP Panel");
-        bluePrintTextBox = bpPanel.GetComponentsInChildren<Text>()[1];
+       // InitBluePrints();
 
-        selectedBluePrint = availableBlueprints[TileData.Types.terraformer];
 
-        bluePrintTextBox.text = selectedBluePrint.buildingName;
+        //selectedBluePrint = availableBlueprints[TileData.Types.terraformer];
+
+        //DisplaySelectedBlueprintName(selectedBluePrint.buildingName);
 
         audio_source = GetComponent<AudioSource>();
 
@@ -48,31 +47,54 @@ public class NanoBuilding_Handler : MonoBehaviour {
     }
 
 
-    void InitBluePrints()
-    {
-        availableBlueprintsTypes = new TileData.Types[10] {TileData.Types.terraformer, TileData.Types.sniper,  TileData.Types.cannons , TileData.Types.seaWitch,
-            TileData.Types.extractor, TileData.Types.desalt_s,TileData.Types.generator,TileData.Types.farm_s, TileData.Types.storage,TileData.Types.machine_gun};
+    //void InitBluePrints()
+    //{
+    //    availableBlueprintsTypes = new TileData.Types[10] {TileData.Types.terraformer, TileData.Types.sniper,  TileData.Types.cannons , TileData.Types.seaWitch,
+    //        TileData.Types.extractor, TileData.Types.desalt_s,TileData.Types.generator,TileData.Types.farm_s, TileData.Types.storage,TileData.Types.machine_gun};
 
-        availableBlueprints = new Dictionary<TileData.Types, Blueprint>
-        {
-            {TileData.Types.terraformer, new Blueprint("Terraformer", 0, 0, TileData.Types.terraformer) }, // < ---- Always include the Terraformer and no cost
-            {TileData.Types.sniper, new Blueprint("Sniper Gun", 3, 10, TileData.Types.sniper) },
-            { TileData.Types.cannons, new Blueprint("Cannons", 3, 10, TileData.Types.cannons)},
-            {TileData.Types.seaWitch, new Blueprint("Sea-Witch Crag", 3, 10, TileData.Types.seaWitch) },
-            {TileData.Types.extractor,  new Blueprint("Extractor", 3, 10, TileData.Types.extractor) },
-            {TileData.Types.desalt_s, new Blueprint("Desalination Pump", 3, 10, TileData.Types.desalt_s) },
-            {TileData.Types.generator, new Blueprint("Energy Generator", 3, 10, TileData.Types.generator) },
-            {TileData.Types.farm_s,  new Blueprint("Seaweed Farm", 3, 10, TileData.Types.farm_s)},
-            {TileData.Types.storage, new Blueprint("Storage", 3, 10, TileData.Types.storage) },
-            {TileData.Types.machine_gun, new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun) }
-        };
+    //    availableBlueprints = new Dictionary<TileData.Types, Blueprint>
+    //    {
+    //        {TileData.Types.terraformer, new Blueprint("Terraformer", 0, 0, TileData.Types.terraformer) }, // < ---- Always include the Terraformer and no cost
+    //        {TileData.Types.sniper, new Blueprint("Sniper Gun", 3, 10, TileData.Types.sniper) },
+    //        { TileData.Types.cannons, new Blueprint("Cannons", 3, 10, TileData.Types.cannons)},
+    //        {TileData.Types.seaWitch, new Blueprint("Sea-Witch Crag", 3, 10, TileData.Types.seaWitch) },
+    //        {TileData.Types.extractor,  new Blueprint("Extractor", 3, 10, TileData.Types.extractor) },
+    //        {TileData.Types.desalt_s, new Blueprint("Desalination Pump", 3, 10, TileData.Types.desalt_s) },
+    //        {TileData.Types.generator, new Blueprint("Energy Generator", 3, 10, TileData.Types.generator) },
+    //        {TileData.Types.farm_s,  new Blueprint("Seaweed Farm", 3, 10, TileData.Types.farm_s)},
+    //        {TileData.Types.storage, new Blueprint("Storage", 3, 10, TileData.Types.storage) },
+    //        {TileData.Types.machine_gun, new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun) }
+    //    };
 
       
-                                                             // FIX THIS !!!!!! FOR NOW im forcing this blueprints array unto the sprite database from here
+    //                                                         // FIX THIS !!!!!! FOR NOW im forcing this blueprints array unto the sprite database from here
+    //    Buildings_SpriteDatabase.Instance.SetSprites(availableBlueprints);
+    //}
+
+    public void InitBP(int totalBPavailable)
+    {
+        availableBlueprintsTypes = new TileData.Types[totalBPavailable];
+        availableBlueprints = new Dictionary<TileData.Types, Blueprint>();
+    }
+
+    public void AddBlueprint(int index, TileData.Types bp_type, Blueprint bp)
+    {
+        availableBlueprintsTypes[index] = bp_type;
+        availableBlueprints.Add(bp_type, bp);
+    }
+
+    public void SetBPSprites()
+    {
         Buildings_SpriteDatabase.Instance.SetSprites(availableBlueprints);
     }
-	
-	void Update () {
+
+    void DisplaySelectedBlueprintName(string bpName)
+    {
+        Player_UIHandler.instance.DisplayBlueprint(bpName);
+    }
+
+    void Update()
+    {
         // For Building:
         if (!build_controller.currentlyBuilding)
             ListenForRightClick();
@@ -80,6 +102,20 @@ public class NanoBuilding_Handler : MonoBehaviour {
         ListenForBPSwapButton();
         // For Breaking a building back into Nanobots:
         ListenToBreakBuilding();
+
+        if (curNanoBots != nanoBots)
+        {
+            KeepNanoBotsUpdated();
+        }
+    }
+
+    void KeepNanoBotsUpdated()
+    {
+        
+        curNanoBots = nanoBots;
+
+        Player_UIHandler.instance.DisplayNanoBotCount(curNanoBots);
+
     }
 
     void ListenForRightClick()
@@ -132,7 +168,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
         }
 
-        bluePrintTextBox.text = bluePrintTextBox.text = selectedBluePrint.buildingName;
+        DisplaySelectedBlueprintName(selectedBluePrint.buildingName);
     }
 
     /// <summary>

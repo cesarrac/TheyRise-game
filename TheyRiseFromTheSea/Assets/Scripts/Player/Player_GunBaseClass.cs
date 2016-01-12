@@ -15,6 +15,8 @@ public class Player_GunBaseClass : MonoBehaviour {
 
 		public float kickAmmt;
 
+        public bool shootsProjectiles;
+
 		public void Init()
 		{
 			curFireRate = startingFireRate;
@@ -55,7 +57,7 @@ public class Player_GunBaseClass : MonoBehaviour {
 
 	void Awake()
 	{
-		sprite_renderer = GetComponent<SpriteRenderer> ();
+		//sprite_renderer = GetComponent<SpriteRenderer> ();
 		//parent_srenderer = GetComponentInParent<SpriteRenderer> ();
 
         objPool = ObjectPool.instance;
@@ -82,7 +84,7 @@ public class Player_GunBaseClass : MonoBehaviour {
        
 		float mouseDirection = Mathf.Atan2 ((mousePosition.y - sightStart.position.y), (mousePosition.x - sightStart.position.x)) * Mathf.Rad2Deg - 90;		
 		if (mousePosition != transform.root.position) {
-			sightStart.rotation = Quaternion.AngleAxis (-mouseDirection, Vector3.forward);
+			sightStart.rotation = Quaternion.AngleAxis (mouseDirection, Vector3.forward);
 			transform.rotation = Quaternion.AngleAxis (mouseDirection, Vector3.forward);
             mousePosition.z = 0;
             
@@ -90,18 +92,21 @@ public class Player_GunBaseClass : MonoBehaviour {
 
 	}
 
-//	public void CanFire()
-//	{	
-//
-//		if (countDownToFire >= gunStats.startingFireRate) {
-//			canFire = true;
-//
-//		} else {
-//			countDownToFire += Time.deltaTime;
-//		}
-//	}
+    //public void CanFire()
+    //{
 
-	public void CheckForShoot()
+    //    if (countDownToFire >= gunStats.startingFireRate)
+    //    {
+    //        canFire = true;
+
+    //    }
+    //    else
+    //    {
+    //        countDownToFire += Time.deltaTime;
+    //    }
+    //}
+
+    public void CheckForShoot()
 	{
 
 		// BRACKEY's way:
@@ -134,16 +139,21 @@ public class Player_GunBaseClass : MonoBehaviour {
     void FireWeapon()
     {
         if (!Build_MainController.Instance.currentlyBuilding)
-        { 
-        // Fire an Raycast towards the mouse to check for a hit
-        targetInSight = RaycastToGetTarget();
-        // Actually shoot the bullet
-        VisualProjectileShoot();
-        // Play gun shot sound
-        source.PlayOneShot(shootSound, 0.5f);
-        // Apply gun kick to Player
-        //		GunKick ();
-        StartCoroutine(GunKick());
+        {
+            // Fire an Raycast towards the mouse to check for a hit
+            targetInSight = RaycastToGetTarget();
+
+            if (targetInSight != null)
+            {
+                // Actually shoot the bullet
+                VisualProjectileShoot();
+                // Play gun shot sound
+                source.PlayOneShot(shootSound, 0.5f);
+                // Apply gun kick to Player
+                StartCoroutine(GunKick());
+            }
+
+       
         }
 	}
 
@@ -153,15 +163,13 @@ public class Player_GunBaseClass : MonoBehaviour {
 	{
 		Debug.DrawLine (transform.position, sightEnd.position, Color.cyan);
 
-		RaycastHit2D hit = Physics2D.Linecast (transform.position, sightEnd.position, mask.value);
+		RaycastHit2D hit = Physics2D.Linecast (sightStart.position, sightEnd.position, mask.value);
 		if (hit.collider != null) {
 
 			if (hit.collider.CompareTag ("Enemy")) {
-
+                Debug.Log("GUN DETECTED ENEMY!");
 				// Linecast HIT an enemy, so store the enemy unit as the target
 				return hit.collider.gameObject;
-
-				Debug.Log ("PLAYER GUN: Hit an enemy!");
 
 			} else {
 				return null;
@@ -178,7 +186,7 @@ public class Player_GunBaseClass : MonoBehaviour {
 
 
 		// Get the bullet from object pool using the name of the ammo type
-		GameObject projectile = objPool.GetObjectForType (_projectileType, true, sightEnd.position);
+		GameObject projectile = objPool.GetObjectForType (_projectileType, true, sightStart.position);
 		if (projectile) {
 			//Debug.Log("Firing " + _projectileType + " !");
             //			// give it the position of the player
@@ -198,7 +206,7 @@ public class Player_GunBaseClass : MonoBehaviour {
 			projectile.transform.eulerAngles = new Vector3 (0, 0, angle);
 
 			// Now fire the bullet trail right behind it
-			GameObject bulletTrail = objPool.GetObjectForType("BulletTrail", true, sightEnd.position);
+			GameObject bulletTrail = objPool.GetObjectForType("BulletTrail", true, sightStart.position);
 			if (bulletTrail){
                 bulletTrail.GetComponent<LineRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
                 // and its direction

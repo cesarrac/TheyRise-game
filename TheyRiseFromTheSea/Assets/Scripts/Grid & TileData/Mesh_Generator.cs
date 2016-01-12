@@ -111,6 +111,9 @@ public class Mesh_Generator : MonoBehaviour {
         islandMesh.triangles = landTriangles;
         islandMesh.RecalculateNormals();
 
+        // Give the Mesh to the ground's mesh collider
+        ground.GetComponent<MeshCollider>().sharedMesh = islandMesh;
+
         GenerateShoreWaterMesh(islandMesh, map);
 
     }

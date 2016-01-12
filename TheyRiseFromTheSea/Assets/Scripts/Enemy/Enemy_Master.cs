@@ -23,6 +23,9 @@ public class Enemy_Master : MonoBehaviour {
 
     int decisionCount; // total decisions made by this instance
 
+    // Decision based on the Terraformer's current stage. The higher the stage number, the stronger the enemies should be.
+    int currentTerraformerStage;
+
     void Awake()
     {
         instance = this;
@@ -48,7 +51,7 @@ public class Enemy_Master : MonoBehaviour {
         attk_weak.startDefence = 1;
         attk_weak.startShield = 0;
         attk_weak.startSpecialDmg = 0;
-        attk_weak.startRate = 0.8f;
+        attk_weak.startRate = 0.6f;
 
         attk_mid = new Unit_Base.Stats();
         attk_mid.maxHP = 42f;
@@ -57,7 +60,7 @@ public class Enemy_Master : MonoBehaviour {
         attk_mid.startDefence = 3;
         attk_mid.startShield = 0;
         attk_mid.startSpecialDmg = 0;
-        attk_mid.startRate = 1f;
+        attk_mid.startRate = 0.8f;
 
         attk_heavy = new Unit_Base.Stats();
         attk_heavy.maxHP = 66f;
@@ -66,13 +69,13 @@ public class Enemy_Master : MonoBehaviour {
         attk_heavy.startDefence = 1;
         attk_heavy.startShield = 0;
         attk_heavy.startSpecialDmg = 0;
-        attk_heavy.startRate = 1.2f;
+        attk_heavy.startRate = 1.0f;
 
         move_fast = new Enemy_PathHandler.MovementStats();
         move_fast.startMoveSpeed = 6f;
         move_fast.startChaseSpeed = 12f;
         move_avg = new Enemy_PathHandler.MovementStats();
-        move_avg.startMoveSpeed = 2f;
+        move_avg.startMoveSpeed = 3f;
         move_avg.startChaseSpeed = 4f;
         move_slow = new Enemy_PathHandler.MovementStats();
         move_slow.startMoveSpeed = 0.5f;
@@ -106,10 +109,12 @@ public class Enemy_Master : MonoBehaviour {
         // This can spawn should not set to false until a pre-set number of seconds have passed depending on the current level difficulty or
         // the current terrformer stage. That way the higher the difficulty or terra stage the more time this Master will have to keep spawning,
         // potentially making the difficulty progressively harder.
+       
+
         if (decisionCount > 0)
         {
-            // Decide if I need to be agressive!
-            MakeADecision(true);
+            StopCoroutine("DecideWhatToSpawnNext");
+            MakeADecision();
         }
         else
         {
@@ -120,11 +125,28 @@ public class Enemy_Master : MonoBehaviour {
     }
 
 
+    // This allows the Master to make a decision dynamically (in between stages)
+    IEnumerator DecideWhatToSpawnNext()
+    {
+        while (true)
+        {
+
+            yield return new WaitForSeconds(10f);
+
+            // If all units that were on field have registered deaths, make a kill squad to avenge them
+            if (CurrUnitsOnField == 0)
+            {
+                
+                MakeAKillSquad();
+                yield break;
+            }
+        }
+    }
+
 
     void MakeADecision(bool beAgressive = false)
     {
-        // Decision based on the Terraformer's current stage. The higher the stage number, the stronger the enemies should be.
-        int currentTerraformerStage = Terraformer_Handler.instance._currStageCount;
+        currentTerraformerStage = Terraformer_Handler.instance._currStageCount;
 
         if (!beAgressive) // Decides to spawn non Aggro units
         {
@@ -136,6 +158,7 @@ public class Enemy_Master : MonoBehaviour {
                     CurrUnitsOnField = 10;
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Weak_noAggro");
                     decisionCount++;
+                    StartCoroutine("DecideWhatToSpawnNext");
                 }
             }
             else if (currentTerraformerStage > 1 && currentTerraformerStage <= 3)
@@ -145,7 +168,7 @@ public class Enemy_Master : MonoBehaviour {
                     CurrUnitsOnField = 8;
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Mid_noAggro");
                     decisionCount++;
-
+                    StartCoroutine("DecideWhatToSpawnNext");
                 }
             }
             else
@@ -155,7 +178,7 @@ public class Enemy_Master : MonoBehaviour {
                     CurrUnitsOnField = 8;
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Heavy_noAggro");
                     decisionCount++;
-
+                    StartCoroutine("DecideWhatToSpawnNext");
                 }
             }
         }
@@ -170,10 +193,65 @@ public class Enemy_Master : MonoBehaviour {
                 {
                     CurrUnitsOnField = 12;
 
-                    // Set an alternate target to this Aggro unit, so that its mission will be to destroy the Killer responsible for its comrades deaths
-                    enemiesAvailable["Slimer_Weak_Aggro"].SetAltTarget( target_killer);
-
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Weak_Aggro");
+
+                    decisionCount++;
+
+                    StartCoroutine("DecideWhatToSpawnNext");
+                }
+            }
+            else if (currentTerraformerStage > 1 && currentTerraformerStage <= 3)
+            {
+                if (canSpawn)
+                {
+                    CurrUnitsOnField = 10;
+
+                    IssueSpawnCommand(CurrUnitsOnField, "Slimer_Mid_Aggro");
+
+                    decisionCount++;
+
+                    StartCoroutine("DecideWhatToSpawnNext");
+
+                }
+            }
+            else
+            {
+                if (canSpawn)
+                {
+                    CurrUnitsOnField = 8;
+
+                    IssueSpawnCommand(CurrUnitsOnField, "Slimer_Heavy_Aggro");
+
+                    decisionCount++;
+
+                    StartCoroutine("DecideWhatToSpawnNext");
+
+                }
+            }
+
+        }
+     
+    }
+
+
+    void MakeAKillSquad()
+    {
+        currentTerraformerStage = Terraformer_Handler.instance._currStageCount;
+
+        if (target_killer != null)
+        {
+            Debug.Log("ENEMY MASTER: Spawning a kill squad to target " + target_killer.name);
+            if (currentTerraformerStage <= 1)
+            {
+                // Decide to spawn weak enemies 
+                if (canSpawn)
+                {
+                    CurrUnitsOnField = 12;
+
+                    // Set an alternate target to this Aggro unit, so that its mission will be to destroy the Killer responsible for its comrades deaths
+                    enemiesAvailable["Slimer_Weak_noAggro"].SetAltTarget(target_killer);
+
+                    IssueSpawnCommand(CurrUnitsOnField, "Slimer_Weak_noAggro");
 
                     decisionCount++;
                 }
@@ -184,9 +262,9 @@ public class Enemy_Master : MonoBehaviour {
                 {
                     CurrUnitsOnField = 10;
 
-                    enemiesAvailable["Slimer_Mid_Aggro"].SetAltTarget(target_killer);
+                    enemiesAvailable["Slimer_Mid_noAggro"].SetAltTarget(target_killer);
 
-                    IssueSpawnCommand(CurrUnitsOnField, "Slimer_Mid_Aggro");
+                    IssueSpawnCommand(CurrUnitsOnField, "Slimer_Mid_noAggro");
                     decisionCount++;
 
                 }
@@ -197,16 +275,14 @@ public class Enemy_Master : MonoBehaviour {
                 {
                     CurrUnitsOnField = 8;
 
-                    enemiesAvailable["Slimer_Heavy_Aggro"].SetAltTarget(target_killer);
+                    enemiesAvailable["Slimer_Heavy_noAggro"].SetAltTarget(target_killer);
 
-                    IssueSpawnCommand(CurrUnitsOnField, "Slimer_Heavy_Aggro");
+                    IssueSpawnCommand(CurrUnitsOnField, "Slimer_Heavy_noAggro");
                     decisionCount++;
 
                 }
             }
-
         }
-     
     }
 
     void IssueSpawnCommand(int total, string key)
@@ -218,7 +294,7 @@ public class Enemy_Master : MonoBehaviour {
         if (enemiesAvailable.ContainsKey(key))
         {
             Enemy_Spawner.instance.ReceiveSpawnCommand(total, enemiesAvailable[key]);
-            canSpawn = false;
+            //canSpawn = false;
         }
         else
         {
@@ -238,5 +314,6 @@ public class Enemy_Master : MonoBehaviour {
             target_killer = killer;
         }
 
+        Debug.Log("ENEMY MASTER: Registered death from " + killer.name);
     }
 }

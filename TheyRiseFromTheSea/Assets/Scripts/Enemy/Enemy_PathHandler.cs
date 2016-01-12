@@ -486,6 +486,27 @@ public class Enemy_PathHandler : MonoBehaviour
 
     }
 
+    public void ChangeSpeed (float newSpeed, float effectTime)
+    {
+        mStats.curMoveSpeed = newSpeed;
+        StartCoroutine(SpeedChange(effectTime));
+    }
+
+    IEnumerator SpeedChange(float timeOfEffect)
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(timeOfEffect);
+            ResetSpeed();
+            yield break;
+        }
+    }
+
+    public void ResetSpeed()
+    {
+        mStats.curMoveSpeed = mStats.startMoveSpeed;
+    }
+
     void OnCollisionEnter2D(Collision2D coll)
     {
         if (coll.gameObject.CompareTag("Rock"))
