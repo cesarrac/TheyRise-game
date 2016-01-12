@@ -59,27 +59,13 @@ public class ResourceGrid : MonoBehaviour{
 	Node[,] graph; // <--------- old one
     Node[,] grid;
 
-	// FOR DEBUG PURPOSES (Finding coordinates and displaying them on screen)
-	public Text coordinatesText, tiletypeText;
-
-
-	// NOTE: the total represents the total of leader rock tiles, not really the total
-	[Range (5, 55)]
-	public int totalRocksOnMap;
-	[Range (6, 28)]
-	public int totalMineralsOnMap;
-
-	// Center of the map
-	public int centerPosX = 0;
-	public int centerPosY = 0;
-
 	// Access to the Player Hero
 	public GameObject Hero;
 
 	// Access to Master State manager to call when Terraformer is blown up
 	public MasterState_Manager master_state;
 
-	public int totalTilesThatAreWater;
+	//public int totalTilesThatAreWater;
 
 	Map_Generator map_generator;
 
@@ -87,8 +73,6 @@ public class ResourceGrid : MonoBehaviour{
 	public Resource_Sprite_Handler res_sprite_handler;
 
 	public bool transporter_built;
-
-	public GameObject enemy_waveSpawner;
 
 	GameMaster game_master;
 
@@ -124,20 +108,17 @@ public class ResourceGrid : MonoBehaviour{
 		if (!master_state)
 			master_state = GameObject.FindGameObjectWithTag ("GameController").GetComponent<MasterState_Manager> ();
 
-		if (!map_generator) {
-			map_generator = GetComponent<Map_Generator> ();
-			mapSizeX = map_generator.width;
-			mapSizeY = map_generator.height;
-		} else {
-			mapSizeX = map_generator.width;
-			mapSizeY = map_generator.height;
-		}
+		//if (!map_generator) {
+		//	map_generator = GetComponent<Map_Generator> ();
+		//	mapSizeX = map_generator.width;
+		//	mapSizeY = map_generator.height;
+		//} else {
+		//	mapSizeX = map_generator.width;
+		//	mapSizeY = map_generator.height;
+		//}
 
 		if (!res_sprite_handler)
 			res_sprite_handler = GetComponent<Resource_Sprite_Handler> ();
-
-		if (!enemy_waveSpawner)
-			enemy_waveSpawner = GameObject.FindGameObjectWithTag ("Spawner");
 
 		game_master = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster> ();
 
@@ -162,6 +143,7 @@ public class ResourceGrid : MonoBehaviour{
 
         // Give the waterTilePositions to Enemy_Spawner
         //Enemy_Spawner.instance.InitSpawnPositions(waterTilesArray);
+        InitializeRockandMinerals();
     }
 
     // This will wait for the Player to select where to land on initial level load. Once they left click, this stops and never checks again.
@@ -250,124 +232,7 @@ public class ResourceGrid : MonoBehaviour{
     {
         Rock_Generator.Instance.GenerateRocks();
 
-        /*
-        string rockTypeName = "rock";
-        string mineralTypeName = "mineral";
-
-
-        centerPosX = mapSizeX / 2;
-        centerPosY = mapSizeY / 2;
-
-        int magicPosX = 0;
-        int magicPosY = 0;
-
-
-
-        //Find a position to start creating rock formations
-        for (int x = centerPosX - (centerPosX / 4); x < centerPosX + (centerPosX / 4); x++)
-        {
-            for (int y = centerPosY - (centerPosY / 4); y < centerPosX + (centerPosY / 4); y++)
-            {
-                if (CheckIsInMapBounds(x, y))
-                {
-                    if (!CheckForWater(x, y))
-                    {
-                        if (tiles[x, y].tileType == TileData.Types.empty)
-                        {
-                            magicPosX = x;
-                            magicPosY = y;
-                            break;
-                        }
-                    }
-
-
-                }
-            }
-        }
-
-        int lastRockPosX = 0;
-        int lastRockPosY = 0;
-
-        // Loop through all the rocks
-        for (int i = 0; i < totalRocksOnMap; i++)
-        {
-            //			
-            if (i == 0)
-            {
-                SetNewOrePatch(magicPosX, magicPosY, rockTypeName);
-            }
-            else
-            {
-                // pick up/left, up/right, down/left, down/right
-                int pick = Random.Range(1, 5);
-                if (pick == 1)
-                {
-                    SetNewOrePatch(magicPosX - 2, magicPosY + 2, rockTypeName);
-                }
-                else if (pick == 2)
-                {
-                    SetNewOrePatch(magicPosX + 2, magicPosY + 2, rockTypeName);
-
-                }
-                else if (pick == 3)
-                {
-                    SetNewOrePatch(magicPosX + 2, magicPosY - 2, rockTypeName);
-                }
-                else if (pick == 4)
-                {
-                    SetNewOrePatch(magicPosX - 2, magicPosY - 2, rockTypeName);
-                }
-                else
-                {
-                    SetNewOrePatch(magicPosX + 3, magicPosY - 2, rockTypeName);
-
-                }
-
-
-            }
-        }
-
-        lastRockPosX = magicPosX + 3;
-        lastRockPosY = magicPosY - 2;
-
-        // Loop through all the minerals
-        for (int j = 0; j < totalMineralsOnMap; j++)
-        {
-            if (j == 0)
-            {
-                SetNewOrePatch(lastRockPosX, lastRockPosY, mineralTypeName);
-            }
-            else
-            {
-                // pick up/left, up/right, down/left, down/right
-                int pick = Random.Range(1, 5);
-                if (pick == 1)
-                {
-                    SetNewOrePatch(lastRockPosX - 2, lastRockPosY + 2, mineralTypeName);
-                }
-                else if (pick == 2)
-                {
-                    SetNewOrePatch(lastRockPosX + 2, lastRockPosY + 2, mineralTypeName);
-
-                }
-                else if (pick == 3)
-                {
-                    SetNewOrePatch(lastRockPosX + 2, lastRockPosY - 2, mineralTypeName);
-                }
-                else if (pick == 4)
-                {
-                    SetNewOrePatch(lastRockPosX - 2, lastRockPosY - 2, mineralTypeName);
-                }
-                else
-                {
-                    SetNewOrePatch(lastRockPosX + 3, lastRockPosY - 2, mineralTypeName);
-
-                }
-
-
-            }
-        }
-        */
+  
     }
 
     //	bool CheckForWater (int x, int y)
@@ -407,60 +272,39 @@ public class ResourceGrid : MonoBehaviour{
         }
     }
 
-    //	void SetNewOrePatch(int leadX, int leadY, string typeName)
-    //	{
-    //		// first make sure that there is NO WATER tiles around this lead tile
-    //		if (!CheckForWater (leadX, leadY)) {
-    //			Debug.Log ("Found tile with no water around it!");
-    //			// Calculate the distance from this lead tile to the center of the map,
-    //			// the closer to the center the DENSER a patch of ore will be
-    //			float distance = Vector2.Distance (new Vector2 (leadX, leadY), new Vector2 (centerPosX, centerPosY)); 
-    //			int density = 0;
-    //			if (distance >= 20) {
-    //				// pick a 1 or 2 density
-    //				int pick = Random.Range (0, 3);
-    //				density = pick;
-    //			} else if (distance < 20 && distance > 8) {
-    //				// pick between 4 or 5 density
-    //				int pick = Random.Range (3, 5);
-    //				density = pick;
-    //			} else {
-    //				density = 5;
-    //			}
-    //			OrePatch patch = new OrePatch (leadX, leadY, density);
-    //			patch.SetFormation ();
-    //			PlaceOrePatch(patch, typeName);
-    //		} else {
-    //			Debug.Log("Could not place ore patch because " + leadX + "," + leadY+ " is a shore!");
-    //		}
-    //	}
 
     public void PlaceOrePatch(OrePatch _patch, Rock.RockType rType)
 	{
         // place the lead ore if there is no rock already on that tile
-
-        switch (rType)
+        if (tiles[_patch.leadPositionX, _patch.leadPositionY].tileType == TileData.Types.empty)
         {
-            case Rock.RockType.sharp:
-                tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50);
-                SpawnDiscoverTile("rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), TileData.Types.rock);
-                break;
-            case Rock.RockType.tube:
-                tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50);
-                SpawnDiscoverTile("rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), TileData.Types.rock);
-                break;
-            case Rock.RockType.hex:
-                tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50);
-                SpawnDiscoverTile("rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), TileData.Types.rock);
-                break;
-            default:
-                break;
+            switch (rType)
+            {
+                case Rock.RockType.sharp:
+                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50);
+                    SpawnRock("sharp rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.sharp);
+                    break;
+                case Rock.RockType.tube:
+                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50);
+                    SpawnRock("tube rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.tube);
+                    break;
+                case Rock.RockType.hex:
+                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50);
+                    SpawnRock("hex rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.hex);
+                    break;
+                default:
+                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50);
+                    SpawnRock("sharp rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.sharp);
+                    break;
+            }
         }
+   
 
         // place the neighbors in their positions
         if (_patch.neighborOreTiles != null && _patch.neighborOreTiles.Length > 0) {
 			
 			for (int i = 0; i < _patch.neighborOreTiles.Length; i++){
+
                 if (CheckIsInMapBounds(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY))
                 {
                     if (tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY].tileType == TileData.Types.empty)
@@ -468,16 +312,16 @@ public class ResourceGrid : MonoBehaviour{
                         switch (rType)
                         {
                             case Rock.RockType.sharp:
-                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50);
-                                SpawnDiscoverTile("rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), TileData.Types.rock);
+                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50);
+                                SpawnRock("sharp rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.sharp);
                                 break;
                             case Rock.RockType.tube:
-                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50);
-                                SpawnDiscoverTile("rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), TileData.Types.rock);
+                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50);
+                                SpawnRock("tube rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.tube);
                                 break;
                             case Rock.RockType.hex:
-                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50);
-                                SpawnDiscoverTile("rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), TileData.Types.rock);
+                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50);
+                                SpawnRock("hex rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.hex);
                                 break;
                             default:
                                 break;
@@ -492,23 +336,23 @@ public class ResourceGrid : MonoBehaviour{
 
 	}
 
-    void CreateUnWalkableBorder(int sourceX, int sourceY, bool prePathInit)
-    {
-        int width = 1;
-        int height = 1;
-        // This will only work previous to initializing the pathfinding graph
-        if (prePathInit)
-        {
-            for (int w = 0; w <= width; w++)
-            {
-                for (int h = 0; h <= height; h++)
-                {
-                    tiles[sourceX + w, sourceY + h].isWalkable = false;
-                }
-            }
-        }
+    //void CreateUnWalkableBorder(int sourceX, int sourceY, bool prePathInit)
+    //{
+    //    int width = 1;
+    //    int height = 1;
+    //    // This will only work previous to initializing the pathfinding graph
+    //    if (prePathInit)
+    //    {
+    //        for (int w = 0; w <= width; w++)
+    //        {
+    //            for (int h = 0; h <= height; h++)
+    //            {
+    //                tiles[sourceX + w, sourceY + h].isWalkable = false;
+    //            }
+    //        }
+    //    }
      
-    }
+    //}
 
 	
 
@@ -664,10 +508,6 @@ public class ResourceGrid : MonoBehaviour{
                 SpriteRenderer sr = chunk.GetComponent<SpriteRenderer>();
                 sr.sprite = res_sprite_handler.GetChunkSprite(rockType);
 
-                // FOR NOW I'm painting the minerals yellow until I get a UNIQUE sprite for it
-                if (rockType == Rock.RockType.mineral)
-                    sr.color = Color.yellow;
-
 
                 Rigidbody2D rb = chunk.GetComponent<Rigidbody2D>();
                 int randomForceDirection = Random.Range(0, 4);
@@ -694,14 +534,17 @@ public class ResourceGrid : MonoBehaviour{
                 // Change their tag according to rock type
                 switch (rockType)
                 {
-                    case Rock.RockType.rock:
-                        chunk.tag = "Rock Chunk";
+                    case Rock.RockType.sharp:
+                        chunk.tag = "Sharp Chunk";
                         break;
-                    case Rock.RockType.mineral:
-                        chunk.tag = "Mineral Chunk";
+                    case Rock.RockType.hex:
+                        chunk.tag = "Hex Chunk";
+                        break;
+                    case Rock.RockType.tube:
+                        chunk.tag = "Tube Chunk";
                         break;
                     default:
-                        chunk.tag = "Rock Chunk";
+                        chunk.tag = "Sharp Chunk";
                         break;
                 }
            
@@ -926,7 +769,7 @@ public class ResourceGrid : MonoBehaviour{
                     int width = Mathf.RoundToInt(spawnedTiles[x, y].GetComponent<SpriteRenderer>().sprite.bounds.size.x);
                     int height = Mathf.RoundToInt(spawnedTiles[x, y].GetComponent<SpriteRenderer>().sprite.bounds.size.y);
                     // Define these as empty using this new width and height (doing this since the arguments passed in would be 0 for an empty SwapTile)
-                    DefineMultipleEmptyTiles(x, y, width, height);
+                    DefineMultipleEmptyTiles(x, y, width, height, tileToBeDestroyed);
                 }
                 else
                 {
@@ -977,7 +820,7 @@ public class ResourceGrid : MonoBehaviour{
     //    }
     //}
 
-    void DefineMultipleEmptyTiles(int x, int y, int spriteWidth, int spriteHeight)
+    void DefineMultipleEmptyTiles(int x, int y, int spriteWidth, int spriteHeight, GameObject oldGameObj)
     {
         // Store the current tiletype to check against
         TileData.Types formerType = tiles[x, y].tileType;
@@ -986,8 +829,8 @@ public class ResourceGrid : MonoBehaviour{
         {
             for (int h = 0; h < spriteHeight; h++)
             {
-                // ONLY swap the tiles that are equal to tile type stored above
-                if (tiles[x + w, y + h].tileType == formerType)
+                // ONLY swap the tiles that are equal to tile type stored above and the same gameobject
+                if (tiles[x + w, y + h].tileType == formerType && spawnedTiles[x + w, y + h] == oldGameObj)
                 {
                     tiles[x + w, y + h] = new TileData(x + w, y + h, TileData.Types.empty, 0, 1);
 
@@ -1002,25 +845,25 @@ public class ResourceGrid : MonoBehaviour{
         }
     }
 
-    void DefineResourceTiles(int x, int y, int areaWidth, int areaHeight, TileData.Types newType, int quantity)
-    {
-        for (int w = 0; w < areaWidth; w++)
-        {
-            for (int h = 0; h < areaHeight; h++)
-            {
-                // ******** MAKE SURE we are not changing tiles that are NOT empty
-                if (tiles[x + w, y + h].tileType == TileData.Types.empty)
-                {
-                    tiles[x + w, y + h] = new TileData(x, y, newType, quantity, 10000);
+    //void DefineResourceTiles(int x, int y, int areaWidth, int areaHeight, TileData.Types newType, int quantity)
+    //{
+    //    for (int w = 0; w < areaWidth; w++)
+    //    {
+    //        for (int h = 0; h < areaHeight; h++)
+    //        {
+    //            // ******** MAKE SURE we are not changing tiles that are NOT empty
+    //            if (tiles[x + w, y + h].tileType == TileData.Types.empty)
+    //            {
+    //                tiles[x + w, y + h] = new TileData(x, y, newType, quantity, 10000);
 
-                   // grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable; < ----------- NOT affecting the grid here because it will become unwalkable when Grid is initialized on Start()
-                }
+    //               // grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable; < ----------- NOT affecting the grid here because it will become unwalkable when Grid is initialized on Start()
+    //            }
 
 
-            }
+    //        }
 
-        }
-    }
+    //    }
+    //}
 
 
 
@@ -1052,8 +895,8 @@ public class ResourceGrid : MonoBehaviour{
 		// spawn the half tile from the pool
 		GameObject discoverTile = objPool.GetObjectForType ("Half_Tile", false, Vector3.zero);
         if (discoverTile != null) {
-            discoverTile.transform.position = position;
             DiscoverTile dTile = discoverTile.GetComponent<DiscoverTile>();
+            dTile.transform.position = position;
             dTile.objPool = objPool;
             dTile.master_state = master_state;
             dTile.r_sprite_handler = res_sprite_handler;
@@ -1068,8 +911,21 @@ public class ResourceGrid : MonoBehaviour{
             }
 
         }
-
 	}
+
+    void SpawnRock(string rockName, Vector3 position, Rock.RockType rockType)
+    {
+        GameObject discoverTile = objPool.GetObjectForType("Half_Tile", false, Vector3.zero);
+        if (discoverTile != null)
+        {
+            DiscoverTile dTile = discoverTile.GetComponent<DiscoverTile>();
+            dTile.transform.position = position;
+            dTile.objPool = objPool;
+            dTile.master_state = master_state;
+            dTile.r_sprite_handler = res_sprite_handler;
+            dTile.DiscoverRock(rockName, (int)position.x, (int)position.y, tileHolder, rockType);
+        }
+    }
 
 	/// <summary>
 	/// Adds the credits for kill to Resources
@@ -1124,6 +980,7 @@ public class ResourceGrid : MonoBehaviour{
 
         int x = Mathf.RoundToInt(worldPoint.x);
         int y = Mathf.RoundToInt(worldPoint.y);
+
 
         return tiles[x, y];
     }

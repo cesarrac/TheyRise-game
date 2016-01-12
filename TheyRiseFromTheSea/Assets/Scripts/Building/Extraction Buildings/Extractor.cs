@@ -21,6 +21,10 @@ public class Extractor : ExtractionBuilding {
     void OnEnable()
     {
         currResourceStored = 0;
+        currRock = null;
+        currRockWorldPos = new Vector3();
+
+        myTransform = transform;
 
         _state = State.SEARCHING;
     }

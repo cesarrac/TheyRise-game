@@ -55,6 +55,10 @@ public class Climate_Manager : MonoBehaviour {
         {
             DestroyImmediate(gameObject);
         }
+
+        // Default:
+        if (curClimateMap == null)
+            curClimateMap = temperateMap;
     }
 
     // This can be accessed by a UI button

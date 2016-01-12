@@ -33,6 +33,7 @@ public class OrePatch
         {
             case 1:
                 // This patch only has one rock or mineral
+                neighborOreTiles = null;
                 break;
             case 2:
                 // This patch contains two, so neighbor ore array = 1
@@ -122,13 +123,12 @@ public class Rock_Generator : MonoBehaviour {
     public void GenerateRocks()
     {
   
-        for (int i = 0; i <= totalRocksOnMap; i++)
+        for (int i = 0; i < totalRocksOnMap; i++)
         {
             // Get a position
             Vector2 pos = GetPosition();
-            int posX = Mathf.RoundToInt(pos.x);
-            int posY = Mathf.RoundToInt(pos.y);
-            SetNewOrePatch(posX, posY, GetRockTypeFromLandType(pos));
+       
+            SetNewOrePatch((int)pos.x, (int) pos.y, GetRockTypeFromLandType(pos));
         }
     }
 
@@ -142,6 +142,8 @@ public class Rock_Generator : MonoBehaviour {
     {
         GraphicTile gTile = TileTexture_3.instance.GetGraphicTileFromPos(position);
 
+        Rock.RockType type = Rock.RockType.sharp;
+
         if (gTile != null)
         {
             switch (gTile.MyTileLandType)
@@ -152,33 +154,30 @@ public class Rock_Generator : MonoBehaviour {
 
                     if (choice == 0)
                     {
-                        return Rock.RockType.tube;
+                        type = Rock.RockType.tube;
                     }
                     else
-                        return Rock.RockType.sharp;
+                        type = Rock.RockType.sharp;
 
                     break;
                 case GraphicTile.TileLandTypes.MUD:
                     // Choose Sharp rock
-                    return Rock.RockType.sharp;
+                    type = Rock.RockType.sharp;
 
                     break;
                 case GraphicTile.TileLandTypes.SAND:
                     // Choose Hex rock
-                    return Rock.RockType.hex;
+                    type = Rock.RockType.hex;
 
                     break;
                 default:
-                    return Rock.RockType.sharp;
+                    type = Rock.RockType.sharp;
 
                     break;
             }
         }
-        else
-        {
-            // Default:
-            return Rock.RockType.sharp;
-        }
+
+        return type;
 
     }
 
@@ -206,7 +205,8 @@ public class Rock_Generator : MonoBehaviour {
         {
             density = 5;
         }
-        OrePatch patch = new OrePatch(leadX, leadY, density, rType);
+        OrePatch patch = new OrePatch(leadX, leadY, 1, rType);
+        Debug.Log("ORE PATCH at lead x " + leadX + " lead Y " + leadY);
         patch.SetFormation();
         ResourceGrid.Grid.PlaceOrePatch(patch, rType);
     }

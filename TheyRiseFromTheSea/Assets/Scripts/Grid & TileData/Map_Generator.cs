@@ -133,7 +133,7 @@ public class Map_Generator : MonoBehaviour {
 		grid.tiles = new TileData[width, height];
         
 
-		int countWaterTiles = 0;
+		//int countWaterTiles = 0;
         // Initialize the grid's water tile positions list
         grid.waterTilePositions = new List<Vector2>();
 
@@ -154,14 +154,14 @@ public class Map_Generator : MonoBehaviour {
                     // fill a list of water tiles positions as vector 2 to be used as potential spawn positions for enemies
                     grid.waterTilePositions.Add(new Vector2(x, y));
 
-                    countWaterTiles++;
+                    //countWaterTiles++;
 				}
 			}
 		}
 		grid.spawnedTiles = new GameObject[width, height];
 
 		// let the grid know how many of these tiles are water so it can get spawn positions
-		grid.totalTilesThatAreWater = countWaterTiles;
+		//grid.totalTilesThatAreWater = countWaterTiles;
        
         // turn water tiles list into an array for faster searching
         grid.waterTilesArray = grid.waterTilePositions.ToArray();
@@ -178,7 +178,7 @@ public class Map_Generator : MonoBehaviour {
 		tileTexture.DefineTilesAndGenerateBaseTexture(grid.emptyTilesArray, iMap.GetLength(0), iMap.GetLength(1));
 
         // After texture is rendered generate rocks
-        grid.InitializeRockandMinerals();
+        //grid.InitializeRockandMinerals();
 
     }
 

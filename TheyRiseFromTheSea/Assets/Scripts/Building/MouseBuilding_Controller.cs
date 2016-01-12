@@ -30,7 +30,7 @@ public class MouseBuilding_Controller:MonoBehaviour
         // Tile Under Mouse Tool: print to console the tile type and position of the tile under mouse
         if (!Build_MainController.Instance.currentlyBuilding)
         {
-            //DebugTileUnderMouse();
+            DebugTileUnderMouse();
             DebugGraphicTile();
         }
 

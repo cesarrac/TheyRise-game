@@ -4,9 +4,7 @@ using System.Collections;
 public class Rock {
 
 	public enum RockType
-    {
-        rock,
-        mineral,
+    { 
         hex,
         tube,
         sharp
@@ -41,21 +39,15 @@ public class Rock {
 		_rockProductionType = GetProductionType(type);
     }
 
-	RockProductionType GetProductionType(RockType type)
+	RockProductionType GetProductionType(RockType _type)
 	{
-		RockProductionType pType = RockProductionType.common;
-		switch (type) 
-		{
-		case RockType.rock:
-			pType = RockProductionType.common;
-			break;
-		case RockType.mineral:
-			pType = RockProductionType.enriched;
-			break;
-		default:
-			pType = RockProductionType.common;
-			break;
-		}
-		return pType;
+        if (_type == RockType.sharp)
+        {
+            return RockProductionType.common;
+        }
+        else
+        {
+            return RockProductionType.enriched;
+        }
 	}
 }

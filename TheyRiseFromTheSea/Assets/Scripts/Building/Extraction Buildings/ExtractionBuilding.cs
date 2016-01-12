@@ -252,7 +252,7 @@ public class ExtractionBuilding : MonoBehaviour {
           // rockTilesDetected.Add(CheckTileType(botRight));
             return CheckTileType(botRight);
         }
-        if (CheckTileType(top2) != null)
+        else if (CheckTileType(top2) != null)
         { // top
 
             //rockTilesDetected.Add(CheckTileType(top));

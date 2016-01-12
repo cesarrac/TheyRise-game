@@ -31,8 +31,8 @@ public class Player_PickUpItems : MonoBehaviour {
             if (!resource_manager)
                 resource_manager = GameObject.FindGameObjectWithTag("Capital").GetComponent<Player_ResourceManager>();
 
-            rock = new Rock(Rock.RockType.rock, Rock.RockSize.single);
-            mineral = new Rock(Rock.RockType.mineral, Rock.RockSize.single);
+            rock = new Rock(Rock.RockType.sharp, Rock.RockSize.single);
+            mineral = new Rock(Rock.RockType.hex, Rock.RockSize.single);
         }
  
     }

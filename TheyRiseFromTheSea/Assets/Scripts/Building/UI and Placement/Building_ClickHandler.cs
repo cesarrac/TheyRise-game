@@ -114,7 +114,9 @@ public class Building_ClickHandler : MonoBehaviour {
 	void Start () {
 
         // get my tiletype
+        Debug.Log("CLICK HANDLER: pos = " + transform.position);
         myTileType = resourceGrid.TileFromWorldPoint(transform.position).tileType;
+
 
         if (myTileType != TileData.Types.capital)
             nano_builder = resourceGrid.Hero.GetComponent<NanoBuilding_Handler>();
