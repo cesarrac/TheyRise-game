@@ -25,19 +25,18 @@ public class NanoBuilding_Handler : MonoBehaviour {
     // public string[] bluePrintsAvailable;
     int selectedBPIndex = 0;
     Blueprint selectedBluePrint;
-
-
-
+    
     Build_MainController build_controller;
+
+    void Awake()
+    {
+       
+    }
 
     void Start()
     {
-       // InitBluePrints();
-
-
-        //selectedBluePrint = availableBlueprints[TileData.Types.terraformer];
-
-        //DisplaySelectedBlueprintName(selectedBluePrint.buildingName);
+        // InitBluePrints();
+        BlueprintDatabase.Instance.LoadToNanoBuilder(this);
 
         audio_source = GetComponent<AudioSource>();
 
@@ -86,6 +85,12 @@ public class NanoBuilding_Handler : MonoBehaviour {
     public void SetBPSprites()
     {
         Buildings_SpriteDatabase.Instance.SetSprites(availableBlueprints);
+
+        // Since this is the last step in initializing the Blueprints, set this here
+
+        selectedBluePrint = availableBlueprints[TileData.Types.terraformer];
+
+        DisplaySelectedBlueprintName(selectedBluePrint.buildingName);
     }
 
     void DisplaySelectedBlueprintName(string bpName)
