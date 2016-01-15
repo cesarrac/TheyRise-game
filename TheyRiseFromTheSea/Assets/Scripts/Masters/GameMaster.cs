@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class GameMaster : MonoBehaviour {
 
+    public static GameMaster Instance { get; protected set; }
+
 	private int _storedCredits;
 	public int curCredits { get { return _storedCredits; }set{ _storedCredits = Mathf.Clamp (value, 0, 100000000); }}
 	
@@ -19,10 +21,18 @@ public class GameMaster : MonoBehaviour {
 
 	void Awake()
 	{
-		DontDestroyOnLoad (this.gameObject);
-		
-		// CHEATING!!!
-		curCredits = 1000;
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            DestroyImmediate(gameObject);
+        }
+
+        // CHEATING!!!
+        curCredits = 1000;
 		Debug.Log ("GM is awake!");
 
         if (Application.loadedLevel == 1)

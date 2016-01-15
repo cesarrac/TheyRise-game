@@ -72,7 +72,9 @@ public class ResourceGrid : MonoBehaviour{
 	[HideInInspector]
 	public Resource_Sprite_Handler res_sprite_handler;
 
-	public bool transporter_built;
+	public bool transporter_built { get; protected set; }
+    
+    public bool terraformer_built { get; protected set; }
 
 	GameMaster game_master;
 
@@ -664,6 +666,8 @@ public class ResourceGrid : MonoBehaviour{
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Terraformer", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
                     else
                         tiles[x, y] = new TileData(x, y, "Terraformer", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+
+                    terraformer_built = true;
                     break;
 
                 case TileData.Types.building:

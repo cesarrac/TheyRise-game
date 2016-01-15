@@ -173,6 +173,7 @@ public class Map_Generator : MonoBehaviour {
 		TileTexture_3 tileTexture = _Floor.GetComponent<TileTexture_3>();
         tileTexture.seed = seed;
         tileTexture.randomFillPercent = randomFillPercent;
+        tileTexture.pseudoRandom = pseudoRandom;
 
         // Generate the proper texture:
 		tileTexture.DefineTilesAndGenerateBaseTexture(grid.emptyTilesArray, iMap.GetLength(0), iMap.GetLength(1));

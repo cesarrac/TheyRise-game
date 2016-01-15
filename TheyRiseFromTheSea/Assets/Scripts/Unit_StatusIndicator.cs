@@ -105,4 +105,38 @@ public class Unit_StatusIndicator : MonoBehaviour {
 	}
 
 
+    public void CreateStatusMessage(string _message, Color color = default(Color))
+    {
+        Vector2 min = new Vector2(0.5f, 0.5f);
+        Vector2 max = new Vector2(0.5f, 0.5f);
+        Vector2 size = new Vector2(306, 64);
+        Vector3 scale = new Vector3(1, 1, 1);
+        Vector3 _scaleCalc = canvas.transform.localScale - scale;
+
+        GameObject _statusMsgText = ObjectPool.instance.GetObjectForType("Status Text", true, Vector3.zero);
+
+        if (_statusMsgText != null)
+        {
+
+            RectTransform rectTransform = _statusMsgText.GetComponent<RectTransform>();
+            rectTransform.SetParent(canvas.transform, true);
+            rectTransform.anchorMax = min;
+            rectTransform.anchorMin = max;
+            rectTransform.offsetMax = Vector2.zero;
+            rectTransform.offsetMin = Vector2.zero;
+            rectTransform.sizeDelta = size;
+            rectTransform.localScale = -_scaleCalc;
+
+
+            _statusMsgText.GetComponent<Text>().text = _message;
+            if (color != Color.clear)
+                _statusMsgText.GetComponent<Text>().color = color;
+
+        }
+        else
+        {
+            Debug.Log("STATUS INDICATOR: Could NOT find Status Text in Pool!");
+        }
+    }
+
 }

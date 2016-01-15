@@ -241,6 +241,8 @@ public class TileTexture_3 : MonoBehaviour
     [HideInInspector]
     public int randomFillPercent;
 
+    public System.Random pseudoRandom;
+
     public Map_Generator mapGenerator;
 
     int ripplesWidth, ripplesHeight;
@@ -1938,69 +1940,69 @@ public class TileTexture_3 : MonoBehaviour
                 // Select a cliff of this edgetype
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM)
                 {
-                    tileIndex = Random.Range(80, 89);
+                    tileIndex = pseudoRandom.Next(90, 100);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP)
                 {
-                    tileIndex = Random.Range(135, 139);
+                    tileIndex = pseudoRandom.Next(145, 150);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT)
                 {
-                    tileIndex = Random.Range(70, 79);
+                    tileIndex = pseudoRandom.Next(80, 90);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT)
                 {
-                    tileIndex = Random.Range(60, 69);
+                    tileIndex = pseudoRandom.Next(70, 80);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_LEFT_CORNER)
                 {
                     // Pick between large corner or small corner
-                    int pick = Random.Range(0, 3);
+                    int pick = pseudoRandom.Next(0, 3);
                     if (pick <= 1)
                     {
-                        tileIndex = Random.Range(151, 154);
+                        tileIndex = pseudoRandom.Next(161, 165);
                     }
                     else
                     {
-                        tileIndex = Random.Range(55, 59);
+                        tileIndex = pseudoRandom.Next(65, 70);
                     }
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_RIGHT_CORNER)
                 {
                     // Pick between large corner or small corner
-                    int pick = Random.Range(0, 3);
+                    int pick = pseudoRandom.Next(0, 3);
                     if (pick <= 1)
                     {
-                        tileIndex = Random.Range(155, 159);
+                        tileIndex = pseudoRandom.Next(165, 170);
                     }
                     else
                     {
-                        tileIndex = Random.Range(50, 54);
+                        tileIndex = pseudoRandom.Next(60, 65);
                     }
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(170, 174);
+                    tileIndex = pseudoRandom.Next(180, 185);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(175, 179);
+                    tileIndex = pseudoRandom.Next(185, 190);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(140, 144);
+                    tileIndex = pseudoRandom.Next(150, 155);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(145, 149);
+                    tileIndex = pseudoRandom.Next(155, 160);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(160, 164);
+                    tileIndex = pseudoRandom.Next(170, 175);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(165, 169);
+                    tileIndex = pseudoRandom.Next(175, 180);
                 }
 
                 break;
@@ -2008,122 +2010,122 @@ public class TileTexture_3 : MonoBehaviour
                 // Select a cliff shore of this edgetype
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM)
                 {
-                    tileIndex = Random.Range(120, 124);
+                    tileIndex = pseudoRandom.Next(130, 135);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP)
                 {
-                    tileIndex = Random.Range(180, 184);
+                    tileIndex = pseudoRandom.Next(190, 195);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT)
                 {
-                    tileIndex = Random.Range(5, 9);
+                    tileIndex = pseudoRandom.Next(15, 20);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT)
                 {
-                    tileIndex = Random.Range(15, 19);
+                    tileIndex = pseudoRandom.Next(25, 30);
                 }
                 // USING CLIFF CORNERS AND DIAGONALS HERE 
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_LEFT_CORNER)
                 {
                     // Pick between large corner or small corner
-                    int pick = Random.Range(0, 3);
+                    int pick = pseudoRandom.Next(0, 3);
                     if (pick <= 1)
                     {
-                        tileIndex = Random.Range(151, 154);
+                        tileIndex = pseudoRandom.Next(161, 165);
                     }
                     else
                     {
-                        tileIndex = Random.Range(55, 59);
+                        tileIndex = pseudoRandom.Next(65, 70);
                     }
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_RIGHT_CORNER)
                 {
                     // Pick between large corner or small corner
-                    int pick = Random.Range(0, 3);
+                    int pick = pseudoRandom.Next(0, 3);
                     if (pick <= 1)
                     {
-                        tileIndex = Random.Range(155, 159);
+                        tileIndex = pseudoRandom.Next(165, 170);
                     }
                     else
                     {
-                        tileIndex = Random.Range(50, 54);
+                        tileIndex = pseudoRandom.Next(60, 65);
                     }
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(170, 174);
+                    tileIndex = pseudoRandom.Next(180, 185);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(175, 179);
+                    tileIndex = pseudoRandom.Next(185, 190);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(140, 144);
+                    tileIndex = pseudoRandom.Next(150, 155);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(145, 149);
+                    tileIndex = pseudoRandom.Next(155, 160);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(160, 164);
+                    tileIndex = pseudoRandom.Next(170, 175);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(165, 169);
+                    tileIndex = pseudoRandom.Next(175, 180);
                 }
                 break;
             case GraphicTile.TileEdgeTypes.SHORE_CLIFF:
                 // select a shore cliff of this edge type
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM)
                 {
-                    tileIndex = Random.Range(125, 129);
+                    tileIndex = pseudoRandom.Next(135, 140);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP)
                 {
-                    tileIndex = Random.Range(185, 189);
+                    tileIndex = pseudoRandom.Next(195, 200);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT)
                 {
-                    tileIndex = Random.Range(0, 4);
+                    tileIndex = pseudoRandom.Next(10, 15);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT)
                 {
-                    tileIndex = Random.Range(10, 14);
+                    tileIndex = pseudoRandom.Next(20, 25);
                 }
                 // USING SHORE CORNERS AND DIAGONALS HERE (WHERE AVAILABLE)
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(115, 119);
+                    tileIndex = pseudoRandom.Next(125, 130);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(110, 114);
+                    tileIndex = pseudoRandom.Next(120, 125);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(20, 24);
+                    tileIndex = pseudoRandom.Next(30, 35);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(25, 29);
+                    tileIndex = pseudoRandom.Next(35, 40);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(40, 44);
+                    tileIndex = pseudoRandom.Next(50, 55);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(45, 49);
+                    tileIndex = pseudoRandom.Next(55, 60);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(30, 34);
+                    tileIndex = pseudoRandom.Next(40, 45);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(35, 39);
+                    tileIndex = pseudoRandom.Next(45, 50);
                 }
                 break;
 
@@ -2131,59 +2133,68 @@ public class TileTexture_3 : MonoBehaviour
                 // select a shore cliff of this edge type
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM)
                 {
-                    tileIndex = Random.Range(100, 109);
+                    tileIndex = pseudoRandom.Next(110, 120);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP)
                 {
-                    tileIndex = Random.Range(130, 139);
+                    tileIndex = pseudoRandom.Next(140, 150);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT)
                 {
-                    tileIndex = Random.Range(95, 99);
+                    tileIndex = pseudoRandom.Next(105, 110);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT)
                 {
-                    tileIndex = Random.Range(90, 94);
+                    tileIndex = pseudoRandom.Next(100, 105);
                 }
 
                 // USING SHORE CORNERS AND DIAGONALS HERE (WHERE AVAILABLE)
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(115, 119);
+                    tileIndex = pseudoRandom.Next(125, 130);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(110, 114);
+                    tileIndex = pseudoRandom.Next(120, 125);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(20, 24);
+                    tileIndex = pseudoRandom.Next(30, 35);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(25, 29);
+                    tileIndex = pseudoRandom.Next(35, 40);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(40, 44);
+                    tileIndex = pseudoRandom.Next(50, 55);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(45, 49);
+                    tileIndex = pseudoRandom.Next(55, 60);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(30, 34);
+                    tileIndex = pseudoRandom.Next(40, 45);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(35, 39);
+                    tileIndex = pseudoRandom.Next(45, 50);
                 }
                 break;
 
             default:
-                // Center tile
-                tileIndex = 150;
+                // Select a center tile
+                int select = pseudoRandom.Next(0, 20);
+                if (select > 9)
+                {
+                    tileIndex = select - 10;
+                }
+                else
+                {
+                    tileIndex = 160;
+                }
+
                 break;
 
         }

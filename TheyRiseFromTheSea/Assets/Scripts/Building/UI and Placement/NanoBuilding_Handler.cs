@@ -28,9 +28,11 @@ public class NanoBuilding_Handler : MonoBehaviour {
     
     Build_MainController build_controller;
 
+    Unit_StatusIndicator status_indicator;
+
     void Awake()
     {
-       
+        status_indicator = GetComponent<Player_HeroAttackHandler>().statusIndicator;
     }
 
     void Start()
@@ -190,59 +192,60 @@ public class NanoBuilding_Handler : MonoBehaviour {
         {
             case TileData.Types.rock:
                 Blueprint extractor = CheckForAvailableBlueprint(TileData.Types.extractor);
-                if (extractor != null)
-                {
-                    if (nanoBots >= extractor.nanoBotCost)
-                    {
-                        build_controller.BuildThis(extractor);
-                        nanoBots -= extractor.nanoBotCost;
-                    }
-                }
-                
-                
+                Build(extractor);
                 break;
+
             case TileData.Types.mineral:
                 Blueprint generator = CheckForAvailableBlueprint(TileData.Types.generator);
-                if (generator != null)
-                {
-                    if (nanoBots >= generator.nanoBotCost)
-                    {
-                        build_controller.BuildThis(generator);
-                        nanoBots -= generator.nanoBotCost;
-                    }
-                }
+                Build(generator);
                 break;
 
             case TileData.Types.empty:
-                if (nanoBots >= selectedBluePrint.nanoBotCost)
+                if (selectedBluePrint.tileType != TileData.Types.terraformer)
                 {
-                    build_controller.BuildThis(selectedBluePrint);
-                    nanoBots -= selectedBluePrint.nanoBotCost;
-                    if (selectedBluePrint.tileType == TileData.Types.terraformer)
-                    {
-                        TerraformerHasBeenBuilt();
-                    }
+                    Build(selectedBluePrint);
+                }
+                else
+                {
+                    BuildTerraformer();
                 }
                 break;
 
             case TileData.Types.water:
                 Blueprint waterPump = CheckForAvailableBlueprint(TileData.Types.desalt_s);
-                if (waterPump != null)
-                {
-                    if (nanoBots >= waterPump.nanoBotCost)
-                    {
-                        build_controller.BuildThis(waterPump);
-                        nanoBots -= waterPump.nanoBotCost;
-                    }
-                }
-
+                Build(waterPump);
                 break;
+
             default:
                 Debug.Log("Cant build on that type of tile!");
                 break;
         }
 
         Debug.Log("Nanobots left: " + nanoBots);
+    }
+
+    void Build(Blueprint bp)
+    {
+        if (bp != null && ResourceGrid.Grid.terraformer_built)
+        {
+            // Check Nanobot cost
+            if (nanoBots >= bp.nanoBotCost)
+            {
+                // Can Build!
+                build_controller.BuildThis(bp);
+                nanoBots -= bp.nanoBotCost;
+            }
+            else
+                status_indicator.CreateStatusMessage("Out of Bots!");
+        }
+        else
+            status_indicator.CreateStatusMessage("Can't build that yet!");
+    }
+
+    void BuildTerraformer()
+    {
+        build_controller.BuildThis(selectedBluePrint);
+        TerraformerHasBeenBuilt();
     }
 
     void ListenToBreakBuilding()
