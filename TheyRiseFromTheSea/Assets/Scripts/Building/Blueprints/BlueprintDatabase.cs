@@ -17,6 +17,8 @@ public class BlueprintDatabase : MonoBehaviour {
 
     public int shipLvlIndex = 0, planetLvlIndex = 1, inventoryLvlIndex = 2;
 
+    Blueprint curSelectedBP;
+
     void Awake()
     {
 
@@ -31,21 +33,21 @@ public class BlueprintDatabase : MonoBehaviour {
         }
 
 
-        //if (Application.loadedLevel == inventoryLvlIndex)
-        //{
-        //    selectedBlueprints.Clear();
-
-        //    Init();
-        //}
-
-        if (Application.loadedLevel == shipLvlIndex)
+        if (Application.loadedLevel == inventoryLvlIndex)
         {
             selectedBlueprints.Clear();
 
             Init();
-
-            Test();
         }
+
+        //if (Application.loadedLevel == shipLvlIndex)
+        //{
+        //    selectedBlueprints.Clear();
+
+        //    Init();
+
+        //    //Test();
+        //}
 
         //if (Application.loadedLevel == planetLvlIndex)
         //{
@@ -87,22 +89,65 @@ public class BlueprintDatabase : MonoBehaviour {
         selectedBlueprints.Add(blueprints_all["Terraformer"]);
     }
 
+    // This will Display the Selected Blueprint's info and store it's info in case the Player decides to Load it to the Builder
     public void SelectBlueprint(string bpType)
     {
-        if (blueprints_all.ContainsKey(bpType) && selectedBlueprints.Count < maxBPAllowed)
+        if (blueprints_all.ContainsKey(bpType))
         {
-            Debug.Log("Adding this blueprint.");
-            selectedBlueprints.Add(blueprints_all[bpType]);
+            curSelectedBP = blueprints_all[bpType];
+
+            DisplaySelectedBPInfo();
+        }
+
+    }
+
+    void DisplaySelectedBPInfo()
+    {
+        // Display the info to the Info Panel from the stored selected BP (curSelectedBP)
+        UI_Manager.Instance.DisplayBPInfo(curSelectedBP.buildingName);
+    }
+
+    public void LoadBlueprint()
+    {
+        if (curSelectedBP != null && selectedBlueprints.Count < maxBPAllowed)
+        {
+            if (!selectedBlueprints.Contains(curSelectedBP))
+            {
+                Debug.Log("Adding this blueprint.");
+                selectedBlueprints.Add(curSelectedBP);
+
+                // Add Text field to Builder
+                AddLoadedBlueprint();
+            }
+         
         }
     }
 
-    public void DeselectBlueprint(string bpType)
+    public void UnLoadBlueprint()
     {
-        if (blueprints_all.ContainsKey(bpType) && selectedBlueprints.Count > 0)
+        if (curSelectedBP != null && selectedBlueprints.Count > 0)
         {
-            Debug.Log("Removing this blueprint.");
-            selectedBlueprints.Remove(blueprints_all[bpType]);
+            if (selectedBlueprints.Contains(curSelectedBP))
+            {
+                Debug.Log("Removing this blueprint.");
+                selectedBlueprints.Remove(curSelectedBP);
+            }
+
+            // Remove the Text field from the Builder
+            RemoveLoadedBlueprint(curSelectedBP.buildingName);
         }
+    }
+
+    void AddLoadedBlueprint()
+    {
+        // Spawn a Text prefab, fill its text with the correct blueprint name, and parent it to the Builder's panel
+        UI_Manager.Instance.AddBlueprintToBuilder(curSelectedBP.buildingName);
+       
+    }
+
+    void RemoveLoadedBlueprint(string bpName)
+    {
+        UI_Manager.Instance.RemoveBlueprintTextFromBuilder(bpName);
     }
 
     public void LoadToNanoBuilder(NanoBuilding_Handler nano_builder)

@@ -19,11 +19,13 @@ public class Building_PositionHandler : MonoBehaviour {
 	public ResourceGrid resourceGrid;
 	public bool followMouse;
 
-	public TileData.Types tileType;
+    [HideInInspector]
+    public TileData.Types tileType;
 
 	SpriteRenderer sr; // to handle the alpha change
-	Color halfColor;
+	Color invalidPosColor;
 	Color trueColor;
+   
 
 	Vector3 m, lastM;
 	int mX;
@@ -50,11 +52,19 @@ public class Building_PositionHandler : MonoBehaviour {
 
 	void Awake()
 	{
+        // Get the Sprite Renderer to be able to change the Sprite's color depending on position
 		sr = GetComponent<SpriteRenderer> ();
-		halfColor = Color.red;
-		trueColor = Color.green;
 
-		sr.color = Color.clear;
+        // Clear red color for Invalid Position
+        invalidPosColor =  new Color(1, 0, 0, 0.5f);
+
+        // Clear green color for Valid Position
+        trueColor = new Color(0, 1, 0, 0.5f);
+
+        // Begin as clear Color
+        sr.color = Color.clear;
+
+        // Set my transform to this tile's Spawn Position (passed in by Discover Tile)
 		transform.position = spawnPos;
 
         resourceGrid = ResourceGrid.Grid;
@@ -108,7 +118,7 @@ public class Building_PositionHandler : MonoBehaviour {
 					canBuild = true;
 					sr.color = trueColor;
 				} else {				// NOT ON ROCK
-					sr.color = halfColor;
+					sr.color = invalidPosColor;
 					canBuild = false;
 				}
 			} else if (tileType == TileData.Types.desalt_s) { // THIS building is a Water Pump so it needs to detect WATER
@@ -137,7 +147,7 @@ public class Building_PositionHandler : MonoBehaviour {
 					canBuild = true;
 					sr.color = trueColor;
 				} else {				// NOT ON Water
-					sr.color = halfColor;
+					sr.color = invalidPosColor;
 					canBuild = false;
 				}
 			}else if (tileType == TileData.Types.generator){ // Energy generators seek for Minerals
@@ -166,7 +176,7 @@ public class Building_PositionHandler : MonoBehaviour {
 					canBuild = true;
 					sr.color = trueColor;
 				} else {				// NOT ON Mineral
-					sr.color = halfColor;
+					sr.color = invalidPosColor;
 					canBuild = false;
 				}
 
@@ -176,12 +186,12 @@ public class Building_PositionHandler : MonoBehaviour {
 					sr.color = trueColor;
 					canBuild = true;
 				} else {// we DO NOT have an empty tile on our sides or beneath
-					sr.color = halfColor;
+					sr.color = invalidPosColor;
 					canBuild = false;
 				}
 			}
 		} else {				// NOT ON EMPTY
-			sr.color = halfColor;
+			sr.color = invalidPosColor;
 			canBuild = false;
 		}
 

@@ -274,8 +274,7 @@ public class Enemy_AttackHandler : Unit_Base {
     {
         while (true)
         {
-            yield return new WaitForSeconds(stats.curRateOfAttk);
-
+           
             if (towerAttackingMe != null && pathHandler.InRange) 
             {
                 Debug.Log("ENEMY: Attacking the tower!");
@@ -288,6 +287,8 @@ public class Enemy_AttackHandler : Unit_Base {
                 isAttacking = false;
                 yield break;
             }
+
+            yield return new WaitForSeconds(stats.curRateOfAttk);
         }
     }
 
@@ -295,7 +296,6 @@ public class Enemy_AttackHandler : Unit_Base {
     {
         while (true)
         {
-            yield return new WaitForSeconds(stats.curRateOfAttk);
 
             if (playerUnit != null && pathHandler.InRange)
             {
@@ -308,6 +308,7 @@ public class Enemy_AttackHandler : Unit_Base {
                 isAttacking = false;
                 yield break;
             }
+            yield return new WaitForSeconds(stats.curRateOfAttk);
         }
     }
 

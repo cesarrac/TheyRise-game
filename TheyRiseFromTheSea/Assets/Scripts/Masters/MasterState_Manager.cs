@@ -91,7 +91,8 @@ public class MasterState_Manager : MonoBehaviour {
             MissionFailed();
             break;
         case MasterState.MISSION_SUCCESS:
-            // Load a progress scene where the player sees what items they got and what they have left
+                // Load a progress scene where the player sees what items they got and what they have left
+                MissionSuccess();
 			break;
         case MasterState.ONSHIP:
                 if (Time.timeScale == 0)
@@ -119,6 +120,19 @@ public class MasterState_Manager : MonoBehaviour {
 			missionFailedPanel.SetActive(true);
 		}
 	}
+
+    void MissionSuccess()
+    {
+        if (Time.timeScale != 0)
+        {
+            UI_Manager.Instance.DisplayVictoryPanel();
+           
+            StopAllCoroutines();
+
+            Time.timeScale = 0;
+        }
+      
+    }
 
 	// BUTTONS:
 	public void PauseButton()
