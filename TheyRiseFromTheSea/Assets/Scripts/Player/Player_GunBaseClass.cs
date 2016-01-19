@@ -10,6 +10,14 @@ public class Player_GunBaseClass : MonoBehaviour {
 		public float curFireRate { get {return _fireRate;} set { _fireRate = Mathf.Clamp(value, 0f, 2f);}}
 		public float startingFireRate;
 
+        public float startingChamberAmmo { get; protected set; }
+        float _chamberAmmo;
+        public float curChamberAmmo { get { return _chamberAmmo; } set { _chamberAmmo = Mathf.Clamp(value, 0, 50000); } }
+
+        float _reloadSpeed;
+        public float curReloadSpeed { get { return _reloadSpeed; } set { _reloadSpeed = Mathf.Clamp(value, 0.1f, 3f); } }
+        public float startingReloadSpeed;
+
 		public int weaponIndex;
 		public string projectileType;
 
@@ -20,7 +28,7 @@ public class Player_GunBaseClass : MonoBehaviour {
 		public void Init()
 		{
 			curFireRate = startingFireRate;
-		
+            curChamberAmmo = startingChamberAmmo;
 		}
 	}
 
@@ -54,6 +62,8 @@ public class Player_GunBaseClass : MonoBehaviour {
 
     public AudioClip shootSound;
     public AudioSource source;
+
+    public bool isReloading { get; protected set; }
 
 	void Awake()
 	{
@@ -109,30 +119,47 @@ public class Player_GunBaseClass : MonoBehaviour {
     public void CheckForShoot()
 	{
 
-		// BRACKEY's way:
-		if (gunStats.curFireRate == 0) {
-			if (Input.GetButtonDown ("Fire1")) {
-                //if (gameMaster){
-                //	if (gameMaster._canFireWeapon) 
-                //		FireWeapon ();
-                //}else{
-                //	Debug.Log("GUN: GM is null!!!");
-                //}
-                FireWeapon();
+		if (gunStats.curChamberAmmo > 0)
+        {
+            if (gunStats.curFireRate == 0)
+            {
+                if (Input.GetButtonDown("Fire1"))
+                {
+                    //if (gameMaster){
+                    //	if (gameMaster._canFireWeapon) 
+                    //		FireWeapon ();
+                    //}else{
+                    //	Debug.Log("GUN: GM is null!!!");
+                    //}
+                    FireWeapon();
+                }
+
             }
-			
-		} else {
-			if (Input.GetButton ("Fire1") && Time.time > countDownToFire) {
-                //if (gameMaster){
-                //	if (gameMaster._canFireWeapon) {
-                //		countDownToFire = Time.time + 1 / gunStats.curFireRate;
-                //		FireWeapon ();
-                //	}
-                //}
-                countDownToFire = Time.time + 1 / gunStats.curFireRate;
-                FireWeapon();
+            else
+            {
+                if (Input.GetButton("Fire1") && Time.time > countDownToFire)
+                {
+                    //if (gameMaster){
+                    //	if (gameMaster._canFireWeapon) {
+                    //		countDownToFire = Time.time + 1 / gunStats.curFireRate;
+                    //		FireWeapon ();
+                    //	}
+                    //}
+                    countDownToFire = Time.time + 1 / gunStats.curFireRate;
+                    FireWeapon();
+                }
             }
-		}
+        }
+        else
+        {
+            // Chamber out of Bullets, must Reload
+            if (!isReloading)
+            {
+                isReloading = true;
+                StartCoroutine("Reload");
+            }
+        }
+	
 
 	}
 
@@ -151,6 +178,8 @@ public class Player_GunBaseClass : MonoBehaviour {
                 source.PlayOneShot(shootSound, 0.5f);
                 // Apply gun kick to Player
                 StartCoroutine(GunKick());
+                // Take a bullet from the gun's chamber ammo
+                gunStats.curChamberAmmo--;
             }
 
        
@@ -238,5 +267,18 @@ public class Player_GunBaseClass : MonoBehaviour {
 		yield break;
 	}
 
+
+    IEnumerator Reload()
+    {
+        while (true)
+        {
+            // Wait for time in seconds according to this gun's Reload Speed stat
+            yield return new WaitForSeconds(gunStats.curReloadSpeed);
+            // Add bullets
+            gunStats.curChamberAmmo = gunStats.startingChamberAmmo;
+            isReloading = false;
+            yield break;
+        }
+    }
 
 }

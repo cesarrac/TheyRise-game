@@ -19,6 +19,8 @@ public class GameMaster : MonoBehaviour {
 
 	bool levelInitialized;
 
+    int levelCount; // using this in a CRUDE way to count how many times the player has been to the surface.
+
 	void Awake()
 	{
         if (Instance == null)
@@ -67,16 +69,62 @@ public class GameMaster : MonoBehaviour {
 		}
 	}
 
-    // HERO/PLAYER LOADING:
+    // HERO/PLAYER LOADING (Called by Resource Grid after Map has been initialized):
     public GameObject SpawnThePlayer(int posX, int posY)
     {
         resourceGrid = ResourceGrid.Grid;
         objPool = ObjectPool.instance;
-        /* Going to need a position that is 100% for sure an empty land tile.
-        To do that I'll need to load the player once the map generator and resource Grid have done their thing */
+
         Vector3 playerPosition = new Vector3(posX, posY, 0.0f);
         GameObject Hero = objPool.GetObjectForType("Hero", true, playerPosition);
+        /*
+        HERE we need what Items the player chose to take with them to the surface.
+        
+        We'll need to know Equipped Items: Armor/Space Suit, Weapons, and Tools
+        And all Consumable items.
+        
+        The correct set needs to be spawned as GameObjects and made children of the Hero GObj.
+        
+        We'll need to tell the Player_HeroAttackHandler how many weapons and tools the player has available and link
+        the Weapon and Tool variables in that script to the corresponding child gameobjects.
+        
+        Default is 2 Weapons, 1 Tool
 
+        Then for the weapons we need to tell its Gun base class to Upgrade any stats if the Weapon was upgraded...
+
+        ...and finally, apply any upgrades to Tools.
+
+        Hero base class.
+        Armor.
+        List of Weapons.
+        List of Tools.
+        List of consumables.
+        List of abilities.
+
+        upgradeWeapon function (type of upgrade U, type of weapon W){
+            Weapons[w].upgrade(U);
+        }
+
+        In Weapons class:
+        upgrade (type of upgrade U){
+            switch(U){
+                case attack rate type:
+                weapon.stats.attackRate = U.attackRate;
+                break;
+            }
+        }
+
+        ** Solution:
+        - Hero prefabs for all possible slot combinations: 
+            Default: 1 wpn , 1 tool
+            Others:  2 wpn , 1 tool / 3wpns, 1 tool / 4 wpns, 1 tool / 4 wpns, 2 tools
+        - GameMaster will know which one to spawn from the weapon and tool count of the Hero stored as a variable (this Hero is of the data class hero)
+        -Get the Weapon's Component from the name of the weapon ( from Hero class) for each weapon
+        - The same for Tools
+        - By default Weapon 1 should be active other weapons and tool gameobjects should be inactive
+            
+
+        */
         if (Hero)
         {
             Hero.GetComponent<Player_MoveHandler>().resourceGrid = resourceGrid;

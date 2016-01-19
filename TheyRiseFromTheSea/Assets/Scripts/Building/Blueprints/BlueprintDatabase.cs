@@ -33,7 +33,7 @@ public class BlueprintDatabase : MonoBehaviour {
         }
 
 
-        if (Application.loadedLevel == inventoryLvlIndex)
+        if (Application.loadedLevel == inventoryLvlIndex && blueprints_all == null)
         {
             selectedBlueprints.Clear();
 
