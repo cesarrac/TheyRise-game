@@ -17,18 +17,41 @@ public class GunStats
     public float curReloadSpeed { get { return _reloadSpeed; } set { _reloadSpeed = Mathf.Clamp(value, 0.1f, 3f); } }
     public float startingReloadSpeed;
 
+    float _damage;
+    public float damage { get { return _damage; } set { _damage = Mathf.Clamp(value, 1, 500); } }
+
     public int weaponIndex;
     public string projectileType;
 
-    public float kickAmmt;
+    public float kickAmmt { get; protected set; }
 
-    public bool shootsProjectiles;
+    public bool shootsProjectiles { get; protected set; }
     
-    public GunStats(float rate, float reloadSpd, int ammo)
+    // Projectile Shooters
+    public GunStats(float rate, float reloadSpd, int ammo, float dmg, float kick, string projectileName)
     {
         startingFireRate = rate;
         startingReloadSpeed = reloadSpd;
         startingChamberAmmo = ammo;
+
+        damage = dmg;
+
+        kickAmmt = kick;
+        shootsProjectiles = true;
+        projectileType = projectileName;
+    }
+
+    // Non-Projectile Shooters
+    public GunStats(float rate, float reloadSpd, int ammo, float dmg, float kick)
+    {
+        startingFireRate = rate;
+        startingReloadSpeed = reloadSpd;
+        startingChamberAmmo = ammo;
+
+        damage = dmg;
+
+        kickAmmt = kick;
+        shootsProjectiles = false;
     }
 
     public void Init()
@@ -48,11 +71,21 @@ public class Weapon : Item
 
     public GunStats gunStats;
 
-    public Weapon(string name, float fireRate, int ammo, float reloadSpeed)
+    // Guns with no projectiles!
+    public Weapon(string name, float fireRate, int ammo, float reloadSpeed, float dmg, float kick)
     {
         itemName = name;
         itemType = ItemType.Weapon;
-        gunStats = new GunStats(fireRate, reloadSpeed, ammo);
+        gunStats = new GunStats(fireRate, reloadSpeed, ammo, dmg, kick);
+        gunStats.Init();
+    }
+
+    // Guns with projectiles!
+    public Weapon(string name, float fireRate, int ammo, float reloadSpeed, float dmg, float kick, string projType)
+    {
+        itemName = name;
+        itemType = ItemType.Weapon;
+        gunStats = new GunStats(fireRate, reloadSpeed, ammo, dmg, kick, projType);
         gunStats.Init();
     }
 

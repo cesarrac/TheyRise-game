@@ -70,16 +70,16 @@ public class BlueprintDatabase : MonoBehaviour {
     {
         blueprints_all = new Dictionary<string, Blueprint>
         {
-            {"Terraformer", new Blueprint("Terraformer", 0, 0, TileData.Types.terraformer) }, // < ---- Always include the Terraformer and no cost
-            {"Sniper Gun", new Blueprint("Sniper Gun", 3, 10, TileData.Types.sniper) },
-            {"Cannons", new Blueprint("Cannons", 3, 10, TileData.Types.cannons)},
-            {"Sea-Witch Crag", new Blueprint("Sea-Witch Crag", 3, 10, TileData.Types.seaWitch) },
-            {"Extractor",  new Blueprint("Extractor", 3, 10, TileData.Types.extractor) },
-            {"Desalination Pump", new Blueprint("Desalination Pump", 3, 10, TileData.Types.desalt_s) },
-            {"Energy Generator", new Blueprint("Energy Generator", 3, 10, TileData.Types.generator) },
-            {"Seaweed Farm",  new Blueprint("Seaweed Farm", 3, 10, TileData.Types.farm_s)},
-            {"Storage", new Blueprint("Storage", 3, 10, TileData.Types.storage) },
-            {"Machine Gun", new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun) }
+            {"Terraformer", new Blueprint("Terraformer", 0, 0, TileData.Types.terraformer, "Turns bad soil into good soil.") }, // < ---- Always include the Terraformer and no cost
+            {"Sniper Gun", new Blueprint("Sniper Gun", 3, 10, TileData.Types.sniper, "Long distance Target acquisition limited by slow firing rate.") },
+            {"Cannons", new Blueprint("Cannons", 3, 10, TileData.Types.cannons, "Short distance multi target artillery that delivers payload its surrounding areas.")},
+            {"Sea-Witch Crag", new Blueprint("Sea-Witch Crag", 3, 10, TileData.Types.seaWitch, "Manipulate genetic composition to slow, weaken, or shatter an enemy's defenses.") },
+            {"Extractor",  new Blueprint("Extractor", 3, 10, TileData.Types.extractor, "Dig and Mine ore and Dirt with this wonderful piece of machinery.") },
+            {"Desalination Pump", new Blueprint("Desalination Pump", 3, 10, TileData.Types.desalt_s, "Find water. Pump water!") },
+            {"Energy Generator", new Blueprint("Energy Generator", 3, 10, TileData.Types.generator, "Generate energy harnessed from ore with high content of precious metals.") },
+            {"Seaweed Farm",  new Blueprint("Seaweed Farm", 3, 10, TileData.Types.farm_s, "Plant seed, harvest food!")},
+            {"Storage", new Blueprint("Storage", 3, 10, TileData.Types.storage, "Store things and send them to ship automatically!") },
+            {"Machine Gun", new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun, "Short distance, fast firing rate, single target acquisition.") }
         };
 
         //// Add +1 to maxBPAllowed since we are using it as a 0 based index below, and to take into account the Terraformer
@@ -104,7 +104,7 @@ public class BlueprintDatabase : MonoBehaviour {
     void DisplaySelectedBPInfo()
     {
         // Display the info to the Info Panel from the stored selected BP (curSelectedBP)
-        UI_Manager.Instance.DisplayBPInfo(curSelectedBP.buildingName);
+        UI_Manager.Instance.DisplayBPInfo(curSelectedBP.buildingName, curSelectedBP.description);
     }
 
     public void LoadBlueprint()

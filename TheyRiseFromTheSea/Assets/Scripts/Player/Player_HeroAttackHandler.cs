@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class Player_HeroAttackHandler : Unit_Base {
@@ -8,29 +9,31 @@ public class Player_HeroAttackHandler : Unit_Base {
 	[SerializeField]
 	private SpriteRenderer weaponSprite;
 
-
-	//Weapons Hero is carrying (Selected in Expedition Supplies / Store screen)
-	public GameObject _curTool, _curWeapon1, _curWeapon2;
-	public static float scrollWheel { get { return Input.mouseScrollDelta.y / 10; } }
-
 	public GameMaster gameMaster;
 
-	void Awake(){
+    public List<GameObject> equipped_items = new List<GameObject>();
+    int curItemIndex = 0;
+
+    public Transform sightStart, sightEnd;
+
+	void Awake()
+    {
 
 		anim = GetComponent<Animator> ();
 
-		if (!gameMaster)
-			gameMaster = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster> ();
+        if (!gameMaster)
+            gameMaster = GameMaster.Instance;
 
 	}
 
-	void Start () {
-		// Initialize Unit stats
-		stats.Init ();
-	}
+    public void AddEquippedItems(GameObject item)
+    {
+        equipped_items.Add(item);
+    }
 	
 
-	void Update () {
+	void Update ()
+    {
 		
 //		if (Input.GetMouseButton (0)) {
 //			anim.SetTrigger ("attack");
@@ -60,24 +63,29 @@ public class Player_HeroAttackHandler : Unit_Base {
 
 	void SwapItems()
 	{
-        
-        if (_curWeapon1.activeSelf)
+
+        // Check if by adding + 1 to current Index, if we are still within the Equipped Items array bounds
+        if (curItemIndex + 1 < equipped_items.Count)
         {
-            _curWeapon1.SetActive(false);
-            _curWeapon2.SetActive(true);
-            _curTool.SetActive(false);
+            // If we are, deactivate the current item using the index...
+            equipped_items[curItemIndex].SetActive(false);
+
+            // ... add + 1 to index...
+            curItemIndex += 1;
+
+            // ... then activate the next item using the new index.
+            equipped_items[curItemIndex].SetActive(true);
         }
-        else if (_curWeapon2.activeSelf)
+        else
         {
-            _curWeapon1.SetActive(false);
-            _curWeapon2.SetActive(false);
-            _curTool.SetActive(true);
-        }
-        else if (_curTool.activeSelf)
-        {
-            _curWeapon1.SetActive(true);
-            _curWeapon2.SetActive(false);
-            _curTool.SetActive(false);
+            // Adding + 1 is out of array's range. So first deactivate the current item...
+            equipped_items[curItemIndex].SetActive(false);
+
+            // ... go back to the start of the Array...
+            curItemIndex = 0;
+
+            // ... and activate that first gameobject.
+            equipped_items[curItemIndex].SetActive(true);
         }
 
     }

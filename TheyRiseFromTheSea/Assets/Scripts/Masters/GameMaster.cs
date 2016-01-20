@@ -21,6 +21,8 @@ public class GameMaster : MonoBehaviour {
 
     int levelCount; // using this in a CRUDE way to count how many times the player has been to the surface.
 
+    public Hero theHero { get; protected set; }
+
 	void Awake()
 	{
         if (Instance == null)
@@ -44,7 +46,29 @@ public class GameMaster : MonoBehaviour {
 
         }
 
+        CreateHero();
+
 	}
+
+    // CHARACTER CREATION:
+    // Create the Hero data class that will hold all the information of the player's Hero character
+    void CreateHero()
+    {
+        // Default constructor for test needs a weapon, a tool, and armor.
+
+        // FIX THIS! This data should be coming from one giant database of Weapons, Armor and Tools!!!
+        // Default Gun: Kinetic Rifle
+        Weapon kinetic_rifle = new Weapon("Kinetic Rifle", 0.3f, 12, 2f, 2, 15, "explosive bullet");
+        // Default Tool: Hand Drill
+        Tool hand_drill = new Tool("Mining Drill");
+        // Default Armor: Vacum Suit
+        Armor vac_suit = new Armor("Vacumn Suit", 2, 0);
+
+        theHero = new Hero(kinetic_rifle, vac_suit, hand_drill);
+
+        Debug.Log("Hero Created!");
+        Debug.Log("Hero is wielding: " + theHero.weapons[0].itemName + " armor: " + theHero.armor.itemName + " and tool: " + theHero.tools[0].itemName);
+    }
 
  
 	// LEVEL LOADING:
@@ -76,7 +100,7 @@ public class GameMaster : MonoBehaviour {
         objPool = ObjectPool.instance;
 
         Vector3 playerPosition = new Vector3(posX, posY, 0.0f);
-        GameObject Hero = objPool.GetObjectForType("Hero", true, playerPosition);
+        GameObject Hero = objPool.GetObjectForType("Test Hero", true, playerPosition);
         /*
         HERE we need what Items the player chose to take with them to the surface.
         
@@ -115,10 +139,7 @@ public class GameMaster : MonoBehaviour {
         }
 
         ** Solution:
-        - Hero prefabs for all possible slot combinations: 
-            Default: 1 wpn , 1 tool
-            Others:  2 wpn , 1 tool / 3wpns, 1 tool / 4 wpns, 1 tool / 4 wpns, 2 tools
-        - GameMaster will know which one to spawn from the weapon and tool count of the Hero stored as a variable (this Hero is of the data class hero)
+     
         -Get the Weapon's Component from the name of the weapon ( from Hero class) for each weapon
         - The same for Tools
         - By default Weapon 1 should be active other weapons and tool gameobjects should be inactive
@@ -127,8 +148,102 @@ public class GameMaster : MonoBehaviour {
         */
         if (Hero)
         {
+            // ***** FIX THIS! Right now this assumes that ALL weapons are guns and have gunstats. There should be a weapon type to 
+            // differentiate what a Melee weapon's component might need in terms of stats VS. what a gun gets for gunStats.
+
+            // Get the Hero's attack handler.
+            Player_HeroAttackHandler hero_attkHandler = Hero.GetComponent<Player_HeroAttackHandler>();
+
+            // Spawn Weapons:
+
+            // Get the first weapon by using the item's name. Name should match the gameobject pre-loaded by Object Pool
+            GameObject wpn1 = ObjectPool.instance.GetObjectForType(theHero.weapons[0].itemName, true, Hero.transform.position);
+            if (wpn1)
+            {
+                // Set the Wpn 1's transform to be a child of the Hero...
+                wpn1.transform.SetParent(Hero.transform);
+
+                // ... then shift it slightly into position.
+                wpn1.transform.localPosition = new Vector3(-0.18f, 0.65f, 0);
+
+                // Then through its Gun base class, set its stats (this will include any upgrades the Hero might have added)
+                wpn1.GetComponent<Player_GunBaseClass>().gunStats = theHero.weapons[0].gunStats;
+
+                // Assign it to the Hero's attack handler
+                hero_attkHandler.AddEquippedItems(wpn1);
+            }
+
+            // Keep spawning weapons if the Hero has more equipped...
+            if (theHero.weapons.Count > 1)
+            {
+                for (int i = 1; i < theHero.weapons.Count; i++)
+                {
+                    // Spawn the next gun...
+                    GameObject otherWpn = ObjectPool.instance.GetObjectForType(theHero.weapons[i].itemName, true, Hero.transform.position);
+
+                    if (otherWpn)
+                    {
+                        otherWpn.transform.SetParent(Hero.transform);
+
+                        otherWpn.transform.localPosition = new Vector3(-0.18f, 0.65f, 0);
+
+                        otherWpn.GetComponent<Player_GunBaseClass>().gunStats = theHero.weapons[i].gunStats;
+
+                        // Assign it to the Hero's attack handler
+                        hero_attkHandler.AddEquippedItems(otherWpn);
+
+                        // ... making sure to set its gameobject to inactive.
+                        otherWpn.SetActive(false);
+                    }
+                }
+            }
+
+            // Spawn Tools:
+            // Do the same process for the tools.
+            GameObject tool1 = ObjectPool.instance.GetObjectForType(theHero.tools[0].itemName, true, Hero.transform.position);
+            if (tool1)
+            {
+                // Set parent to Hero...
+                tool1.transform.SetParent(Hero.transform);
+
+                // ... and shift position.
+                tool1.transform.localPosition = new Vector3(-0.18f, 0.65f, 0);
+
+                // This gameobject (tool1) needs to start as inactive, so pass in false to its SetActive func.
+                tool1.SetActive(false);
+
+                // Assign it to the attack handler.
+                hero_attkHandler.AddEquippedItems(tool1);
+            }
+            // Again we check if more tools are equipped. (The player is limited to two tools at a time)
+            if (theHero.tools.Count > 1)
+            {
+                for (int i = 1; i < theHero.weapons.Count; i++)
+                {
+                    // Spawn the next Tool...
+                    GameObject otherTool = ObjectPool.instance.GetObjectForType(theHero.tools[i].itemName, true, Hero.transform.position);
+
+                    if (otherTool)
+                    {
+                        otherTool.transform.SetParent(Hero.transform);
+
+                        otherTool.transform.localPosition = new Vector3(-0.18f, 0.65f, 0);
+
+                        // ... making sure to set its gameobject to inactive.
+                        otherTool.SetActive(false);
+
+                        // Assign it to the attack handler.
+                        hero_attkHandler.AddEquippedItems(otherTool);
+                    }
+                }
+            }
+
+            // Set the Hero's unit stats
+            hero_attkHandler.stats = theHero.heroStats;
+
+            // Then set the rest of the necessary values
             Hero.GetComponent<Player_MoveHandler>().resourceGrid = resourceGrid;
-            Hero.GetComponent<Player_HeroAttackHandler>().objPool = objPool;
+            hero_attkHandler.objPool = objPool;
             Hero.GetComponent<Player_PickUpItems>().objPool = objPool;
             resourceGrid.cameraHolder.gameObject.GetComponent<PixelPerfectCam>().followTarget = Hero;
             return Hero;

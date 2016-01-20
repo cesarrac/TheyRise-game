@@ -3,36 +3,36 @@ using System.Collections;
 
 public class Player_GunBaseClass : MonoBehaviour {
 
-	[System.Serializable]
-	public class GunStats
-	{
-		float _fireRate;
-		public float curFireRate { get {return _fireRate;} set { _fireRate = Mathf.Clamp(value, 0f, 2f);}}
-		public float startingFireRate;
+    //[System.Serializable]
+    //public class GunStats
+    //{
+    //	float _fireRate;
+    //	public float curFireRate { get {return _fireRate;} set { _fireRate = Mathf.Clamp(value, 0f, 2f);}}
+    //	public float startingFireRate;
 
-        public float startingChamberAmmo { get; protected set; }
-        float _chamberAmmo;
-        public float curChamberAmmo { get { return _chamberAmmo; } set { _chamberAmmo = Mathf.Clamp(value, 0, 50000); } }
+    //       public float startingChamberAmmo { get; protected set; }
+    //       float _chamberAmmo;
+    //       public float curChamberAmmo { get { return _chamberAmmo; } set { _chamberAmmo = Mathf.Clamp(value, 0, 50000); } }
 
-        float _reloadSpeed;
-        public float curReloadSpeed { get { return _reloadSpeed; } set { _reloadSpeed = Mathf.Clamp(value, 0.1f, 3f); } }
-        public float startingReloadSpeed;
+    //       float _reloadSpeed;
+    //       public float curReloadSpeed { get { return _reloadSpeed; } set { _reloadSpeed = Mathf.Clamp(value, 0.1f, 3f); } }
+    //       public float startingReloadSpeed;
 
-		public int weaponIndex;
-		public string projectileType;
+    //	public int weaponIndex;
+    //	public string projectileType;
 
-		public float kickAmmt;
+    //	public float kickAmmt;
 
-        public bool shootsProjectiles;
+    //       public bool shootsProjectiles;
 
-		public void Init()
-		{
-			curFireRate = startingFireRate;
-            curChamberAmmo = startingChamberAmmo;
-		}
-	}
+    //	public void Init()
+    //	{
+    //		curFireRate = startingFireRate;
+    //           curChamberAmmo = startingChamberAmmo;
+    //	}
+    //}
 
-	public GunStats gunStats = new GunStats();
+    public GunStats gunStats;
 
 
 	public Transform sightStart, sightEnd; // where the gun's range starts and ends

@@ -111,18 +111,23 @@ public class Blueprint
     // Name of the Building
     public string buildingName { get; protected set; }
 
+    // Description of this Blueprint
+    public string description { get; protected set; }
+
     // Tier / Upgrade level of this Blueprint
     public Blueprint_Tier bp_Tier { get; protected set; }
 
 
     public Blueprint() { }
 
-    public Blueprint (string Name, int PUCost, int NanoBotCost, TileData.Types _Ttype)
+    public Blueprint (string Name, int PUCost, int NanoBotCost, TileData.Types _Ttype, string desc)
     {
         buildingName = Name;
         processingCost = PUCost;
         nanoBotCost = NanoBotCost;
         tileType = _Ttype;
+        description = desc;
+
         // Initialize this new Blueprint's Tier/Upgrade at 0 (no upgrade)
         bp_Tier = new Blueprint_Tier();
     }

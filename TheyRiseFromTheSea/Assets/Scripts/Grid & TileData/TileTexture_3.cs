@@ -510,7 +510,7 @@ public class TileTexture_3 : MonoBehaviour
                 }
             }
 
-            texture.filterMode = FilterMode.Trilinear;
+            texture.filterMode = FilterMode.Point;
             texture.wrapMode = TextureWrapMode.Clamp;
 
             // Apply texture
@@ -543,6 +543,7 @@ public class TileTexture_3 : MonoBehaviour
     {
         // Make sure this Mesh object shares the same mesh as Base mesh
         Mesh islandMesh = base_renderer.gameObject.GetComponent<MeshFilter>().mesh;
+
         second_renderer.gameObject.GetComponent<MeshFilter>().mesh = islandMesh;
 
         int texWidth = islandWidth * tileResolution;
@@ -615,7 +616,7 @@ public class TileTexture_3 : MonoBehaviour
                 }
             }
 
-            texture2.filterMode = FilterMode.Trilinear;
+            texture2.filterMode = FilterMode.Point;
             texture2.wrapMode = TextureWrapMode.Clamp;
 
             // Apply texture
@@ -660,7 +661,7 @@ public class TileTexture_3 : MonoBehaviour
         // These are ONLY Center tiles, so the top layer can avoid the shores and leave that for the base land type
         centerTiles = secondaryTilePositions.ToArray();
 
-        GenerateShoreRippleTexture(shoreTilePositions.ToArray());
+       // GenerateShoreRippleTexture(shoreTilePositions.ToArray());
 
         if (hasTopLayer)
         {
@@ -711,7 +712,7 @@ public class TileTexture_3 : MonoBehaviour
                 }
             }
 
-            textureRipples.filterMode = FilterMode.Trilinear;
+            textureRipples.filterMode = FilterMode.Point;
             textureRipples.wrapMode = TextureWrapMode.Clamp;
 
             // Apply texture
@@ -1012,7 +1013,7 @@ public class TileTexture_3 : MonoBehaviour
         // Give all their data and respective tile types to a texture.
         //BuildSecondaryTexture(width, height, regions);
 
-        secondTexture.filterMode = FilterMode.Trilinear;
+        secondTexture.filterMode = FilterMode.Point;
 
         Texture2 = secondTexture;
         ApplyTextures();
@@ -1184,7 +1185,7 @@ public class TileTexture_3 : MonoBehaviour
     //        }
     //    }
  
-    //    texture2.filterMode = FilterMode.Trilinear;
+    //    texture2.filterMode = FilterMode.Point;
 
     //    Texture2 = texture2;
     //    /*
@@ -2365,13 +2366,13 @@ public class TileTexture_3 : MonoBehaviour
         {
             base_renderer.sharedMaterial.mainTexture = Texture1;
             second_renderer.sharedMaterial.mainTexture = Texture2;
-            shore_renderer.sharedMaterial.mainTexture = Texture3;
+           // shore_renderer.sharedMaterial.mainTexture = Texture3;
 
         }
         else
         {
             base_renderer.sharedMaterial.mainTexture = Texture1;
-            shore_renderer.sharedMaterial.mainTexture = Texture3;
+           // shore_renderer.sharedMaterial.mainTexture = Texture3;
         }
             
 

@@ -10,7 +10,7 @@ public class UI_Manager : MonoBehaviour {
     public static UI_Manager Instance { get; protected set; }
 
     public GameObject blueprint_infoPanel, builder_panel;
-    public Text bp_name;
+    public Text bp_name, bp_desc;
     Dictionary<string, GameObject> loadedBlueprints = new Dictionary<string, GameObject>();
 
     public GameObject victoryPanel;
@@ -20,9 +20,10 @@ public class UI_Manager : MonoBehaviour {
         Instance = this;
     }
 
-    public void DisplayBPInfo(string bpName)
+    public void DisplayBPInfo(string bpName, string bpDesc)
     {
         bp_name.text = bpName;
+        bp_desc.text = bpDesc;
     }
 
     public void AddBlueprintToBuilder(string bpName)

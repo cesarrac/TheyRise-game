@@ -44,12 +44,15 @@ public class Player_HandDrill : MonoBehaviour {
         miningCountDown = miningTime;
     }
 
+
     void Start()
     {
-        
 
-        resourceGrid = GetComponentInParent<Player_MoveHandler>().resourceGrid;
-        objPool = GetComponentInParent<Player_HeroAttackHandler>().objPool;
+        sightStart = GetComponentInParent<Player_HeroAttackHandler>().sightStart;
+
+        resourceGrid = ResourceGrid.Grid;
+
+        objPool = ObjectPool.instance;
 
         lineR = sightStart.GetComponent<LineRenderer>();
         // Set line renderer sorting layer

@@ -3,23 +3,16 @@ using System.Collections;
 
 public class Player_AssaultRifle : Player_GunBaseClass {
 
-	public float explosiveDamage = 2f; 
+	float explosiveDamage = 2f; 
 
 
 
 	void Awake () 
 	{
 		// Initialize gun stats
-		gunStats.Init ();
+		//gunStats.Init ();
 		
-		rigid_body = GetComponentInParent<Rigidbody2D> ();
-
-        source = GetComponentInParent<AudioSource>();
-
-        gameMaster = GetComponentInParent<Player_HeroAttackHandler>().gameMaster;
-
         sprite_renderer = GetComponent<SpriteRenderer>();
-       
 
     }
 
@@ -27,8 +20,20 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 	{
         objPool = ObjectPool.instance;
 
-		if (!gameMaster)
+        rigid_body = GetComponentInParent<Rigidbody2D>();
+
+        source = GetComponentInParent<AudioSource>();
+
+        // Get sights
+        sightStart = GetComponentInParent<Player_HeroAttackHandler>().sightStart;
+        sightEnd = GetComponentInParent<Player_HeroAttackHandler>().sightEnd;
+
+        gameMaster = GameMaster.Instance;
+
+        if (!gameMaster)
 			gameMaster = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster> ();
+
+        explosiveDamage = gunStats.damage;
 	}
 	
 	// Check for a HIT:

@@ -1,52 +1,75 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[System.Serializable]
+public class UnitStats
+{
+    public float maxHP, startDefence, startAttack, startShield, startRate, startDamage, startSpecialDmg;
+    public int creditReward;
+    private float _hitPoints, _defence, _attack, _shield, _damage, _specialDamage, _rateOfAttack;
+    private int _creditValue;
+
+    public float curHP { get { return _hitPoints; } set { _hitPoints = Mathf.Clamp(value, 0f, maxHP); } }
+    public float curDefence { get { return _defence; } set { _defence = Mathf.Clamp(value, 0f, 100f); } }
+    public float curAttack { get { return _attack; } set { _attack = Mathf.Clamp(value, 0f, 100f); } }
+    public float curShield { get { return _shield; } set { _shield = Mathf.Clamp(value, 0f, 100f); } }
+    public float curRateOfAttk { get { return _rateOfAttack; } set { _rateOfAttack = Mathf.Clamp(value, 0f, 5f); } }
+    public float curDamage { get { return _damage; } set { _damage = Mathf.Clamp(value, 0f, 100f); } }
+    public float curSPdamage { get { return _specialDamage; } set { _specialDamage = Mathf.Clamp(value, 0f, 100f); } }
+
+    public int curCreditValue { get { return _creditValue; } set { _creditValue = Mathf.Clamp(value, 0, 500); } }
+
+
+    // Use this to initialize current stats from a Unit's gameobject (Attack Handler)
+    public void Init()
+    {
+        curHP = maxHP;
+        curDefence = startDefence;
+        curAttack = startAttack;
+        curShield = startShield;
+        curRateOfAttk = startRate;
+        curDamage = startDamage;
+        curSPdamage = startSpecialDmg;
+        curCreditValue = creditReward;
+    }
+
+
+
+    // Use this to initialize Stats from the Spawner
+    public void InitStartingStats(float hp, float def, float attk, float shi, float rate, float dmg, float sp_dmg)
+    {
+        maxHP = hp;
+        startDefence = def;
+        startAttack = attk;
+        startShield = _shield;
+        startRate = rate;
+        startDamage = dmg;
+        startSpecialDmg = sp_dmg;
+    }
+
+    // Default empty constructor used by Enemy Units
+    public UnitStats() { }
+
+    // Constructor used by hero
+    public UnitStats(float hp, float attk, float def, float shi)
+    {
+        maxHP = hp;
+        startDefence = def;
+        startAttack = attk;
+        startShield = _shield;
+        startRate = 0;
+        startDamage = 0;
+        startSpecialDmg = 0;
+
+        Init();
+    }
+}
+
 public class Unit_Base : MonoBehaviour {
 
-	[System.Serializable]
-	public class Stats{
-		public float maxHP, startDefence, startAttack, startShield, startRate, startDamage, startSpecialDmg;
-		public int creditReward;
-		private float _hitPoints, _defence, _attack, _shield, _damage, _specialDamage, _rateOfAttack;
-		private int _creditValue;
-	
-		public float curHP { get { return _hitPoints; } set { _hitPoints = Mathf.Clamp (value, 0f, maxHP); } }
-		public float curDefence {get {return _defence;} set { _defence = Mathf.Clamp (value, 0f, 100f); }}
-		public float curAttack {get {return _attack;} set { _attack = Mathf.Clamp (value, 0f, 100f); }}
-		public float curShield {get {return _shield;} set { _shield = Mathf.Clamp (value, 0f, 100f); }}
-		public float curRateOfAttk {get {return _rateOfAttack;} set { _rateOfAttack = Mathf.Clamp (value, 0f, 5f); }}
-		public float curDamage {get {return _damage;} set { _damage = Mathf.Clamp (value, 0f, 100f); }}
-		public float curSPdamage { get {return _specialDamage;} set {_specialDamage = Mathf.Clamp (value, 0f, 100f);}}
-
-		public int curCreditValue { get{return _creditValue;} set {_creditValue = Mathf.Clamp(value, 0, 500);}}
 
 
-        // Use this to initialize current stats from a Unit's gameobject (Attack Handler)
-		public void Init(){
-			curHP = maxHP;
-			curDefence = startDefence;
-			curAttack = startAttack;
-			curShield = startShield;
-			curRateOfAttk = startRate;
-			curDamage = startDamage;
-			curSPdamage = startSpecialDmg;
-			curCreditValue = creditReward;
-		}
-
-        // Use this to initialize Stats from the Spawner
-        public void InitStartingStats(float hp, float def, float attk, float shi, float rate, float dmg, float sp_dmg)
-        {
-            maxHP = hp;
-            startDefence = def;
-            startAttack = attk;
-            startShield = _shield;
-            startRate = rate;
-            startDamage = dmg;
-            startSpecialDmg = sp_dmg;
-        }
-	}
-
-    public Stats stats;
+    public UnitStats stats;
 
 	public ResourceGrid resourceGrid;
 

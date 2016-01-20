@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class Enemy_Master : MonoBehaviour {
     public static Enemy_Master instance;
 
-    Unit_Base.Stats attk_weak, attk_mid, attk_heavy;
+    UnitStats attk_weak, attk_mid, attk_heavy;
 
     Enemy_PathHandler.MovementStats move_avg, move_fast, move_slow;
 
@@ -44,7 +44,7 @@ public class Enemy_Master : MonoBehaviour {
         // respective Component (Enemy_AttackHandler and Enemy_PathHandler) when I actually spawn the unit.
 
         // FIX THIS! For now I'm going to initialize the stats within this script but it would be nice to get these values from an external database!
-        attk_weak = new Unit_Base.Stats();
+        attk_weak = new UnitStats();
         attk_weak.maxHP = 24f;
         attk_weak.startAttack = 2;
         attk_weak.startDamage = 5;
@@ -53,7 +53,7 @@ public class Enemy_Master : MonoBehaviour {
         attk_weak.startSpecialDmg = 0;
         attk_weak.startRate = 0.6f;
 
-        attk_mid = new Unit_Base.Stats();
+        attk_mid = new UnitStats();
         attk_mid.maxHP = 42f;
         attk_mid.startAttack = 5;
         attk_mid.startDamage = 8;
@@ -62,7 +62,7 @@ public class Enemy_Master : MonoBehaviour {
         attk_mid.startSpecialDmg = 0;
         attk_mid.startRate = 0.8f;
 
-        attk_heavy = new Unit_Base.Stats();
+        attk_heavy = new UnitStats();
         attk_heavy.maxHP = 66f;
         attk_heavy.startAttack = 5;
         attk_heavy.startDamage = 10;

@@ -52,9 +52,9 @@ public class Enemy_Spawner : MonoBehaviour {
                     if (e.GetComponent<Unit_Base>() != null)
                     {
                         Unit_Base enemyUnitBase = e.GetComponent<Unit_Base>();
-                        enemyUnitBase.stats = new Unit_Base.Stats();
-                        enemyUnitBase.stats.InitStartingStats(curr_Enemy_toSpwn.AttackStats.maxHP, curr_Enemy_toSpwn.AttackStats.startDefence,
-                            curr_Enemy_toSpwn.AttackStats.startAttack, curr_Enemy_toSpwn.AttackStats.startShield, curr_Enemy_toSpwn.AttackStats.startRate, curr_Enemy_toSpwn.AttackStats.startDamage, curr_Enemy_toSpwn.AttackStats.startSpecialDmg);
+                        enemyUnitBase.stats = new UnitStats();
+                        enemyUnitBase.stats.InitStartingStats(curr_Enemy_toSpwn.UnitStats.maxHP, curr_Enemy_toSpwn.UnitStats.startDefence,
+                            curr_Enemy_toSpwn.UnitStats.startAttack, curr_Enemy_toSpwn.UnitStats.startShield, curr_Enemy_toSpwn.UnitStats.startRate, curr_Enemy_toSpwn.UnitStats.startDamage, curr_Enemy_toSpwn.UnitStats.startSpecialDmg);
                         enemyUnitBase.stats.Init();
                         enemyUnitBase.isAggroToBuildings = curr_Enemy_toSpwn.isAggroToBuildings;
                     }
