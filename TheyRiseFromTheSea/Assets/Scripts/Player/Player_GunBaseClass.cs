@@ -65,6 +65,8 @@ public class Player_GunBaseClass : MonoBehaviour {
 
     public bool isReloading { get; protected set; }
 
+    public Unit_StatusIndicator status_Indicator { get; protected set; }
+
 	void Awake()
 	{
 		//sprite_renderer = GetComponent<SpriteRenderer> ();
@@ -156,6 +158,9 @@ public class Player_GunBaseClass : MonoBehaviour {
             if (!isReloading)
             {
                 isReloading = true;
+
+                status_Indicator.CreateStatusMessage("Reloading!");
+
                 StartCoroutine("Reload");
             }
         }

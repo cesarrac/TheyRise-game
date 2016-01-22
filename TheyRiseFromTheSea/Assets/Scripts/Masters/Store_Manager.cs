@@ -60,7 +60,7 @@ public class Store_Manager : MonoBehaviour {
 		// To get the new ammount of credits just subtract the difference and pass it in as an argument
 		gm.AddOrSubtractCredits (-(gm.curCredits - credits));
 		// tell GM to load level
-		gm.LoadLevel ();
+		//gm.LoadLevel ();
 
 	}
 

@@ -27,6 +27,7 @@ public class ShoreRipple_Generator : MonoBehaviour {
                 if (ResourceGrid.Grid.worldGridInitialized)
                 {
                     SpawnRipple();
+                    SpawnRipple();
                 }
             }
         }

@@ -8,14 +8,7 @@ public class Player_FreezeGun : Player_GunBaseClass {
 
 	void Awake () 
 	{
-		// Initialize gun stats
-		gunStats.Init ();
 
-        rigid_body = GetComponentInParent<Rigidbody2D>();
-
-        source = GetComponentInParent<AudioSource>();
-
-        gameMaster = GetComponentInParent<Player_HeroAttackHandler>().gameMaster;
 
         sprite_renderer = GetComponent<SpriteRenderer>();
 
@@ -23,8 +16,24 @@ public class Player_FreezeGun : Player_GunBaseClass {
 
 	void Start()
 	{
+        // Initialize gun stats
+        gunStats.Init();
+
+        rigid_body = GetComponentInParent<Rigidbody2D>();
+
+        source = GetComponentInParent<AudioSource>();
+
+        gameMaster = GameMaster.Instance;
+
         objPool = ObjectPool.instance;
-	}
+
+        // Get sights
+        sightStart = GetComponentInParent<Player_HeroAttackHandler>().sightStart;
+        sightEnd = GetComponentInParent<Player_HeroAttackHandler>().sightEnd;
+
+        // And Status Indicator to display text over head when reloading
+        status_Indicator = GetComponentInParent<Player_HeroAttackHandler>().statusIndicator;
+    }
 
 	// Check for a HIT and do EFFECT:
 

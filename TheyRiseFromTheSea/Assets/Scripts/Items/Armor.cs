@@ -21,6 +21,12 @@ public class ArmorStats
         _curShield = startingShield;
         _curDefense = startingDefense;
     }
+
+    public void Upgrade(float def, float shi)
+    {
+        _curDefense += def;
+        _curShield += shi;
+    }
 }
 
 public class Armor : Item {
@@ -34,5 +40,16 @@ public class Armor : Item {
 
         armorStats = new ArmorStats(def, shield);
         armorStats.Init();
+    }
+
+    public void UpgradeArmor(ArmorUpgrade upgrade)
+    {
+        if (upgrade.upgradeType != ItemUpgradeType.Armor)
+        {
+            Debug.LogError("The ItemUpgrade being passed into the Upgrade callback is not of the type Armor! Is the Item improperly constructed??");
+            return;
+        }
+
+        armorStats.Upgrade(upgrade.defense, upgrade.shield);
     }
 }

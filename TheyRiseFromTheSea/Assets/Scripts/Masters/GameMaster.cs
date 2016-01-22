@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameMaster : MonoBehaviour {
 
@@ -22,6 +23,7 @@ public class GameMaster : MonoBehaviour {
     int levelCount; // using this in a CRUDE way to count how many times the player has been to the surface.
 
     public Hero theHero { get; protected set; }
+    public bool isHeroCreated { get; protected set; }
 
 	void Awake()
 	{
@@ -39,26 +41,38 @@ public class GameMaster : MonoBehaviour {
         curCredits = 1000;
 		Debug.Log ("GM is awake!");
 
-        if (Application.loadedLevel == 1)
+        // Set values for Grid and Object Pool if we are on Planet level
+        if (SceneManager.GetActiveScene().name == "Level_Planet")
         {
             resourceGrid = ResourceGrid.Grid;
             objPool = ObjectPool.instance;
 
         }
 
-        CreateHero();
+        //if (!isHeroCreated)
+        //{
+        //    isHeroCreated = true;
+        //    CreateHero();
+        //}
+
+        if (theHero != null)
+        {
+            Debug.Log("HERO: current BP count = " + theHero.nanoBuilder.blueprintsMap.Count);
+
+        }
 
 	}
 
     // CHARACTER CREATION:
     // Create the Hero data class that will hold all the information of the player's Hero character
-    void CreateHero()
+    public void CreateHero()
     {
         // Default constructor for test needs a weapon, a tool, and armor.
 
         // FIX THIS! This data should be coming from one giant database of Weapons, Armor and Tools!!!
         // Default Gun: Kinetic Rifle
-        Weapon kinetic_rifle = new Weapon("Kinetic Rifle", 0.3f, 12, 2f, 2, 15, "explosive bullet");
+        Weapon kinetic_rifle = new Weapon("Kinetic Rifle", 0, 12, 2f, 2, 15, "explosive bullet");
+        Weapon freeze_gun = new Weapon("Freeze Gun", 0.2f, 100, 3f, 0, 15, "ice bullet");
         // Default Tool: Hand Drill
         Tool hand_drill = new Tool("Mining Drill");
         // Default Armor: Vacum Suit
@@ -66,8 +80,13 @@ public class GameMaster : MonoBehaviour {
 
         theHero = new Hero(kinetic_rifle, vac_suit, hand_drill);
 
+        theHero.AddWeapon(freeze_gun);
+
         Debug.Log("Hero Created!");
         Debug.Log("Hero is wielding: " + theHero.weapons[0].itemName + " armor: " + theHero.armor.itemName + " and tool: " + theHero.tools[0].itemName);
+        Debug.Log("and " + theHero.weapons[1].itemName);
+
+        isHeroCreated = true;
     }
 
  
@@ -84,14 +103,14 @@ public class GameMaster : MonoBehaviour {
 		}
 	}
 
-	public void LoadLevel()
-	{
-		if (Application.loadedLevel == 2) {
-			Application.LoadLevel (1);
-		} else {
-			Application.LoadLevel(2);
-		}
-	}
+	//public void LoadLevel()
+	//{
+	//	if (Application.loadedLevel == 2) {
+	//		Application.LoadLevel (1);
+	//	} else {
+	//		Application.LoadLevel(2);
+	//	}
+	//}
 
     // HERO/PLAYER LOADING (Called by Resource Grid after Map has been initialized):
     public GameObject SpawnThePlayer(int posX, int posY)
@@ -167,8 +186,25 @@ public class GameMaster : MonoBehaviour {
                 wpn1.transform.localPosition = new Vector3(-0.18f, 0.65f, 0);
 
                 // Then through its Gun base class, set its stats (this will include any upgrades the Hero might have added)
-                wpn1.GetComponent<Player_GunBaseClass>().gunStats = theHero.weapons[0].gunStats;
-
+               // wpn1.GetComponent<Player_GunBaseClass>().gunStats = theHero.weapons[0].gunStats;
+                if (theHero.weapons[0].gunStats.shootsProjectiles)
+                {
+                    wpn1.GetComponent<Player_GunBaseClass>().gunStats = new GunStats(theHero.weapons[0].gunStats.startingFireRate,
+                                                              theHero.weapons[0].gunStats.startingReloadSpeed,
+                                                              theHero.weapons[0].gunStats.startingChamberAmmo,
+                                                              theHero.weapons[0].gunStats.damage,
+                                                              theHero.weapons[0].gunStats.kickAmmt,
+                                                              theHero.weapons[0].gunStats.projectileType);
+                }
+                else
+                {
+                    wpn1.GetComponent<Player_GunBaseClass>().gunStats = new GunStats(theHero.weapons[0].gunStats.startingFireRate,
+                                                              theHero.weapons[0].gunStats.startingReloadSpeed,
+                                                              theHero.weapons[0].gunStats.startingChamberAmmo,
+                                                              theHero.weapons[0].gunStats.damage,
+                                                              theHero.weapons[0].gunStats.kickAmmt);
+                }
+          
                 // Assign it to the Hero's attack handler
                 hero_attkHandler.AddEquippedItems(wpn1);
             }
@@ -187,7 +223,23 @@ public class GameMaster : MonoBehaviour {
 
                         otherWpn.transform.localPosition = new Vector3(-0.18f, 0.65f, 0);
 
-                        otherWpn.GetComponent<Player_GunBaseClass>().gunStats = theHero.weapons[i].gunStats;
+                        if (theHero.weapons[0].gunStats.shootsProjectiles)
+                        {
+                            otherWpn.GetComponent<Player_GunBaseClass>().gunStats = new GunStats(theHero.weapons[0].gunStats.startingFireRate,
+                                                                      theHero.weapons[0].gunStats.startingReloadSpeed,
+                                                                      theHero.weapons[0].gunStats.startingChamberAmmo,
+                                                                      theHero.weapons[0].gunStats.damage,
+                                                                      theHero.weapons[0].gunStats.kickAmmt,
+                                                                      theHero.weapons[0].gunStats.projectileType);
+                        }
+                        else
+                        {
+                            otherWpn.GetComponent<Player_GunBaseClass>().gunStats = new GunStats(theHero.weapons[0].gunStats.startingFireRate,
+                                                                      theHero.weapons[0].gunStats.startingReloadSpeed,
+                                                                      theHero.weapons[0].gunStats.startingChamberAmmo,
+                                                                      theHero.weapons[0].gunStats.damage,
+                                                                      theHero.weapons[0].gunStats.kickAmmt);
+                        }
 
                         // Assign it to the Hero's attack handler
                         hero_attkHandler.AddEquippedItems(otherWpn);
@@ -276,22 +328,48 @@ public class GameMaster : MonoBehaviour {
 	// Restart a level by loading it again
 	public void MissionRestart()
 	{
-		Application.LoadLevel (1);
+        // FIX THIS! Instead of just re-loading and re-calculating the level we should load the map that we were just in (including Textures, TileData, seed, etc.)
+
+        // For now we are just re-loading the Planet Level
+        SceneManager.LoadScene("Level_Planet");
+
 	}
+
+    public void NewCharacterScreen()
+    {
+
+    }
 
 	public void GoBackToShip()
 	{
-		// load the ship level
-		Application.LoadLevel (0);
-	}
+        // load the ship level
+        SceneManager.LoadScene("Level_CENTRAL");
+    }
 
-	// DURING A LEVEL:
-	
-	void Update()
+    public void LoadBlueprintsScene()
+    {
+        SceneManager.LoadScene("Level_Blueprints");
+
+    }
+
+    public void LoadEquipmentScreen()
+    {
+        SceneManager.LoadScene("Level_Equip");
+
+    }
+
+    public void LoadLauncherScene()
+    {
+        SceneManager.LoadScene("Level_Launch");
+
+    }
+    // DURING A LEVEL:
+
+    void Update()
 	{
 		
-        if (Application.loadedLevel == 1)
-            CheckIfBuilding(); // this is so Player can know if they can fire or not
+        //if (Application.loadedLevel == 1)
+        //    CheckIfBuilding(); // this is so Player can know if they can fire or not
     }
 
 	void CheckIfBuilding()

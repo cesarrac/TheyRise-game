@@ -20,7 +20,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
     // For now I'm setting these to be an array of Blueprints containing the three basic battle towers... this means it will only affect
     // the player if they are building battle buildings NOT extractors and such.
     public TileData.Types[] availableBlueprintsTypes;
-    public Dictionary<TileData.Types, Blueprint> availableBlueprints;
+    //public Dictionary<TileData.Types, Blueprint> availableBlueprints;
 
     // public string[] bluePrintsAvailable;
     int selectedBPIndex = 0;
@@ -30,6 +30,8 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
     Unit_StatusIndicator status_indicator;
 
+    NanoBuilder NanoBuilder;
+
     void Awake()
     {
         status_indicator = GetComponent<Player_HeroAttackHandler>().statusIndicator;
@@ -38,7 +40,11 @@ public class NanoBuilding_Handler : MonoBehaviour {
     void Start()
     {
         // InitBluePrints();
-        BlueprintDatabase.Instance.LoadToNanoBuilder(this);
+        //BlueprintDatabase.Instance.LoadToNanoBuilder(this);
+
+        NanoBuilder = GameMaster.Instance.theHero.nanoBuilder;
+
+        InitBP();
 
         audio_source = GetComponent<AudioSource>();
 
@@ -72,25 +78,46 @@ public class NanoBuilding_Handler : MonoBehaviour {
     //    Buildings_SpriteDatabase.Instance.SetSprites(availableBlueprints);
     //}
 
-    public void InitBP(int totalBPavailable)
+    public void InitBP()
     {
-        availableBlueprintsTypes = new TileData.Types[totalBPavailable];
-        availableBlueprints = new Dictionary<TileData.Types, Blueprint>();
+        //availableBlueprintsTypes = new TileData.Types[totalBPavailable];
+        //availableBlueprints = new Dictionary<TileData.Types, Blueprint>();
+        //availableBlueprints = GameMaster.Instance.theHero.nanoBuilder.blueprintsMap;
+        //availableBlueprintsTypes = GameMaster.Instance.theHero.nanoBuilder.bpTypes.ToArray();
+
+        availableBlueprintsTypes = NanoBuilder.bpTypes.ToArray();
+
+        Debug.Log("NANO B: First BP in available blueprints types is " + availableBlueprintsTypes[0].ToString());
+        Debug.Log("NANO B: The Hero's nanobuilder currently has " + NanoBuilder.blueprintsMap.Count + " blueprints loaded.");
+        
+
+        SetBPSprites();
+
     }
 
-    public void AddBlueprint(int index, TileData.Types bp_type, Blueprint bp)
-    {
-        availableBlueprintsTypes[index] = bp_type;
-        availableBlueprints.Add(bp_type, bp);
-    }
+    //public void AddBlueprint(int index, TileData.Types bp_type, Blueprint bp)
+    //{
+    //    availableBlueprintsTypes[index] = bp_type;
+    //    availableBlueprints.Add(bp_type, bp);
+    //}
 
-    public void SetBPSprites()
+    void SetBPSprites()
     {
-        Buildings_SpriteDatabase.Instance.SetSprites(availableBlueprints);
+        Buildings_SpriteDatabase.Instance.SetSprites(NanoBuilder.blueprintsMap);
 
         // Since this is the last step in initializing the Blueprints, set this here
 
-        selectedBluePrint = availableBlueprints[TileData.Types.terraformer];
+        //selectedBluePrint = availableBlueprints[TileData.Types.terraformer];
+        selectedBluePrint = NanoBuilder.blueprintsMap[TileData.Types.terraformer];
+
+        if (selectedBluePrint != null)
+        {
+            Debug.Log("NANO B: Selected blueprint's type is currently " + selectedBluePrint.tileType);
+        }
+        else
+        {
+            Debug.LogError("NANO B: The Selected Blueprint is null! WTF?! Did the GM loose track of the Hero?!");
+        }
 
         DisplaySelectedBlueprintName(selectedBluePrint.buildingName);
     }
@@ -153,29 +180,30 @@ public class NanoBuilding_Handler : MonoBehaviour {
     {
         if (selectedBPIndex < availableBlueprintsTypes.Length)
         {
-            if (availableBlueprints.ContainsKey(availableBlueprintsTypes[selectedBPIndex]))
+            if (NanoBuilder.CheckForBlueprint(availableBlueprintsTypes[selectedBPIndex]))
             {
-                selectedBluePrint = availableBlueprints[availableBlueprintsTypes[selectedBPIndex]];
+                selectedBluePrint = NanoBuilder.blueprintsMap[availableBlueprintsTypes[selectedBPIndex]];
             }
 
             selectedBPIndex += 1;
         }
         else
         {
-            if (availableBlueprints.ContainsKey(availableBlueprintsTypes[0]))
+            if (NanoBuilder.CheckForBlueprint(availableBlueprintsTypes[0]))
             {
-                selectedBluePrint = availableBlueprints[availableBlueprintsTypes[0]];
+                selectedBluePrint = NanoBuilder.blueprintsMap[availableBlueprintsTypes[0]];
                 selectedBPIndex = 0;
             }
             else
             {
-                selectedBluePrint = availableBlueprints[availableBlueprintsTypes[1]];
+                selectedBluePrint = NanoBuilder.blueprintsMap[availableBlueprintsTypes[1]];
                 selectedBPIndex = 1;
             }
 
         }
 
         DisplaySelectedBlueprintName(selectedBluePrint.buildingName);
+        Debug.Log("NANO Buid: Selected Blueprint name is " + selectedBluePrint.buildingName);
     }
 
     /// <summary>
@@ -191,16 +219,17 @@ public class NanoBuilding_Handler : MonoBehaviour {
         switch (_tileType)
         {
             case TileData.Types.rock:
-                Blueprint extractor = CheckForAvailableBlueprint(TileData.Types.extractor);
+                Blueprint extractor = GetAvailableBlueprint(TileData.Types.extractor);
                 Build(extractor);
                 break;
 
             case TileData.Types.mineral:
-                Blueprint generator = CheckForAvailableBlueprint(TileData.Types.generator);
+                Blueprint generator = GetAvailableBlueprint(TileData.Types.generator);
                 Build(generator);
                 break;
 
             case TileData.Types.empty:
+                Debug.Log("NANO B: Building on empty!");
                 if (selectedBluePrint.tileType != TileData.Types.terraformer)
                 {
                     Build(selectedBluePrint);
@@ -212,7 +241,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
                 break;
 
             case TileData.Types.water:
-                Blueprint waterPump = CheckForAvailableBlueprint(TileData.Types.desalt_s);
+                Blueprint waterPump = GetAvailableBlueprint(TileData.Types.desalt_s);
                 Build(waterPump);
                 break;
 
@@ -239,7 +268,11 @@ public class NanoBuilding_Handler : MonoBehaviour {
                 status_indicator.CreateStatusMessage("Out of Bots!");
         }
         else
+        {
             status_indicator.CreateStatusMessage("Can't build that yet!");
+            Debug.Log("BP = " +  bp);
+        }
+           
     }
 
     void BuildTerraformer()
@@ -265,17 +298,17 @@ public class NanoBuilding_Handler : MonoBehaviour {
     public void BreakThisBuilding (TileData.Types _type, GameObject building)
     {
         // get me the cost of this building by finding its blueprint
-        Blueprint bp = CheckForAvailableBlueprint(_type);
+        Blueprint bp = GetAvailableBlueprint(_type);
         Building_ClickHandler b_Handler = building.GetComponent<Building_ClickHandler>();
         if (bp != null)
             b_Handler.BreakBuilding(bp.nanoBotCost);
     }
 
-    Blueprint CheckForAvailableBlueprint (TileData.Types _type)
+    Blueprint GetAvailableBlueprint(TileData.Types _type)
     {
-        if (availableBlueprints.ContainsKey(_type))
+        if (NanoBuilder.CheckForBlueprint(_type))
         {
-            return availableBlueprints[_type];
+            return NanoBuilder.blueprintsMap[_type];
         }
         else
             return null;
@@ -284,9 +317,9 @@ public class NanoBuilding_Handler : MonoBehaviour {
     void TerraformerHasBeenBuilt()
     {
         // Make the Terraformer blueprint unavailable
-        if (availableBlueprints.ContainsKey(TileData.Types.terraformer))
+        if (NanoBuilder.CheckForBlueprint(TileData.Types.terraformer))
         {
-            availableBlueprints.Remove(TileData.Types.terraformer);
+            NanoBuilder.RemoveBlueprint(TileData.Types.terraformer);
         }
 
         selectedBPIndex += 1;

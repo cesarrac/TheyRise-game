@@ -102,8 +102,8 @@ public class Blueprint
 
     public TileData.Types tileType { get; protected set; }
 
-    // Blueprint PU Cost that can be updated
-    public int processingCost { get; protected set; }
+    // Blueprint Memory Cost that can be updated
+    public int memoryCost { get; protected set; }
 
     // Nanobot cost of this building
     public int nanoBotCost { get; protected set; }
@@ -123,7 +123,7 @@ public class Blueprint
     public Blueprint (string Name, int PUCost, int NanoBotCost, TileData.Types _Ttype, string desc)
     {
         buildingName = Name;
-        processingCost = PUCost;
+        memoryCost = PUCost;
         nanoBotCost = NanoBotCost;
         tileType = _Ttype;
         description = desc;
@@ -134,7 +134,7 @@ public class Blueprint
 
     public void ChangePUCost(int change)
     {
-        processingCost += change;
+        memoryCost += change;
     }
 
     public void ChangeNanoCost(int change)

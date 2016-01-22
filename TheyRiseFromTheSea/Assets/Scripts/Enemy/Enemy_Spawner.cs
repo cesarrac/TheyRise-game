@@ -48,7 +48,7 @@ public class Enemy_Spawner : MonoBehaviour {
 
                 if (e != null)
                 {
-                    // Assign the unit's stats
+                    // Assign the unit's attack stats
                     if (e.GetComponent<Unit_Base>() != null)
                     {
                         Unit_Base enemyUnitBase = e.GetComponent<Unit_Base>();
@@ -58,12 +58,15 @@ public class Enemy_Spawner : MonoBehaviour {
                         enemyUnitBase.stats.Init();
                         enemyUnitBase.isAggroToBuildings = curr_Enemy_toSpwn.isAggroToBuildings;
                     }
+
+                    // Assign the unit's Path/Movement stats
                     if (e.GetComponent<Enemy_PathHandler>() != null)
                     {
                         Enemy_PathHandler ePathHandler = e.GetComponent<Enemy_PathHandler>();
                         ePathHandler.mStats = new Enemy_PathHandler.MovementStats();
                         ePathHandler.mStats.InitStartingMoveStats(curr_Enemy_toSpwn.MovementStats.startMoveSpeed, curr_Enemy_toSpwn.MovementStats.startChaseSpeed);
                         ePathHandler.mStats.InitMoveStats();
+
                         // If this isn't a player chaser (meaning the player is its main path target) then it needs an alternate path target
                         if (!curr_Enemy_toSpwn.chasesPlayer)
                         {

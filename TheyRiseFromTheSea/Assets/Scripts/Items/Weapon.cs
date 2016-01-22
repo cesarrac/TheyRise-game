@@ -60,6 +60,14 @@ public class GunStats
         curChamberAmmo = startingChamberAmmo;
         curReloadSpeed = startingReloadSpeed;
     }
+
+    public void Upgrade(float rate, float dmg, float r_spd, int ammo)
+    {
+        curFireRate += rate;
+        damage += dmg;
+        curReloadSpeed += r_spd;
+        curChamberAmmo += ammo;
+    }
 }
 
 // This weapon class can hold Gun Stats. The PlayerGun Base can hold all the basic shooting and follow mouse funtions of a gun and can sit as a component on a GameObject.
@@ -91,14 +99,14 @@ public class Weapon : Item
 
 
 
-    public void Upgrade(ItemUpgradeType upgradeType)
+    public void UpgradeArmor(WeaponUpgrade upgrade)
     {
-        //switch (U)
-        //{
-        //    //            case attack rate type:
-        //    //            weapon.stats.attackRate = U.attackRate;
-        //    //            break;
-        //    //        }
-        //}
+        if (upgrade.upgradeType != ItemUpgradeType.Weapon)
+        {
+            Debug.LogError("The ItemUpgrade being passed into the Upgrade callback is not of the type Weapon! Is the Item improperly constructed??");
+            return;
+        }
+
+        gunStats.Upgrade(upgrade.attackRate, upgrade.damage, upgrade.reload_speed, upgrade.ammo);
     }
 }

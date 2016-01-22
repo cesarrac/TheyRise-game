@@ -5,12 +5,14 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
-public class UI_Manager : MonoBehaviour {
+
+public class UI_Manager : MonoBehaviour
+{
 
     public static UI_Manager Instance { get; protected set; }
 
     public GameObject blueprint_infoPanel, builder_panel;
-    public Text bp_name, bp_desc;
+    public Text bp_name, bp_desc, cur_nano_memory, total_nano_memory;
     Dictionary<string, GameObject> loadedBlueprints = new Dictionary<string, GameObject>();
 
     public GameObject victoryPanel;
@@ -18,6 +20,12 @@ public class UI_Manager : MonoBehaviour {
     void Awake()
     {
         Instance = this;
+    }
+
+    public void DisplayNanoBuilderMemory(int curMemory, int totalMemory)
+    {
+        cur_nano_memory.text = curMemory.ToString();
+        total_nano_memory.text = totalMemory.ToString();
     }
 
     public void DisplayBPInfo(string bpName, string bpDesc)
@@ -62,7 +70,7 @@ public class UI_Manager : MonoBehaviour {
     public void InventoryReady()
     {
         // Load the Ship level
-        Application.LoadLevel(0);
+        GameMaster.Instance.GoBackToShip();
     }
 
     public void DisplayVictoryPanel()
@@ -71,6 +79,28 @@ public class UI_Manager : MonoBehaviour {
         {
             victoryPanel.SetActive(true);
         }
-     
+
+    }
+
+
+    // Load Scenes:
+    public void ReturnToShip()
+    {
+        GameMaster.Instance.GoBackToShip();
+    }
+
+    public void GoToBlueprintsScene()
+    {
+        GameMaster.Instance.LoadBlueprintsScene();
+    }
+
+    public void GoToLaunchScene()
+    {
+        GameMaster.Instance.LoadLauncherScene();
+    }
+
+    public void GoToEquipScene()
+    {
+        GameMaster.Instance.LoadEquipmentScreen();
     }
 }

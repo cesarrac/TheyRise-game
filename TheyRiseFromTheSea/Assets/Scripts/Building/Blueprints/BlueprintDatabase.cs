@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class BlueprintDatabase : MonoBehaviour {
 
@@ -11,13 +12,15 @@ public class BlueprintDatabase : MonoBehaviour {
     Dictionary<string, Blueprint> blueprints_all;
 
     // FIX THIS! 
-    public int maxBPAllowed = 3;
+   // public int maxBPAllowed = 3;
 
-    List<Blueprint> selectedBlueprints = new List<Blueprint>();
+   // List<Blueprint> selectedBlueprints = new List<Blueprint>();
 
     public int shipLvlIndex = 0, planetLvlIndex = 1, inventoryLvlIndex = 2;
 
     Blueprint curSelectedBP;
+
+    NanoBuilder hero_nanoBuilder;
 
     void Awake()
     {
@@ -25,46 +28,50 @@ public class BlueprintDatabase : MonoBehaviour {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            //DontDestroyOnLoad(gameObject);
         }
         else
         {
-            DestroyImmediate(gameObject);
+            //DestroyImmediate(gameObject);
         }
 
 
-        if (Application.loadedLevel == inventoryLvlIndex && blueprints_all == null)
+        if ( blueprints_all == null)
         {
-            selectedBlueprints.Clear();
-
             Init();
+
         }
 
-        //if (Application.loadedLevel == shipLvlIndex)
-        //{
-        //    selectedBlueprints.Clear();
-
-        //    Init();
-
-        //    //Test();
-        //}
-
-        //if (Application.loadedLevel == planetLvlIndex)
-        //{
-        //    selectedBlueprints.Clear();
-
-        //    Init();
-        //}
 
     }
 
-    void Test()
+    void Start()
     {
-        selectedBlueprints.Add(blueprints_all["Machine Gun"]);
-        selectedBlueprints.Add(blueprints_all["Cannons"]);
-        selectedBlueprints.Add(blueprints_all["Extractor"]);
+        hero_nanoBuilder = GameMaster.Instance.theHero.nanoBuilder;
+
+        if (hero_nanoBuilder.blueprintsMap.Count > 0)
+        {
+            // The Hero already has Blueprints loaded unto their Builder, so those need to be displayed by the UI Manager
+            ReloadOnNanoBuilder();
+        }
+
+        // Check if this is the firs time we load the Blueprint screen. If it is we need to load the Terraformer unto the Hero's blueprints map.
+        if (!hero_nanoBuilder.CheckForBlueprint(TileData.Types.terraformer))
+        {
+            // As soon as we have access to the Hero, the first blueprint to load into it would be the Terraformer (this assumes BP database has been Initialized)
+            hero_nanoBuilder.AddBluePrint(TileData.Types.terraformer, blueprints_all["Terraformer"]);
+            Debug.Log("Hero added blueprint for " + blueprints_all["Terraformer"].buildingName);
+        }
+
+        // If we are on the Inventory/Blueprint Loader scene, we should display the memory count on the Hero's nanobuilder
+        if (SceneManager.GetActiveScene().buildIndex == inventoryLvlIndex)
+        {
+            DisplayBuilderMemory();
+        }
+
 
     }
+
 
     void Init()
     {
@@ -83,10 +90,10 @@ public class BlueprintDatabase : MonoBehaviour {
         };
 
         //// Add +1 to maxBPAllowed since we are using it as a 0 based index below, and to take into account the Terraformer
-        maxBPAllowed += 1;
+       // maxBPAllowed += 1;
 
         // Always add the terraformer to the Selected Blueprints at its 0 index position
-        selectedBlueprints.Add(blueprints_all["Terraformer"]);
+        //selectedBlueprints.Add(blueprints_all["Terraformer"]);
     }
 
     // This will Display the Selected Blueprint's info and store it's info in case the Player decides to Load it to the Builder
@@ -107,67 +114,138 @@ public class BlueprintDatabase : MonoBehaviour {
         UI_Manager.Instance.DisplayBPInfo(curSelectedBP.buildingName, curSelectedBP.description);
     }
 
+    // Player presses the Load button
     public void LoadBlueprint()
     {
-        if (curSelectedBP != null && selectedBlueprints.Count < maxBPAllowed)
+        // Check if the nanobuilder has enough memory left to load the curSelected Blueprint
+        if (curSelectedBP != null)
         {
-            if (!selectedBlueprints.Contains(curSelectedBP))
+            if (curSelectedBP.memoryCost <= hero_nanoBuilder.cur_memory)
             {
-                Debug.Log("Adding this blueprint.");
-                selectedBlueprints.Add(curSelectedBP);
-
-                // Add Text field to Builder
-                AddLoadedBlueprint();
+                // Add loaded blueprint to NanoBuilder
+                AddLoadedBlueprintToNanoBuilder();
             }
+        }
+        //if (curSelectedBP != null && selectedBlueprints.Count < maxBPAllowed)
+        //{
+        //    if (!selectedBlueprints.Contains(curSelectedBP))
+        //    {
+        //        Debug.Log("Adding this blueprint.");
+        //        selectedBlueprints.Add(curSelectedBP);
+
+        //        // Add to Builder
+       
+        //    }
          
-        }
+        //}
     }
 
-    public void UnLoadBlueprint()
+    void AddLoadedBlueprintToNanoBuilder()
     {
-        if (curSelectedBP != null && selectedBlueprints.Count > 0)
+        if (hero_nanoBuilder.CheckForBlueprint(curSelectedBP.tileType))
         {
-            if (selectedBlueprints.Contains(curSelectedBP))
-            {
-                Debug.Log("Removing this blueprint.");
-                selectedBlueprints.Remove(curSelectedBP);
-            }
-
-            // Remove the Text field from the Builder
-            RemoveLoadedBlueprint(curSelectedBP.buildingName);
+            Debug.LogError("Nanobuilder already contains a blueprint for: " + curSelectedBP.buildingName);
+            return;
         }
-    }
-
-    void AddLoadedBlueprint()
-    {
         // Spawn a Text prefab, fill its text with the correct blueprint name, and parent it to the Builder's panel
         UI_Manager.Instance.AddBlueprintToBuilder(curSelectedBP.buildingName);
-       
+
+        // Actually load it to the Hero's nanobuilder
+        hero_nanoBuilder.AddBluePrint(curSelectedBP.tileType, curSelectedBP);
+
+        DisplayBuilderMemory();
+
+        Debug.Log("Hero loaded blueprint for: " + curSelectedBP.buildingName);
+
     }
 
-    void RemoveLoadedBlueprint(string bpName)
+    void ReloadOnNanoBuilder()
     {
-        UI_Manager.Instance.RemoveBlueprintTextFromBuilder(bpName);
-    }
-
-    public void LoadToNanoBuilder(NanoBuilding_Handler nano_builder)
-    {
-        if (selectedBlueprints.Count == maxBPAllowed)
+        if (hero_nanoBuilder.blueprintsMap.Count > 0)
         {
-            // Init the Nano builder's blueprint array and dict
-            nano_builder.InitBP(maxBPAllowed);
-
-            // Load the terraformer first
-            nano_builder.AddBlueprint(0, selectedBlueprints[0].tileType, selectedBlueprints[0]);
-
-            // Start i at 1 since the 0 position is taken by the Terraformer
-            for (int i = 1; i < maxBPAllowed; i++)
+            foreach(TileData.Types btype in hero_nanoBuilder.bpTypes)
             {
-                nano_builder.AddBlueprint(i, selectedBlueprints[i].tileType, selectedBlueprints[i]);
-            }
+                // Do not load the Terraformer since it is a Blueprint that is loaded by default
+                if (btype == TileData.Types.terraformer)
+                {
+                    continue;
+                }
 
-            nano_builder.SetBPSprites();
+                UI_Manager.Instance.AddBlueprintToBuilder(hero_nanoBuilder.blueprintsMap[btype].buildingName);
+            }
         }
-    
     }
+
+    // Player presses the unload button
+    public void UnLoadBlueprint()
+    {
+        if (curSelectedBP != null)
+        {
+            //if (selectedBlueprints.Contains(curSelectedBP))
+            //{
+            //    Debug.Log("Removing this blueprint.");
+            //    selectedBlueprints.Remove(curSelectedBP);
+            //}
+            
+            // Remove from the Builder
+            RemoveLoadedBlueprintFromNanoBuilder();
+        }
+    }
+
+
+    void RemoveLoadedBlueprintFromNanoBuilder()
+    {
+        if (!hero_nanoBuilder.CheckForBlueprint(curSelectedBP.tileType))
+        {
+            Debug.LogError("Nanobuilder does NOT contain a blueprint for: " + curSelectedBP.buildingName);
+            return;
+        }
+
+        UI_Manager.Instance.RemoveBlueprintTextFromBuilder(curSelectedBP.buildingName);
+
+        // Remove it from the NanoBuilder
+        hero_nanoBuilder.RemoveBlueprint(curSelectedBP.tileType);
+
+        DisplayBuilderMemory();
+    }
+
+    void DisplayBuilderMemory()
+    {
+        // Display the memory count on the Hero's nanobuilder
+        UI_Manager.Instance.DisplayNanoBuilderMemory(hero_nanoBuilder.cur_memory, hero_nanoBuilder.memoryBank);
+    }
+
+
+    //// Loading it to the Hero's Nanobuilder when the Player presses Ready in the inventory / blueprints screen
+    //public void LoadAllBPNanoBuilder()
+    //{
+    //    // Load the terraformer first
+    //    GameMaster.Instance.theHero.nanoBuilder.AddBluePrint(selectedBlueprints[0].tileType, selectedBlueprints[0]);
+    //    // Start i at 1 since the 0 position is taken by the Terraformer
+    //    for (int i = 1; i < maxBPAllowed; i++)
+    //    {
+    //        GameMaster.Instance.theHero.nanoBuilder.AddBluePrint(selectedBlueprints[i].tileType, selectedBlueprints[i]);
+    //    }
+    //}
+
+    //public void LoadToNanoBuilderHandler(NanoBuilding_Handler nano_builder)
+    //{
+    //    if (selectedBlueprints.Count == maxBPAllowed)
+    //    {
+    //        // Init the Nano builder's blueprint array and dict
+    //        nano_builder.InitBP(maxBPAllowed);
+
+    //        // Load the terraformer first
+    //        nano_builder.AddBlueprint(0, selectedBlueprints[0].tileType, selectedBlueprints[0]);
+
+    //        // Start i at 1 since the 0 position is taken by the Terraformer
+    //        for (int i = 1; i < maxBPAllowed; i++)
+    //        {
+    //            nano_builder.AddBlueprint(i, selectedBlueprints[i].tileType, selectedBlueprints[i]);
+    //        }
+
+    //        nano_builder.SetBPSprites();
+    //    }
+    
+    //}
 }

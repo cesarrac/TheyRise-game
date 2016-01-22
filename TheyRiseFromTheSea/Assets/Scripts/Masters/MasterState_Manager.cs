@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class MasterState_Manager : MonoBehaviour {
 
@@ -12,7 +13,7 @@ public class MasterState_Manager : MonoBehaviour {
 	/// - Pause CoRoutines in other scripts by changing Master State
 	/// </summary>
 
-	public enum MasterState { WAITING, LOADING, START, PAUSED, MISSION_FAILED, PLAYER_DEAD,  MISSION_SUCCESS, ONSHIP,CONTINUE, QUIT }
+	public enum MasterState { WAITING, LOADING, START, PAUSED, MISSION_FAILED, PLAYER_DEAD,  MISSION_SUCCESS, ONSHIP,CONTINUE, ON_EQUIP, ON_BLUEPRINTS, QUIT }
 
 	private MasterState _mState = MasterState.WAITING;
 
@@ -25,33 +26,33 @@ public class MasterState_Manager : MonoBehaviour {
 
     public static MasterState_Manager Instance { get; protected set; }
 
-    int planetLevelIndex = 1, shipLevelIndex = 0;
-
 	void Awake () 
 	{
         Instance = this;
 
 
+
         // ON PLANET:
-        if (Application.loadedLevel == planetLevelIndex)
+        if (SceneManager.GetActiveScene().name == "Level_Planet")
         {
-            game_master = GameObject.FindGameObjectWithTag("GM").GetComponent<GameMaster>();
             // If for some reason the mission failed panel is still active, deactivate it
             if (missionFailedPanel)
             {
                 if (missionFailedPanel.activeSelf)
                     missionFailedPanel.SetActive(false);
             }
+            mState = MasterState.START;
         }
-        else if (Application.loadedLevel == shipLevelIndex)
+        else if (SceneManager.GetActiveScene().name == "Level_CENTRAL")
         {
             _mState = MasterState.ONSHIP;
         }
-
-
-
 	}
 	
+    void Start()
+    {
+        if (!game_master) game_master = GameMaster.Instance;
+    }
 
 	void Update ()
 	{
@@ -154,9 +155,17 @@ public class MasterState_Manager : MonoBehaviour {
 		game_master.MissionRestart ();
 	}
 
+
 	public void ReturnToShip()
 	{
         _mState = MasterState.ONSHIP;
 		game_master.GoBackToShip ();
 	}
+
+    public void NewCharacter()
+    {
+        _mState = MasterState.ONSHIP;
+        game_master.NewCharacterScreen();
+    }
+
 }

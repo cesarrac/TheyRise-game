@@ -9,8 +9,6 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 
 	void Awake () 
 	{
-		// Initialize gun stats
-		//gunStats.Init ();
 		
         sprite_renderer = GetComponent<SpriteRenderer>();
 
@@ -18,6 +16,14 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 
     void Start()
 	{
+
+        Debug.Log("Gun Stats starting stats: rate " + gunStats.startingFireRate + " ammo " + gunStats.startingChamberAmmo + " r spd " + gunStats.startingReloadSpeed);
+    
+        // Initialize gun stats
+        gunStats.Init();
+
+        Debug.Log("Gun Stats: rate " + gunStats.curFireRate + " ammo " + gunStats.curChamberAmmo + " r spd " + gunStats.curReloadSpeed);
+
         objPool = ObjectPool.instance;
 
         rigid_body = GetComponentInParent<Rigidbody2D>();
@@ -28,10 +34,10 @@ public class Player_AssaultRifle : Player_GunBaseClass {
         sightStart = GetComponentInParent<Player_HeroAttackHandler>().sightStart;
         sightEnd = GetComponentInParent<Player_HeroAttackHandler>().sightEnd;
 
-        gameMaster = GameMaster.Instance;
+        // And Status Indicator to display text over head when reloading
+        status_Indicator = GetComponentInParent<Player_HeroAttackHandler>().statusIndicator;
 
-        if (!gameMaster)
-			gameMaster = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster> ();
+        gameMaster = GameMaster.Instance;
 
         explosiveDamage = gunStats.damage;
 	}

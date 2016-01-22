@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class Transporter_Handler : MonoBehaviour {
 
@@ -20,7 +21,7 @@ public class Transporter_Handler : MonoBehaviour {
         isLocked = false;
         
         // Lock transport controls when landinng on planet (can only be unlocked once the Terraformer is done)
-        if (Application.loadedLevel == planetLevelIndex)
+        if (SceneManager.GetActiveScene().name == "Level_Planet")
         {
             LockControls(true);
         }
