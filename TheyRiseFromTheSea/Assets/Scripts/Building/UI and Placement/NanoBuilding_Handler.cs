@@ -12,8 +12,8 @@ public class NanoBuilding_Handler : MonoBehaviour {
     public int nanoBots = 500;
     int curNanoBots = 0;
 
-    private AudioSource audio_source;
-    public AudioClip buildSound, nanoBotReturnSound;
+    //private AudioSource audio_source;
+    //public AudioClip buildSound, nanoBotReturnSound;
 
     // This will need an array of active Blueprints that the player has selected when beaming down to the planet
     // The total ammount of blueprints allowed is set by the NanoBuilders Processing Units
@@ -46,7 +46,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
         InitBP();
 
-        audio_source = GetComponent<AudioSource>();
+       // audio_source = GetComponent<AudioSource>();
 
         build_controller = Build_MainController.Instance;
         build_controller.nanoBuild_handler = this;
@@ -155,13 +155,21 @@ public class NanoBuilding_Handler : MonoBehaviour {
     void ListenForRightClick()
     {
         
-        if (Input.GetMouseButtonDown(1))
-        {
+        //if (Input.GetMouseButtonDown(1))
+        //{
             
+        //    GetBuildingFromType(MouseBuilding_Controller.MouseController.GetTileUnderMouse().tileType);
+
+        //    // Play build sound
+        //    audio_source.PlayOneShot(buildSound, 0.5f);
+        //}
+        if (MouseBuilding_Controller.MouseController.isRightClickingForBuilding)
+        {
             GetBuildingFromType(MouseBuilding_Controller.MouseController.GetTileUnderMouse().tileType);
 
             // Play build sound
-            audio_source.PlayOneShot(buildSound, 0.5f);
+            // audio_source.PlayOneShot(buildSound, 0.5f);
+            Sound_Manager.Instance.Build();
         }
       
     }

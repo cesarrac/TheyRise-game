@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.UI;
+using System;
 
 //using System;
 //Random = UnityEngine.Random;
@@ -91,6 +92,8 @@ public class ResourceGrid : MonoBehaviour{
 
     public bool worldGridInitialized { get; protected set; }
 
+    public System.Random pseudoRandom { get; set; }
+
     public int MaxSize
     {
         get
@@ -169,38 +172,131 @@ public class ResourceGrid : MonoBehaviour{
 
         if (!islandVisible)
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                Vector3 camHolderPos = new Vector3(cameraHolder.position.x, cameraHolder.position.y, -10F);
-                //MoveTheIslandMapToFront(camHolderPos);
-                islandVisible = true;
-            }
+            Vector3 camHolderPos = new Vector3(cameraHolder.position.x, cameraHolder.position.y, -10F);
+            //MoveTheIslandMapToFront(camHolderPos);
+            islandVisible = true;
+
+            //if (Input.GetMouseButtonDown(0))
+            //{
+            //    Vector3 camHolderPos = new Vector3(cameraHolder.position.x, cameraHolder.position.y, -10F);
+            //    //MoveTheIslandMapToFront(camHolderPos);
+            //    islandVisible = true;
+            //}
         }
 
 	}
 
 	void BuildTheTransporter()
 	{
-		Vector3 m = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-		int mX = Mathf.RoundToInt(m.x);
-		int mY = Mathf.RoundToInt(m.y);
+        // This code allows the Player to see the entire island upon loading, and select a landing site with the mouse:
 
-		if (mX < mapSizeX && mY < mapSizeY && mX > 0 && mY > 0){
-			if (Input.GetMouseButtonDown(0))
+        //Vector3 m = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        //int mX = Mathf.RoundToInt(m.x);
+        //int mY = Mathf.RoundToInt(m.y);
+
+        //if (mX < mapSizeX && mY < mapSizeY && mX > 0 && mY > 0){
+        //	if (Input.GetMouseButtonDown(0))
+        //          {
+        //              // Just in case the Wait for Player Landing select coroutine hasn't stopped 
+        //              StopCoroutine("WaitForLandingSiteSelection");
+        //		InitTransporter(mX, mY);
+        //	}
+        //}
+
+        // This will grab an empty tile position, check its surrounding tiles and make sure there are no rocks in the way
+        Vector2 t_pos = new Vector2();
+        // Try to get a clean empty position 5 times.
+        int getPosAttempts = 5;
+        for (int i = 0; i < getPosAttempts; i++)
+        {
+            if (t_pos == null || t_pos == Vector2.zero)
             {
-                // Just in case the Wait for Player Landing select coroutine hasn't stopped 
-                StopCoroutine("WaitForLandingSiteSelection");
-				InitTransporter(mX, mY);
-			}
-		}
+                t_pos = GetStartingPosition();
+            }
+            else
+                break;
+        }
+
+        // If unsuccesful spawn in the center of map.
+        if (t_pos == null || t_pos == Vector2.zero)
+        {
+            t_pos = new Vector2((float)mapSizeX / 2, (float)mapSizeY / 2);
+        }
+
+        InitTransporter(Mathf.RoundToInt(t_pos.x), Mathf.RoundToInt(t_pos.y));
 	}
+
+    Vector2 GetStartingPosition()
+    {
+        // Select a random empty tile position
+        Vector2 pos = emptyTilesArray[pseudoRandom.Next(0, emptyTilesArray.Length - 1)];
+
+        // Check its neighbors. 
+
+        // If it doesnt match all criteria
+
+    }
+
+    bool WaterCheck(int x, int y)
+    {
+        if (GetTileType(x, y) == TileData.Types.water)
+        {
+            return true;
+        }
+        if (CheckIsInMapBounds(x - 1, y)) // left
+        {
+            if (GetTileType(x - 1, y) == TileData.Types.water)
+            {
+                return true;
+            }
+        }
+        if (CheckIsInMapBounds(x - 1, y + 1)) // top left
+        {
+            if (GetTileType(x - 1, y) == TileData.Types.water)
+            {
+                return true;
+            }
+        }
+        if (CheckIsInMapBounds(x, y + 1)) // top
+        {
+            if (GetTileType(x - 1, y) == TileData.Types.water)
+            {
+                return true;
+            }
+        }
+        if (CheckIsInMapBounds(x + 1, y + 1)) // top right
+        {
+            if (GetTileType(x - 1, y) == TileData.Types.water)
+            {
+                return true;
+            }
+        }
+        if (CheckIsInMapBounds(x + 1, y)) // right
+        {
+            if (GetTileType(x - 1, y) == TileData.Types.water)
+            {
+                return true;
+            }
+        }
+
+        if (CheckIsInMapBounds(x + 1, y)) // right
+        {
+            if (GetTileType(x - 1, y) == TileData.Types.water)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     void InitTransporter(int _terraPosX, int _terraPosY)
     {
-        // SPAWN PLAYER CAPITAL HERE:
+        // Define the Transporter tile
         tiles[_terraPosX, _terraPosY] = new TileData(_terraPosX, _terraPosY, "Transporter", TileData.Types.capital, 0, 10000, 200, 5, 0, 0, 0);
         DefineMultipleTiles(_terraPosX, _terraPosY, 2, 2, "Transporter", TileData.Types.capital, 0, 100, 200, 5, 0, 0, 0);
 
+        // Spawn the Transporter HERE:
         SpawnDiscoverTile(tiles[_terraPosX, _terraPosY].tileName, new Vector3(_terraPosX, _terraPosY, 0.0f), tiles[_terraPosX, _terraPosY].tileType, 2, 2);
 
         // Spawn Player / Hero 1 tile down from the terraformer
@@ -420,8 +516,8 @@ public class ResourceGrid : MonoBehaviour{
 	/// <param name="y">The y coordinate.</param>
 	public TileData.Types GetTileType(int x, int y)
 	{
-		return tiles[x,y].tileType;
-	}
+        return tiles[x, y].tileType;
+    }
 
 	/// <summary>
 	/// Gets the tile game object from spawned tiles array.
@@ -514,7 +610,7 @@ public class ResourceGrid : MonoBehaviour{
 
 
                 Rigidbody2D rb = chunk.GetComponent<Rigidbody2D>();
-                int randomForceDirection = Random.Range(0, 4);
+                int randomForceDirection = pseudoRandom.Next(0, 5);
                 float forceAmmt = 10;
                 switch (randomForceDirection)
                 {

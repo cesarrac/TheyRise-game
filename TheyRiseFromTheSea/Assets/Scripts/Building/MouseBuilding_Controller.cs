@@ -8,11 +8,17 @@ public class MouseBuilding_Controller:MonoBehaviour
 
     public Vector3 currMouseP { get; protected set; }
 
-   
+    public bool isRightClickingForBuilding { get; protected set; }
+    public bool isRightClickingForDash { get; protected set; }
 
-    void Awake()
+    float distance = 0;
+    float maxDashThreshold = 20f;
+    public float dashDistance { get; protected set; }
+
+    void OnEnable()
     {
         MouseController = this;
+        dashDistance = 0;
     }
 
     void Update()
@@ -38,7 +44,84 @@ public class MouseBuilding_Controller:MonoBehaviour
             DebugGraphicTile();
         }
 
+
+        ListenForRightClick();
+
     }
+
+
+    void ListenForRightClick()
+    {
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButtonDown(1))
+        {
+           // BUILDING CONTROL:
+
+                // Holding Down Left Shift and press Right click
+                isRightClickingForBuilding = true;
+      
+        }
+        else
+        {
+            isRightClickingForBuilding = false;
+
+          // DASH CONTROL:
+            if (!Input.GetKey(KeyCode.LeftShift))
+            {
+                if (Input.GetMouseButton(1))
+                {
+                    // DASHING:
+                    // While holding down the right mouse button calculate distance between player and mouse within a distance threshold.
+                    distance = (ResourceGrid.Grid.Hero.transform.position - currMouseP).sqrMagnitude;
+
+
+                }
+                else if (Input.GetMouseButtonUp(1))
+                {
+                    // When you let go of the right mouse button you will move to the furthest distance calculated within the threshold.
+                    if (distance <= maxDashThreshold)
+                    {
+                        dashDistance = distance;
+                    }
+                    else
+                    {
+                        dashDistance = maxDashThreshold;
+                    }
+
+                    // Holding down Right click without holding Left Shift
+                    isRightClickingForDash = true;
+                }
+                else
+                {
+                    isRightClickingForDash = false;
+                }
+            }
+       
+        }
+
+        // Not holding down Left Shift & not Right Clicking
+   
+       
+
+
+    }
+
+
+    void ZoomWithMouseWheel()
+    {
+        Camera.main.orthographicSize -= Camera.main.orthographicSize * Input.GetAxis("Mouse ScrollWheel");
+
+        Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize, 6f, 12.5f);
+    }
+
+
+    public TileData GetTileUnderMouse()
+    {
+        return ResourceGrid.Grid.TileFromWorldPoint(currMouseP);
+    }
+
+
+
+    // DEBUGGING TOOLS:
 
     void DebugTileUnderMouse()
     {
@@ -66,18 +149,7 @@ public class MouseBuilding_Controller:MonoBehaviour
       
     }
 
-    void ZoomWithMouseWheel()
-    {
-        Camera.main.orthographicSize -= Camera.main.orthographicSize * Input.GetAxis("Mouse ScrollWheel");
 
-        Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize, 6f, 12.5f);
-    }
-
-
-    public TileData GetTileUnderMouse()
-    {
-        return ResourceGrid.Grid.TileFromWorldPoint(currMouseP);
-    }
 
   
 

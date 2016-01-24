@@ -218,7 +218,6 @@ public class Player_GunBaseClass : MonoBehaviour {
 	{
 		string _projectileType = gunStats.projectileType;
 
-
 		// Get the bullet from object pool using the name of the ammo type
 		GameObject projectile = objPool.GetObjectForType (_projectileType, true, sightStart.position);
 		if (projectile) {

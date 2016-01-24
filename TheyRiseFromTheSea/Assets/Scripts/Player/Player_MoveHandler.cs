@@ -48,6 +48,11 @@ public class Player_MoveHandler : MonoBehaviour {
 
     public bool isOnShip { get; protected set; }
 
+    Vector3 currPos = new Vector3();
+    Vector2 dashTarget = new Vector2();
+
+    bool isDashing;
+
 	void Awake()
 	{
 		anim = GetComponent<Animator> ();
@@ -94,6 +99,8 @@ public class Player_MoveHandler : MonoBehaviour {
 		// Store the axis Inputs in a Vector 2
 		move_vector = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical"));
 
+        ListenForMouseDash();
+
 	}
 
 
@@ -106,19 +113,22 @@ public class Player_MoveHandler : MonoBehaviour {
 		case State.IDLING:
 //			if (Input.GetKeyDown (KeyCode.W) || Input.GetKeyDown (KeyCode.A) || Input.GetKeyDown (KeyCode.S) || Input.GetKeyDown (KeyCode.D))
 			// If Player tries to move
-			if (move_vector != Vector2.zero) {
-				if ((Time.time - lastTapTime) < tapSpeed && !isOnShip) {
-					// dashing
-					_state = State.DASHING;
-//					Move (mStats.dashSpeed);
-					
-				}else{
-					// just moving
-					_state = State.MOVING;
-//					Move (mStats.speed);
-				}
-				lastTapTime = Time.time;
-			}
+			    if (move_vector != Vector2.zero)
+                {
+                    //				if ((Time.time - lastTapTime) < tapSpeed && !isOnShip) {
+                    //					// dashing
+                    //					_state = State.DASHING;
+                    ////					Move (mStats.dashSpeed);
+
+                    //				}else{
+                    //					// just moving
+                    //					_state = State.MOVING;
+                    ////					Move (mStats.speed);
+                    //				}
+                    //				lastTapTime = Time.time;
+
+                    _state = State.MOVING;
+                }
 
 			break;
 		case State.MOVING:
@@ -190,25 +200,55 @@ public class Player_MoveHandler : MonoBehaviour {
 	
 	}
 
-	//bool CheckWalkabale(Vector3 pos){
-	//	int posX = Mathf.RoundToInt (pos.x);
-	//	int posY = Mathf.RoundToInt (pos.y);
 
-	//	if (resourceGrid.UnitCanEnterTile (posX, posY)) {
-	//		return true;
-	//	} else {
-	//		return false;
-	//	}
+    void ListenForMouseDash()
+    {
+        if (MouseBuilding_Controller.MouseController.isRightClickingForDash)
+        {
+            currPos = transform.position;
 
-	//}
+            dashTarget = MouseBuilding_Controller.MouseController.currMouseP;
 
-	//void MouseWeaponAim(Transform weapon)
-	//{
-	//	var mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-	//	Quaternion rot = Quaternion.LookRotation (weapon.position - mousePos, Vector3.forward);
-	//	weapon.rotation = rot;
-	//	Vector3 facingRot = new Vector3 (0, 0, weapon.eulerAngles.z);
-	//	weapon.eulerAngles = facingRot;
+            StartCoroutine("Dashing");
+        }
+    }
 
-	//}
+    IEnumerator Dashing()
+    {
+        while (true)
+        {
+            transform.position = Vector2.MoveTowards(transform.position, dashTarget , MouseBuilding_Controller.MouseController.dashDistance * Time.deltaTime);
+
+            var distance = (currPos - transform.position).sqrMagnitude;
+
+            if (distance >= MouseBuilding_Controller.MouseController.dashDistance)
+            {
+                yield break;
+            }
+
+            yield return null;
+        }
+    }
+
+    //bool CheckWalkabale(Vector3 pos){
+    //	int posX = Mathf.RoundToInt (pos.x);
+    //	int posY = Mathf.RoundToInt (pos.y);
+
+    //	if (resourceGrid.UnitCanEnterTile (posX, posY)) {
+    //		return true;
+    //	} else {
+    //		return false;
+    //	}
+
+    //}
+
+    //void MouseWeaponAim(Transform weapon)
+    //{
+    //	var mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+    //	Quaternion rot = Quaternion.LookRotation (weapon.position - mousePos, Vector3.forward);
+    //	weapon.rotation = rot;
+    //	Vector3 facingRot = new Vector3 (0, 0, weapon.eulerAngles.z);
+    //	weapon.eulerAngles = facingRot;
+
+    //}
 }

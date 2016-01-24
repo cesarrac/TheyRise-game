@@ -161,8 +161,13 @@ public class Map_Generator : MonoBehaviour {
         // do the same to the empty tiles list
         grid.emptyTilesArray = grid.emptyTilePositions.ToArray();
 
+        // Give the pseudoRandom to the Resource Grid to maintain unity with the seed
+        grid.pseudoRandom = pseudoRandom;
+
 //        // Build island Texture
 		TileTexture_3 tileTexture = _Floor.GetComponent<TileTexture_3>();
+
+        // Also pass the same pseudoRandom to the TileTexture generator to maintain the seed
         tileTexture.seed = seed;
         tileTexture.randomFillPercent = randomFillPercent;
         tileTexture.pseudoRandom = pseudoRandom;
