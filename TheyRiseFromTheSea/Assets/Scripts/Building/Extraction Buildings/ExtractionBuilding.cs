@@ -105,6 +105,16 @@ public class ExtractionBuilding : MonoBehaviour {
 
     public Vector3 resourceWorldPos { get; protected set; }
 
+    // Keep track of the tile I'm on
+    public TileData originTile { get; protected set; }
+
+    // Keep track of the tile that is currently being extracted
+    public TileData targetTile { get; protected set; }
+
+    public GameObject circleSelection { get; protected set; }
+
+    public bool pickUpSpawned;
+
     // STATE MACHINE:
     public enum State
     {
@@ -127,7 +137,9 @@ public class ExtractionBuilding : MonoBehaviour {
         myTransform = _trans;
 
         resource_grid = ResourceGrid.Grid;
+
         b_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
+
     }
 
     // this Initializer works for buildings that extract from another building to produce their OWN resource
@@ -163,19 +175,44 @@ public class ExtractionBuilding : MonoBehaviour {
 
     public bool CheckSearchForResource()
     {
-        TileData resourceTile = SearchForResource();
-
-        if (resourceTile  != null)
+        // Get my origin tile
+        if (originTile == null)
         {
-            if (r_PosX != resourceTile.posX || r_PosY != resourceTile.posY)
+            originTile = resource_grid.TileFromWorldPoint(myTransform.position);
+            Debug.Log("EXTRACTOR origin tile is at: " + originTile.posX + " " + originTile.posY);
+        }
+
+
+        targetTile = SearchForResource();
+
+        if (targetTile != null)
+        {
+            // Place a circle around the Resource, showing that it is being currently extracted
+            Vector3 circlePos = new Vector3();
+
+            if (resource_grid.GetTileGameObjFromIntCoords(targetTile.posX, targetTile.posY) != null)
+            {
+                circlePos = resource_grid.GetTileGameObjFromIntCoords(targetTile.posX, targetTile.posY).transform.position;
+            }
+            else
+            {
+                circlePos = resource_grid.GetTileWorldPos(targetTile.posX, targetTile.posY);
+            }
+
+            // Make sure before placing that this Building doesn't already have any circle Selections
+            if (circleSelection != null)
+            {
+                ObjectPool.instance.PoolObject(circleSelection);
+            }
+
+            circleSelection = ObjectPool.instance.GetObjectForType("Selection Circle", true, circlePos);
+
+            if (r_PosX != targetTile.posX || r_PosY != targetTile.posY)
             {
                 // Define my resource's tile position
-                r_PosX = resourceTile.posX;
-                r_PosY = resourceTile.posY;
+                r_PosX = targetTile.posX;
+                r_PosY = targetTile.posY;
             }
-      
-
-
             return true;
         }
         else
@@ -190,103 +227,31 @@ public class ExtractionBuilding : MonoBehaviour {
         float spriteWidth = GetComponent<SpriteRenderer>().sprite.bounds.size.x;
         float spriteHeight = GetComponent<SpriteRenderer>().sprite.bounds.size.y;
 
-        Vector3 top = myTransform.position + Vector3.up;
-        Vector3 bottom = myTransform.position - Vector3.up;
-        Vector3 left = myTransform.position + Vector3.left;
-        Vector3 right = myTransform.position + Vector3.right;
-        right.x += spriteWidth;
-        top.y += spriteHeight;
-        left.x += -1;
 
-        Vector3 top2 = top + Vector3.up;
-        Vector3 bottom2 = bottom - Vector3.up;
-        Vector3 left2 = left + Vector3.left;
-        Vector3 right2 = right + Vector3.right;
-
-        Vector3 topLeft = top + Vector3.left;
-        Vector3 topRight = top + Vector3.right;
-        Vector3 botLeft = bottom + Vector3.left;
-        Vector3 botRight = bottom + Vector3.right;
-
-        //rockTilesDetected.Clear();
-
-        if (CheckTileType(top) != null)
-        { // top
-
-            //rockTilesDetected.Add(CheckTileType(top));
-            return CheckTileType(top);
-        }
-        else if (CheckTileType(bottom) != null)
-        { // bottom
-
-            //rockTilesDetected.Add(CheckTileType(bottom));
-            return CheckTileType(bottom);
-        }
-        else if (CheckTileType(left) != null)
-        { // left
-            //rockTilesDetected.Add(CheckTileType(left));
-            return CheckTileType(left);
-        }
-        else if (CheckTileType(right) != null)
-        { //right
-            //rockTilesDetected.Add(CheckTileType(right));
-            return CheckTileType(right);
-        }
-        else if (CheckTileType(topLeft) != null)
-        { // top left
-            //rockTilesDetected.Add(CheckTileType(topLeft));
-            return CheckTileType(topLeft);
-        }
-        else if (CheckTileType(topRight) != null)
-        { // top right
-          // rockTilesDetected.Add(CheckTileType(topRight));
-            return CheckTileType(topRight);
-        }
-        else if (CheckTileType(botLeft) != null)
-        { // bottom left
-            //rockTilesDetected.Add(CheckTileType(botLeft));
-            return CheckTileType(botLeft);
-        }
-        else if (CheckTileType(botRight) != null)
-        { // bottom right
-          // rockTilesDetected.Add(CheckTileType(botRight));
-            return CheckTileType(botRight);
-        }
-        else if (CheckTileType(top2) != null)
-        { // top
-
-            //rockTilesDetected.Add(CheckTileType(top));
-            return CheckTileType(top2);
-        }
-        else if (CheckTileType(bottom2) != null)
-        { // bottom
-
-            //rockTilesDetected.Add(CheckTileType(bottom));
-            return CheckTileType(bottom2);
-        }
-        else if (CheckTileType(left2) != null)
-        { // left
-            //rockTilesDetected.Add(CheckTileType(left));
-            return CheckTileType(left2);
-        }
-        else if (CheckTileType(right2) != null)
-        { //right
-            //rockTilesDetected.Add(CheckTileType(right));
-            return CheckTileType(right2);
-        }
-        else
+        for (int x =(int) myTransform.position.x - (int)spriteWidth; x <= myTransform.position.x + spriteWidth; x++)
         {
-            return null;
+            for (int y = originTile.posY - (int)spriteHeight; y <= originTile.posY + spriteHeight; y++)
+            {
+                Debug.Log("EXTRACTION: Checking pos " + x + " " + y);
+                if (CheckTileType(x, y) != null)
+                {
+                    return CheckTileType(x, y); ;
+                }
+            }
         }
+
+        // If no tiles were found ...
+        return null;
 
     }
 
-    TileData CheckTileType(Vector3 position)
+
+    TileData CheckTileType(int x, int y)
     {
-        if (resource_grid.TileFromWorldPoint(position).tileType == resourceType)
+        if (resource_grid.GetTileType(x, y) == resourceType)
         {
-            resourceWorldPos = position;
-            return resource_grid.TileFromWorldPoint(position);
+            resourceWorldPos = new Vector3(x, y, 0);
+            return resource_grid.tiles[x, y];
 
         }
         else
@@ -621,6 +586,7 @@ public class ExtractionBuilding : MonoBehaviour {
             callback(type, ammnt);
     }
 
+    // This Beams all the contents STORED inside of a building to the ship
     public void BeamAllStoredToShip()
     {
         Ship_Inventory.Instance.ReceiveItems(resourceType, currResourceStored);
@@ -636,6 +602,32 @@ public class ExtractionBuilding : MonoBehaviour {
             storageIsFull = false;
     }
 
+    // This beams any Resource Drops the player picks up, to the ship
+    public void PickUpAndBeamToShip(int total)
+    {
+        Ship_Inventory.Instance.ReceiveItems(resourceType, total);
+
+        // This will split the current resources before sending them to ship (for example split between common ore and enriched ore)
+        if (splitShipInventoryCallback != null)
+        {
+            splitShipInventoryCallback(total);
+        }
+
+
+    }
+
+    public void SpawnPickUp()
+    {
+        GameObject drop = ObjectPool.instance.GetObjectForType("Resource Drop", true, myTransform.position);
+        if (drop != null)
+        {
+            drop.GetComponent<ResourceDrop>().InitSource(this, currResourceStored);
+
+            currResourceStored = 0;
+            if (storageIsFull)
+                storageIsFull = false;
+        }
+    }
 
     // GRAB ALL THE CONTENTS of this building's storage using THIS method:
     public int GrabAllStoredResource()

@@ -254,16 +254,22 @@ public class Building_ClickHandler : MonoBehaviour {
 		}
 	}
 
-	public void Sell(){
-
-        //nanoBotsCreated = 0;
-
+	public void SwapBuildingTile(){
 
 		if (resourceGrid != null) {
             // Define the tile again in case this was a pooled object and for some reason it didn't re-define its tile. This might make it unnecessary to do it on start.
             myTile = resourceGrid.TileFromWorldPoint(transform.position);
             Debug.Log("My tile pos X " + myTile.posX + " pos Y " + myTile.posY);
 			resourceGrid.SwapTileType(myTile.posX, myTile.posY, TileData.Types.empty, myTile.nanoBotCost);
+
+            // Pool any circle selections this building has, only if it IS an extraction building
+            if (GetComponent<ExtractionBuilding>() != null)
+            {
+                if (GetComponent<ExtractionBuilding>().circleSelection != null)
+                {
+                    ObjectPool.instance.PoolObject(GetComponent<ExtractionBuilding>().circleSelection);
+                }
+            }
 		}
 	}
 
@@ -321,7 +327,7 @@ public class Building_ClickHandler : MonoBehaviour {
             if (nanoBotsCreated >= 10)
             {
                 nanoBotsCreated = 0;
-                Sell();
+                SwapBuildingTile();
                 yield break;
             }
 

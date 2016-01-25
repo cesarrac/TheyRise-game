@@ -117,7 +117,11 @@ public class DiscoverTile : MonoBehaviour {
                 {
                     for (int h = 0; h < spriteHeight; h++)
                     {
-                        resourceGrid.spawnedTiles[mapPosX + w, mapPosY + h] = tileToSpawn;
+                        if (resourceGrid.spawnedTiles[mapPosX + w, mapPosY + h] == null)
+                        {
+                            resourceGrid.spawnedTiles[mapPosX + w, mapPosY + h] = tileToSpawn;
+                        }
+                      
                     }
                 }
 

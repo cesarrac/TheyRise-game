@@ -17,6 +17,9 @@ public class Extractor : ExtractionBuilding {
     Rock currRock;
 
     Vector3 currRockWorldPos;
+    Vector3 currRockTilePos;
+
+
 
     void OnEnable()
     {
@@ -87,7 +90,8 @@ public class Extractor : ExtractionBuilding {
                 {
                     if (currRock == null)
                     {
-                        GameObject currTarget = resource_grid.GetTileGameObjFromWorldPos(resourceWorldPos);
+                        //GameObject currTarget = resource_grid.GetTileGameObjFromWorldPos(resourceWorldPos);
+                        GameObject currTarget = resource_grid.GetTileGameObjFromIntCoords((int)currRockTilePos.x, (int)currRockTilePos.y);
                         if (currTarget != null)
                         {
                             if (currTarget.GetComponent<Rock_Handler>() != null)
@@ -143,42 +147,53 @@ public class Extractor : ExtractionBuilding {
 
                     _state = State.SEARCHING;
                 }
-                else if (statusIndicated && storageIsFull)
-                {
-                    // repeating full status message for player to see!!
-                  
-                    StopCoroutine("ShowStatusMessage");
-                    StartCoroutine("ShowStatusMessage");
-                    statusMessage = "Full!";
-                }
                 else
                 {
-                    if (CheckOutputStorage())
+                    if (!pickUpSpawned)
                     {
-                       
-                        StopCoroutine("ShowStatusMessage");
-                        StartCoroutine("ShowStatusMessage");
-                        statusMessage = "Sending!";
+                        SpawnPickUp();
+                        commonOreCount = 0;
+                        enrichedOreCount = 0;
+                        pickUpSpawned = true;
                     }
-                    else
-                    {
-                        if (output == null)
-                        {
-                            // No output connected. My storage is full
-                            StopCoroutine("ShowStatusMessage");
-                            StartCoroutine("ShowStatusMessage");
-                            statusMessage = "Full!";
-                        }
-                        else
-                        {
-                            // OUTPUT STORAGE FULL:
-                            StopCoroutine("ShowStatusMessage");
-                            StartCoroutine("ShowStatusMessage");
-                            statusMessage = "Output Full!";
-                        }
-                       
-                    }
+            
                 }
+                //else if (statusIndicated && storageIsFull)
+                //{
+                //    // repeating full status message for player to see!!
+                  
+                //    StopCoroutine("ShowStatusMessage");
+                //    StartCoroutine("ShowStatusMessage");
+                //    statusMessage = "Full!";
+                //}
+                //else
+                //{
+                //    if (CheckOutputStorage())
+                //    {
+                       
+                //        StopCoroutine("ShowStatusMessage");
+                //        StartCoroutine("ShowStatusMessage");
+                //        statusMessage = "Sending!";
+                //    }
+                //    else
+                //    {
+                //        if (output == null)
+                //        {
+                //            // No output connected. My storage is full
+                //            StopCoroutine("ShowStatusMessage");
+                //            StartCoroutine("ShowStatusMessage");
+                //            statusMessage = "Full!";
+                //        }
+                //        else
+                //        {
+                //            // OUTPUT STORAGE FULL:
+                //            StopCoroutine("ShowStatusMessage");
+                //            StartCoroutine("ShowStatusMessage");
+                //            statusMessage = "Output Full!";
+                //        }
+                       
+                //    }
+                //}
 
 
                 break;
@@ -189,10 +204,13 @@ public class Extractor : ExtractionBuilding {
                 StopCoroutine("ShowStatusMessage");
                 StartCoroutine("ShowStatusMessage");
 
+                pickUpSpawned = false;
+
                 if (CheckSearchForResource())
                 {
                     // Define my resource tile position
-                    currRockWorldPos = resourceWorldPos;
+                    //currRockWorldPos =
+                    currRockTilePos = new Vector3(targetTile.posX, targetTile.posY, 0);
 
                     // If it's true it means the position of rock has been defined
                     _state = State.EXTRACTING;
@@ -239,173 +257,192 @@ public class Extractor : ExtractionBuilding {
 
     void DefineEnrichedAndCommonOre(int currTotal)
     {
-        if (enrichedOreCount + commonOreCount == currTotal)
+        //if (enrichedOreCount + commonOreCount == currTotal)
+        //{
+        //    Ship_Inventory.Instance.SplitOre(commonOreCount, enrichedOreCount);
+        //    // Now make sure that both enriched and common count go back to 0 since this extractor is now empty
+        //    commonOreCount = 0;
+        //    enrichedOreCount = 0;
+        //}
+        //else
+        //{
+        //    Debug.Log("Total inventory = " + currResourceStored + " Common ore = " + commonOreCount + " Enriched = " + enrichedOreCount);
+        //    Debug.LogError("This EXTRACTOR's enriched and common count DO NOT equal its current inventory!");
+        //}
+        int commonOre = 0;
+        int enrichedOre = 0;
+
+        if (currRock != null)
         {
-            Ship_Inventory.Instance.SplitOre(commonOreCount, enrichedOreCount);
-            // Now make sure that both enriched and common count go back to 0 since this extractor is now empty
-            commonOreCount = 0;
-            enrichedOreCount = 0;
+            if (currRock._rockProductionType == Rock.RockProductionType.common)
+            {
+                print("Adding Common ore!");
+                commonOre = currTotal;
+            }
+            else if (currRock._rockProductionType == Rock.RockProductionType.enriched)
+            {
+                print("Adding Enriched ore!");
+                enrichedOre = currTotal;
+            }
         }
-        else
-        {
-            Debug.Log("Total inventory = " + currResourceStored + " Common ore = " + commonOreCount + " Enriched = " + enrichedOreCount);
-            Debug.LogError("This EXTRACTOR's enriched and common count DO NOT equal its current inventory!");
-        }
+
+        Ship_Inventory.Instance.SplitOre(commonOre, enrichedOre);
+
     }
 
-	//void CountDownToExtract()
-	//{
-	//	if (extractCountDown <= 0) {
+    //void CountDownToExtract()
+    //{
+    //	if (extractCountDown <= 0) {
 
-	//		Extract();
-	//		extractCountDown = extractRate;
+    //		Extract();
+    //		extractCountDown = extractRate;
 
-	//	} else {
+    //	} else {
 
-	//		extractCountDown -= Time.deltaTime;
+    //		extractCountDown -= Time.deltaTime;
 
-	//	}
-	//}
+    //	}
+    //}
 
-	//void LineFollowMouse(){
-	//	Vector3 m = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-	//	mouseEnd = new Vector3 (Mathf.Clamp(m.x, transform.position.x - 10f, transform.position.x + 10f), 
-	//	                        Mathf.Clamp(m.y, transform.position.y - 10f, transform.position.y + 10f), 
-	//	                        0.0f);
-	//	lineR.SetPosition (1, mouseEnd);
-	//}
+    //void LineFollowMouse(){
+    //	Vector3 m = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+    //	mouseEnd = new Vector3 (Mathf.Clamp(m.x, transform.position.x - 10f, transform.position.x + 10f), 
+    //	                        Mathf.Clamp(m.y, transform.position.y - 10f, transform.position.y + 10f), 
+    //	                        0.0f);
+    //	lineR.SetPosition (1, mouseEnd);
+    //}
 
-	///// <summary>
-	///// Sets selecting bool to true. Useful for attaching to
-	///// an On-Click Event on a Button for Resetting this extractor's storage.
-	///// </summary>
-	//public void ActivateSelecting(){
-	//	if (!selecting) {
-	//		selecting = true;
-	//	}
-	//}
+    ///// <summary>
+    ///// Sets selecting bool to true. Useful for attaching to
+    ///// an On-Click Event on a Button for Resetting this extractor's storage.
+    ///// </summary>
+    //public void ActivateSelecting(){
+    //	if (!selecting) {
+    //		selecting = true;
+    //	}
+    //}
 
-	//void SetStorageAndExtract(){
-	//	int mX = Mathf.RoundToInt(mouseEnd.x);
-	//	int mY = Mathf.RoundToInt(mouseEnd.y);
-	//	if (mX > 2 && mX < resourceGrid.mapSizeX - 2 && mY > 2 && mY < resourceGrid.mapSizeY - 2) {
+    //void SetStorageAndExtract(){
+    //	int mX = Mathf.RoundToInt(mouseEnd.x);
+    //	int mY = Mathf.RoundToInt(mouseEnd.y);
+    //	if (mX > 2 && mX < resourceGrid.mapSizeX - 2 && mY > 2 && mY < resourceGrid.mapSizeY - 2) {
 
-	//		// Make sure that where we clicked on the Grid is a storage tile
-	//		if (resourceGrid.GetTileType (mX, mY) == TileData.Types.storage) {
-	//			Debug.Log("Storage found for ore!");
+    //		// Make sure that where we clicked on the Grid is a storage tile
+    //		if (resourceGrid.GetTileType (mX, mY) == TileData.Types.storage) {
+    //			Debug.Log("Storage found for ore!");
 
-	//			// Selecting is now false to deactivate the Line Renderer gameobject
-	//			selecting = false;
-			
-	//			// Give Building UI ability to access to building menus by clicking again
-	//			buildingUI.currentlyBuilding = false;
+    //			// Selecting is now false to deactivate the Line Renderer gameobject
+    //			selecting = false;
 
- //               // Set my storage
- //               myStorage = resourceGrid.GetTileGameObjFromWorldPos(mouseEnd).GetComponent<Storage>();
+    //			// Give Building UI ability to access to building menus by clicking again
+    //			buildingUI.currentlyBuilding = false;
 
- //               // Start extracting by finding which direction rock was found
- //               if (SearchForRock ()) {
+    //               // Set my storage
+    //               myStorage = resourceGrid.GetTileGameObjFromWorldPos(mouseEnd).GetComponent<Storage>();
 
-	//				// Cycle through the rocks found array to make sure we don't extract from a NULL (represented by Vector2.zero)
-	//				CycleRocksArray ();
-	//			}
+    //               // Start extracting by finding which direction rock was found
+    //               if (SearchForRock ()) {
+
+    //				// Cycle through the rocks found array to make sure we don't extract from a NULL (represented by Vector2.zero)
+    //				CycleRocksArray ();
+    //			}
 
 
-	//		} else {
-	//			Debug.Log ("Need a place to store the ore!");
-	//			// state will stay on NO STORAGE
-	//		}
-	//	}
-	//}
+    //		} else {
+    //			Debug.Log ("Need a place to store the ore!");
+    //			// state will stay on NO STORAGE
+    //		}
+    //	}
+    //}
 
-	//TileData SearchForRock(){
- //       Vector3 top = transform.position + Vector3.up;
- //       Vector3 bottom = transform.position - Vector3.up;
- //       Vector3 left = transform.position + Vector3.left;
- //       Vector3 right = transform.position + Vector3.right;
- //       Vector3 topLeft = top + Vector3.left;
- //       Vector3 topRight = top + Vector3.right;
- //       Vector3 botLeft = bottom + Vector3.left;
- //       Vector3 botRight = bottom + Vector3.right;
+    //TileData SearchForRock(){
+    //       Vector3 top = transform.position + Vector3.up;
+    //       Vector3 bottom = transform.position - Vector3.up;
+    //       Vector3 left = transform.position + Vector3.left;
+    //       Vector3 right = transform.position + Vector3.right;
+    //       Vector3 topLeft = top + Vector3.left;
+    //       Vector3 topRight = top + Vector3.right;
+    //       Vector3 botLeft = bottom + Vector3.left;
+    //       Vector3 botRight = bottom + Vector3.right;
 
- //       //rockTilesDetected.Clear();
+    //       //rockTilesDetected.Clear();
 
- //       if (CheckTileType(top) != null)
- //       { // top
+    //       if (CheckTileType(top) != null)
+    //       { // top
 
- //           //rockTilesDetected.Add(CheckTileType(top));
- //           return CheckTileType(top);
- //       }
-	//	else if (CheckTileType(bottom) != null)
- //       { // bottom
+    //           //rockTilesDetected.Add(CheckTileType(top));
+    //           return CheckTileType(top);
+    //       }
+    //	else if (CheckTileType(bottom) != null)
+    //       { // bottom
 
- //           //rockTilesDetected.Add(CheckTileType(bottom));
- //           return CheckTileType(bottom);
- //       }
- //       else if (CheckTileType(left) != null)
- //       { // left
- //           //rockTilesDetected.Add(CheckTileType(left));
- //           return CheckTileType(left);
- //       }
- //       else if (CheckTileType(right) != null) { //right
- //           //rockTilesDetected.Add(CheckTileType(right));
- //           return CheckTileType(right);
- //       }
- //       else if (CheckTileType(topLeft) != null)
- //       { // top left
- //           //rockTilesDetected.Add(CheckTileType(topLeft));
- //           return CheckTileType(topLeft);
- //       }
- //       else if (CheckTileType(topRight) != null)
- //       { // top right
- //         // rockTilesDetected.Add(CheckTileType(topRight));
- //           return CheckTileType(topRight);
- //       }
- //       else if (CheckTileType(botLeft) != null)
- //       { // bottom left
- //           //rockTilesDetected.Add(CheckTileType(botLeft));
- //           return CheckTileType(botLeft);
- //       }
- //       else if (CheckTileType(botRight) != null)
- //       { // bottom right
- //         // rockTilesDetected.Add(CheckTileType(botRight));
- //           return CheckTileType(botRight);
- //       }
- //       else
- //       {
- //           return null;
- //       }
-		
-	//}
+    //           //rockTilesDetected.Add(CheckTileType(bottom));
+    //           return CheckTileType(bottom);
+    //       }
+    //       else if (CheckTileType(left) != null)
+    //       { // left
+    //           //rockTilesDetected.Add(CheckTileType(left));
+    //           return CheckTileType(left);
+    //       }
+    //       else if (CheckTileType(right) != null) { //right
+    //           //rockTilesDetected.Add(CheckTileType(right));
+    //           return CheckTileType(right);
+    //       }
+    //       else if (CheckTileType(topLeft) != null)
+    //       { // top left
+    //           //rockTilesDetected.Add(CheckTileType(topLeft));
+    //           return CheckTileType(topLeft);
+    //       }
+    //       else if (CheckTileType(topRight) != null)
+    //       { // top right
+    //         // rockTilesDetected.Add(CheckTileType(topRight));
+    //           return CheckTileType(topRight);
+    //       }
+    //       else if (CheckTileType(botLeft) != null)
+    //       { // bottom left
+    //           //rockTilesDetected.Add(CheckTileType(botLeft));
+    //           return CheckTileType(botLeft);
+    //       }
+    //       else if (CheckTileType(botRight) != null)
+    //       { // bottom right
+    //         // rockTilesDetected.Add(CheckTileType(botRight));
+    //           return CheckTileType(botRight);
+    //       }
+    //       else
+    //       {
+    //           return null;
+    //       }
 
-	//TileData CheckTileType(Vector3 position){
- //       if (resourceGrid.TileFromWorldPoint(position).tileType == TileData.Types.rock)
- //           return resourceGrid.TileFromWorldPoint(position);
- //       else
- //           return null;
-	//}
+    //}
 
- //   void DefineRockPosition(TileData rock)
- //   {
- //       rockPosX = rock.posX;
- //       rockPosY = rock.posY;
- //   }
+    //TileData CheckTileType(Vector3 position){
+    //       if (resourceGrid.TileFromWorldPoint(position).tileType == TileData.Types.rock)
+    //           return resourceGrid.TileFromWorldPoint(position);
+    //       else
+    //           return null;
+    //}
 
-	//void CycleRocksArray(){
-	//	for (int x =0; x< rocksDetected.Length; x++){
-	//		if (rocksDetected[x] != Vector2.zero){
-	//			rockPosX = (int) rocksDetected[x].x;
-	//			rockPosY = (int) rocksDetected[x].y;
-	//			currRockIndex = x;
+    //   void DefineRockPosition(TileData rock)
+    //   {
+    //       rockPosX = rock.posX;
+    //       rockPosY = rock.posY;
+    //   }
 
-	//			// Rock has been detected so we can change state
-	//			_state = State.EXTRACTING;
+    //void CycleRocksArray(){
+    //	for (int x =0; x< rocksDetected.Length; x++){
+    //		if (rocksDetected[x] != Vector2.zero){
+    //			rockPosX = (int) rocksDetected[x].x;
+    //			rockPosY = (int) rocksDetected[x].y;
+    //			currRockIndex = x;
 
-	//		}else{
-	//			Debug.Log("No rock found at: " + rocksDetected[x]);
-	//		}
-	//	}
-	//}
+    //			// Rock has been detected so we can change state
+    //			_state = State.EXTRACTING;
+
+    //		}else{
+    //			Debug.Log("No rock found at: " + rocksDetected[x]);
+    //		}
+    //	}
+    //}
 
     //IEnumerator ExtractOre()
     //{
@@ -416,7 +453,7 @@ public class Extractor : ExtractionBuilding {
     //        yield return new WaitForSeconds(extractRate);
 
     //        int extract = resourceGrid.MineARock(rockPosX, rockPosY, extractAmmnt);
-          
+
     //        if ((currOreStored + extract) <= personalStorageCap)
     //        {
     //            currOreStored += extract;
@@ -436,7 +473,7 @@ public class Extractor : ExtractionBuilding {
     //            }
 
     //        }
-                
+
     //        else
     //        {
     //            // STORAGE FULL
@@ -449,9 +486,9 @@ public class Extractor : ExtractionBuilding {
     //            _state = State.NOSTORAGE;
     //            yield break;
     //        }
-            
 
-           
+
+
 
     //    }
     //}
@@ -480,68 +517,68 @@ public class Extractor : ExtractionBuilding {
     //            statusIndicated = true;
     //            yield break;
     //        }
-               
-                 
+
+
     //    }
-       
+
     //}
 
-	//void Extract(){
-	//	int q = resourceGrid.tiles [rockPosX, rockPosY].maxResourceQuantity;
-	//	int calc = q - extractAmmnt;
-	//	if (calc > 0) { // theres still ore left in this rock
-	//		Debug.Log ("Extracting!");
-		
-	//		// check that storage is not full
-	//		if (!myStorage.CheckIfFull (extractAmmnt, false)) {
+    //void Extract(){
+    //	int q = resourceGrid.tiles [rockPosX, rockPosY].maxResourceQuantity;
+    //	int calc = q - extractAmmnt;
+    //	if (calc > 0) { // theres still ore left in this rock
+    //		Debug.Log ("Extracting!");
 
-	//			// add it to Storage
-	//			myStorage.AddOreOrWater (extractAmmnt, false);
+    //		// check that storage is not full
+    //		if (!myStorage.CheckIfFull (extractAmmnt, false)) {
 
-	//			// subtract it from the tile
-	//			resourceGrid.tiles [rockPosX, rockPosY].maxResourceQuantity = calc;
+    //			// add it to Storage
+    //			myStorage.AddOreOrWater (extractAmmnt, false);
 
-	//			// check if tile is depleted
-	//			int newQ = resourceGrid.tiles [rockPosX, rockPosY].maxResourceQuantity;
+    //			// subtract it from the tile
+    //			resourceGrid.tiles [rockPosX, rockPosY].maxResourceQuantity = calc;
 
-	//			if (newQ <= 0) {
+    //			// check if tile is depleted
+    //			int newQ = resourceGrid.tiles [rockPosX, rockPosY].maxResourceQuantity;
 
-	//				// This rock is Depleted, so change state to stop extraction while we Search for more rock
-	//				_state = State.SEARCHING;
+    //			if (newQ <= 0) {
 
-	//				// Deplete the rock and check for more
-	//				DepleteRock (rockPosX, rockPosY);
-	//			} 
+    //				// This rock is Depleted, so change state to stop extraction while we Search for more rock
+    //				_state = State.SEARCHING;
 
-	//		} else {
+    //				// Deplete the rock and check for more
+    //				DepleteRock (rockPosX, rockPosY);
+    //			} 
 
-	//			// Storage is full and extractor stops until it gets a new storage
-	//			myStorage = null;
+    //		} else {
 
-	//			// Change state to stop extraction while we get a new Storage
-	//			_state = State.NOSTORAGE;
-	//		}
+    //			// Storage is full and extractor stops until it gets a new storage
+    //			myStorage = null;
+
+    //			// Change state to stop extraction while we get a new Storage
+    //			_state = State.NOSTORAGE;
+    //		}
 
 
-	//	} else { 
+    //	} else { 
 
-	//		// This rock is Depleted, so change state to stop extraction while we Search for more rock
-	//		_state = State.SEARCHING;
+    //		// This rock is Depleted, so change state to stop extraction while we Search for more rock
+    //		_state = State.SEARCHING;
 
-	//		// Deplete the rock and check for more
-	//		DepleteRock (rockPosX, rockPosY);
-	//	}
-	//}
+    //		// Deplete the rock and check for more
+    //		DepleteRock (rockPosX, rockPosY);
+    //	}
+    //}
 
-	//void DepleteRock(int x, int y){
+    //void DepleteRock(int x, int y){
 
-	//	// To Deplete a rock, swap tile to empty
-	//	resourceGrid.SwapTileType (x, y, TileData.Types.empty);
+    //	// To Deplete a rock, swap tile to empty
+    //	resourceGrid.SwapTileType (x, y, TileData.Types.empty);
 
-	//	// change value of this rock in the array so we don't try extracting from it anymore
-	//	rocksDetected [currRockIndex] = Vector3.zero;
+    //	// change value of this rock in the array so we don't try extracting from it anymore
+    //	rocksDetected [currRockIndex] = Vector3.zero;
 
-	//	// Cycle the array to see if there is any more rock around us
-	//	CycleRocksArray ();
-	//}
+    //	// Cycle the array to see if there is any more rock around us
+    //	CycleRocksArray ();
+    //}
 }

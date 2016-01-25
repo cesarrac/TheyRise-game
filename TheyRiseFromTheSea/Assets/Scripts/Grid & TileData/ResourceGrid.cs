@@ -205,8 +205,9 @@ public class ResourceGrid : MonoBehaviour{
 
         // This will grab an empty tile position, check its surrounding tiles and make sure there are no rocks in the way
         Vector2 t_pos = new Vector2();
+
         // Try to get a clean empty position 5 times.
-        int getPosAttempts = 5;
+        int getPosAttempts = 10;
         for (int i = 0; i < getPosAttempts; i++)
         {
             if (t_pos == null || t_pos == Vector2.zero)
@@ -230,11 +231,76 @@ public class ResourceGrid : MonoBehaviour{
     {
         // Select a random empty tile position
         Vector2 pos = emptyTilesArray[pseudoRandom.Next(0, emptyTilesArray.Length - 1)];
-
+    
         // Check its neighbors. 
+        // First check for rocks
+        bool rockInTheWay = false, waterIntheWay = false;
 
-        // If it doesnt match all criteria
+        for (int x = (int) pos.x - 2; x <= pos.x + 2; x++)
+        {
+            for (int y = (int) pos.y - 2; y <= pos.y + 2; y++)
+            {
+                if (CheckForResource(x, y, TileData.Types.rock))
+                {
+                    rockInTheWay = true;
+                }
 
+                if (CheckForResource(x, y, TileData.Types.water))
+                {
+                    waterIntheWay = true;
+                }
+            }
+        }
+
+        // If no water or rock was detected retun position
+        if (!rockInTheWay && !waterIntheWay)
+        {
+            return pos;
+        }
+        else
+        {        // If it doesnt match all criteria return zero and attempt this again
+            return Vector2.zero;
+        }
+
+
+
+    }
+
+    public bool CheckForResource(int x, int y, TileData.Types rType)
+    {
+        if (rType == TileData.Types.rock)
+        {
+            if (tiles[x, y].tileType == TileData.Types.rock)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else if (rType == TileData.Types.water)
+        {
+            if (tiles[x, y].tileType == TileData.Types.water)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (tiles[x, y].tileType == TileData.Types.mineral)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 
     bool WaterCheck(int x, int y)
@@ -542,6 +608,14 @@ public class ResourceGrid : MonoBehaviour{
             return spawnedTiles[x, y];
         else
             return null;
+    }
+
+    public Vector3 GetTileWorldPos(int x, int y)
+    {
+        Vector3 worldBottomLeft = transform.position - Vector3.right * mapSizeX / 2 - Vector3.up * mapSizeY / 2;
+        Vector3 worldPoint = worldBottomLeft + Vector3.right * x + Vector3.up * y;
+
+        return worldPoint;
     }
 
     public int ExtractFromTile(int x, int y, int ammnt, bool isHandDrill = false)

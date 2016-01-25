@@ -127,35 +127,44 @@ public class DeSalt_Plant : ExtractionBuilding {
                 }
                 else
                 {
-                    if (output != null && isConnectedToOutput)
+                    if (!pickUpSpawned)
                     {
-                        if (CheckOutputStorage())
-                        {
-
-                            StopCoroutine("ShowStatusMessage");
-                            StartCoroutine("ShowStatusMessage");
-                            statusMessage = "Sending!";
-                        }
-                        else
-                        {
-                            if (output == null)
-                            {
-                                // No output connected. My storage is full
-                                StopCoroutine("ShowStatusMessage");
-                                StartCoroutine("ShowStatusMessage");
-                                statusMessage = "Full!";
-                            }
-                            else
-                            {
-                                // OUTPUT STORAGE FULL:
-                                StopCoroutine("ShowStatusMessage");
-                                StartCoroutine("ShowStatusMessage");
-                                statusMessage = "Output Full!";
-                            }
-
-                        }
+                        SpawnPickUp();
+                        pickUpSpawned = true;
                     }
+
                 }
+                //else
+                //{
+                //    if (output != null && isConnectedToOutput)
+                //    {
+                //        if (CheckOutputStorage())
+                //        {
+
+                //            StopCoroutine("ShowStatusMessage");
+                //            StartCoroutine("ShowStatusMessage");
+                //            statusMessage = "Sending!";
+                //        }
+                //        else
+                //        {
+                //            if (output == null)
+                //            {
+                //                // No output connected. My storage is full
+                //                StopCoroutine("ShowStatusMessage");
+                //                StartCoroutine("ShowStatusMessage");
+                //                statusMessage = "Full!";
+                //            }
+                //            else
+                //            {
+                //                // OUTPUT STORAGE FULL:
+                //                StopCoroutine("ShowStatusMessage");
+                //                StartCoroutine("ShowStatusMessage");
+                //                statusMessage = "Output Full!";
+                //            }
+
+                //        }
+                //    }
+                //}
 
 
                 break;
@@ -166,9 +175,11 @@ public class DeSalt_Plant : ExtractionBuilding {
                 StopCoroutine("ShowStatusMessage");
                 StartCoroutine("ShowStatusMessage");
 
+                pickUpSpawned = false;
+
                 if (CheckSearchForResource())
                 {
-                    // If it's true it means the position of rock has been defined
+                    // If it's true it means the position of water has been defined
                     _state = State.EXTRACTING;
                 }
                 else
