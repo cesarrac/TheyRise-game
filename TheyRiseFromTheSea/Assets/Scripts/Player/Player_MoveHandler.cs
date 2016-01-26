@@ -99,7 +99,7 @@ public class Player_MoveHandler : MonoBehaviour {
 		// Store the axis Inputs in a Vector 2
 		move_vector = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical"));
 
-       // ListenForMouseDash();
+       ListenForMouseDash();
 
 	}
 

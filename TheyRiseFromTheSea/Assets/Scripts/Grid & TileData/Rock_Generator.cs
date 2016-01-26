@@ -125,43 +125,86 @@ public class Rock_Generator : MonoBehaviour {
   
         for (int i = 0; i < totalRocksOnMap; i++)
         {
-            // Attempt to get a position for this Rock 10 times...
-            int rockPosAttempts = 10;
+            // Here we attempt to get a position for this rock. A legal position means there's no water around it.
 
-            // During each attempt, check that the position has no water tiles within a 5 tile radius of itself...
-            Vector2 tempPos = GetPosition();
+            // Start with an empty Vector2, this will be filled if a legal position is found.
             Vector2 pos = new Vector2();
 
-            for (int x = (int)tempPos.x - 5; x < tempPos.x + 5; x++)
+            // We will allow 5 attempts to get a legal position.
+            int rockPosAttempts = 5;
+
+            // Loop to check for legal position
+            for (int j = 0; j < rockPosAttempts; j++)
             {
-                for (int y = (int)tempPos.y - 5; y < tempPos.y + 5; y++)
+                // During each attempt we try to assign a legal position...
+
+                // ... if pos is Null or Vector2.zero, this attempt failed...
+                if (pos == null || pos == Vector2.zero)
                 {
-                    if (ResourceGrid.Grid.CheckForResource(x, y, TileData.Types.water) == false)
-                    {
-                        pos = new Vector2(x, y);
-                    }
+                    pos = CheckForWater();
+                }
+                // ... if it's NOT Null or Vector2.zero, this attempt SUCCEDED...
+                else
+                {
+                    // ... so we break out of the loop!
+                    break;
                 }
             }
-            // If this was not the last attempt, try again.
-            if (rockPosAttempts > 0)
-            {
 
-            }
-            // If all attempts to get a legal position fail, continue to next rock in the loop
+            // If the attempt FAILED pos will be equal to null or Vector2.zero
             if (pos == null || pos == Vector2.zero)
             {
+                // In this case, give up with this rock and continue to the next Rock in the loop
                 continue;
             }
 
-
+            // If the attempt SUCCEDED a new Ore Patch will be set, using this new position
             SetNewOrePatch((int)pos.x, (int) pos.y, GetRockTypeFromLandType(pos));
         }
     }
 
     Vector2 GetPosition()
     {
-        return TileTexture_3.instance.centerTiles[ Random.Range(0, TileTexture_3.instance.centerTiles.Length) ];
+        return TileTexture_3.instance.centerTiles[ResourceGrid.Grid.pseudoRandom.Next(0, TileTexture_3.instance.centerTiles.Length) ];
         
+    }
+
+    Vector2 CheckForWater()
+    {
+        // First get a random position from the Empty Tiles array, using the psedorandom tied to this Map's seed...
+
+        //Vector2 tempPos = ResourceGrid.Grid.emptyTilesArray[ResourceGrid.Grid.pseudoRandom.Next(0, ResourceGrid.Grid.emptyTilesArray.Length - 1)];
+        Vector2 tempPos = GetPosition();
+
+        // .. then check for water in a 5 tile radius around this temporary position.
+
+        // If Water is found, this flag will turn true.
+        bool waterFound = false;
+
+        for (int x = (int)tempPos.x - 8; x < tempPos.x + 8; x++)
+        {
+            for (int y = (int)tempPos.y - 8; y < tempPos.y + 8; y++)
+            {
+                if (ResourceGrid.Grid.CheckForResource(x, y, TileData.Types.water) == true)
+                {
+                    waterFound = true;
+
+                    // If just ONE tile is water, we can break out of the loop after setting the flag to true
+                    break;
+                }
+            }
+        }
+
+        // If the water flag was not set to true, then we return the temporary random position.
+        if (!waterFound)
+        {
+            return tempPos;
+        }
+        else
+        {
+            // If Water was found we return Vector2 zero and attempt to get a position again if there are attempts left.
+            return Vector2.zero;
+        }
     }
 
     Rock.RockType GetRockTypeFromLandType(Vector2 position)

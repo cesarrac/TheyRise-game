@@ -268,39 +268,20 @@ public class ResourceGrid : MonoBehaviour{
 
     public bool CheckForResource(int x, int y, TileData.Types rType)
     {
-        if (rType == TileData.Types.rock)
+        if (CheckIsInMapBounds(x, y) == false)
         {
-            if (tiles[x, y].tileType == TileData.Types.rock)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return true;
         }
-        else if (rType == TileData.Types.water)
+
+        if (tiles[x, y].tileType == rType)
         {
-            if (tiles[x, y].tileType == TileData.Types.water)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return true;
         }
         else
         {
-            if (tiles[x, y].tileType == TileData.Types.mineral)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return false;
         }
+
     }
 
     bool WaterCheck(int x, int y)
