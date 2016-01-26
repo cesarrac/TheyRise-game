@@ -44,8 +44,10 @@ public class TileData  {
 
 	public string tileName;
 
-	//public int energyCost, oreCost;
     public int nanoBotCost { get; protected set; }
+
+    // Value for Resources that can be extracted
+    public float hardness { get; protected set; }
 
     public int posX { get; protected set; }
     public int posY { get; protected set; }
@@ -70,15 +72,24 @@ public class TileData  {
 		tileName = name;
         nanoBotCost = nCost;
 	}
-	public TileData(int x, int y, Types type, int resourceQuantity, int moveCost){
+	public TileData(int x, int y, Types type, int resourceQuantity, int moveCost, int _hardness = 0){
         posX = x;
         posY = y;
 
         tileType = type;
 		maxResourceQuantity = resourceQuantity;
+
+        // If this is a water tile, set Extraction hardness to 0
+        if (type == Types.water)
+        {
+            hardness = 0;
+        }
+    
+
 		movementCost = moveCost;
 
-		if (type != Types.empty && type != Types.water) {
+        // MAKING ROCK UNWAKABLE
+        if (type != Types.empty && type != Types.water) {
 			isWalkable = false;
 		}
 		tileName = type.ToString ();

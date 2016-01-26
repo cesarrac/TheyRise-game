@@ -30,6 +30,8 @@ public class DeSalt_Plant : ExtractionBuilding {
 
     public int ExtractAmmnt;
 
+    public float ExtractPower;
+
     public int startingStorageCap;
     public int PersonalStorageCap { get; protected set; }
 
@@ -37,7 +39,7 @@ public class DeSalt_Plant : ExtractionBuilding {
 
         PersonalStorageCap = startingStorageCap;
 
-        Init(TileData.Types.water, ExtractRate, ExtractAmmnt, PersonalStorageCap, transform);
+        Init(TileData.Types.water, ExtractRate, ExtractPower,  ExtractAmmnt, PersonalStorageCap, transform);
 
         _state = State.SEARCHING;
     }

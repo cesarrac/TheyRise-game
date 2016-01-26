@@ -28,14 +28,19 @@ public class ExtractionBuilding : MonoBehaviour {
         public int materialsConsumed { get; protected set; }
         int _materialsConsumed { get { return materialsConsumed; } set { materialsConsumed = Mathf.Clamp(value, 1, 100); } }
 
+        // Power versus the resources Hardness will result in time (in seconds) it takes for this machine to extract its target resource
+        public float extractPower { get; protected set; }
+        float _extractPower { get { return extractPower; } set { extractPower = Mathf.Clamp(value, 1, 100);  } }
+
         // Constructor
-        public ExtractorStats(float rate, int ammount, int personalStorageCap, int secondStorageCap = 0, int materialConsumed = 0)
+        public ExtractorStats(float rate, int ammount, float power, int personalStorageCap, int secondStorageCap = 0, int materialConsumed = 0)
         {
             _extractRate = rate;
             _extractAmmount = ammount;
             _personalStorageCap = personalStorageCap;
             _secondStorageCap = secondStorageCap;
             _materialsConsumed = materialConsumed;
+            _extractPower = power;
         }
 
         // Constructor for a Storage Unit
@@ -44,7 +49,10 @@ public class ExtractionBuilding : MonoBehaviour {
             _secondStorageCap = storageCap;
         }
 
-
+        public void SetCurrentRate(float newRate)
+        {
+            _extractRate = newRate;
+        }
     }
 
 
@@ -115,6 +123,8 @@ public class ExtractionBuilding : MonoBehaviour {
 
     public bool pickUpSpawned;
 
+    Action rateCalcCallback;
+
     // STATE MACHINE:
     public enum State
     {
@@ -130,9 +140,9 @@ public class ExtractionBuilding : MonoBehaviour {
     public State _state { get; protected set; }
 
     // INITIALIZERS:
-    public void Init(TileData.Types r_type, float rate, int ammnt, int storageCap, Transform _trans)
+    public void Init(TileData.Types r_type, float rate, float power, int ammnt, int storageCap, Transform _trans)
     {
-        extractorStats = new ExtractorStats(rate, ammnt, storageCap);
+        extractorStats = new ExtractorStats(rate, ammnt, power, storageCap);
         resourceType = r_type;
         myTransform = _trans;
 
@@ -284,12 +294,21 @@ public class ExtractionBuilding : MonoBehaviour {
 
     }
 
+    void SetExtractRate(float currExtractRate, float power, float hardness)
+    {
+        extractorStats.SetCurrentRate((hardness / power) + currExtractRate);
+        Debug.Log("EXTRACTOR: Current Power is " + power + " and the Tile Hardness is " + hardness);
+        Debug.Log("EXTRACTOR: Setting Extraction Rate to: " + extractorStats.extractRate);
+    }
+
     public IEnumerator ExtractResource()
     {
         // while true, extract, wait extract rate, check if there's ore left: if no break out and  change state to searching
         while (true)
         {
-
+            // Calculate and Set the true extraction rate considering the current target resource tile
+            SetExtractRate(extractorStats.extractRate, extractorStats.extractPower, targetTile.hardness);
+           
             yield return new WaitForSeconds(extractorStats.extractRate);
 
             if (!productionHalt)

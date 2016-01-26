@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class Extractor : ExtractionBuilding {
 
+    public float ExtractPower;
+
     public float ExtractRate;
 
     public int ExtractAmmnt;
@@ -38,7 +40,7 @@ public class Extractor : ExtractionBuilding {
 
         //resource_grid = ResourceGrid.Grid;
 
-        Init(TileData.Types.rock, ExtractRate, ExtractAmmnt, PersonalStorageCap, transform);
+        Init(TileData.Types.rock, ExtractRate, ExtractPower, ExtractAmmnt, PersonalStorageCap, transform);
 
 
         inventoryTypeCallback = SplitRockByType;
@@ -57,7 +59,6 @@ public class Extractor : ExtractionBuilding {
         lineR.enabled = false;
 
     }
-
 
     void Update () {
 
@@ -107,9 +108,7 @@ public class Extractor : ExtractionBuilding {
                     {
                         // Store the rock type of the target rock
                         // Define my target tile's gameobject
-
-                      
-
+                        
                         StopCoroutine("ExtractResource");
                         StartCoroutine("ExtractResource");
                         isExtracting = true;
