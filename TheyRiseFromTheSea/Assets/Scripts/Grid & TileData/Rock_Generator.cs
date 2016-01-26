@@ -125,9 +125,35 @@ public class Rock_Generator : MonoBehaviour {
   
         for (int i = 0; i < totalRocksOnMap; i++)
         {
-            // Get a position
-            Vector2 pos = GetPosition();
-       
+            // Attempt to get a position for this Rock 10 times...
+            int rockPosAttempts = 10;
+
+            // During each attempt, check that the position has no water tiles within a 5 tile radius of itself...
+            Vector2 tempPos = GetPosition();
+            Vector2 pos = new Vector2();
+
+            for (int x = (int)tempPos.x - 5; x < tempPos.x + 5; x++)
+            {
+                for (int y = (int)tempPos.y - 5; y < tempPos.y + 5; y++)
+                {
+                    if (ResourceGrid.Grid.CheckForResource(x, y, TileData.Types.water) == false)
+                    {
+                        pos = new Vector2(x, y);
+                    }
+                }
+            }
+            // If this was not the last attempt, try again.
+            if (rockPosAttempts > 0)
+            {
+
+            }
+            // If all attempts to get a legal position fail, continue to next rock in the loop
+            if (pos == null || pos == Vector2.zero)
+            {
+                continue;
+            }
+
+
             SetNewOrePatch((int)pos.x, (int) pos.y, GetRockTypeFromLandType(pos));
         }
     }
@@ -185,8 +211,9 @@ public class Rock_Generator : MonoBehaviour {
 
     void SetNewOrePatch(int leadX, int leadY, Rock.RockType rType)
     {
-        // FIX THIS! Making density calculation totally random
-        int distance = Random.Range(0, 21);
+        // FIX THIS! Making density calculation totally random!
+
+        int distance = ResourceGrid.Grid.pseudoRandom.Next(0, 21);
 
         int density = 0;
         if (distance >= 15)
