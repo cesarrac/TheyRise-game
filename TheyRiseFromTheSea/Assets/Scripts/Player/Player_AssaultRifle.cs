@@ -28,8 +28,6 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 
         rigid_body = GetComponentInParent<Rigidbody2D>();
 
-        source = GetComponentInParent<AudioSource>();
-
         // Get sights
         sightStart = GetComponentInParent<Player_HeroAttackHandler>().sightStart;
         sightEnd = GetComponentInParent<Player_HeroAttackHandler>().sightEnd;

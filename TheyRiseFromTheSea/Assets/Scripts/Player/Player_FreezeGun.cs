@@ -21,8 +21,6 @@ public class Player_FreezeGun : Player_GunBaseClass {
 
         rigid_body = GetComponentInParent<Rigidbody2D>();
 
-        source = GetComponentInParent<AudioSource>();
-
         gameMaster = GameMaster.Instance;
 
         objPool = ObjectPool.instance;

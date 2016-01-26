@@ -26,6 +26,8 @@ public class GunStats
     public float kickAmmt { get; protected set; }
 
     public bool shootsProjectiles { get; protected set; }
+
+    public string soundName { get; protected set; }
     
     // Projectile Shooters
     public GunStats(float rate, float reloadSpd, int ammo, float dmg, float kick, string projectileName)

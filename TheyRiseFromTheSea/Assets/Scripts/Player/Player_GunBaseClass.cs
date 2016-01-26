@@ -60,9 +60,6 @@ public class Player_GunBaseClass : MonoBehaviour {
 
 	public GameMaster gameMaster;
 
-    public AudioClip shootSound;
-    public AudioSource source;
-
     public bool isReloading { get; protected set; }
 
     public Unit_StatusIndicator status_Indicator { get; protected set; }
@@ -179,8 +176,11 @@ public class Player_GunBaseClass : MonoBehaviour {
             {
                 // Actually shoot the bullet
                 VisualProjectileShoot();
+
+                // FIX THIS! Right now this is playing one sounds fits all for all guns!
                 // Play gun shot sound
-                source.PlayOneShot(shootSound, 0.5f);
+                Sound_Manager.Instance.PlaySound(gameObject.name);
+
                 // Apply gun kick to Player
                 StartCoroutine(GunKick());
                 // Take a bullet from the gun's chamber ammo

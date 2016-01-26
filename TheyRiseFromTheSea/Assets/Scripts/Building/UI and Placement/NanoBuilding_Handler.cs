@@ -169,7 +169,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
             // Play build sound
             // audio_source.PlayOneShot(buildSound, 0.5f);
-            Sound_Manager.Instance.Build();
+            Sound_Manager.Instance.PlaySound("Build");
         }
       
     }
