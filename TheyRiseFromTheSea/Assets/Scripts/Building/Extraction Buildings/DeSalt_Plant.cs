@@ -39,9 +39,10 @@ public class DeSalt_Plant : ExtractionBuilding {
 
         PersonalStorageCap = startingStorageCap;
 
-        Init(TileData.Types.water, ExtractRate, ExtractPower,  ExtractAmmnt, PersonalStorageCap, transform);
+       // Init(TileData.Types.water, ExtractRate, ExtractPower,  ExtractAmmnt, PersonalStorageCap, transform);
+        BlueprintDatabase.Instance.GetExtractorStats("Desalination Pump", myTransform, this, TileData.Types.water);
 
-        _state = State.SEARCHING;
+      _state = State.SEARCHING;
     }
 
 

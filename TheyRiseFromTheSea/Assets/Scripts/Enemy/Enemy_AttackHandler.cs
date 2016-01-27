@@ -324,7 +324,7 @@ public class Enemy_AttackHandler : Unit_Base {
 
                 StartCoroutine(JumpAttack(towerAttackingMe.transform.parent.position));
 
-                HandleDamageToTile();
+                HandleDamageToBattleTower();
             }
             else
             {
@@ -408,12 +408,12 @@ public class Enemy_AttackHandler : Unit_Base {
     }
 
 
-    void HandleDamageToTile()
+    void HandleDamageToBattleTower()
     {
         if (pathHandler != null)
         {
             // Check if tile can still take damage, if so Unit_Base damages it
-            if (!AttackTile(resourceGrid.TileFromWorldPoint(towerAttackingMe.transform.root.position)))
+            if (!AttackTileUnit(towerAttackingMe.GetComponent<Unit_Base>(), resourceGrid.TileFromWorldPoint(towerAttackingMe.transform.parent.position)))
             {
                 // Set state back to moving
                 _state = State.MOVING;

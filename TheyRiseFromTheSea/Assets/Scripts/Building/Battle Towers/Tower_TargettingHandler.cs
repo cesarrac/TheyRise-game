@@ -10,26 +10,7 @@ public class Tower_TargettingHandler : Unit_Base
     /// Seeks Enemy units using a Linecast
     /// </summary>
 
-    [System.Serializable]
-    public class GunStats
-    {
-        private int _ammo;
-        public int startingAmmo;
-        public int currAmmo { get { return _ammo; } set { _ammo = Mathf.Clamp(value, 1, 20); } }
-
-        private float _reloadTime;
-        public float startingReloadTime;
-        public float currReloadTime { get { return _reloadTime; } set { _reloadTime = Mathf.Clamp(value, 1f, 10f); } }
-
-        public void Init()
-        {
-            currAmmo = startingAmmo;
-            currReloadTime = startingReloadTime;
-        }
-    }
-
-    [SerializeField]
-    private GunStats gunStats = new GunStats();
+    public TowerGunStats gunStats { get; protected set; }
 
     public Transform sightStart, sightEnd;
 
@@ -65,6 +46,7 @@ public class Tower_TargettingHandler : Unit_Base
 
     Action<Unit_Base> CB_DoDamage;
 
+    public string towerName;
 
     void OnEnable()
     {
@@ -74,30 +56,43 @@ public class Tower_TargettingHandler : Unit_Base
     void Awake()
     {
         CB_DoDamage = HandleDamageToUnit;
+
+        // Get Stats from Database
+        BlueprintDatabase.Instance.GetBattleStats(towerName, InitGunStats, InitTowerStats);
+    }
+
+    void InitGunStats(TowerGunStats towerStats)
+    {
+        gunStats = new TowerGunStats(towerStats.startingAmmo, towerStats.startingReloadTime);
+
+    }
+
+    void InitTowerStats(UnitStats unitStats)
+    {
+        stats = new UnitStats();
+        stats.InitStartingStats(unitStats.maxHP, unitStats.startDefence, unitStats.startAttack, unitStats.startShield, unitStats.startRate, unitStats.startDamage, 0);
     }
 
     void Start()
     {
-        //		if (bStatusIndicator == null)
-        //			Debug.Log ("GUN: Building Status Indicator NOT SET!");
 
         build_click_handler = GetComponentInParent<Building_ClickHandler>();
 
+        stats.Init();
+
         // Initialize Gun stats, starting ammo
-        gunStats.Init();
-        Debug.Log("GUN: Gun stats initialized!");
+        //gunStats.Init();
 
         // Set initial reload Count Down to starting reload time
-        reloadCountDown = gunStats.startingReloadTime;
+        reloadCountDown = gunStats.currReloadTime;
 
         // Also set the initial ammo
-        ammoCount = gunStats.startingAmmo;
+        ammoCount = gunStats.currAmmo;
+
+        // Set the count down to Shoot to this Tower's fire rate
+        shootCountDown = stats.curRateOfAttk;
 
         resourceGrid = ResourceGrid.Grid;
-
-        // Initialize building stats
-        stats.Init();
-        InitTileStats((int)transform.position.x, (int)transform.position.y);
 
         objPool = ObjectPool.instance;
 
@@ -114,8 +109,7 @@ public class Tower_TargettingHandler : Unit_Base
 
         }
 
-        // set the count down to Shoot to this Tower's fire rate
-        shootCountDown = stats.startRate;
+
 
     }
 

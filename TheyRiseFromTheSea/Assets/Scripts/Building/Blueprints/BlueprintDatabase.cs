@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using System;
 
 public class BlueprintDatabase : MonoBehaviour {
 
@@ -9,12 +10,14 @@ public class BlueprintDatabase : MonoBehaviour {
 
     // FIX ALL OF THIS! Eventually this should read from an external database. For now I'm going to hardcode all the blueprints in the game here.
 
-    Dictionary<string, Blueprint> blueprints_all;
+    Dictionary<string, Blueprint> blueprintsMap;
+    Dictionary<string, Blueprint_Extraction> extractorsMap;
+    Dictionary<string, Blueprint_Battle> battleTowersMap;
 
     // FIX THIS! 
-   // public int maxBPAllowed = 3;
+    // public int maxBPAllowed = 3;
 
-   // List<Blueprint> selectedBlueprints = new List<Blueprint>();
+    // List<Blueprint> selectedBlueprints = new List<Blueprint>();
 
     public int shipLvlIndex = 0, planetLvlIndex = 1, inventoryLvlIndex = 2;
 
@@ -28,18 +31,19 @@ public class BlueprintDatabase : MonoBehaviour {
         if (Instance == null)
         {
             Instance = this;
-            //DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            //DestroyImmediate(gameObject);
+            DestroyImmediate(gameObject);
         }
 
 
-        if ( blueprints_all == null)
+        if ( blueprintsMap == null)
         {
             Init();
-
+            InitExtractors();
+            InitBattleTowers();
         }
 
 
@@ -59,8 +63,8 @@ public class BlueprintDatabase : MonoBehaviour {
         if (!hero_nanoBuilder.CheckForBlueprint(TileData.Types.terraformer))
         {
             // As soon as we have access to the Hero, the first blueprint to load into it would be the Terraformer (this assumes BP database has been Initialized)
-            hero_nanoBuilder.AddBluePrint(TileData.Types.terraformer, blueprints_all["Terraformer"]);
-            Debug.Log("Hero added blueprint for " + blueprints_all["Terraformer"].buildingName);
+            hero_nanoBuilder.AddBluePrint(TileData.Types.terraformer, blueprintsMap["Terraformer"]);
+            Debug.Log("Hero added blueprint for " + blueprintsMap["Terraformer"].buildingName);
         }
 
         // If we are on the Inventory/Blueprint Loader scene, we should display the memory count on the Hero's nanobuilder
@@ -75,7 +79,7 @@ public class BlueprintDatabase : MonoBehaviour {
 
     void Init()
     {
-        blueprints_all = new Dictionary<string, Blueprint>
+        blueprintsMap = new Dictionary<string, Blueprint>
         {
             {"Terraformer", new Blueprint("Terraformer", 0, 0, TileData.Types.terraformer, "Turns bad soil into good soil.") }, // < ---- Always include the Terraformer and no cost
             {"Sniper Gun", new Blueprint("Sniper Gun", 3, 10, TileData.Types.sniper, "Long distance Target acquisition limited by slow firing rate.") },
@@ -89,6 +93,8 @@ public class BlueprintDatabase : MonoBehaviour {
             {"Machine Gun", new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun, "Short distance, fast firing rate, single target acquisition.") }
         };
 
+        //blueprints_all["Extractor"].
+
         //// Add +1 to maxBPAllowed since we are using it as a 0 based index below, and to take into account the Terraformer
        // maxBPAllowed += 1;
 
@@ -96,12 +102,46 @@ public class BlueprintDatabase : MonoBehaviour {
         //selectedBlueprints.Add(blueprints_all["Terraformer"]);
     }
 
+    void InitExtractors()
+    {
+        extractorsMap = new Dictionary<string, Blueprint_Extraction>();
+        extractorsMap.Add("Extractor", new Blueprint_Extraction(20, 10, 1, 100));
+        extractorsMap.Add("Desalination Pump", new Blueprint_Extraction(20, 20, 1, 100));
+    }
+
+    void InitBattleTowers()
+    {
+        battleTowersMap = new Dictionary<string, Blueprint_Battle>();
+        battleTowersMap.Add("Machine Gun", new Blueprint_Battle(12, 2, 0.8f, 5, 25, 2, 1, 0));
+        battleTowersMap.Add("Sniper Gun", new Blueprint_Battle(12, 2, 1.5f, 8 ,25, 2, 1, 0));
+    }
+
+    public void GetExtractorStats(string id, Transform objTransform, ExtractionBuilding extractor, TileData.Types resourceType)
+    {
+        if (extractorsMap.ContainsKey(id))
+        {
+            Debug.Log("BP Database: Found stats for " + id);
+            extractor.Init(resourceType, extractorsMap[id].extractorStats.extractRate, extractorsMap[id].extractorStats.extractPower,
+                extractorsMap[id].extractorStats.extractAmmount, extractorsMap[id].extractorStats.personalStorageCapacity, objTransform);
+        }
+    }
+
+    public void GetBattleStats(string id, Action<TowerGunStats> InitGunStats, Action<UnitStats> InitUnitStats)
+    {
+        if (battleTowersMap.ContainsKey(id))
+        {
+            Debug.Log("BP Database: Found stats for " + id);
+            InitGunStats(battleTowersMap[id].battleStats);
+            InitUnitStats(battleTowersMap[id].unitStats);
+        }
+    }
+
     // This will Display the Selected Blueprint's info and store it's info in case the Player decides to Load it to the Builder
     public void SelectBlueprint(string bpType)
     {
-        if (blueprints_all.ContainsKey(bpType))
+        if (blueprintsMap.ContainsKey(bpType))
         {
-            curSelectedBP = blueprints_all[bpType];
+            curSelectedBP = blueprintsMap[bpType];
 
             DisplaySelectedBPInfo();
         }
@@ -215,37 +255,30 @@ public class BlueprintDatabase : MonoBehaviour {
         UI_Manager.Instance.DisplayNanoBuilderMemory(hero_nanoBuilder.cur_memory, hero_nanoBuilder.memoryBank);
     }
 
+    // UPGRADES:
 
-    //// Loading it to the Hero's Nanobuilder when the Player presses Ready in the inventory / blueprints screen
-    //public void LoadAllBPNanoBuilder()
-    //{
-    //    // Load the terraformer first
-    //    GameMaster.Instance.theHero.nanoBuilder.AddBluePrint(selectedBlueprints[0].tileType, selectedBlueprints[0]);
-    //    // Start i at 1 since the 0 position is taken by the Terraformer
-    //    for (int i = 1; i < maxBPAllowed; i++)
-    //    {
-    //        GameMaster.Instance.theHero.nanoBuilder.AddBluePrint(selectedBlueprints[i].tileType, selectedBlueprints[i]);
-    //    }
-    //}
+    public void UpgradeBattleBPAmmo(string id, int newAmmo)
+    {
+        if (battleTowersMap.ContainsKey(id))
+        {
+            battleTowersMap[id].UpgradeAmmo(newAmmo);
+        }
+    }
 
-    //public void LoadToNanoBuilderHandler(NanoBuilding_Handler nano_builder)
-    //{
-    //    if (selectedBlueprints.Count == maxBPAllowed)
-    //    {
-    //        // Init the Nano builder's blueprint array and dict
-    //        nano_builder.InitBP(maxBPAllowed);
+    public void UpgradeBattleBPReloadSpd(string id, float newSpeed)
+    {
+        if (battleTowersMap.ContainsKey(id))
+        {
+            battleTowersMap[id].UpgradeReloadSpeed(newSpeed);
+        }
+    }
 
-    //        // Load the terraformer first
-    //        nano_builder.AddBlueprint(0, selectedBlueprints[0].tileType, selectedBlueprints[0]);
 
-    //        // Start i at 1 since the 0 position is taken by the Terraformer
-    //        for (int i = 1; i < maxBPAllowed; i++)
-    //        {
-    //            nano_builder.AddBlueprint(i, selectedBlueprints[i].tileType, selectedBlueprints[i]);
-    //        }
-
-    //        nano_builder.SetBPSprites();
-    //    }
-    
-    //}
+    public void UpgradeBattleBPUnitStats(string id, string statID, float newAmmnt)
+    {
+        if (battleTowersMap.ContainsKey(id))
+        {
+            battleTowersMap[id].UpgradeUnitStat(statID, newAmmnt);
+        }
+    }
 }

@@ -2,6 +2,14 @@
 using System.Collections;
 
 [System.Serializable]
+public class TileStats
+{
+    float _hp, _shield, _defense, _attack;
+    int _nanoBotCost;
+    
+
+}
+
 public class TileData  {
 	
 	public enum Types{

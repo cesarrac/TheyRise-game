@@ -4,9 +4,9 @@ using System.Collections;
 [System.Serializable]
 public class UnitStats
 {
-    public float maxHP, startDefence, startAttack, startShield, startRate, startDamage, startSpecialDmg;
+    public float maxHP, startDefence, startAttack, startShield, startRate, startDamage, startSpecialDmg, startReloadSpd;
     public int creditReward;
-    private float _hitPoints, _defence, _attack, _shield, _damage, _specialDamage, _rateOfAttack;
+    private float _hitPoints, _defence, _attack, _shield, _damage, _specialDamage, _rateOfAttack, _reloadSpd;
     private int _creditValue;
 
     public float curHP { get { return _hitPoints; } set { _hitPoints = Mathf.Clamp(value, 0f, maxHP); } }
@@ -15,6 +15,9 @@ public class UnitStats
     public float curShield { get { return _shield; } set { _shield = Mathf.Clamp(value, 0f, 100f); } }
     public float curRateOfAttk { get { return _rateOfAttack; } set { _rateOfAttack = Mathf.Clamp(value, 0f, 5f); } }
     public float curDamage { get { return _damage; } set { _damage = Mathf.Clamp(value, 0f, 100f); } }
+    public float curReloadSpeed { get { return _reloadSpd; } set { _reloadSpd = Mathf.Clamp(value, 0.1f, 10f); } }
+
+
     public float curSPdamage { get { return _specialDamage; } set { _specialDamage = Mathf.Clamp(value, 0f, 100f); } }
 
     public int curCreditValue { get { return _creditValue; } set { _creditValue = Mathf.Clamp(value, 0, 500); } }
@@ -31,6 +34,7 @@ public class UnitStats
         curDamage = startDamage;
         curSPdamage = startSpecialDmg;
         curCreditValue = creditReward;
+        curReloadSpeed = startReloadSpd;
     }
 
 
@@ -60,6 +64,22 @@ public class UnitStats
         startRate = 0;
         startDamage = 0;
         startSpecialDmg = 0;
+       // startReloadSpd = 0;
+
+        Init();
+    }
+
+    // Constructor used by battle towers
+    public UnitStats(float hp, float attk, float def, float shi, float rate)
+    {
+        maxHP = hp;
+        startDefence = def;
+        startAttack = attk;
+        startShield = _shield;
+        startRate = rate;
+        startDamage = 0;
+        startSpecialDmg = 0;
+       // startReloadSpd = rel_spd;
 
         Init();
     }
@@ -79,9 +99,9 @@ public class Unit_Base : MonoBehaviour {
 
 	// ENEMY UNITS ONLY:
 	// recording the tile they are attacking so we don't have to check its stats with each individual unit
-	TileData tileUnderAttack = null;
-	float tileDefence, tileShield, tileHP;
-	public bool canAttackTile;
+	//TileData tileUnderAttack = null;
+	//float tileDefence, tileShield, tileHP;
+	//public bool canAttackTile;
 
 //	public Damage_PopUp dmgPopUp; 
 	[Header("Optional (For Units): ")]
@@ -146,48 +166,94 @@ public class Unit_Base : MonoBehaviour {
             {
                 MasterState_Manager.Instance.mState = MasterState_Manager.MasterState.MISSION_FAILED;
             }
-            tileUnderAttack = null;
+           // tileUnderAttack = null;
             return false;
         }
       
     }
 
+    public bool AttackTileUnit(Unit_Base target, TileData tile)
+    {
+        if (target.stats.curHP > 0)
+        {
+
+            float def = (target.stats.curDefence + target.stats.curShield);
+
+            if (stats.curAttack > def)
+            {
+                //Debug.Log("UNIT: Attacking " + target.name + " DEF: " + def + " ATTK: " + stats.curAttack);
+
+                // Apply full damage
+                TakeDamage(target, stats.curDamage);
+
+
+            }
+            else
+            {
+                // hit for difference between def and attack
+                float calc = stats.curAttack - def;
+                float damageCalc = stats.curDamage - calc;
+
+                // always do MINIMUM 1 pt of damage
+                float clampedDamage = Mathf.Clamp(damageCalc, 1f, stats.curDamage);
+
+                // Debug.Log("UNIT: Can't beat " + target.name + "'s Defence, so I hit for " + clampedDamage);
+
+                TakeDamage(target, clampedDamage);
+
+            }
+
+            return true;
+        }
+        else
+        {
+            // target is dead by now
+            resourceGrid.DamageTile(tile, tile.hp);
+
+            Debug.Log("UNIT: Target Dead!");
+            //Die(unit.gameObject);
+
+            return false;
+
+        }
+    }
+
     // ********************** WARNING! This is the old Attack Unit method that really does not work as well!! ******************************
-    public void AttackOtherUnit(Unit_Base unit){
-		Debug.Log ("UNIT: target unit hp at " + unit.stats.curHP);
-		Debug.Log ("UNIT: My damage is " + stats.curDamage + " and my HP is " + stats.curHP);
+ //   public void AttackOtherUnit(Unit_Base unit){
+	//	Debug.Log ("UNIT: target unit hp at " + unit.stats.curHP);
+	//	Debug.Log ("UNIT: My damage is " + stats.curDamage + " and my HP is " + stats.curHP);
 
-		if (unit.stats.curHP > 0) {
+	//	if (unit.stats.curHP > 0) {
 
-			float def = (unit.stats.curDefence + unit.stats.curShield);
+	//		float def = (unit.stats.curDefence + unit.stats.curShield);
 
-			if (stats.curAttack > def){
-				Debug.Log("UNIT: Attacking " + unit.name + " DEF: " + def + " ATTK: " + stats.curAttack);
+	//		if (stats.curAttack > def){
+	//			Debug.Log("UNIT: Attacking " + unit.name + " DEF: " + def + " ATTK: " + stats.curAttack);
 
-				// Apply full damage
-				TakeDamage(unit, stats.curDamage);
+	//			// Apply full damage
+	//			TakeDamage(unit, stats.curDamage);
 
-			}else{
-				// hit for difference between def and attack
-				float calc = stats.curAttack - def;
-				float damageCalc = stats.curDamage - calc;
+	//		}else{
+	//			// hit for difference between def and attack
+	//			float calc = stats.curAttack - def;
+	//			float damageCalc = stats.curDamage - calc;
 
-				// always do MINIMUM 1 pt of damage
-				float clampedDamage = Mathf.Clamp(damageCalc, 1f, stats.curDamage);
+	//			// always do MINIMUM 1 pt of damage
+	//			float clampedDamage = Mathf.Clamp(damageCalc, 1f, stats.curDamage);
 
-				Debug.Log("UNIT: Can't beat " + unit.name + "'s Defence, so I hit for " + clampedDamage);
+	//			Debug.Log("UNIT: Can't beat " + unit.name + "'s Defence, so I hit for " + clampedDamage);
 
-				TakeDamage (unit, clampedDamage);
+	//			TakeDamage (unit, clampedDamage);
 
-			}
-		} else {
-			// target is dead by now
-			Debug.Log("UNIT: Target Dead!");
-			Die (unit.gameObject);
+	//		}
+	//	} else {
+	//		// target is dead by now
+	//		Debug.Log("UNIT: Target Dead!");
+	//		Die (unit.gameObject);
 		
-		}
+	//	}
 	
-	}
+	//}
     // *************************************************************************
 
 

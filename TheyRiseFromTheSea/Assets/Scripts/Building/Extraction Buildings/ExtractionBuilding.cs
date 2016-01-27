@@ -2,59 +2,57 @@
 using System.Collections;
 using System;
 
-public class ExtractionBuilding : MonoBehaviour {
-    
-   
+public class ExtractorStats
+{
+    // Seconds it takes to call the extract method and get more of a resource
+    public float extractRate { get; protected set; }
+    float _extractRate { get { return extractRate; } set { extractRate = Mathf.Clamp(value, 10f, 120f); } } // <------- Use this in a constructor to set extract Rate
 
-    public class ExtractorStats
+    // How much of a resource this building can extract
+    public int extractAmmount { get; protected set; }
+    int _extractAmmount { get { return extractAmmount; } set { extractAmmount = Mathf.Clamp(value, 1, 1000); } } // <------- Use this in a constructor to set extract ammount
+
+    // How many units of a resource can this building store
+    public int personalStorageCapacity { get; protected set; }
+    int _personalStorageCap { get { return personalStorageCapacity; } set { personalStorageCapacity = Mathf.Clamp(value, 10, 1000); } }
+
+    // Storage for required materials needed by buildings that PRODUCE a resource
+    public int secondStorageCapacity { get; protected set; }
+    int _secondStorageCap { get { return secondStorageCapacity; } set { secondStorageCapacity = Mathf.Clamp(value, 5, 500); } }
+
+    // How many units of a material does this building need to produce
+    public int materialsConsumed { get; protected set; }
+    int _materialsConsumed { get { return materialsConsumed; } set { materialsConsumed = Mathf.Clamp(value, 1, 100); } }
+
+    // Power versus the resources Hardness will result in time (in seconds) it takes for this machine to extract its target resource
+    public float extractPower { get; protected set; }
+    float _extractPower { get { return extractPower; } set { extractPower = Mathf.Clamp(value, 1, 100); } }
+
+    // Constructor
+    public ExtractorStats(float rate, int ammount, float power, int personalStorageCap, int secondStorageCap = 0, int materialConsumed = 0)
     {
-        // Seconds it takes to call the extract method and get more of a resource
-        public float extractRate { get; protected set; }
-        float _extractRate { get { return extractRate; } set { extractRate = Mathf.Clamp(value, 10f, 120f); } } // <------- Use this in a constructor to set extract Rate
-
-        // How much of a resource this building can extract
-        public int extractAmmount { get; protected set; }
-        int _extractAmmount { get { return extractAmmount; } set { extractAmmount = Mathf.Clamp(value, 1, 1000); } } // <------- Use this in a constructor to set extract ammount
-
-        // How many units of a resource can this building store
-        public int personalStorageCapacity { get; protected set; }
-        int _personalStorageCap { get { return personalStorageCapacity; } set { personalStorageCapacity = Mathf.Clamp(value, 10, 1000); } }
-
-        // Storage for required materials needed by buildings that PRODUCE a resource
-        public int secondStorageCapacity { get; protected set; }
-        int _secondStorageCap { get { return secondStorageCapacity; } set { secondStorageCapacity = Mathf.Clamp(value, 5, 500); } }
-
-        // How many units of a material does this building need to produce
-        public int materialsConsumed { get; protected set; }
-        int _materialsConsumed { get { return materialsConsumed; } set { materialsConsumed = Mathf.Clamp(value, 1, 100); } }
-
-        // Power versus the resources Hardness will result in time (in seconds) it takes for this machine to extract its target resource
-        public float extractPower { get; protected set; }
-        float _extractPower { get { return extractPower; } set { extractPower = Mathf.Clamp(value, 1, 100);  } }
-
-        // Constructor
-        public ExtractorStats(float rate, int ammount, float power, int personalStorageCap, int secondStorageCap = 0, int materialConsumed = 0)
-        {
-            _extractRate = rate;
-            _extractAmmount = ammount;
-            _personalStorageCap = personalStorageCap;
-            _secondStorageCap = secondStorageCap;
-            _materialsConsumed = materialConsumed;
-            _extractPower = power;
-        }
-
-        // Constructor for a Storage Unit
-        public ExtractorStats(int storageCap)
-        {
-            _secondStorageCap = storageCap;
-        }
-
-        public void SetCurrentRate(float newRate)
-        {
-            _extractRate = newRate;
-        }
+        _extractRate = rate;
+        _extractAmmount = ammount;
+        _personalStorageCap = personalStorageCap;
+        _secondStorageCap = secondStorageCap;
+        _materialsConsumed = materialConsumed;
+        _extractPower = power;
     }
 
+    // Constructor for a Storage Unit
+    public ExtractorStats(int storageCap)
+    {
+        _secondStorageCap = storageCap;
+    }
+
+    public void SetCurrentRate(float newRate)
+    {
+        _extractRate = newRate;
+    }
+}
+
+public class ExtractionBuilding : MonoBehaviour {
+   
 
     // VARS:
     public LineRenderer lineR; // < --- to display connections from inputs to outputs

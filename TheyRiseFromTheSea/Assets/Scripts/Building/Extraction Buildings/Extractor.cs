@@ -4,14 +4,14 @@ using System.Collections.Generic;
 
 public class Extractor : ExtractionBuilding {
 
-    public float ExtractPower;
+    //public float ExtractPower;
 
-    public float ExtractRate;
+    //public float ExtractRate;
 
-    public int ExtractAmmnt;
+    //public int ExtractAmmnt;
 
-    public int startingStorageCap;
-    public int PersonalStorageCap { get; protected set; }
+    //public int startingStorageCap;
+    //public int PersonalStorageCap { get; protected set; }
 
     int commonOreCount;
     int enrichedOreCount;
@@ -36,16 +36,18 @@ public class Extractor : ExtractionBuilding {
 
     void Awake()
     {
-        PersonalStorageCap = startingStorageCap;
+        //PersonalStorageCap = startingStorageCap;
 
         //resource_grid = ResourceGrid.Grid;
 
-        Init(TileData.Types.rock, ExtractRate, ExtractPower, ExtractAmmnt, PersonalStorageCap, transform);
+        //Init(TileData.Types.rock, ExtractRate, ExtractPower, ExtractAmmnt, PersonalStorageCap, transform);
 
+        BlueprintDatabase.Instance.GetExtractorStats("Extractor", myTransform, this, TileData.Types.rock);
 
         inventoryTypeCallback = SplitRockByType;
 
         splitShipInventoryCallback = DefineEnrichedAndCommonOre;
+
     }
 
 	void Start()

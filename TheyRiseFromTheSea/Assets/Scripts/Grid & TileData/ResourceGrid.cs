@@ -739,9 +739,12 @@ public class ResourceGrid : MonoBehaviour{
             // round them down to ints
             int spriteWidth = Mathf.RoundToInt(spriteSizeX);
             int spriteHeight = Mathf.RoundToInt(spriteSizeY);
-            Debug.Log(newType + " 's sprite size x: " + spriteWidth + " and size y: " + spriteHeight);
+          
             switch (newType) {
 			    case TileData.Types.extractor:
+
+                    // Define the Tile's stats from its Blueprint
+                    
 
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Extractor", newType, 0, 10000, 5, 5, 0, 0, nanoBotCost);
