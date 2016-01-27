@@ -131,7 +131,7 @@ public class Enemy_PathHandler : MonoBehaviour
         {
             if (alternateMainTarget == null)
             {
-                return grid.transporterGObj.transform;
+                return Terraformer_Handler.instance.gameObject.transform;
             }
             else
             {

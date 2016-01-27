@@ -77,6 +77,9 @@ public class ResourceGrid : MonoBehaviour{
     
     public bool terraformer_built { get; protected set; }
 
+    // Keep a reference to access the Terraformer's tile once it is built
+    public TileData terraformerTile { get; protected set; }
+
 	GameMaster game_master;
 
 	bool islandVisible;
@@ -528,8 +531,8 @@ public class ResourceGrid : MonoBehaviour{
 				}
 			}else{
 				tile.hp -= damage;
-				Debug.Log("Tile: " + tile.tileType + " damaged for " + damage);
-				Debug.Log("It has " + tile.hp + " left!");
+				//Debug.Log("Tile: " + tile.tileType + " damaged for " + damage);
+				//Debug.Log("It has " + tile.hp + " left!");
 
                 // Check again if it needs to be killed, hp <= 0
                 if (tile.hp <= 0)
@@ -814,7 +817,11 @@ public class ResourceGrid : MonoBehaviour{
 				break;
                 case TileData.Types.terraformer:
                     if (spriteWidth > 0 && spriteHeight > 0)
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Terraformer", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+                    {
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Terraformer", newType, 0, 10000, 250, 2, 0, 0, nanoBotCost);
+                        // Keep a record of the Terraformer's main tile
+                        terraformerTile = tiles[x, y];
+                    }
                     else
                         tiles[x, y] = new TileData(x, y, "Terraformer", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
 

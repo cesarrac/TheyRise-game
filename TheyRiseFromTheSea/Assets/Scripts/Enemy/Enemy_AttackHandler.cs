@@ -44,9 +44,11 @@ public class Enemy_AttackHandler : Unit_Base {
 
     bool mainTargetFound;
 
-    bool mainTargetIsTile = false, currTargetIsTile = false;
+    bool mainTargetIsTerraformer = false, currTargetIsTile = false;
 
     Rigidbody2D rigid_body;
+
+    TileData targetAsTile;
 
 
     void OnEnable()
@@ -59,7 +61,7 @@ public class Enemy_AttackHandler : Unit_Base {
         mainTargetFound = false;
         movingToAttack = false;
         isAttacking = false;
-        mainTargetIsTile = false;
+        mainTargetIsTerraformer = false;
 
         attackingTower = null;
         towerAttackingMe = null;
@@ -79,7 +81,7 @@ public class Enemy_AttackHandler : Unit_Base {
 
         if (mainTarget.gameObject.tag == "Citizen")
         {
-            mainTargetIsTile = false;
+            mainTargetIsTerraformer = false;
 
             // If this unit is NO-Aggro to buildings we can go ahead and set playerUnit here so it attacks the player as soon as it is in range
             if (!isAggroToBuildings)
@@ -91,7 +93,12 @@ public class Enemy_AttackHandler : Unit_Base {
         }
         else
         {
-            mainTargetIsTile = true;
+           // towerAttackingMe = target.gameObject;
+
+            mainTargetIsTerraformer = true;
+
+            // Set the Target tile to the terraformer
+            targetAsTile = ResourceGrid.Grid.terraformerTile;
         }
     }
 
@@ -145,12 +152,18 @@ public class Enemy_AttackHandler : Unit_Base {
             // If at any time the path handler is in range of the target and isAttacking is false, call attack!
             if (pathHandler.InRange && !isAttacking)
             {
-                if (currTargetIsTile)
+                if (currTargetIsTile || mainTargetIsTerraformer)
                 {
                     if (towerAttackingMe != null)
                     {
                         Debug.Log("ENEMY: Starting tower attack...");
-                        StartCoroutine("TowerAttack");
+                        StartCoroutine("TowerAggroAttack");
+                        isAttacking = true;
+                    }
+                    else
+                    {
+                        StopAttackCoRoutines();
+                        StartCoroutine("TowerisMainTargetAttack");
                         isAttacking = true;
                     }
 
@@ -270,24 +283,52 @@ public class Enemy_AttackHandler : Unit_Base {
     }
 
 
-    IEnumerator TowerAttack()
+    IEnumerator TowerisMainTargetAttack()
     {
         while (true)
         {
            
-            if (towerAttackingMe != null && pathHandler.InRange) 
+            if (mainTarget != null && pathHandler.InRange) 
             {
                // Debug.Log("ENEMY: Attacking the tower!");
 
                 // Play attack sound
                 Sound_Manager.Instance.PlaySound("Slimer Attack");
 
-                StartCoroutine(JumpAttack(towerAttackingMe.transform.parent.position));
-                HandleDamageToTile();
+                StartCoroutine(JumpAttack(mainTarget.position));
+
+                HandleDamage_ToMainTargetTile();
             }
             else
             {
                
+                isAttacking = false;
+                yield break;
+            }
+
+            yield return new WaitForSeconds(stats.curRateOfAttk);
+        }
+    }
+
+    IEnumerator TowerAggroAttack()
+    {
+        while (true)
+        {
+
+            if (towerAttackingMe != null && pathHandler.InRange)
+            {
+                // Debug.Log("ENEMY: Attacking the tower!");
+
+                // Play attack sound
+                Sound_Manager.Instance.PlaySound("Slimer Attack");
+
+                StartCoroutine(JumpAttack(towerAttackingMe.transform.parent.position));
+
+                HandleDamageToTile();
+            }
+            else
+            {
+
                 isAttacking = false;
                 yield break;
             }
@@ -342,13 +383,37 @@ public class Enemy_AttackHandler : Unit_Base {
 
     }
 
+    void HandleDamage_ToMainTargetTile()
+    {
+        if (pathHandler != null)
+        {
+            if (mainTargetIsTerraformer)
+            {
+                if (!AttackTile(targetAsTile))
+                {
+                    // Set state back to moving
+                    _state = State.MOVING;
+
+                    // Set attacking flag to false to stop attacking
+                    isAttacking = false;
+
+                    Debug.Log("ENEMY: Stopped damaging tower!");
+
+                    // Stop Tower Attack coroutine
+                    StopCoroutine("TowerAttack");
+                }
+            }
+
+        }
+    }
+
 
     void HandleDamageToTile()
     {
         if (pathHandler != null)
         {
             // Check if tile can still take damage, if so Unit_Base damages it
-            if (!AttackTile(resourceGrid.TileFromWorldPoint(towerAttackingMe.transform.position)))
+            if (!AttackTile(resourceGrid.TileFromWorldPoint(towerAttackingMe.transform.root.position)))
             {
                 // Set state back to moving
                 _state = State.MOVING;
@@ -367,7 +432,6 @@ public class Enemy_AttackHandler : Unit_Base {
                 // Stop Tower Attack coroutine
                 StopCoroutine("TowerAttack");
             }
-
         }
     }
 

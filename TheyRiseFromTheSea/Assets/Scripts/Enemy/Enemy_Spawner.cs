@@ -74,6 +74,7 @@ public class Enemy_Spawner : MonoBehaviour {
                         // If this isn't a player chaser (meaning the player is its main path target) then it needs an alternate path target
                         if (!curr_Enemy_toSpwn.chasesPlayer)
                         {
+                            ePathHandler.chasesPlayer = false;
                             ePathHandler.alternateMainTarget = curr_Enemy_toSpwn.alternateTarget;
                         }
                         else

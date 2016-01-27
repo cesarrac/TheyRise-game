@@ -108,6 +108,8 @@ public class Building_ClickHandler : MonoBehaviour {
 		if (s_renderer.color == A){
 			colorTime = 0;
 			_state = State.READY;
+
+            Sound_Manager.Instance.PlaySound("Build Finish");
 		}
 	}
 
@@ -162,6 +164,7 @@ public class Building_ClickHandler : MonoBehaviour {
 			FadeIn();
 			break;
 		case State.READY:
+
                 if (myTileType != TileData.Types.terraformer)
                 {
                     if (Input.GetButtonDown("Interact") && playerIsNear)
@@ -181,8 +184,6 @@ public class Building_ClickHandler : MonoBehaviour {
                         }
                     }
                 }
-			 
-
 
                 if (Input.GetButtonDown("Beam") && playerIsNear)
                 {
@@ -254,24 +255,25 @@ public class Building_ClickHandler : MonoBehaviour {
 		}
 	}
 
-	public void SwapBuildingTile(){
+	public void SwapBuildingTile()
+    {
+        // Define the tile again in case this was a pooled object and for some reason it didn't re-define its tile. This might make it unnecessary to do it on start.
+        myTile = ResourceGrid.Grid.TileFromWorldPoint(transform.position);
+        Debug.Log("My tile pos X " + myTile.posX + " pos Y " + myTile.posY);
+        ResourceGrid.Grid.SwapTileType(myTile.posX, myTile.posY, TileData.Types.empty, myTile.nanoBotCost);
 
-		if (resourceGrid != null) {
-            // Define the tile again in case this was a pooled object and for some reason it didn't re-define its tile. This might make it unnecessary to do it on start.
-            myTile = resourceGrid.TileFromWorldPoint(transform.position);
-            Debug.Log("My tile pos X " + myTile.posX + " pos Y " + myTile.posY);
-			resourceGrid.SwapTileType(myTile.posX, myTile.posY, TileData.Types.empty, myTile.nanoBotCost);
+        Sound_Manager.Instance.PlaySound("Build Break");
 
-            // Pool any circle selections this building has, only if it IS an extraction building
-            if (GetComponent<ExtractionBuilding>() != null)
+        // Pool any circle selections this building has, only if it IS an extraction building
+        if (GetComponent<ExtractionBuilding>() != null)
+        {
+            if (GetComponent<ExtractionBuilding>().circleSelection != null)
             {
-                if (GetComponent<ExtractionBuilding>().circleSelection != null)
-                {
-                    ObjectPool.instance.PoolObject(GetComponent<ExtractionBuilding>().circleSelection);
-                }
+                ObjectPool.instance.PoolObject(GetComponent<ExtractionBuilding>().circleSelection);
             }
-		}
-	}
+        }
+
+    }
 
 
 	//void Dissasemble()

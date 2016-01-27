@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
+
 
 public class Tower_TargettingHandler : Unit_Base
 {
@@ -61,10 +63,17 @@ public class Tower_TargettingHandler : Unit_Base
 
     Building_ClickHandler build_click_handler;
 
+    Action<Unit_Base> CB_DoDamage;
+
 
     void OnEnable()
     {
         targetUnit = null;
+    }
+
+    void Awake()
+    {
+        CB_DoDamage = HandleDamageToUnit;
     }
 
     void Start()
@@ -147,7 +156,10 @@ public class Tower_TargettingHandler : Unit_Base
                         // IF gun has enough ammo SHOOT once
                         if (ammoCount > 0)
                         {
-                            HandleDamageToUnit();
+                            //HandleDamageToUnit();
+
+                            ShootProjectile();
+
                             VisualShooting();
                             // Then start counting down to next shot
                             _state = State.SHOOTING;
@@ -305,7 +317,9 @@ public class Tower_TargettingHandler : Unit_Base
                     VisualShooting();
 
                     // Damage Target unit
-                    HandleDamageToUnit();
+                    //HandleDamageToUnit();
+
+                    ShootProjectile();
 
 
                     //						Debug.Log("MACHINE GUN: Shot fired! Ammo at: " + ammoCount);
@@ -322,9 +336,6 @@ public class Tower_TargettingHandler : Unit_Base
                 {
                     // Need to reload. Set the reload count down to current reload time
                     reloadCountDown = gunStats.currReloadTime;
-
-                    // Start reloading
-                    Debug.Log("MACHINE GUN: Gun out of AMMO!");
 
                     // If we are NOT Manual Shooting or Starved, change state to reload
                     if (_state != State.MANUAL_SHOOTING && _state != State.STARVED)
@@ -438,50 +449,69 @@ public class Tower_TargettingHandler : Unit_Base
     /// </summary>
     void VisualShooting()
     {
-        // Get an explosion for the VFX of laser hitting enemy (Burst particle)
-        GameObject explosion = objPool.GetObjectForType("Burst Particles", true, targetUnit.transform.position);
-        if (explosion != null)
-        {
-            // Explosion must match the target's layer
-            if (targetUnit != null)
-            {
-                // get the target layer
-                string targetLayer = targetUnit.GetComponent<SpriteRenderer>().sortingLayerName;
-
-                // assign layer to Particle Renderer
-                explosion.GetComponent<ParticleSystemRenderer>().sortingLayerName = targetLayer;
-
-            }
-            else
-            {
-
-                // There is no target, just hits the sightEnd
-                explosion.transform.position = sightEnd.position;
-            }
-        }
-
         // Get the muzzle flash for this gun's laser
         GameObject muzzle = objPool.GetObjectForType("MachineGun_ShootFX", true, sightStart.position);
-
     }
 
+    void ShootProjectile()
+    {
+        // Get the bullet from object pool using the name of the ammo type
+        GameObject projectile = objPool.GetObjectForType("Tower Bullet", true, sightStart.position);
+        if (projectile)
+        {
+           // projectile.GetComponent<SpriteRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
 
+            // and its direction
+            Vector3 dir = targetUnit.transform.position - sightStart.position;
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90;
+            projectile.transform.eulerAngles = new Vector3(0, 0, angle);
+
+            // Now fire the bullet trail right behind it
+            GameObject bulletTrail = objPool.GetObjectForType("BulletTrail", true, sightStart.position);
+            if (bulletTrail)
+            {
+                bulletTrail.transform.SetParent(projectile.transform);
+
+                //// Place it in the correct local position
+                //bulletTrail.transform.localPosition = new Vector3(-2f, 0, 0);
+
+                // and its direction
+                float trailAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+                bulletTrail.transform.eulerAngles = new Vector3(0, 0, trailAngle);
+
+            }
+
+            // Initialize the Tower Bullet component with the DoDamage Callback and Trail gameObject
+            projectile.GetComponent<Bullet_Tower>().InitBullet(CB_DoDamage, bulletTrail);
+
+            // Play shoot sound
+            // FIX THIS! THIS WILL BE ONE SOUND FITS ALL!
+            Sound_Manager.Instance.PlaySound("Kinetic Rifle");
+
+        }
+        else
+        {
+            Debug.Log("MACHINE GUN: cant find Tower Bullet in Pool!");
+        }
+    }
 
     /// <summary>
     /// Handles the damage to unit by using
     /// method from Unit_Base class.
     /// </summary>
-    void HandleDamageToUnit()
+    void HandleDamageToUnit(Unit_Base target)
     {
-        if (AttackUnit(targetUnit.GetComponent<Unit_Base>()))
+        if (AttackUnit(target))
         {
 
             // Tell the enemy this Tower is attacking it if it doesn't already have an attacker
-            if (targetUnit.GetComponent<Enemy_AttackHandler>().attackingTower == null)
-                targetUnit.GetComponent<Enemy_AttackHandler>().attackingTower = gameObject;
+            if (target.gameObject.GetComponent<Enemy_AttackHandler>().attackingTower == null)
+                target.gameObject.GetComponent<Enemy_AttackHandler>().attackingTower = gameObject;
 
             // Lose a bullet
             ammoCount--;
+
+      
         }
         else
         {

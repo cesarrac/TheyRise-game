@@ -134,11 +134,18 @@ public class Unit_Base : MonoBehaviour {
                 // Apply just 1 damage
                 resourceGrid.DamageTile(tile, 1f);
             }
+            //Debug.Log("TILE: tile takes damage " + stats.curDamage);
+
             return true;
 
         }
         else
         {
+            // Check if the Tile attacked was the Terraformer... if it was it's GAME OVER!
+            if (tile.tileType == TileData.Types.terraformer)
+            {
+                MasterState_Manager.Instance.mState = MasterState_Manager.MasterState.MISSION_FAILED;
+            }
             tileUnderAttack = null;
             return false;
         }

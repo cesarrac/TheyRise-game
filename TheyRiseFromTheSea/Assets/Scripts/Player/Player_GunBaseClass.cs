@@ -197,12 +197,8 @@ public class Player_GunBaseClass : MonoBehaviour {
             //			projectile.transform.position = sightStart.position;
             projectile.GetComponent<SpriteRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
 
-
-			// give it the object pool so it can pool itself
-			projectile.GetComponent<Bullet_FastMoveHandler> ().objPool = objPool;
-
 			// and access to this gun to do damage
-			projectile.GetComponent<Bullet_FastMoveHandler> ().myWeapon = this;
+			projectile.GetComponent<Bullet_Player> ().myWeapon = this;
 
 			// and its direction
 			Vector3 dir = mousePosition - sightStart.position;

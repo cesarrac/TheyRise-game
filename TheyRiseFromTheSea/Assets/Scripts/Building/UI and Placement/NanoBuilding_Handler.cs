@@ -273,7 +273,12 @@ public class NanoBuilding_Handler : MonoBehaviour {
                 nanoBots -= bp.nanoBotCost;
             }
             else
+            {
                 status_indicator.CreateStatusMessage("Out of Bots!");
+                Sound_Manager.Instance.PlaySound("Empty");
+
+            }
+
         }
         else
         {
