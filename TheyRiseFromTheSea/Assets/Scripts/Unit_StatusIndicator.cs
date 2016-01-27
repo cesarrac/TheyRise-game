@@ -4,8 +4,8 @@ using UnityEngine.UI;
 
 public class Unit_StatusIndicator : MonoBehaviour {
 
-	[SerializeField]
-	private RectTransform healthBarRect;
+	
+	public RectTransform healthBarRect;
 
 	[SerializeField]
 	private Canvas canvas;
@@ -27,7 +27,7 @@ public class Unit_StatusIndicator : MonoBehaviour {
 
 	}
 
-	public void SetHealth(float _cur, float _max, float _damage = 0)
+	public virtual void SetHealth(float _cur, float _max, float _damage = 0)
 	{
 		float _value = _cur / _max;
 

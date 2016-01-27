@@ -48,7 +48,7 @@ public class Building_PositionHandler : MonoBehaviour {
 
     public NanoBuilding_Handler nanoBuild_handler;
 
-    MouseBuilding_Controller mouse_controller;
+    Mouse_Controller mouse_controller;
 
 	void Awake()
 	{
@@ -71,7 +71,7 @@ public class Building_PositionHandler : MonoBehaviour {
         objPool = ObjectPool.instance;
         build_controller = Build_MainController.Instance;
 
-        mouse_controller = MouseBuilding_Controller.MouseController;
+        mouse_controller = Mouse_Controller.MouseController;
     }
 
 	

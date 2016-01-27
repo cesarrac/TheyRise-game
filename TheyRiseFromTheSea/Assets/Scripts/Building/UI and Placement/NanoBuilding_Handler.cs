@@ -163,9 +163,9 @@ public class NanoBuilding_Handler : MonoBehaviour {
         //    // Play build sound
         //    audio_source.PlayOneShot(buildSound, 0.5f);
         //}
-        if (MouseBuilding_Controller.MouseController.isRightClickingForBuilding)
+        if (Mouse_Controller.MouseController.isRightClickingForBuilding)
         {
-            GetBuildingFromType(MouseBuilding_Controller.MouseController.GetTileUnderMouse().tileType);
+            GetBuildingFromType(Mouse_Controller.MouseController.GetTileUnderMouse().tileType);
 
             // Play build sound
             // audio_source.PlayOneShot(buildSound, 0.5f);
@@ -294,7 +294,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
         if (Input.GetButtonDown("Break"))
         {
             // Check the tile mouse is on and all 8 tiles around it for a building
-            TileData tileUnderMouse = MouseBuilding_Controller.MouseController.GetTileUnderMouse();
+            TileData tileUnderMouse = Mouse_Controller.MouseController.GetTileUnderMouse();
             if (tileUnderMouse.tileType != TileData.Types.empty && tileUnderMouse.tileType != TileData.Types.rock && tileUnderMouse.tileType != TileData.Types.mineral && tileUnderMouse.tileType != TileData.Types.water && tileUnderMouse.tileType != TileData.Types.capital)
             {
                 GameObject building = ResourceGrid.Grid.GetTileGameObjFromIntCoords(tileUnderMouse.posX, tileUnderMouse.posY);

@@ -155,7 +155,7 @@ public class Enemy_Master : MonoBehaviour {
                 // Decide to spawn weak enemies 
                 if (canSpawn)
                 {
-                    CurrUnitsOnField = 10;
+                    CurrUnitsOnField = 5;
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Weak_noAggro");
                     decisionCount++;
                     StartCoroutine("DecideWhatToSpawnNext");
@@ -165,7 +165,7 @@ public class Enemy_Master : MonoBehaviour {
             {
                 if (canSpawn)
                 {
-                    CurrUnitsOnField = 8;
+                    CurrUnitsOnField = 3;
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Mid_noAggro");
                     decisionCount++;
                     StartCoroutine("DecideWhatToSpawnNext");
@@ -175,7 +175,7 @@ public class Enemy_Master : MonoBehaviour {
             {
                 if (canSpawn)
                 {
-                    CurrUnitsOnField = 8;
+                    CurrUnitsOnField = 2;
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Heavy_noAggro");
                     decisionCount++;
                     StartCoroutine("DecideWhatToSpawnNext");
@@ -191,7 +191,7 @@ public class Enemy_Master : MonoBehaviour {
                 // Decide to spawn weak enemies 
                 if (canSpawn)
                 {
-                    CurrUnitsOnField = 12;
+                    CurrUnitsOnField = 5;
 
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Weak_Aggro");
 
@@ -204,7 +204,7 @@ public class Enemy_Master : MonoBehaviour {
             {
                 if (canSpawn)
                 {
-                    CurrUnitsOnField = 10;
+                    CurrUnitsOnField = 4;
 
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Mid_Aggro");
 
@@ -218,7 +218,7 @@ public class Enemy_Master : MonoBehaviour {
             {
                 if (canSpawn)
                 {
-                    CurrUnitsOnField = 8;
+                    CurrUnitsOnField = 3;
 
                     IssueSpawnCommand(CurrUnitsOnField, "Slimer_Heavy_Aggro");
 
@@ -246,7 +246,7 @@ public class Enemy_Master : MonoBehaviour {
                 // Decide to spawn weak enemies 
                 if (canSpawn)
                 {
-                    CurrUnitsOnField = 12;
+                    CurrUnitsOnField = 3;
 
                     // Set an alternate target to this Aggro unit, so that its mission will be to destroy the Killer responsible for its comrades deaths
                     enemiesAvailable["Slimer_Weak_noAggro"].SetAltTarget(target_killer);
@@ -260,7 +260,7 @@ public class Enemy_Master : MonoBehaviour {
             {
                 if (canSpawn)
                 {
-                    CurrUnitsOnField = 10;
+                    CurrUnitsOnField = 2;
 
                     enemiesAvailable["Slimer_Mid_noAggro"].SetAltTarget(target_killer);
 
@@ -273,7 +273,7 @@ public class Enemy_Master : MonoBehaviour {
             {
                 if (canSpawn)
                 {
-                    CurrUnitsOnField = 8;
+                    CurrUnitsOnField = 1;
 
                     enemiesAvailable["Slimer_Heavy_noAggro"].SetAltTarget(target_killer);
 

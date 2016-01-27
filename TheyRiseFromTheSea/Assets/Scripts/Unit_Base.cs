@@ -266,7 +266,7 @@ public class Unit_Base : MonoBehaviour {
 	public void TakeDamage(float damage)
 	{
 		stats.curHP -= damage;
-        Debug.Log (gameObject.name + " has " + stats.curHP + "HP left");
+       // Debug.Log (gameObject.name + " has " + stats.curHP + "HP left");
 
         // Play take damage sound
         if (audio_source)

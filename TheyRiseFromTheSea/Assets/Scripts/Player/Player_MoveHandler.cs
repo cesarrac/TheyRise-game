@@ -137,14 +137,16 @@ public class Player_MoveHandler : MonoBehaviour {
 			break;
 
 		case State.DASHING:
-			// Dash
-			if (dashCountdown <=0){
-				dashCountdown = timeDashing;
-				_state = State.MOVING;
-			}else{
-				dashCountdown -= Time.deltaTime;
-				Dash (mStats.dashSpeed);
-			}
+                // Dash
+                //if (dashCountdown <=0){
+                //	dashCountdown = timeDashing;
+                //	_state = State.MOVING;
+                //}else{
+                //	dashCountdown -= Time.deltaTime;
+                //	Dash (mStats.dashSpeed);
+                //}
+
+                Dash(mStats.dashSpeed);
 
 
 			break;
@@ -195,40 +197,51 @@ public class Player_MoveHandler : MonoBehaviour {
 
 	void Dash(float _curSpeed)
 	{
-		rBody.MovePosition(rBody.position + move_vector * _curSpeed * Time.deltaTime);
+		//rBody.MovePosition(rBody.position + move_vector * _curSpeed * Time.deltaTime);
 
-	
-	}
+        transform.position = Vector2.MoveTowards(transform.position, dashTarget, mStats.dashSpeed * Time.deltaTime);
+
+
+        var distance = (currPos - transform.position).sqrMagnitude;
+
+        if (distance >= Mouse_Controller.MouseController.dashDistance)
+        {
+            _state = State.IDLING;
+        }
+
+    }
 
 
     void ListenForMouseDash()
     {
-        if (MouseBuilding_Controller.MouseController.isRightClickingForDash)
+        if (Mouse_Controller.MouseController.isRightClickingForDash)
         {
             currPos = transform.position;
 
-            dashTarget = MouseBuilding_Controller.MouseController.currMouseP;
+            dashTarget = Mouse_Controller.MouseController.currMouseP;
 
-            StartCoroutine("Dashing");
+            _state = State.DASHING;
+           // StartCoroutine("Dashing");
         }
     }
 
-    IEnumerator Dashing()
-    {
-        while (true)
-        {
-            transform.position = Vector2.MoveTowards(transform.position, dashTarget , MouseBuilding_Controller.MouseController.dashDistance * Time.deltaTime);
+    //IEnumerator Dashing()
+    //{
+    //    while (true)
+    //    {
+    //        transform.position = Vector2.MoveTowards(transform.position, dashTarget , mStats.dashSpeed * Time.deltaTime);
+        
 
-            var distance = (currPos - transform.position).sqrMagnitude;
+    //        var distance = (currPos - transform.position).sqrMagnitude;
 
-            if (distance >= MouseBuilding_Controller.MouseController.dashDistance)
-            {
-                yield break;
-            }
+    //        if (distance >= MouseBuilding_Controller.MouseController.dashDistance)
+    //        {
+    //            yield break;
+    //        }
 
-            yield return null;
-        }
-    }
+    //        yield return null;
+    //    }
+    //}
 
     //bool CheckWalkabale(Vector3 pos){
     //	int posX = Mathf.RoundToInt (pos.x);

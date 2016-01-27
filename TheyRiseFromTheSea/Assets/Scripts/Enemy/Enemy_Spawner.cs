@@ -31,6 +31,10 @@ public class Enemy_Spawner : MonoBehaviour {
     {
         totalToSpawn = spawnCount;
         curr_Enemy_toSpwn = enemyToSpwn;
+
+        // Select a Spawn Position
+        spawnPosition = GetSpawnPosition();
+
         StartCoroutine("Spawn");
     }
 
@@ -41,8 +45,8 @@ public class Enemy_Spawner : MonoBehaviour {
         {
             if (curr_Enemy_toSpwn != null)
             {
-                // Select a Spawn Position
-                spawnPosition = GetSpawnPosition();
+                //// Select a Spawn Position
+                //spawnPosition = GetSpawnPosition();
 
                 GameObject e = ObjectPool.instance.GetObjectForType(curr_Enemy_toSpwn.name, true, spawnPosition);
 

@@ -71,8 +71,8 @@ public class GameMaster : MonoBehaviour {
 
         // FIX THIS! This data should be coming from one giant database of Weapons, Armor and Tools!!!
         // Default Gun: Kinetic Rifle
-        Weapon kinetic_rifle = new Weapon("Kinetic Rifle", 0, 12, 2f, 2, 15, "explosive bullet");
-        Weapon freeze_gun = new Weapon("Freeze Gun", 0.2f, 100, 3f, 0, 15, "ice bullet");
+        Weapon kinetic_rifle = new Weapon("Kinetic Rifle", 0, 12, 2f, 2, 50, "explosive bullet");
+        Weapon freeze_gun = new Weapon("Freeze Gun", 0.2f, 100, 3f, 0, 30, "ice bullet");
         // Default Tool: Hand Drill
         Tool hand_drill = new Tool("Mining Drill");
         // Default Armor: Vacum Suit
@@ -89,10 +89,9 @@ public class GameMaster : MonoBehaviour {
         isHeroCreated = true;
     }
 
- 
-	// LEVEL LOADING:
 
-	void OnLevelWasLoaded (int level){
+    // HERO & ITEMS LOADING:
+    void OnLevelWasLoaded (int level){
 		if (level == 1) {
 			// When we go into a "level" initialize the supplies bought at the store
 			InitializeInventoryAndSupplies();
@@ -102,15 +101,6 @@ public class GameMaster : MonoBehaviour {
 				Time.timeScale = 1;
 		}
 	}
-
-	//public void LoadLevel()
-	//{
-	//	if (Application.loadedLevel == 2) {
-	//		Application.LoadLevel (1);
-	//	} else {
-	//		Application.LoadLevel(2);
-	//	}
-	//}
 
     // HERO/PLAYER LOADING (Called by Resource Grid after Map has been initialized):
     public GameObject SpawnThePlayer(int posX, int posY)
@@ -314,19 +304,26 @@ public class GameMaster : MonoBehaviour {
 		resourceMan.InitStartingResources (inventory.food, curCredits, 10000);
 	}
 
-//	void InitializeHeroAndResourceGrid()
-//	{
-//		resourceGrid = GameObject.FindGameObjectWithTag ("Map").GetComponent<ResourceGrid> ();
-//		player_weapon = GameObject.FindGameObjectWithTag ("Citizen").GetComponentInChildren<Player_GunBaseClass> ();
-//		building_UIHandler = GameObject.FindGameObjectWithTag ("Capital").GetComponent<Building_UIHandler> ();
-//
-//		Debug.Log ("GM: Initialized Grid, Hero & B UI");
-//		// TODO: Spawn the Hero here
-//	}
+
+    // LEVEL LOADING:
+
+    public void LaunchToPlanet()
+    {
+        SceneManager.LoadScene("Level_Planet");
+    }
+
+    public void LaunchToShip()
+    {
+        // Tell Ship Inventory to register items that were on the Temporary inventory, since now the Player is finally taking them to the ship
+        Ship_Inventory.Instance.RegisterTempInventoryToShip();
+
+        // load the ship level
+        SceneManager.LoadScene("Level_CENTRAL");
+    }
 
 
-	// Restart a level by loading it again
-	public void MissionRestart()
+    // Restart a level by loading it again
+    public void MissionRestart()
 	{
         // FIX THIS! Instead of just re-loading and re-calculating the level we should load the map that we were just in (including Textures, TileData, seed, etc.)
 
@@ -337,10 +334,10 @@ public class GameMaster : MonoBehaviour {
 
     public void NewCharacterScreen()
     {
-
+        SceneManager.LoadScene("Level_CharacterCreation");
     }
 
-	public void GoBackToShip()
+	public void RestartToShip()
 	{
         // load the ship level
         SceneManager.LoadScene("Level_CENTRAL");

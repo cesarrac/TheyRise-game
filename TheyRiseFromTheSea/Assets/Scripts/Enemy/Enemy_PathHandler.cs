@@ -193,7 +193,7 @@ public class Enemy_PathHandler : MonoBehaviour
             // Halt all moving and getting path CoRoutines while we are in range and attacking
             if (!isFullyStopped)
             {
-                Debug.Log("ENEMY: Target in range!");
+               // Debug.Log("ENEMY: Target in range!");
                 FullStop();
             }
         }
@@ -208,7 +208,7 @@ public class Enemy_PathHandler : MonoBehaviour
                 {
                     finishedPath = false;
                     ContinueOnPath();
-                    print("My target's position is: " + target);
+                    //print("My target's position is: " + target);
 
                 }
             }
@@ -253,7 +253,7 @@ public class Enemy_PathHandler : MonoBehaviour
             target = savedTarget;
         }
         ContinueOnPath();
-        Debug.Log("Continuing PATH TO Main Target.");
+        //Debug.Log("Continuing PATH TO Main Target.");
     }
 
     void ContinueOnPath()

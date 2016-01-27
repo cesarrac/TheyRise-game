@@ -13,6 +13,8 @@ public class UI_Manager : MonoBehaviour
 
     public GameObject blueprint_infoPanel, builder_panel;
     public Text bp_name, bp_desc, cur_nano_memory, total_nano_memory;
+    public Image player_healthBar;
+
     Dictionary<string, GameObject> loadedBlueprints = new Dictionary<string, GameObject>();
 
     public GameObject victoryPanel;
@@ -70,7 +72,7 @@ public class UI_Manager : MonoBehaviour
     public void InventoryReady()
     {
         // Load the Ship level
-        GameMaster.Instance.GoBackToShip();
+        GameMaster.Instance.RestartToShip();
     }
 
     public void DisplayVictoryPanel()
@@ -86,7 +88,7 @@ public class UI_Manager : MonoBehaviour
     // Load Scenes:
     public void ReturnToShip()
     {
-        GameMaster.Instance.GoBackToShip();
+        GameMaster.Instance.RestartToShip();
     }
 
     public void GoToBlueprintsScene()

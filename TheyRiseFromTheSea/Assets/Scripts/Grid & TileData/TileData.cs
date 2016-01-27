@@ -79,12 +79,7 @@ public class TileData  {
         tileType = type;
 		maxResourceQuantity = resourceQuantity;
 
-        // If this is a water tile, set Extraction hardness to 0
-        if (type == Types.water)
-        {
-            hardness = 0;
-        }
-    
+        hardness = _hardness;
 
 		movementCost = moveCost;
 

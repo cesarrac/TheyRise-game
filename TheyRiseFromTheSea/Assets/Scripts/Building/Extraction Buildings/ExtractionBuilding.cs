@@ -297,8 +297,8 @@ public class ExtractionBuilding : MonoBehaviour {
     void SetExtractRate(float currExtractRate, float power, float hardness)
     {
         extractorStats.SetCurrentRate((hardness / power) + currExtractRate);
-        Debug.Log("EXTRACTOR: Current Power is " + power + " and the Tile Hardness is " + hardness);
-        Debug.Log("EXTRACTOR: Setting Extraction Rate to: " + extractorStats.extractRate);
+        //Debug.Log("EXTRACTOR: Current Power is " + power + " and the Tile Hardness is " + hardness);
+        //Debug.Log("EXTRACTOR: Setting Extraction Rate to: " + extractorStats.extractRate);
     }
 
     public IEnumerator ExtractResource()
@@ -469,7 +469,7 @@ public class ExtractionBuilding : MonoBehaviour {
 
     IEnumerator WaitToConnect()
     {
-        MouseBuilding_Controller mouse_control = MouseBuilding_Controller.MouseController;
+        Mouse_Controller mouse_control = Mouse_Controller.MouseController;
 
         while (true)
         {

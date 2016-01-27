@@ -353,7 +353,7 @@ public class Tower_TargettingHandler : Unit_Base
             else
             {
 
-                Debug.Log("MACHINE GUN: Target is NULL!");
+                //Debug.Log("MACHINE GUN: Target is NULL!");
                 // Target is null so we can go back to seeking if NOT starved
                 if (_state != State.MANUAL_SHOOTING && _state != State.STARVED)
                 {

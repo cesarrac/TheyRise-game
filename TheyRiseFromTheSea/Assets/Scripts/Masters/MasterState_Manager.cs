@@ -159,7 +159,7 @@ public class MasterState_Manager : MonoBehaviour {
 	public void ReturnToShip()
 	{
         _mState = MasterState.ONSHIP;
-		game_master.GoBackToShip ();
+		game_master.RestartToShip ();
 	}
 
     public void NewCharacter()

@@ -277,7 +277,11 @@ public class Enemy_AttackHandler : Unit_Base {
            
             if (towerAttackingMe != null && pathHandler.InRange) 
             {
-                Debug.Log("ENEMY: Attacking the tower!");
+               // Debug.Log("ENEMY: Attacking the tower!");
+
+                // Play attack sound
+                Sound_Manager.Instance.PlaySound("Slimer Attack");
+
                 StartCoroutine(JumpAttack(towerAttackingMe.transform.parent.position));
                 HandleDamageToTile();
             }
@@ -299,12 +303,20 @@ public class Enemy_AttackHandler : Unit_Base {
 
             if (playerUnit != null && pathHandler.InRange)
             {
-                Debug.Log("ENEMY: Attacking the player!");
+                //Debug.Log("ENEMY: Attacking the player!");
+
+                // Play attack sound
+                Sound_Manager.Instance.PlaySound("Slimer Attack");
+
                 StartCoroutine(JumpAttack(playerUnit.transform.position));
                 HandleDamageToUnit();
             }
             else
             {
+                if (!pathHandler.InRange)
+                {
+                    Debug.Log("ENEMY: Missed! Player DODGED!!");
+                }
                 isAttacking = false;
                 yield break;
             }

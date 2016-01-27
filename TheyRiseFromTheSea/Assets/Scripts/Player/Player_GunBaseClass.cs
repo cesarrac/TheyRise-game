@@ -3,35 +3,6 @@ using System.Collections;
 
 public class Player_GunBaseClass : MonoBehaviour {
 
-    //[System.Serializable]
-    //public class GunStats
-    //{
-    //	float _fireRate;
-    //	public float curFireRate { get {return _fireRate;} set { _fireRate = Mathf.Clamp(value, 0f, 2f);}}
-    //	public float startingFireRate;
-
-    //       public float startingChamberAmmo { get; protected set; }
-    //       float _chamberAmmo;
-    //       public float curChamberAmmo { get { return _chamberAmmo; } set { _chamberAmmo = Mathf.Clamp(value, 0, 50000); } }
-
-    //       float _reloadSpeed;
-    //       public float curReloadSpeed { get { return _reloadSpeed; } set { _reloadSpeed = Mathf.Clamp(value, 0.1f, 3f); } }
-    //       public float startingReloadSpeed;
-
-    //	public int weaponIndex;
-    //	public string projectileType;
-
-    //	public float kickAmmt;
-
-    //       public bool shootsProjectiles;
-
-    //	public void Init()
-    //	{
-    //		curFireRate = startingFireRate;
-    //           curChamberAmmo = startingChamberAmmo;
-    //	}
-    //}
-
     public GunStats gunStats;
 
 
@@ -172,15 +143,15 @@ public class Player_GunBaseClass : MonoBehaviour {
             // Fire an Raycast towards the mouse to check for a hit
             targetInSight = RaycastToGetTarget();
 
+            // Actually shoot the bullet
+            VisualProjectileShoot();
+
+            // Play gun shot sound
+            Sound_Manager.Instance.PlaySound(gameObject.name);
+
             if (targetInSight != null)
             {
-                // Actually shoot the bullet
-                VisualProjectileShoot();
-
-                // FIX THIS! Right now this is playing one sounds fits all for all guns!
-                // Play gun shot sound
-                Sound_Manager.Instance.PlaySound(gameObject.name);
-
+                
                 // Apply gun kick to Player
                 StartCoroutine(GunKick());
                 // Take a bullet from the gun's chamber ammo
@@ -201,7 +172,7 @@ public class Player_GunBaseClass : MonoBehaviour {
 		if (hit.collider != null) {
 
 			if (hit.collider.CompareTag ("Enemy")) {
-                Debug.Log("GUN DETECTED ENEMY!");
+               // Debug.Log("GUN DETECTED ENEMY!");
 				// Linecast HIT an enemy, so store the enemy unit as the target
 				return hit.collider.gameObject;
 

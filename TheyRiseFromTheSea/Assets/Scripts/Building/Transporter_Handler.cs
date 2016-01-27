@@ -14,6 +14,8 @@ public class Transporter_Handler : MonoBehaviour {
 
     public bool isLocked { get; protected set; }
 
+    Building_StatusIndicator status_indicator;
+
     void Awake()
     {
         instance = this;
@@ -24,6 +26,9 @@ public class Transporter_Handler : MonoBehaviour {
         if (SceneManager.GetActiveScene().name == "Level_Planet")
         {
             LockControls(true);
+
+            // The PreFab for the Transporter only contains the Click Handler if it is on the Planet!
+            status_indicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
         }
     }
 
@@ -39,13 +44,18 @@ public class Transporter_Handler : MonoBehaviour {
     {
         if (Input.GetButtonDown("Launch"))
         {
-            if (Application.loadedLevel == shipLevelIndex)
+            if (SceneManager.GetActiveScene().name == "Level_Launch")
             {
+                Sound_Manager.Instance.PlaySound("Transporter");
                 LaunchToPlanet();
             }
-            else if (Application.loadedLevel == planetLevelIndex)
+            else if (SceneManager.GetActiveScene().name == "Level_Planet" && !isLocked)
             {
                 LaunchToShip();
+            }
+            else if (isLocked && status_indicator != null)
+            {
+                status_indicator.CreateStatusMessage("Locked!");
             }
           
         }
@@ -53,15 +63,12 @@ public class Transporter_Handler : MonoBehaviour {
 
     void LaunchToShip()
     {
-        // Tell Ship Inventory to register items that were on the Temporary inventory, since now the Player is finally taking them to the ship
-        Ship_Inventory.Instance.RegisterTempInventoryToShip();
-
-        Application.LoadLevel(shipLevelIndex);
+        GameMaster.Instance.LaunchToShip();
     }
 
     public void LaunchToPlanet()
     {
-        Application.LoadLevel(planetLevelIndex);
+        GameMaster.Instance.LaunchToPlanet();
     }
 
 
@@ -78,7 +85,7 @@ public class Transporter_Handler : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D coll)
     {
-        if (coll.gameObject.CompareTag("Citizen") && !isLocked)
+        if (coll.gameObject.CompareTag("Citizen"))
         {
             isPlayerOnPad = true;
         }

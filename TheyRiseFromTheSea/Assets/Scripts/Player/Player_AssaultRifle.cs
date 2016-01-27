@@ -94,13 +94,13 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 				}else{
 					// just do damage
 					enemy.TakeDamage(explosiveDamage);
-					Debug.Log ("DAMAGING ENEMY!");
+					//Debug.Log ("DAMAGING ENEMY!");
 				}
 
 
 				targetHit = null;
 			}else{
-				Debug.Log ("ENEMY SHOULD BE DEAD!");
+				//Debug.Log ("ENEMY SHOULD BE DEAD!");
 				targetHit = null;
 			}
 

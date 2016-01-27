@@ -36,7 +36,7 @@ class Build_MainController:MonoBehaviour
         currentlyBuilding = true;
 
         // Mouse position so I can instantiate on the mouse!
-        Vector3 m = MouseBuilding_Controller.MouseController.currMouseP;
+        Vector3 m = Mouse_Controller.MouseController.currMouseP;
         Vector3 spawnPos = new Vector3(Mathf.Round(m.x), Mathf.Round(m.y), 0.0f);
 
         // At this point NanoBuild_handler should have checked if there's ENOUGH nanobots to build AND subtracted the NANOBOTS necessary, so just build!

@@ -430,15 +430,15 @@ public class ResourceGrid : MonoBehaviour{
                     SpawnRock("sharp rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.sharp);
                     break;
                 case Rock.RockType.tube:
-                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50, 2);
+                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50, 4);
                     SpawnRock("tube rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.tube);
                     break;
                 case Rock.RockType.hex:
-                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50, 3);
+                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50, 8);
                     SpawnRock("hex rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.hex);
                     break;
                 default:
-                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50);
+                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50, 1);
                     SpawnRock("sharp rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.sharp);
                     break;
             }
@@ -458,19 +458,19 @@ public class ResourceGrid : MonoBehaviour{
                         switch (rType)
                         {
                             case Rock.RockType.sharp:
-                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50);
+                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50, 1);
                                 SpawnRock("sharp rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.sharp);
                                 break;
                             case Rock.RockType.tube:
-                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50);
+                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50, 2);
                                 SpawnRock("tube rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.tube);
                                 break;
                             case Rock.RockType.hex:
-                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50);
+                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50, 3);
                                 SpawnRock("hex rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.hex);
                                 break;
                             default:
-                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50);
+                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50, 1);
                                 SpawnRock("sharp rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.sharp);
                                 break;
                         }
@@ -1138,8 +1138,12 @@ public class ResourceGrid : MonoBehaviour{
         int x = Mathf.RoundToInt(worldPoint.x);
         int y = Mathf.RoundToInt(worldPoint.y);
 
-
-        return tiles[x, y];
+        if (CheckIsInMapBounds(x, y))
+        {
+            return tiles[x, y];
+        }
+        else
+            return null;
     }
 
     public void SwitchTileWalkability (int x, int y, bool trueIfWalkable)
