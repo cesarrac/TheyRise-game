@@ -413,7 +413,7 @@ public class Enemy_AttackHandler : Unit_Base {
         if (pathHandler != null)
         {
             // Check if tile can still take damage, if so Unit_Base damages it
-            if (!AttackTileUnit(towerAttackingMe.GetComponent<Unit_Base>(), resourceGrid.TileFromWorldPoint(towerAttackingMe.transform.parent.position)))
+            if (!AttackTile(resourceGrid.TileFromWorldPoint(towerAttackingMe.transform.parent.position)))
             {
                 // Set state back to moving
                 _state = State.MOVING;

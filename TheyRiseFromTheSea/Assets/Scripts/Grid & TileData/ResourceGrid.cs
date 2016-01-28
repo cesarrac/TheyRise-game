@@ -518,7 +518,7 @@ public class ResourceGrid : MonoBehaviour{
 		if (spawnedTiles [tile.posX, tile.posY] != null) {
 
 			// If it has 0 or less HP left, kill tile
-			if (tile.hp <= 0) {
+			if (tile.tileStats.HP <= 0) {
 				if (tile.tileType == TileData.Types.capital){
 					// call mission failed
 					master_state.mState = MasterState_Manager.MasterState.MISSION_FAILED;
@@ -530,12 +530,12 @@ public class ResourceGrid : MonoBehaviour{
 
 				}
 			}else{
-				tile.hp -= damage;
+				tile.tileStats.HP -= damage;
 				//Debug.Log("Tile: " + tile.tileType + " damaged for " + damage);
 				//Debug.Log("It has " + tile.hp + " left!");
 
                 // Check again if it needs to be killed, hp <= 0
-                if (tile.hp <= 0)
+                if (tile.tileStats.HP <= 0)
                 {
                     if (tile.tileType == TileData.Types.capital)
                     {
@@ -545,7 +545,7 @@ public class ResourceGrid : MonoBehaviour{
                     }
                     else
                     {
-                        spawnedTiles[tile.posX, tile.posY].GetComponent<Building_ClickHandler>().BreakBuilding(tile.nanoBotCost); // Call Break Building from within the building's click handler
+                        spawnedTiles[tile.posX, tile.posY].GetComponent<Building_ClickHandler>().BreakBuilding(tile.tileStats.NanoBotCost); // Call Break Building from within the building's click handler
 
                         //SwapTileType(tile.posX, tile.posY, TileData.Types.empty);   // to KILL TILE I just swap it to an empty! ;) < ----- NOPE! :P
 
@@ -631,7 +631,7 @@ public class ResourceGrid : MonoBehaviour{
             else
             {
                 // Deplete the tile
-                SwapTileType(x, y, TileData.Types.empty);
+                SwapTileType(x, y, TileData.Types.empty, "Empty");
             }
 
             resourceMined = ammnt;
@@ -640,13 +640,13 @@ public class ResourceGrid : MonoBehaviour{
         {
             // take what's left and deplete it
             resourceMined = tiles[x, y].maxResourceQuantity;
-            SwapTileType(x, y, TileData.Types.empty);
+            SwapTileType(x, y, TileData.Types.empty, "Empty");
         }
         else
         {
             // nothing left
             resourceMined = 0;
-            SwapTileType(x, y, TileData.Types.empty);
+            SwapTileType(x, y, TileData.Types.empty, "Empty");
         }
 
         return resourceMined;
@@ -724,9 +724,13 @@ public class ResourceGrid : MonoBehaviour{
 	/// <param name="x">The x coordinate.</param>
 	/// <param name="y">The y coordinate.</param>
 	/// <param name="newType">New type.</param>
-	public void SwapTileType(int x, int y, TileData.Types newType, int nanoBotCost = 0, float spriteSizeX = 0, float spriteSizeY = 0)
+	public void SwapTileType(int x, int y, TileData.Types newType, string bpName, int nanoBotCost = 0, float spriteSizeX = 0, float spriteSizeY = 0)
 	{
-        
+        TileStats tileStats = new TileStats();
+        if (bpName != "Empty")
+        {
+            tileStats = BlueprintDatabase.Instance.GetTileStats(bpName);
+        }
 		// MAKE SURE THIS IS NOT A SPAWNED TILE ALREADY!!! 
 		// So we don't change the grid tile data where we don't want to!
 		if (spawnedTiles [x, y] == null) {
@@ -742,10 +746,7 @@ public class ResourceGrid : MonoBehaviour{
           
             switch (newType) {
 			    case TileData.Types.extractor:
-
-                    // Define the Tile's stats from its Blueprint
-                    
-
+              
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Extractor", newType, 0, 10000, 5, 5, 0, 0, nanoBotCost);
                     
@@ -754,27 +755,27 @@ public class ResourceGrid : MonoBehaviour{
                    
 				break;
 			    case TileData.Types.machine_gun:
-				    
+
                     if (spriteWidth > 0 && spriteHeight > 0)
                     {
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Machine Gun", newType, 0, 10000, 30, 5, 5, 0, nanoBotCost);
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Machine Gun", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                     }
                     else
                     {
-                        tiles[x, y] = new TileData(x, y, "Machine Gun", newType, 0, 10000, 30, 5, 5, 0, nanoBotCost);
+                        tiles[x, y] = new TileData(x, y, "Machine Gun", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                     }
                     break;
 			    case TileData.Types.cannons:
                     if (spriteWidth > 0 && spriteHeight > 0)
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Cannons", newType, 0, 10000, 30, 5, 3, 0, nanoBotCost);
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Cannons", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                     else
-                        tiles [x, y] = new TileData (x, y, "Cannons", newType, 0, 10000, 30, 5, 3, 0, nanoBotCost);
+                        tiles [x, y] = new TileData (x, y, "Cannons", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
 				break;
 			    case TileData.Types.harpoonHall:
                     if(spriteWidth > 0 && spriteHeight > 0)
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Harpooner's Hall", newType, 0, 10000, 50, 6, 0, 0, nanoBotCost);
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Harpooner's Hall", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                     else
-				        tiles [x, y] = new TileData (x, y, "Harpooner's Hall", newType, 0, 10000, 50, 6, 0, 0, nanoBotCost);
+				        tiles [x, y] = new TileData (x, y, "Harpooner's Hall", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
 				break;
 			    case TileData.Types.farm_s:
                     if (spriteWidth > 0 && spriteHeight > 0)
@@ -796,15 +797,15 @@ public class ResourceGrid : MonoBehaviour{
 				break;
 			    case TileData.Types.sniper:
                     if (spriteWidth > 0 && spriteHeight > 0)
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Sniper Gun", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Sniper Gun", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                     else
-                        tiles [x, y] = new TileData (x, y, "Sniper Gun", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+                        tiles [x, y] = new TileData (x, y, "Sniper Gun", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
 				break;
 			    case TileData.Types.seaWitch:
                     if (spriteWidth > 0 && spriteHeight > 0)
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Sea-Witch Crag", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Sea-Witch Crag", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                     else
-                        tiles [x, y] = new TileData (x, y, "Sea-Witch Crag", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+                        tiles [x, y] = new TileData (x, y, "Sea-Witch Crag", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
 				break;
 			    case TileData.Types.nutrient:
                     if (spriteWidth > 0 && spriteHeight > 0)
@@ -821,12 +822,12 @@ public class ResourceGrid : MonoBehaviour{
                 case TileData.Types.terraformer:
                     if (spriteWidth > 0 && spriteHeight > 0)
                     {
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Terraformer", newType, 0, 10000, 250, 2, 0, 0, nanoBotCost);
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Terraformer", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                         // Keep a record of the Terraformer's main tile
                         terraformerTile = tiles[x, y];
                     }
                     else
-                        tiles[x, y] = new TileData(x, y, "Terraformer", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+                        tiles[x, y] = new TileData(x, y, "Terraformer", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
 
                     terraformer_built = true;
                     break;
@@ -906,7 +907,7 @@ public class ResourceGrid : MonoBehaviour{
             //*********   NANO BOTS RETURNED:
 
             // Return bots... THIS WILL NEED TO EQUAL A NANOBOTS COST LATER, JUST USING 10
-            int returnNanoCost = tiles[x, y].nanoBotCost;
+            int returnNanoCost = tiles[x, y].tileStats.NanoBotCost;
 
             NanoBuilding_Handler nanoBuilder = Hero.GetComponent<NanoBuilding_Handler>();
         

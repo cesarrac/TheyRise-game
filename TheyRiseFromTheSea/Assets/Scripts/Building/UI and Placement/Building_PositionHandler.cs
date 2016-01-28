@@ -50,6 +50,9 @@ public class Building_PositionHandler : MonoBehaviour {
 
     Mouse_Controller mouse_controller;
 
+    // Blueprint name
+    public string bpName { get; protected set; }
+
 	void Awake()
 	{
         // Get the Sprite Renderer to be able to change the Sprite's color depending on position
@@ -74,6 +77,10 @@ public class Building_PositionHandler : MonoBehaviour {
         mouse_controller = Mouse_Controller.MouseController;
     }
 
+    public void SetCurrentBlueprintID(string id)
+    {
+        bpName = id;
+    }
 	
 
 	void Update () {
@@ -216,7 +223,7 @@ public class Building_PositionHandler : MonoBehaviour {
 
             TileData currTile = mouse_controller.GetTileUnderMouse();
 
-			resourceGrid.SwapTileType (currTile.posX, currTile.posY, tileType, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
+			resourceGrid.SwapTileType (currTile.posX, currTile.posY, tileType, bpName,currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
 			followMouse = false;
             
 			// Pool this object

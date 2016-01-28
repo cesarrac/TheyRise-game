@@ -39,10 +39,30 @@ public class Tower_AoETargettingHandler : Unit_Base {
 
 	public State debugState;
 
+    public string towerName;
+
     void OnEnable()
     {
         enemiesInRange = null;
         enemiesCount = 0;
+    }
+
+    void Awake()
+    {
+        // Get Stats from Database
+        BlueprintDatabase.Instance.GetBattleStats(towerName, InitTowerStats);
+    }
+
+    //void InitGunStats(TowerGunStats towerStats)
+    //{
+    //    gunStats = new TowerGunStats(towerStats.startingAmmo, towerStats.startingReloadTime);
+
+    //}
+
+    void InitTowerStats(UnitStats unitStats)
+    {
+        stats = new UnitStats();
+        stats.InitStartingStats(unitStats.maxHP, unitStats.startDefence, unitStats.startAttack, unitStats.startShield, unitStats.startRate, unitStats.startDamage, 0);
     }
 
     void Start () 
@@ -55,7 +75,7 @@ public class Tower_AoETargettingHandler : Unit_Base {
 
 		// Initialize building stats
 		stats.Init ();
-		InitTileStats((int)transform.position.x, (int)transform.position.y);
+		//InitTileStats((int)transform.position.x, (int)transform.position.y);
         
         objPool = ObjectPool.instance;
 		

@@ -114,6 +114,7 @@ public class BlueprintDatabase : MonoBehaviour {
         battleTowersMap = new Dictionary<string, Blueprint_Battle>();
         battleTowersMap.Add("Machine Gun", new Blueprint_Battle(12, 2, 0.8f, 5, 25, 2, 1, 0));
         battleTowersMap.Add("Sniper Gun", new Blueprint_Battle(12, 2, 1.5f, 8 ,25, 2, 1, 0));
+        battleTowersMap.Add("Terraformer", new Blueprint_Battle(0, 0, 0, 0, 2500, 0, 2, 0));
     }
 
     public void GetExtractorStats(string id, Transform objTransform, ExtractionBuilding extractor, TileData.Types resourceType)
@@ -133,6 +134,28 @@ public class BlueprintDatabase : MonoBehaviour {
             Debug.Log("BP Database: Found stats for " + id);
             InitGunStats(battleTowersMap[id].battleStats);
             InitUnitStats(battleTowersMap[id].unitStats);
+        }
+    }
+
+    public void GetBattleStats(string id, Action<UnitStats> InitUnitStats)
+    {
+        if (battleTowersMap.ContainsKey(id))
+        {
+            Debug.Log("BP Database: Found stats for " + id);
+            InitUnitStats(battleTowersMap[id].unitStats);
+        }
+    }
+
+    public TileStats GetTileStats(string id)
+    {
+        if (battleTowersMap.ContainsKey(id))
+        {
+            Debug.Log("BP DATABASE: Found initial tile stats for " + id);
+            return battleTowersMap[id].tileStats;
+        }
+        else
+        {
+            return null;
         }
     }
 

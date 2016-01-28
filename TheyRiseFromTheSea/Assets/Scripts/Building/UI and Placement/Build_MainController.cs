@@ -52,6 +52,7 @@ class Build_MainController:MonoBehaviour
 
 
         Building_PositionHandler bPosHand = halfBuilt.GetComponent<Building_PositionHandler>();
+        bPosHand.SetCurrentBlueprintID(building.buildingName);
         bPosHand.spawnPos = spawnPos;
         bPosHand.followMouse = true;
         bPosHand.tileType = building.tileType;

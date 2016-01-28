@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using System;
 
 [System.Serializable]
 public class TowerGunStats
@@ -34,10 +34,15 @@ public class Blueprint_Battle : Blueprint {
     public TowerGunStats battleStats { get; protected set; }
     public UnitStats unitStats { get; protected set; }
 
+    // FIX THIS! Battle Stats, unit stats?! Tile STats!?! TOO MANY STATS!!!!!!!!!!!!!!!!!!!!!!!
+    // Tile Stats (HP, Defnse, Attk, Shield, Nanobot Cost)
+    public TileStats tileStats { get; protected set; }
+
     public Blueprint_Battle(int ammo, float reload_time, float rate, float damage, float hp, float attk, float defense, float shield)
     {
         battleStats = new TowerGunStats(ammo, reload_time);
         unitStats = new UnitStats(hp, attk, defense, shield, rate);
+        tileStats = new TileStats(hp, defense, attk, shield, nanoBotCost);
     }
 
     public void UpgradeAmmo(int newAmmo)

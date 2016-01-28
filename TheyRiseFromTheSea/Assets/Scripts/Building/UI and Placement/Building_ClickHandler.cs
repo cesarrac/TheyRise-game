@@ -260,7 +260,7 @@ public class Building_ClickHandler : MonoBehaviour {
         // Define the tile again in case this was a pooled object and for some reason it didn't re-define its tile. This might make it unnecessary to do it on start.
         myTile = ResourceGrid.Grid.TileFromWorldPoint(transform.position);
         Debug.Log("My tile pos X " + myTile.posX + " pos Y " + myTile.posY);
-        ResourceGrid.Grid.SwapTileType(myTile.posX, myTile.posY, TileData.Types.empty, myTile.nanoBotCost);
+        ResourceGrid.Grid.SwapTileType(myTile.posX, myTile.posY, TileData.Types.empty, "Empty", myTile.tileStats.NanoBotCost);
 
         Sound_Manager.Instance.PlaySound("Build Break");
 

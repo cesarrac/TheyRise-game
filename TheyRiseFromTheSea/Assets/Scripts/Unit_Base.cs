@@ -128,21 +128,21 @@ public class Unit_Base : MonoBehaviour {
 		}
 	}
 
-	public void InitTileStats(int x, int y){
-//		Debug.Log ("BASE: Tile stats initialized!");
-		resourceGrid.tiles [x, y].hp = stats.curHP;
-		resourceGrid.tiles [x, y].def = stats.curDefence;
-		resourceGrid.tiles [x, y].attk = stats.curAttack;
-		resourceGrid.tiles [x, y].shield = stats.curShield;
-	}
+//	public void InitTileStats(int x, int y){
+////		Debug.Log ("BASE: Tile stats initialized!");
+//		resourceGrid.tiles [x, y].hp = stats.curHP;
+//		resourceGrid.tiles [x, y].def = stats.curDefence;
+//		resourceGrid.tiles [x, y].attk = stats.curAttack;
+//		resourceGrid.tiles [x, y].shield = stats.curShield;
+//	}
 
 	
 
     public bool AttackTile(TileData tile)
     {
-        if (tile.hp > 0)
+        if (tile.tileStats.HP > 0)
         {
-            float calc = (tile.def + tile.shield ) - stats.curAttack;
+            float calc = (tile.tileStats.Defense + tile.tileStats.Shield ) - stats.curAttack;
             //			
             if (calc <= 0)
             {
@@ -208,7 +208,7 @@ public class Unit_Base : MonoBehaviour {
         else
         {
             // target is dead by now
-            resourceGrid.DamageTile(tile, tile.hp);
+            resourceGrid.DamageTile(tile, tile.tileStats.HP);
 
             Debug.Log("UNIT: Target Dead!");
             //Die(unit.gameObject);

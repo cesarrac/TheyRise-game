@@ -47,7 +47,7 @@ public class Tower_DeBuffer : Unit_Base {
 
         // Initialize building stats
         stats.Init ();
-		InitTileStats((int)transform.position.x, (int)transform.position.y);
+		//InitTileStats((int)transform.position.x, (int)transform.position.y);
 
         objPool = ObjectPool.instance;
 

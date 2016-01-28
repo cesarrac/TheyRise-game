@@ -117,7 +117,6 @@ public class Blueprint
     // Tier / Upgrade level of this Blueprint
     public Blueprint_Tier bp_Tier { get; protected set; }
 
-
     public Blueprint() { }
 
     public Blueprint (string Name, int PUCost, int NanoBotCost, TileData.Types _Ttype, string desc)
