@@ -84,6 +84,10 @@ public class UI_Manager : MonoBehaviour
 
     }
 
+    public void CloseVictoryPanel()
+    {
+        victoryPanel.SetActive(false);
+    }
 
     // Load Scenes:
     public void ReturnToShip()

@@ -134,8 +134,8 @@ public class Enemy_AttackHandler : Unit_Base {
         {
 
             // Only listen for attackingTower once our path handler has set our main target and unit is NOT attacking
-            if (mainTarget != null && !isAttacking)
-                ListenForAttacker();
+            //if (mainTarget != null && !isAttacking)
+            //    ListenForAttacker();
 
             // Makes sure that if the tower target was POOLED that the target is nulled
             if (towerAttackingMe != null)

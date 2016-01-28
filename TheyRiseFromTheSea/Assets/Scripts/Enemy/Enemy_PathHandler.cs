@@ -329,13 +329,13 @@ public class Enemy_PathHandler : MonoBehaviour
                 {
                     // Reset the x
                     currPathPosition.x = target.position.x;
-                    currPathPosition.y = currPathPosition.y - 2;
+                    currPathPosition.y = currPathPosition.y - 3;
                     Debug.Log("ENEMY: Trying to Go UNDER the target.");
 
                     // If STILL unwalkable go OVER it
                     if (!grid.NodeFromWorldPoint(currPathPosition).isWalkable)
                     {
-                        currPathPosition.y = currPathPosition.y + 4;
+                        currPathPosition.y = currPathPosition.y + 6;
                         Debug.Log("ENEMY: Trying to Go OVER the target.");
                     }
                 }
@@ -359,6 +359,12 @@ public class Enemy_PathHandler : MonoBehaviour
             StartCoroutine("FollowPath");
             if (_state != State.FOLLOWING_PATH && _state != State.MOVING_TO_TARGET)
                 _state = State.FOLLOWING_PATH;
+
+            // If this Unit is not chasing the player, it doesn't need to recheck its path. The target does not move.
+            //if (!chasesPlayer && target.gameObject.tag != "Citizen")
+            //{
+            //    StopCoroutine("RequestPath");
+            //}
         }
         else
         {

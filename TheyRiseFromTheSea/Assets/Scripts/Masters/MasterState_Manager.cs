@@ -124,15 +124,21 @@ public class MasterState_Manager : MonoBehaviour {
 
     void MissionSuccess()
     {
-        if (Time.timeScale != 0)
-        {
-            UI_Manager.Instance.DisplayVictoryPanel();
-           
-            StopAllCoroutines();
+        //if (Time.timeScale != 0)
+        //{
+        //    UI_Manager.Instance.DisplayVictoryPanel();
 
-            Time.timeScale = 0;
-        }
-      
+        //    StopAllCoroutines();
+
+        //    Time.timeScale = 0;
+        //}
+        UI_Manager.Instance.DisplayVictoryPanel();
+
+        // Notify the Launchpad/Transporter that it can now launch safely by unlocking its controls.
+        Transporter_Handler.instance.LockControls(false);
+        Debug.Log("MASTER STATE: Unlocking Transporter controls!");
+
+        mState = MasterState.WAITING;
     }
 
 	// BUTTONS:

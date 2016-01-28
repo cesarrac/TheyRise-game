@@ -240,7 +240,7 @@ public class ExtractionBuilding : MonoBehaviour {
         {
             for (int y = originTile.posY - (int)spriteHeight; y <= originTile.posY + spriteHeight; y++)
             {
-                Debug.Log("EXTRACTION: Checking pos " + x + " " + y);
+                //Debug.Log("EXTRACTION: Checking pos " + x + " " + y);
                 if (CheckTileType(x, y) != null)
                 {
                     return CheckTileType(x, y); ;

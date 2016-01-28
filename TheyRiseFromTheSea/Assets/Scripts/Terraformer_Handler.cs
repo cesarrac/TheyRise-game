@@ -10,8 +10,8 @@ public class Terraformer_Handler : MonoBehaviour {
 
     public static Terraformer_Handler instance;
     
-    private int _maxTerraformerStages = 5;
-    public int MaxTerraformerStages { get { return _maxTerraformerStages; } set { _maxTerraformerStages = Mathf.Clamp(value, 5, 11); } }
+    private int _maxTerraformerStages = 1;
+    public int MaxTerraformerStages { get { return _maxTerraformerStages; } set { _maxTerraformerStages = Mathf.Clamp(value, 3, 11); } }
 
 	private int _maxTerraformCycles = 3; // # of cycles that must that must completed for terraforming to finish a stage
     public int MaxTerraformerCycles { get { return _maxTerraformCycles; } set { _maxTerraformCycles = Mathf.Clamp(value, 2, 11); } }
@@ -93,12 +93,10 @@ public class Terraformer_Handler : MonoBehaviour {
                 if (isWorking)
                 {
                     StopTerraformer();
+                    isWorking = false;
                 }
               
                 Debug.Log("Congratulations! Terraformer has succesfully completed its final stage!");
-
-                // Notify the Launchpad/Transporter that it can now launch safely by unlocking its controls.
-                Transporter_Handler.instance.LockControls(false);
 
 			    //Notify Master State that this level was succesfully terraformed, Game Master will load ship level after UI screen pops up
 			    MasterState_Manager.Instance.mState = MasterState_Manager.MasterState.MISSION_SUCCESS;

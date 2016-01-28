@@ -83,13 +83,13 @@ public class Enemy_Master : MonoBehaviour {
 
         // FIX THIS TOO! Here I'm going to create the enemies hardcoded for testing, but this also would be nice to get from an external database!
         Enemy slimer_weak_noAggro = new Enemy("Slimer_weak", attk_weak, move_avg, false);  // The name of the Enemy class has to match the name of the prefab preloaded unto the Object Pool
-        Enemy slimer_weak_Aggro = new Enemy("Slimer_weak", attk_weak, move_avg, false, true);
+        Enemy slimer_weak_Aggro = new Enemy("Slimer_weak", attk_weak, move_avg, true, true);
 
         Enemy slimer_mid_noAggro = new Enemy("Slimer_weak", attk_mid, move_avg, false);
-        Enemy slimer_mid_Aggro = new Enemy("Slimer_weak", attk_mid, move_avg, false, true);
+        Enemy slimer_mid_Aggro = new Enemy("Slimer_weak", attk_mid, move_avg, true, true);
 
         Enemy slimer_heavy_noAggro = new Enemy("Slimer_weak", attk_heavy, move_avg, false);
-        Enemy slimer_heavy_Aggro = new Enemy("Slimer_weak", attk_heavy, move_avg, false, true);
+        Enemy slimer_heavy_Aggro = new Enemy("Slimer_weak", attk_heavy, move_avg, true, true);
 
         enemiesAvailable.Add("Slimer_Weak_noAggro", slimer_weak_noAggro);
         enemiesAvailable.Add("Slimer_Mid_noAggro", slimer_mid_noAggro);
@@ -240,7 +240,7 @@ public class Enemy_Master : MonoBehaviour {
 
         if (target_killer != null)
         {
-            //Debug.Log("ENEMY MASTER: Spawning a kill squad to target " + target_killer.name);
+            Debug.Log("ENEMY MASTER: Spawning a kill squad to target " + target_killer.name);
             if (currentTerraformerStage <= 1)
             {
                 // Decide to spawn weak enemies 

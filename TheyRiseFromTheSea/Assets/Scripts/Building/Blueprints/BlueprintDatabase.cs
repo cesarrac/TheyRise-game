@@ -53,11 +53,6 @@ public class BlueprintDatabase : MonoBehaviour {
     {
         hero_nanoBuilder = GameMaster.Instance.theHero.nanoBuilder;
 
-        if (hero_nanoBuilder.blueprintsMap.Count > 0)
-        {
-            // The Hero already has Blueprints loaded unto their Builder, so those need to be displayed by the UI Manager
-            ReloadOnNanoBuilder();
-        }
 
         // Check if this is the firs time we load the Blueprint screen. If it is we need to load the Terraformer unto the Hero's blueprints map.
         if (!hero_nanoBuilder.CheckForBlueprint(TileData.Types.terraformer))
@@ -105,7 +100,7 @@ public class BlueprintDatabase : MonoBehaviour {
     void InitExtractors()
     {
         extractorsMap = new Dictionary<string, Blueprint_Extraction>();
-        extractorsMap.Add("Extractor", new Blueprint_Extraction(20, 10, 1, 100));
+        extractorsMap.Add("Extractor", new Blueprint_Extraction(10, 10, 1, 50));
         extractorsMap.Add("Desalination Pump", new Blueprint_Extraction(20, 20, 1, 100));
     }
 
@@ -158,6 +153,8 @@ public class BlueprintDatabase : MonoBehaviour {
             return null;
         }
     }
+
+    // LOADER
 
     // This will Display the Selected Blueprint's info and store it's info in case the Player decides to Load it to the Builder
     public void SelectBlueprint(string bpType)
@@ -222,8 +219,22 @@ public class BlueprintDatabase : MonoBehaviour {
 
     }
 
+    public void ReloadPreviousLoaded()
+    {
+        if (hero_nanoBuilder != null)
+        {
+            if (hero_nanoBuilder.blueprintsMap.Count > 0)
+            {
+                // The Hero already has Blueprints loaded unto their Builder, so those need to be displayed by the UI Manager
+                ReloadOnNanoBuilder();
+            }
+        }
+
+    }
+
     void ReloadOnNanoBuilder()
     {
+        Debug.Log("Reloading Hero Bluerprints...");
         if (hero_nanoBuilder.blueprintsMap.Count > 0)
         {
             foreach(TileData.Types btype in hero_nanoBuilder.bpTypes)
@@ -236,6 +247,8 @@ public class BlueprintDatabase : MonoBehaviour {
 
                 UI_Manager.Instance.AddBlueprintToBuilder(hero_nanoBuilder.blueprintsMap[btype].buildingName);
             }
+
+            DisplayBuilderMemory();
         }
     }
 

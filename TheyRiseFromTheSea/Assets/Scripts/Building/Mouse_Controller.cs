@@ -38,11 +38,11 @@ public class Mouse_Controller:MonoBehaviour
 
         // FOR DEBUGGING PURPOSES:
         // Tile Under Mouse Tool: print to console the tile type and position of the tile under mouse
-        if (!Build_MainController.Instance.currentlyBuilding)
-        {
-            DebugTileUnderMouse();
-            DebugGraphicTile();
-        }
+        //if (!Build_MainController.Instance.currentlyBuilding)
+        //{
+        //    DebugTileUnderMouse();
+        //    DebugGraphicTile();
+        //}
 
 
         ListenForRightClick();

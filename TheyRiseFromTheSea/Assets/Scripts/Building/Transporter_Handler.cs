@@ -8,11 +8,9 @@ public class Transporter_Handler : MonoBehaviour {
 
     public static Transporter_Handler instance { get; protected set; }
 
-    public int shipLevelIndex = 0, planetLevelIndex = 1;
-
     bool isPlayerOnPad;
 
-    public bool isLocked { get; protected set; }
+    bool isLocked;
 
     Building_StatusIndicator status_indicator;
 
@@ -42,22 +40,28 @@ public class Transporter_Handler : MonoBehaviour {
 
     void ListenForLaunchButton()
     {
-        if (Input.GetButtonDown("Launch"))
+        if (Input.GetButtonUp("Launch"))
         {
             if (SceneManager.GetActiveScene().name == "Level_Launch")
             {
                 Sound_Manager.Instance.PlaySound("Transporter");
                 LaunchToPlanet();
             }
-            else if (SceneManager.GetActiveScene().name == "Level_Planet" && !isLocked)
+            else
             {
-                LaunchToShip();
+                if (isLocked == false)
+                {
+                    LaunchToShip();
+                }
+                else if (isLocked == true && status_indicator != null)
+                {
+                    status_indicator.CreateStatusMessage("Locked!");
+                }
             }
-            else if (isLocked && status_indicator != null)
-            {
-                status_indicator.CreateStatusMessage("Locked!");
-            }
-          
+
+            Debug.Log("TRANSPORTER: Lock is " + isLocked);
+
+
         }
     }
 
@@ -80,6 +84,7 @@ public class Transporter_Handler : MonoBehaviour {
     public void LockControls(bool isLock)
     {
         isLocked = isLock;
+        Debug.Log("TRANSPORTER: Lock is " + isLocked);
     }
 
 

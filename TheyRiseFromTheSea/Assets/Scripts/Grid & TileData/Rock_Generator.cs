@@ -130,8 +130,8 @@ public class Rock_Generator : MonoBehaviour {
             // Start with an empty Vector2, this will be filled if a legal position is found.
             Vector2 pos = new Vector2();
 
-            // We will allow 5 attempts to get a legal position.
-            int rockPosAttempts = 5;
+            // We will allow 10 attempts to get a legal position.
+            int rockPosAttempts = 10;
 
             // Loop to check for legal position
             for (int j = 0; j < rockPosAttempts; j++)

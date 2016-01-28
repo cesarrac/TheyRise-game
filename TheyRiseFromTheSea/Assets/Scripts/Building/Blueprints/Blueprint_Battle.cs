@@ -41,7 +41,9 @@ public class Blueprint_Battle : Blueprint {
     public Blueprint_Battle(int ammo, float reload_time, float rate, float damage, float hp, float attk, float defense, float shield)
     {
         battleStats = new TowerGunStats(ammo, reload_time);
-        unitStats = new UnitStats(hp, attk, defense, shield, rate);
+        unitStats = new UnitStats();
+        unitStats.InitStartingStats(hp, defense, attk, shield, rate, damage, 0);
+        unitStats.Init();
         tileStats = new TileStats(hp, defense, attk, shield, nanoBotCost);
     }
 
