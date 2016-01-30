@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 [System.Serializable]
 public class UnitStats
@@ -83,6 +84,35 @@ public class UnitStats
 
         Init();
     }
+
+    //public void Energize (float boost)
+    //{
+    //    // Attack boost
+    //    curAttack = boost * curAttack;
+
+    //    // Rate boost
+    //    curRateOfAttk = boost * curRateOfAttk;
+
+    //    // Damage boost 
+    //    curDamage = boost * curDamage;
+
+    //    // Reload Speed boost (subtracts because Reload speed is how long it takes to reload in seconds)
+    //    curReloadSpeed = curReloadSpeed - boost;
+    //}
+
+    //public void DeEnergize()
+    //{
+    //    // Set stats back to starting values
+    //    curAttack = startAttack;
+    //    curRateOfAttk = startRate;
+    //    curDamage = startDamage;
+    //    curReloadSpeed = startReloadSpd;
+    //}
+
+
+
+
+
 }
 
 public class Unit_Base : MonoBehaviour {
@@ -128,15 +158,37 @@ public class Unit_Base : MonoBehaviour {
 		}
 	}
 
-//	public void InitTileStats(int x, int y){
-////		Debug.Log ("BASE: Tile stats initialized!");
-//		resourceGrid.tiles [x, y].hp = stats.curHP;
-//		resourceGrid.tiles [x, y].def = stats.curDefence;
-//		resourceGrid.tiles [x, y].attk = stats.curAttack;
-//		resourceGrid.tiles [x, y].shield = stats.curShield;
-//	}
+    //	public void InitTileStats(int x, int y){
+    ////		Debug.Log ("BASE: Tile stats initialized!");
+    //		resourceGrid.tiles [x, y].hp = stats.curHP;
+    //		resourceGrid.tiles [x, y].def = stats.curDefence;
+    //		resourceGrid.tiles [x, y].attk = stats.curAttack;
+    //		resourceGrid.tiles [x, y].shield = stats.curShield;
+    //	}
 
-	
+    public void EnergizeCallback(Action<Unit_Base> cb)
+    {
+        cb(this);
+    }
+
+    public void CountDownToDeEnergize(Action<UnitStats> cb, float duration)
+    {
+        StartCoroutine(DeEnergizeCountDown(cb, duration));
+    }
+
+    IEnumerator DeEnergizeCountDown(Action<UnitStats> cb, float duration)
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(duration);
+
+            cb(stats);
+
+            yield break;
+
+        }
+    }
+
 
     public bool AttackTile(TileData tile)
     {
