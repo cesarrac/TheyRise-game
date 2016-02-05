@@ -55,7 +55,7 @@ public class Player_MoveHandler : MonoBehaviour {
 
 	void Awake()
 	{
-		anim = GetComponent<Animator> ();
+		anim = GetComponentInChildren<Animator> ();
 
 		rBody = GetComponent<Rigidbody2D> ();
 
@@ -81,11 +81,11 @@ public class Player_MoveHandler : MonoBehaviour {
 
 		lastTapTime = 0;
 
-        if (!isOnShip)
-        {
-            mapX = resourceGrid.mapSizeX;
-            mapY = resourceGrid.mapSizeY;
-        }
+        //if (!isOnShip)
+        //{
+        //    mapX = resourceGrid.mapSizeX;
+        //    mapY = resourceGrid.mapSizeY;
+        //}
 	
 	}
 
@@ -99,7 +99,7 @@ public class Player_MoveHandler : MonoBehaviour {
 		// Store the axis Inputs in a Vector 2
 		move_vector = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical"));
 
-       ListenForMouseDash();
+       //ListenForMouseDash();
 
 	}
 

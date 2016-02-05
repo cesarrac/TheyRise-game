@@ -8,6 +8,8 @@ public class SortingLayer_Manager : MonoBehaviour {
     public bool isLineRenderer;
     string correctSortingLayer = "Foreground";
 
+    public bool isCharacterLimb;
+
 	void Awake(){
         if (!isLineRenderer)
         {
@@ -28,16 +30,24 @@ public class SortingLayer_Manager : MonoBehaviour {
 
 	void LateUpdate () 
 	{
-		if (spriteRenderer != null)
+		if (spriteRenderer != null && spriteRenderer.isVisible)
         {
             if (spriteRenderer.sortingLayerName != correctSortingLayer)
                 spriteRenderer.sortingLayerName = correctSortingLayer;
 
-            spriteRenderer.sortingOrder = (int)Camera.main.WorldToScreenPoint(spriteRenderer.bounds.min).y * -1;
+            if (isCharacterLimb)
+            {
+                spriteRenderer.sortingOrder = ((int)Camera.main.WorldToScreenPoint(spriteRenderer.bounds.min).y * -1) * (int)transform.position.z;
+
+            }
+            else
+            {
+                spriteRenderer.sortingOrder = ((int)Camera.main.WorldToScreenPoint(spriteRenderer.bounds.min).y * -1);
+            }
         }
 			
 
-        if (lineRenderer != null)
+        if (lineRenderer != null && lineRenderer.isVisible)
         {
             if (lineRenderer.sortingLayerName != correctSortingLayer)
                 lineRenderer.sortingLayerName = correctSortingLayer;
