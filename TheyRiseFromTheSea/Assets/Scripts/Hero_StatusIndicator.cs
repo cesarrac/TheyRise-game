@@ -5,6 +5,7 @@ public class Hero_StatusIndicator : Unit_StatusIndicator {
 
     void Awake()
     {
+        if (healthBarRect != null)
         healthBarRect = UI_Manager.Instance.player_healthBar.rectTransform;
     }
 

@@ -53,7 +53,7 @@ public class Player_FreezeGun : Player_GunBaseClass {
         }
 
         CheckForShoot ();
-		FollowMouse ();
+		//FollowMouse ();
 	}
 
 

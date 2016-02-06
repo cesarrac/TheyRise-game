@@ -62,7 +62,7 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 		CheckForShoot ();
 	
 
-		FollowMouse ();
+		//FollowMouse ();
 	}
 
 	

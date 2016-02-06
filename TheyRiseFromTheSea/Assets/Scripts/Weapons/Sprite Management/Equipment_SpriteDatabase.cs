@@ -22,13 +22,13 @@ public class Equipment_SpriteDatabase : MonoBehaviour {
     void InitSpritesMap()
     {
 
-        allSprites = Resources.LoadAll<Sprite>("Sprites/PlayerWeapons");
+        allSprites = Resources.LoadAll<Sprite>("PlayerWeapons");
 
 
         // Here we would have to manually name and map each sprite to the equipment map
-        equipmentMap.Add("Assault", allSprites[0]);
-        equipmentMap.Add("Shotgun", allSprites[1]);
-        equipmentMap.Add("Thunder", allSprites[2]);
+        equipmentMap.Add("Kinetic Rifle", allSprites[0]);
+        equipmentMap.Add("Mining Drill", allSprites[1]);
+        equipmentMap.Add("Freeze Gun", allSprites[2]);
     }
 
     public Sprite GetSprite(string name)

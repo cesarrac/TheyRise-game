@@ -58,19 +58,19 @@ public class Player_GunBaseClass : MonoBehaviour {
 //		}
 
 	}
-	public void FollowMouse()
-	{
-		mousePosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+	//public void FollowMouse()
+	//{
+	//	mousePosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
        
-		float mouseDirection = Mathf.Atan2 ((mousePosition.y - sightStart.position.y), (mousePosition.x - sightStart.position.x)) * Mathf.Rad2Deg - 90;		
-		if (mousePosition != transform.root.position) {
-			sightStart.rotation = Quaternion.AngleAxis (mouseDirection, Vector3.forward);
-			transform.rotation = Quaternion.AngleAxis (mouseDirection, Vector3.forward);
-            mousePosition.z = 0;
+	//	float mouseDirection = Mathf.Atan2 ((mousePosition.y - sightStart.position.y), (mousePosition.x - sightStart.position.x)) * Mathf.Rad2Deg - 90;		
+	//	if (mousePosition != transform.root.position) {
+	//		sightStart.rotation = Quaternion.AngleAxis (mouseDirection, Vector3.forward);
+	//		transform.rotation = Quaternion.AngleAxis (mouseDirection, Vector3.forward);
+ //           mousePosition.z = 0;
             
-        }
+ //       }
 
-	}
+	//}
 
     //public void CanFire()
     //{
@@ -193,29 +193,31 @@ public class Player_GunBaseClass : MonoBehaviour {
 		GameObject projectile = objPool.GetObjectForType (_projectileType, true, sightStart.position);
 		if (projectile) {
 			//Debug.Log("Firing " + _projectileType + " !");
-            //			// give it the position of the player
-            //			projectile.transform.position = sightStart.position;
             //projectile.GetComponent<SpriteRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
 
 			// and access to this gun to do damage
 			projectile.GetComponent<Bullet_Player> ().myWeapon = this;
 
-			// and its direction
-			Vector3 dir = mousePosition - sightStart.position;
-			float angle = Mathf.Atan2 (dir.y, dir.x) * Mathf.Rad2Deg - 90;
-			projectile.transform.eulerAngles = new Vector3 (0, 0, angle);
+            // and its direction
+            Vector3 dir = sightEnd.position - sightStart.position;
 
-			// Now fire the bullet trail right behind it
-			GameObject bulletTrail = objPool.GetObjectForType("BulletTrail", true, sightStart.position);
-			if (bulletTrail){
+            projectile.transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90);
+
+            // Now fire the bullet trail right behind it ...
+            GameObject bulletTrail = objPool.GetObjectForType("BulletTrail", true, sightStart.position);
+
+			if (bulletTrail)
+            {
                 //bulletTrail.GetComponent<LineRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
-                // and its direction
-                float trailAngle = Mathf.Atan2 (dir.y, dir.x) * Mathf.Rad2Deg;
-				bulletTrail.transform.eulerAngles = new Vector3 (0, 0, trailAngle);
-				bulletTrail.transform.SetParent(projectile.transform);
-			}
 
-		} else {
+                // ...and  set Rotation
+                bulletTrail.transform.eulerAngles = new Vector3 (0, 0, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
+                bulletTrail.transform.SetParent(projectile.transform);
+            }
+
+		}
+        else
+        {
 			Debug.Log("cant find " + _projectileType + " in Pool!");
 		}
 	}

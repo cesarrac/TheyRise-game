@@ -7,12 +7,12 @@ public class Weapon_Test : MonoBehaviour {
 
     Player_MoveHandler player_move;
     public GameObject player;
-    Equip_Weapon equip_wpn;
+    Equip_Item equip_wpn;
 
     void Start()
     {
         player_move = player.GetComponent<Player_MoveHandler>();
-        equip_wpn = player.GetComponent<Equip_Weapon>();
+        equip_wpn = player.GetComponent<Equip_Item>();
 
         SpawnWeapon();
     }
@@ -27,7 +27,7 @@ public class Weapon_Test : MonoBehaviour {
         //player_move.test_wpn = wpn;
 
         // Use the method in Equip Weapon to set the default transform to down
-       // equip_wpn.TestSwitch(0, -1f);
+        equip_wpn.SwitchRig(Equip_Item.EquipState.DOWN);
 
         // We would know the name of the first equipped Weapon or Tool from the GM, but here we are hardcoding it for test
         equip_wpn.SwitchSprite("Thunder");

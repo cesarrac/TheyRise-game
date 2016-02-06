@@ -181,10 +181,10 @@ public class GameMaster : MonoBehaviour {
                 */
 
                 // Use the method in Equip Weapon to set the default transform to down...
-                Hero.GetComponent<Equip_Weapon>().SwitchTransform(0, -1f);
+                Hero.GetComponent<Equip_Item>().SwitchRig(Equip_Item.EquipState.DOWN);
 
                 // .. and set the sprite according to this weapon's name
-                Hero.GetComponent<Equip_Weapon>().SwitchSprite(theHero.weapons[0].itemName);
+                Hero.GetComponent<Equip_Item>().SwitchSprite(theHero.weapons[0].itemName);
 
                 // Set the Wpn 1's transform to be a child of the Hero...
                 wpn1.transform.SetParent(Hero.transform);

@@ -29,21 +29,30 @@ public class Unit_StatusIndicator : MonoBehaviour {
 
 	public virtual void SetHealth(float _cur, float _max, float _damage = 0)
 	{
-		float _value = _cur / _max;
+        if (healthBarRect != null)
+        {
+            float _value = _cur / _max;
 
-		if (_value < 0.4f) {
-			healthBarRect.gameObject.GetComponent<Image> ().color = Color.red;
+            if (_value < 0.4f)
+            {
+                healthBarRect.gameObject.GetComponent<Image>().color = Color.red;
 
-		} else if (_value < 0.6f) {
-			healthBarRect.gameObject.GetComponent<Image> ().color = Color.yellow;
-		} else {
-			healthBarRect.gameObject.GetComponent<Image> ().color = Color.green;
-		}
+            }
+            else if (_value < 0.6f)
+            {
+                healthBarRect.gameObject.GetComponent<Image>().color = Color.yellow;
+            }
+            else
+            {
+                healthBarRect.gameObject.GetComponent<Image>().color = Color.green;
+            }
 
-		healthBarRect.localScale = new Vector3 (_value, healthBarRect.localScale.y, healthBarRect.localScale.z);
+            healthBarRect.localScale = new Vector3(_value, healthBarRect.localScale.y, healthBarRect.localScale.z);
 
-		if (_damage > 0)
-			CreateDamageText (_damage);
+            if (_damage > 0)
+                CreateDamageText(_damage);
+        }
+
 	}
 
 	public void CreateDamageText(float _damage, string damageTypeID = "Damage")

@@ -53,7 +53,7 @@ public class Player_MoveHandler : MonoBehaviour {
 
     bool isDashing;
 
-    Equip_Weapon equip_wpn;
+    Equip_Item equip_wpn;
 
     void Awake()
 	{
@@ -76,7 +76,7 @@ public class Player_MoveHandler : MonoBehaviour {
         if (!resourceGrid && !isOnShip)
             resourceGrid = ResourceGrid.Grid;
 
-        equip_wpn = GetComponent<Equip_Weapon>();
+        equip_wpn = GetComponent<Equip_Item>();
 	}
 
 
@@ -92,9 +92,7 @@ public class Player_MoveHandler : MonoBehaviour {
         //}
 	
 	}
-
-
-
+    
 
 	void Update () {
 		debugState = _state;
@@ -106,7 +104,6 @@ public class Player_MoveHandler : MonoBehaviour {
        //ListenForMouseDash();
 
 	}
-
 
 
 	void MyStateMachine (State _curState){
@@ -185,7 +182,7 @@ public class Player_MoveHandler : MonoBehaviour {
         // Equip Weapon will need to know our direction
         //  equip_wpn.TransformSwitch(move_vector.x, move_vector.y);
 
-        equip_wpn.SwitchTransform(move_vector.x, move_vector.y);
+        equip_wpn.CheckCurrentRigTransform(move_vector.x, move_vector.y);
 
 		// Moving using Rigidbody 2D
 		rBody.MovePosition(rBody.position + move_vector * _curSpeed * Time.deltaTime);

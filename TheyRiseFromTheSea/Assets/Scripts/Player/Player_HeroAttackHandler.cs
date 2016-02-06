@@ -16,6 +16,9 @@ public class Player_HeroAttackHandler : Unit_Base {
 
     public Transform sightStart, sightEnd;
 
+    Transform currArms;
+
+    public float wpnRotationAngle { get; protected set; }
 
 	void Awake()
     {
@@ -56,13 +59,76 @@ public class Player_HeroAttackHandler : Unit_Base {
             SwapItems();
         }
 
+        if (currArms != null)
+        {
+            ArmsFollowMouse();
+        }
 
-
-        if (stats.curHP <= 0)
-            Suicide();
+        //if (stats.curHP <= 0)
+        //    Suicide();
     }
 
-	void SwapItems()
+    public void SetCurrentArms(Transform arms)
+    {
+        if (arms != currArms)
+        {
+            currArms = arms;
+        }
+    }
+
+    void ArmsFollowMouse()
+    {
+        Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        //float mouseDirection = Mathf.Atan2((mousePosition.y - sightStart.position.y), (mousePosition.x - sightStart.position.x)) * Mathf.Rad2Deg - 90;
+        //if (mousePosition != transform.root.position)
+        //{
+        //    sightStart.rotation = Quaternion.AngleAxis(mouseDirection, Vector3.forward);
+
+        //    mousePosition.z = 0;
+
+        //}
+
+        // Check what Direction State our Equip Item is in to know what type of rotation we need
+
+        Equip_Item equip = GetComponent<Equip_Item>();
+        if (equip != null)
+        {
+            if (equip.equipState == Equip_Item.EquipState.DOWN || equip.equipState == Equip_Item.EquipState.RIGHT)
+            {
+                wpnRotationAngle = Mathf.Atan2((mousePosition.y - currArms.position.y), (mousePosition.x - currArms.position.x)) * Mathf.Rad2Deg + 90;
+
+                if (mousePosition != transform.root.position)
+                {
+
+                    currArms.rotation = Quaternion.AngleAxis(wpnRotationAngle, Vector3.forward);
+
+                    mousePosition.z = 0;
+
+                }
+            }
+            else
+            {
+                wpnRotationAngle = Mathf.Atan2((mousePosition.y - currArms.position.y), (mousePosition.x - currArms.position.x)) * Mathf.Rad2Deg - 90;
+
+                if (mousePosition != transform.root.position)
+                {
+
+                    currArms.rotation = Quaternion.AngleAxis(wpnRotationAngle, Vector3.forward);
+
+                    mousePosition.z = 0;
+
+                }
+            }
+        }
+
+        Debug.DrawLine(sightStart.position, mousePosition, Color.cyan);
+
+     
+    }
+
+
+    void SwapItems()
 	{
         if (equipped_items.Count > 0)
         {
@@ -91,7 +157,7 @@ public class Player_HeroAttackHandler : Unit_Base {
             }
 
             // tell the equipped weapon script to swap the Sprite to the correct activated Wpn/Tool
-            GetComponent<Equip_Weapon>().SwitchSprite(equipped_items[curItemIndex].name);
+            GetComponent<Equip_Item>().SwitchSprite(equipped_items[curItemIndex].name);
         }
 
     }
