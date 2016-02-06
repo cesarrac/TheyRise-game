@@ -109,7 +109,7 @@ public class GameMaster : MonoBehaviour {
         objPool = ObjectPool.instance;
 
         Vector3 playerPosition = new Vector3(posX, posY, 0.0f);
-        GameObject Hero = objPool.GetObjectForType("Test Hero", true, playerPosition);
+        GameObject Hero = objPool.GetObjectForType("Hero Rig", true, playerPosition);
         /*
         HERE we need what Items the player chose to take with them to the surface.
         
@@ -169,6 +169,23 @@ public class GameMaster : MonoBehaviour {
             GameObject wpn1 = ObjectPool.instance.GetObjectForType(theHero.weapons[0].itemName, true, Hero.transform.position);
             if (wpn1)
             {
+                /* *** TRY THIS FOR ANIMATIONS: ****
+                Once the weapon gets instantiated, parent it to the Front Rig's weapon Holder (this transform can be stored as a var on an EquipWeapon script on the Hero parent)
+                since this is the default direction.
+                Then when the animator goes to activate another rig, EquipWeapon would switch its parent to the correct direction's weapon holder. Since it itself will
+                always have a Transform defaulted to 0 the weapon Holder should take care of giving it the correct rotation and position.
+
+                Like so:
+                wpn1.transform.SetParent(Hero.GetComponent<Equip_Weapon>().Weapon_Down);
+                
+                */
+
+                // Use the method in Equip Weapon to set the default transform to down...
+                Hero.GetComponent<Equip_Weapon>().SwitchTransform(0, -1f);
+
+                // .. and set the sprite according to this weapon's name
+                Hero.GetComponent<Equip_Weapon>().SwitchSprite(theHero.weapons[0].itemName);
+
                 // Set the Wpn 1's transform to be a child of the Hero...
                 wpn1.transform.SetParent(Hero.transform);
 

@@ -25,7 +25,7 @@ public class Player_GunBaseClass : MonoBehaviour {
 	public Rigidbody2D rigid_body;
 
 	// Handle the weapon sorting layer from here
-	public SpriteRenderer sprite_renderer;
+	//public SpriteRenderer sprite_renderer;
 
 	public Transform bulletTrailFab;
 
@@ -195,7 +195,7 @@ public class Player_GunBaseClass : MonoBehaviour {
 			//Debug.Log("Firing " + _projectileType + " !");
             //			// give it the position of the player
             //			projectile.transform.position = sightStart.position;
-            projectile.GetComponent<SpriteRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
+            //projectile.GetComponent<SpriteRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
 
 			// and access to this gun to do damage
 			projectile.GetComponent<Bullet_Player> ().myWeapon = this;
@@ -208,7 +208,7 @@ public class Player_GunBaseClass : MonoBehaviour {
 			// Now fire the bullet trail right behind it
 			GameObject bulletTrail = objPool.GetObjectForType("BulletTrail", true, sightStart.position);
 			if (bulletTrail){
-                bulletTrail.GetComponent<LineRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
+                //bulletTrail.GetComponent<LineRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
                 // and its direction
                 float trailAngle = Mathf.Atan2 (dir.y, dir.x) * Mathf.Rad2Deg;
 				bulletTrail.transform.eulerAngles = new Vector3 (0, 0, trailAngle);

@@ -16,6 +16,7 @@ public class Player_HeroAttackHandler : Unit_Base {
 
     public Transform sightStart, sightEnd;
 
+
 	void Awake()
     {
 
@@ -54,38 +55,43 @@ public class Player_HeroAttackHandler : Unit_Base {
             // Swap what item they are using
             SwapItems();
         }
-		
 
 
-		if (stats.curHP <= 0)
-			Suicide ();
-	}
+
+        if (stats.curHP <= 0)
+            Suicide();
+    }
 
 	void SwapItems()
 	{
-
-        // Check if by adding + 1 to current Index, if we are still within the Equipped Items array bounds
-        if (curItemIndex + 1 < equipped_items.Count)
+        if (equipped_items.Count > 0)
         {
-            // If we are, deactivate the current item using the index...
-            equipped_items[curItemIndex].SetActive(false);
+            // Check if by adding + 1 to current Index, if we are still within the Equipped Items array bounds
+            if (curItemIndex + 1 < equipped_items.Count)
+            {
+                // If we are, deactivate the current item using the index...
+                equipped_items[curItemIndex].SetActive(false);
 
-            // ... add + 1 to index...
-            curItemIndex += 1;
+                // ... add + 1 to index...
+                curItemIndex += 1;
 
-            // ... then activate the next item using the new index.
-            equipped_items[curItemIndex].SetActive(true);
-        }
-        else
-        {
-            // Adding + 1 is out of array's range. So first deactivate the current item...
-            equipped_items[curItemIndex].SetActive(false);
+                // ... then activate the next item using the new index.
+                equipped_items[curItemIndex].SetActive(true);
+            }
+            else
+            {
+                // Adding + 1 is out of array's range. So first deactivate the current item...
+                equipped_items[curItemIndex].SetActive(false);
 
-            // ... go back to the start of the Array...
-            curItemIndex = 0;
+                // ... go back to the start of the Array...
+                curItemIndex = 0;
 
-            // ... and activate that first gameobject.
-            equipped_items[curItemIndex].SetActive(true);
+                // ... and activate that first gameobject.
+                equipped_items[curItemIndex].SetActive(true);
+            }
+
+            // tell the equipped weapon script to swap the Sprite to the correct activated Wpn/Tool
+            GetComponent<Equip_Weapon>().SwitchSprite(equipped_items[curItemIndex].name);
         }
 
     }

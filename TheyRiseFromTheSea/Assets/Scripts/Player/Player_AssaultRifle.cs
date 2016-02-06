@@ -10,7 +10,7 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 	void Awake () 
 	{
 		
-        sprite_renderer = GetComponent<SpriteRenderer>();
+        //sprite_renderer = GetComponent<SpriteRenderer>();
 
     }
 

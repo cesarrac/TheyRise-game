@@ -53,7 +53,9 @@ public class Player_MoveHandler : MonoBehaviour {
 
     bool isDashing;
 
-	void Awake()
+    Equip_Weapon equip_wpn;
+
+    void Awake()
 	{
 		anim = GetComponentInChildren<Animator> ();
 
@@ -73,6 +75,8 @@ public class Player_MoveHandler : MonoBehaviour {
 
         if (!resourceGrid && !isOnShip)
             resourceGrid = ResourceGrid.Grid;
+
+        equip_wpn = GetComponent<Equip_Weapon>();
 	}
 
 
@@ -159,26 +163,30 @@ public class Player_MoveHandler : MonoBehaviour {
 
 	void Move(float _curSpeed)
 	{
-/* This is the logic for moving using the map coordinates to check if next tile is walkable:
+        /* This is the logic for moving using the map coordinates to check if next tile is walkable:
 
-		float _inputX = Input.GetAxis ("Horizontal");
-		float _inputY = Input.GetAxis ("Vertical");
-		float inputX = Mathf.Clamp (_inputX,(float) -mapX, (float) mapX);
-		float inputY = Mathf.Clamp (_inputY,(float) -mapY, (float) mapY);
+                float _inputX = Input.GetAxis ("Horizontal");
+                float _inputY = Input.GetAxis ("Vertical");
+                float inputX = Mathf.Clamp (_inputX,(float) -mapX, (float) mapX);
+                float inputY = Mathf.Clamp (_inputY,(float) -mapY, (float) mapY);
 
-		Vector3 move = new Vector3 (inputX, inputY, 0.0f);
+                Vector3 move = new Vector3 (inputX, inputY, 0.0f);
 
-		Vector3 newMovePos = new Vector3 (transform.position.x + inputX, transform.position.y + inputY, 0.0f);
+                Vector3 newMovePos = new Vector3 (transform.position.x + inputX, transform.position.y + inputY, 0.0f);
 
-//		if (CheckWalkabale (newMovePos)) {
-//
-//			transform.position += move * speed * Time.deltaTime;
-//
-//		}
-		transform.position += move * speed * Time.deltaTime;
+        //		if (CheckWalkabale (newMovePos)) {
+        //
+        //			transform.position += move * speed * Time.deltaTime;
+        //
+        //		}
+                transform.position += move * speed * Time.deltaTime;
 
+        */
+        // Equip Weapon will need to know our direction
+        //  equip_wpn.TransformSwitch(move_vector.x, move_vector.y);
 
-*/
+        equip_wpn.SwitchTransform(move_vector.x, move_vector.y);
+
 		// Moving using Rigidbody 2D
 		rBody.MovePosition(rBody.position + move_vector * _curSpeed * Time.deltaTime);
 

@@ -10,7 +10,7 @@ public class Player_FreezeGun : Player_GunBaseClass {
 	{
 
 
-        sprite_renderer = GetComponent<SpriteRenderer>();
+        //sprite_renderer = GetComponent<SpriteRenderer>();
 
     }
 
