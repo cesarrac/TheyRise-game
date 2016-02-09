@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class Ship_Inventory : MonoBehaviour {
 
@@ -15,8 +16,24 @@ public class Ship_Inventory : MonoBehaviour {
     public int commonOreStored { get; protected set; }
     public int enrichedOreStored { get; protected set; }
 
-    int tempWater, tempOre, tempFood, tempCommorOre, tempEnrichedOre; // ## Use this to create a temporary inventory that gets added to ship inventory only once Player launches (succeeds in Terraforming)
-    
+    // ## Use this to create a temporary inventory that gets added to ship inventory only once Player launches (succeeds in Terraforming)
+    public int tempWater { get; protected set; }
+    public int tempOre { get; protected set; }
+    public int tempFood { get; protected set; }
+    public int tempCommorOre { get; protected set; }
+    public int tempEnrichedOre { get; protected set; }
+
+
+
+
+    public int credits { get; protected set; }
+
+    public Dictionary<Item, int> fabricatedGoodsMap { get; protected set; }
+    public Dictionary<TileData.Types, int> rawResourcesMap { get; protected set; }
+
+    List<Weapon> availableWeapons;
+    List<Armor> availableArmor;
+    List<Tool> availableTools;
 
     void Awake()
     {
@@ -24,6 +41,9 @@ public class Ship_Inventory : MonoBehaviour {
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            fabricatedGoodsMap = new Dictionary<Item, int>();
+            rawResourcesMap = new Dictionary<TileData.Types, int>();
         }
         else
         {
@@ -71,6 +91,21 @@ public class Ship_Inventory : MonoBehaviour {
         storageTotal += ammnt;
     }
 
+    public void StoreItems(TileData.Types rType, int ammnt)
+    {
+        if (rawResourcesMap.ContainsKey(rType))
+        {
+            rawResourcesMap[rType] += ammnt;
+        }
+        else
+        {
+            rawResourcesMap.Add(rType, ammnt);
+        }
+
+        // add to the total
+        storageTotal += ammnt;
+    }
+
     public void SplitOre(int common, int enriched)
     {
         commonOreStored += common;
@@ -90,33 +125,118 @@ public class Ship_Inventory : MonoBehaviour {
 
         foodStored += tempFood;
 
+        StoreItems(TileData.Types.water, tempWater);
+        StoreItems(TileData.Types.rock, tempOre);
+        StoreItems(TileData.Types.food, tempFood);
+
         commonOreStored += tempCommorOre;
         enrichedOreStored += tempEnrichedOre;
+
+
+    }
+
+
+
+    public int DisplayResourceAmount(TileData.Types key)
+    {
+        if (rawResourcesMap.ContainsKey(key))
+        {
+            return rawResourcesMap[key];
+        }
+        else
+            return 0;
+    }
+
+
+
+    public void InitUI()
+    {
+        ResetTempInventory();
+
+        if (SceneManager.GetActiveScene().name == "Level_Planet")
+        {
+            Player_UIHandler.instance.InitTransporterTempInventory(tempFood, tempWater, tempOre);
+        }
+
+    }
+
+    public void ResetTempInventory()
+    {
 
         tempWater = 0;
         tempOre = 0;
         tempFood = 0;
         tempCommorOre = 0;
         tempEnrichedOre = 0;
-
     }
 
 
-    public void InitUI()
+    // FABRICATOR:
+    public void AddFabricatedGood(Item good, int ammnt)
     {
-        if (Application.loadedLevel == 1)
+        if (fabricatedGoodsMap.ContainsKey(good))
         {
-            Player_UIHandler.instance.InitPlanetUIText(tempFood, tempWater, tempOre);
+            fabricatedGoodsMap[good] += ammnt;
         }
-        else if (Application.loadedLevel == 0)
+        else
         {
-            Player_UIHandler.instance.InitShipUI(foodStored, waterStored, oreStored);
+            fabricatedGoodsMap.Add(good, ammnt);
         }
-      
-        
+    }
+
+    
+    // Whenever the player opens the info of a Current trade order, call this method below to check if the required good are available
+    public bool CheckForGoods(Item good, int ammnt)
+    {
+        if (fabricatedGoodsMap.ContainsKey(good))
+        {
+            if (fabricatedGoodsMap[good] >= ammnt)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool CheckForRawResources(TileData.Types resource, int ammnt)
+    {
+        if (rawResourcesMap.ContainsKey(resource))
+        {
+            if (rawResourcesMap[resource] >= ammnt)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
+    // MISSIONS:
+
+    // If the above method returns true a button on the Trade Order UI will allow the player to complete the Order by...
+
+    // ... giving their client the required Fabricated Goods ... 
+    public void DeliverGoods(Item good, int ammnt)
+    {
+        fabricatedGoodsMap[good] -= ammnt;
+
+        if (fabricatedGoodsMap[good] <= 0)
+        {
+            fabricatedGoodsMap.Remove(good);
+        }
+    }
+    // ... or required Raw Resource.
+    public void DeliverResources(TileData.Types resource, int ammnt)
+    {
+        rawResourcesMap[resource] -= ammnt;
+
+        if (rawResourcesMap[resource] <= 0)
+        {
+            rawResourcesMap.Remove(resource);
+        }
+    }
 
 
 

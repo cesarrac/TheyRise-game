@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
+
 
 public class Hero {
     public List<Weapon> weapons = new List<Weapon>();
@@ -13,13 +15,15 @@ public class Hero {
     public UnitStats heroStats { get; protected set; }
 
     // Default Constructor (1 Weapon, Armor, and 1 Tool) with Initial NanoBuilder
-    public Hero(Weapon weapon, Armor _armor, Tool tool)
+    public Hero(Weapon weapon, Armor _armor, Tool tool, float maxHP, float curHP, float attk)
     {
         weapons.Add(weapon);
         armor = _armor;
         tools.Add(tool);
 
-        heroStats = new UnitStats(100f, 2, armor.armorStats._curDefense, armor.armorStats._curShield);
+        heroStats = new UnitStats(maxHP, attk, armor.armorStats._curDefense, armor.armorStats._curShield);
+
+        heroStats.curHP = curHP;
 
         nanoBuilder = new NanoBuilder();
 
@@ -41,6 +45,19 @@ public class Hero {
 
     }
 
+}
 
+[Serializable]
+public class HeroData
+{
+    public float curHP { get; protected set; }
+    public float maxHP { get; protected set; }
+    public float Attack { get; protected set; }
 
+    public HeroData(float maxHitPoints, float curHitpoints, float attk)
+    {
+        maxHP = maxHitPoints;
+        curHP = curHitpoints;
+        Attack = attk;
+    }
 }

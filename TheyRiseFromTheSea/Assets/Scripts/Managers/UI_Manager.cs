@@ -19,11 +19,45 @@ public class UI_Manager : MonoBehaviour
 
     public GameObject victoryPanel;
 
+    public Text ore_total, water_total, food_total, organics_total;
+    public Text ore_new, water_new, food_new, organics_new;
+
+    public Text days;
+
     void Awake()
     {
         Instance = this;
     }
 
+    void Start()
+    {
+        if (GameTracker.Instance.GetScene().name == "Level_CENTRAL")
+        {
+            DisplayDaysPassed();
+        }
+    }
+
+    public void DisplayDaysPassed()
+    {
+        days.text = GameTracker.Instance.Days.ToString();
+    }
+
+    public void DisplayTotalResources()
+    {
+        ore_total.text = Ship_Inventory.Instance.DisplayResourceAmount(TileData.Types.rock).ToString();
+        ore_new.text = Ship_Inventory.Instance.tempOre.ToString();
+
+        water_total.text = Ship_Inventory.Instance.DisplayResourceAmount(TileData.Types.water).ToString();
+        water_new.text = Ship_Inventory.Instance.tempWater.ToString();
+
+        food_total.text = Ship_Inventory.Instance.DisplayResourceAmount(TileData.Types.food).ToString();
+        food_new.text = Ship_Inventory.Instance.tempFood.ToString();
+
+        //organics_total.text = Ship_Inventory.Instance.DisplayResourceAmount(TileData.Types.organic).ToString();
+        //organics_new.text = Ship_Inventory.Instance.tempOrganics.ToString();
+    }
+
+    // BLUEPRINT PANEL:
     public void DisplayNanoBuilderMemory(int curMemory, int totalMemory)
     {
         cur_nano_memory.text = curMemory.ToString();
@@ -108,5 +142,17 @@ public class UI_Manager : MonoBehaviour
     public void GoToEquipScene()
     {
         GameMaster.Instance.LoadEquipmentScreen();
+    }
+
+
+    // Save & Load
+    public void Save()
+    {
+        GameTracker.Instance.Save();
+    }
+
+    public void Load()
+    {
+        GameTracker.Instance.Load();
     }
 }

@@ -3,7 +3,7 @@ using System.Collections;
 
 public class DeSalt_Plant : ExtractionBuilding {
 
-   
+
     //public bool selecting;
     //public float pumpRate;
     //public int waterPumped;
@@ -26,23 +26,32 @@ public class DeSalt_Plant : ExtractionBuilding {
 
     //private float pumpCountdown;
 
-    public float ExtractRate;
+    //public float ExtractRate;
 
-    public int ExtractAmmnt;
+    //public int ExtractAmmnt;
 
-    public float ExtractPower;
+    //public float ExtractPower;
 
-    public int startingStorageCap;
-    public int PersonalStorageCap { get; protected set; }
+    //public int startingStorageCap;
+    //public int PersonalStorageCap { get; protected set; }
+
+
+    void OnEnable()
+    {
+        currResourceStored = 0;
+
+        myTransform = transform;
+
+        _state = State.SEARCHING;
+    }
 
     void Awake(){
 
-        PersonalStorageCap = startingStorageCap;
+        //PersonalStorageCap = startingStorageCap;
 
        // Init(TileData.Types.water, ExtractRate, ExtractPower,  ExtractAmmnt, PersonalStorageCap, transform);
         BlueprintDatabase.Instance.GetExtractorStats("Desalination Pump", myTransform, this, TileData.Types.water);
 
-      _state = State.SEARCHING;
     }
 
 

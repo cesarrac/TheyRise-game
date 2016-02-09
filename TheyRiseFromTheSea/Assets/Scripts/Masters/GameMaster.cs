@@ -63,24 +63,25 @@ public class GameMaster : MonoBehaviour {
 
 	}
 
+    public void CreateDefaultHero()
+    {
+        CreateHero();
+    }
+
     // CHARACTER CREATION:
     // Create the Hero data class that will hold all the information of the player's Hero character
-    public void CreateHero()
+    public void CreateHero(string weaponOne = "Kinetic Rifle", string weaponTwo = "Freeze Gun", string tool = "Mining Drill", string armor = "Vacumn Suit", float maxHP = 100f, float curHP = 100f, float attk = 2)
     {
         // Default constructor for test needs a weapon, a tool, and armor.
 
-        // FIX THIS! This data should be coming from one giant database of Weapons, Armor and Tools!!!
-        // Default Gun: Kinetic Rifle
-        Weapon kinetic_rifle = new Weapon("Kinetic Rifle", 0, 12, 2f, 2, 50, "explosive bullet");
-        Weapon freeze_gun = new Weapon("Freeze Gun", 0.2f, 100, 3f, 0, 30, "ice bullet");
-        // Default Tool: Hand Drill
-        Tool hand_drill = new Tool("Mining Drill");
-        // Default Armor: Vacum Suit
-        Armor vac_suit = new Armor("Vacumn Suit", 2, 0);
+        theHero = new Hero(Items_Database.Instance.GetWeaponfromID(weaponOne)
+                            , Items_Database.Instance.GetArmorfromID(armor)
+                            , Items_Database.Instance.GetToolfromID(tool)
+                            , maxHP,
+                            curHP, 
+                            attk);
 
-        theHero = new Hero(kinetic_rifle, vac_suit, hand_drill);
-
-        theHero.AddWeapon(freeze_gun);
+        theHero.AddWeapon(Items_Database.Instance.GetWeaponfromID(weaponTwo));
 
         Debug.Log("Hero Created!");
         Debug.Log("Hero is wielding: " + theHero.weapons[0].itemName + " armor: " + theHero.armor.itemName + " and tool: " + theHero.tools[0].itemName);
@@ -88,6 +89,7 @@ public class GameMaster : MonoBehaviour {
 
         isHeroCreated = true;
     }
+
 
 
     // HERO & ITEMS LOADING:
@@ -336,6 +338,9 @@ public class GameMaster : MonoBehaviour {
 
         // load the ship level
         SceneManager.LoadScene("Level_CENTRAL");
+
+        // Add a day to the Game Tracker
+        GameTracker.Instance.AddDay();
     }
 
 

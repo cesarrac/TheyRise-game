@@ -622,6 +622,8 @@ public class ExtractionBuilding : MonoBehaviour {
     // This beams any Resource Drops the player picks up, to the ship
     public void PickUpAndBeamToShip(int total)
     {
+        // This method on Ship Inventory Receives Items and stores them Temporarily. They will actually become part of the inventory once the Player
+        // launches from the Transporter.
         Ship_Inventory.Instance.ReceiveItems(resourceType, total);
 
         // This will split the current resources before sending them to ship (for example split between common ore and enriched ore)

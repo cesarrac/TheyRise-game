@@ -6,7 +6,7 @@ public class Equipment_SpriteDatabase : MonoBehaviour {
 
     public static Equipment_SpriteDatabase Instance { get; protected set; }
 
-    public Dictionary<string, Sprite> equipmentMap = new Dictionary<string, Sprite>();
+    public Dictionary<string, Sprite> itemSpritesMap = new Dictionary<string, Sprite>();
     Sprite[] allSprites;
 
     void OnEnable()
@@ -26,16 +26,16 @@ public class Equipment_SpriteDatabase : MonoBehaviour {
 
 
         // Here we would have to manually name and map each sprite to the equipment map
-        equipmentMap.Add("Kinetic Rifle", allSprites[0]);
-        equipmentMap.Add("Mining Drill", allSprites[1]);
-        equipmentMap.Add("Freeze Gun", allSprites[2]);
+        itemSpritesMap.Add("Kinetic Rifle", allSprites[0]);
+        itemSpritesMap.Add("Mining Drill", allSprites[1]);
+        itemSpritesMap.Add("Freeze Gun", allSprites[2]);
     }
 
     public Sprite GetSprite(string name)
     {
-        if (equipmentMap.ContainsKey(name))
+        if (itemSpritesMap.ContainsKey(name))
         {
-            return equipmentMap[name];
+            return itemSpritesMap[name];
         }
 
         Debug.Log("Equipment DB: Could not find a sprite for: " + name);

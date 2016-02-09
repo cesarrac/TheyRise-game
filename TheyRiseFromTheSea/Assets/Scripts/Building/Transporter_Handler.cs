@@ -23,7 +23,7 @@ public class Transporter_Handler : MonoBehaviour {
         // Lock transport controls when landinng on planet (can only be unlocked once the Terraformer is done)
         if (SceneManager.GetActiveScene().name == "Level_Planet")
         {
-            LockControls(true);
+            //LockControls(true);
 
             // The PreFab for the Transporter only contains the Click Handler if it is on the Planet!
             status_indicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;

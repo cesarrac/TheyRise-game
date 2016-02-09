@@ -76,6 +76,7 @@ public class GunStats
 // This class will be constructed by the GameMaster as it keeps track of the guns the Hero purchases and upgrades.
 // When the Hero is spawned the PlayerGun Base sitting in its weapon gameobject will ask the GameMaster to fill its corresponding weapon from the Hero's current weapons.
 
+[System.Serializable]
 public class Weapon : Item
 {
 

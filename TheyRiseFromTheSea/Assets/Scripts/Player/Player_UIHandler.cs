@@ -43,7 +43,7 @@ public class Player_UIHandler : MonoBehaviour {
         // Ask Ship Inventory to init ui
         Ship_Inventory.Instance.InitUI();
 
-		if (resourceManager == null) {
+        if (resourceManager == null) {
 			resourceManager = GetComponent<Player_ResourceManager>();
 		}
 
@@ -60,7 +60,7 @@ public class Player_UIHandler : MonoBehaviour {
         */
     }
 
-    public void InitPlanetUIText(int _food, int _water, int _ore)         // FIX THIS: Add the rest of the resources!
+    public void InitTransporterTempInventory(int _food, int _water, int _ore)         // FIX THIS: Add the rest of the resources!
     {
         // Right now this will initialize the text for the Transporter storage panel
         tempOreTxt.text = _ore.ToString();
@@ -69,32 +69,35 @@ public class Player_UIHandler : MonoBehaviour {
 
     }
 
-    public void InitShipUI(int _food, int _water, int _ore)
-    {
-        oreText.text = _ore.ToString();
-        foodText.text = _food.ToString();
-        waterText.text = _water.ToString();
-    }
 
-    public void DisplayShipInventoryText(TileData.Types statThatChanges, int ammnt)
-    {
-        // This method will only be called when a stat is changing. This will update the text. 
-        switch (statThatChanges)
-        {
-            case TileData.Types.rock:
-                oreText.text = ammnt.ToString();
-                break;
-            case TileData.Types.food:
-                foodText.text = ammnt.ToString();
-                break;
-            case TileData.Types.water:
-                waterText.text = ammnt.ToString();
-                break;
-            default:
-                // do nothing
-                break;
-        }
-    }
+    //public void InitShipInventory(int _food, int _water, int _ore)
+    //{
+    //    oreText.text = _ore.ToString();
+    //    foodText.text = _food.ToString();
+    //    waterText.text = _water.ToString();
+
+    //    // Reset the temporary inventory
+    //}
+
+    //public void DisplayShipInventoryText(TileData.Types statThatChanges, int ammnt)
+    //{
+    //    // This method will only be called when a stat is changing. This will update the text. 
+    //    switch (statThatChanges)
+    //    {
+    //        case TileData.Types.rock:
+    //            oreText.text = ammnt.ToString();
+    //            break;
+    //        case TileData.Types.food:
+    //            foodText.text = ammnt.ToString();
+    //            break;
+    //        case TileData.Types.water:
+    //            waterText.text = ammnt.ToString();
+    //            break;
+    //        default:
+    //            // do nothing
+    //            break;
+    //    }
+    //}
 
     public void DisplayTransporterStorage(TileData.Types statThatChanges, int ammnt)
     {
