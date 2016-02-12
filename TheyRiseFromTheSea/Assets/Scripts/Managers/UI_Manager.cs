@@ -24,6 +24,14 @@ public class UI_Manager : MonoBehaviour
 
     public Text days;
 
+    Dictionary<int, GameObject> loadedMissionsMap = new Dictionary<int, GameObject>();
+
+    public GameObject availableMissions_panel, activeMissions_panel, completeMissions_panel;
+
+    // MAIN UI PANELS
+    public GameObject characterPanel, missionsPanel, resoucesPanel, bpPanel;
+    GameObject currActivePanel;
+
     void Awake()
     {
         Instance = this;
@@ -34,6 +42,8 @@ public class UI_Manager : MonoBehaviour
         if (GameTracker.Instance.GetScene().name == "Level_CENTRAL")
         {
             DisplayDaysPassed();
+
+            DisplayCharacterPanel();
         }
     }
 
@@ -72,21 +82,21 @@ public class UI_Manager : MonoBehaviour
 
     public void AddBlueprintToBuilder(string bpName)
     {
-        // Get the Button prefab from the Pool ...
-        GameObject bp = ObjectPool.instance.GetObjectForType("Loaded Blueprint", true, Vector3.zero);
-
-        //Parent it to the Builder's transform ...
-        bp.transform.SetParent(builder_panel.transform);
-
-        // Add an onClick listener to this button, to allow it to callback Select Blueprint with its corresponding BP name...
-        bp.GetComponent<Button>().onClick.AddListener(() => { BlueprintDatabase.Instance.SelectBlueprint(bpName); });
-
-        //... and fill its text field with the BP name.
-        bp.GetComponentInChildren<Text>().text = bpName;
-
-        // To easily find which is which for removal or later loading them again, add each Button to a Dictionary<string, GameObject>
+        // Only allow Adding to Builder if it hasn't already been added
         if (!loadedBlueprints.ContainsKey(bpName))
         {
+            // Get the Button prefab from the Pool ...
+            GameObject bp = ObjectPool.instance.GetObjectForType("Loaded Blueprint", true, Vector3.zero);
+
+            //Parent it to the Builder's transform ...
+            bp.transform.SetParent(builder_panel.transform);
+
+            // Add an onClick listener to this button, to allow it to callback Select Blueprint with its corresponding BP name...
+            bp.GetComponent<Button>().onClick.AddListener(() => { BlueprintDatabase.Instance.SelectBlueprint(bpName); });
+
+            //... and fill its text field with the BP name.
+            bp.GetComponentInChildren<Text>().text = bpName;
+
             loadedBlueprints.Add(bpName, bp);
         }
     }
@@ -145,6 +155,50 @@ public class UI_Manager : MonoBehaviour
     }
 
 
+    // Trade Orders / Missions
+
+    public void AddAvailableMission(int id, string name, int timeLeft)
+    {
+ 
+        if (!loadedMissionsMap.ContainsKey(id))
+        {
+            // Get the Button prefab from the Pool ...
+            GameObject mission = ObjectPool.instance.GetObjectForType("Mission", true, Vector3.zero);
+
+        //Parent it to the Builder's transform ...
+        mission.transform.SetParent(availableMissions_panel.transform);
+
+        // Add an onClick listener to this button, to allow it to callback Select Blueprint with its corresponding BP name...
+        mission.GetComponent<Button>().onClick.AddListener(() => { TradeOrder_Manager.Instance.SelectTradeOrderFromUI(id); });
+
+        // ... and fill both its Text children...
+
+        // ... first the Name
+        mission.GetComponentsInChildren<Text>()[0].text = timeLeft.ToString();
+
+        // ... then the Time Left.
+        mission.GetComponentsInChildren<Text>()[1].text =  name;
+
+
+            // To easily find which is which for removal or later loading them again, add each Button to a Dictionary<string, GameObject>
+            loadedMissionsMap.Add(id, mission);
+        }
+    }
+
+    public void AddToActiveMissions(int id)
+    {
+        // All we have to do here is find the mission from available missions and set its parent to the available missions panel
+        if (loadedMissionsMap.ContainsKey(id))
+        {
+            loadedMissionsMap[id].transform.SetParent(activeMissions_panel.transform);
+        }
+    }
+
+    public void DisplayMissions()
+    {
+        TradeOrder_Manager.Instance.DisplayOrders();
+    }
+
     // Save & Load
     public void Save()
     {
@@ -154,5 +208,79 @@ public class UI_Manager : MonoBehaviour
     public void Load()
     {
         GameTracker.Instance.Load();
+    }
+
+    // PANEL CONTROLS
+    public void DisplayCharacterPanel()
+    {
+        if (characterPanel.activeSelf == false)
+        {
+            // Deactivate curr active panel...
+            if (currActivePanel != null)
+                currActivePanel.SetActive(false);
+
+            // ... activate Character Panel ...
+            characterPanel.SetActive(true);
+
+            // ... and set it as current active
+            currActivePanel = characterPanel;
+        }
+    }
+
+    public void DisplayMissionsPanel()
+    {
+        if (missionsPanel.activeSelf == false)
+        {
+            // Deactivate curr active panel...
+            if (currActivePanel != null)
+                currActivePanel.SetActive(false);
+
+            // ... activate Missions Panel ...
+            missionsPanel.SetActive(true);
+
+            // ... show available missions,
+            DisplayMissions();
+
+            // and set it as current active.
+            currActivePanel = missionsPanel;
+        }
+    }
+
+    public void DisplayResourcesPanel()
+    {
+        if (resoucesPanel.activeSelf == false)
+        {
+            // Deactivate curr active panel...
+            if (currActivePanel != null)
+                currActivePanel.SetActive(false);
+
+            // ... activate Resources Panel ...
+            resoucesPanel.SetActive(true);
+
+            // ... display Resources
+            DisplayTotalResources();
+
+            // and set it as current active.
+            currActivePanel = resoucesPanel;
+        }
+    }
+
+    public void DisplayBPPanel()
+    {
+        if (bpPanel.activeSelf == false)
+        {
+            // Deactivate curr active panel...
+            if (currActivePanel != null)
+                currActivePanel.SetActive(false);
+
+            // ... activate Resources Panel ...
+            bpPanel.SetActive(true);
+
+            // ... Reload any previous blueprints ...
+            BlueprintDatabase.Instance.ReloadPreviousLoaded();
+
+            // and set it as current active.
+            currActivePanel = bpPanel;
+        }
     }
 }

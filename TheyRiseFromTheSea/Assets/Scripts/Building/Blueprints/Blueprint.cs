@@ -18,6 +18,7 @@ using System.Collections;
 
 // Each Blueprint, by TileData Type, has their own set of named upgrades (from Tier I to Tier V ). For example,
 // Machine Gun's Tier I: Reaction Time - upgrades Reloading mechanisms to load cartridges faster. Reload Time -25%
+[System.Serializable]
 public class Blueprint_Tier
 {
     int _tier = 0;
@@ -91,6 +92,7 @@ public class Blueprint_Upgrade
     // An Upgrade Manager would Get the corresponding Upgrade and know from the UpgradeStatType what to update when spawning the building
 }
 
+[System.Serializable]
 public class Blueprint
 {
     // Type of Building: Battle or Utility

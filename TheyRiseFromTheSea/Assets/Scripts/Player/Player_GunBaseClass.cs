@@ -127,7 +127,7 @@ public class Player_GunBaseClass : MonoBehaviour {
             {
                 isReloading = true;
 
-                status_Indicator.CreateStatusMessage("Reloading!");
+                //status_Indicator.CreateStatusMessage("Reloading!");
 
                 StartCoroutine("Reload");
             }

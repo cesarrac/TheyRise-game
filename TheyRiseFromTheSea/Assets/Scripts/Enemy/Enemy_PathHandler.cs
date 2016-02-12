@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class Enemy_PathHandler : MonoBehaviour
 {
@@ -57,6 +58,9 @@ public class Enemy_PathHandler : MonoBehaviour
     Rigidbody2D rb;
 
     Enemy_AttackHandler enemy_AttackHandler;
+
+    float threshold;
+
 
     bool isFullyStopped = false; // < ---- flag sets to true when Full Stop is called
     bool isInRange = false;
@@ -228,7 +232,7 @@ public class Enemy_PathHandler : MonoBehaviour
 
     bool CheckIsInRangeOfTarget()
     {
-        float threshold = enemy_AttackHandler.AttackRange;
+        threshold = enemy_AttackHandler.AttackRange;
         if (target != null)
         {
             if ((target.position - transform.position).sqrMagnitude <= threshold)

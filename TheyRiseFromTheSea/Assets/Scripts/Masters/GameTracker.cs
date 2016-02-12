@@ -40,6 +40,12 @@ public class GameTracker : MonoBehaviour {
         }
         else
             Days += 1;
+
+        // Check if new missions are available
+        if (TradeOrder_Manager.Instance != null)
+        {
+            TradeOrder_Manager.Instance.CheckDay(Days);
+        }
     }
 
     public void Save()
@@ -59,6 +65,10 @@ public class GameTracker : MonoBehaviour {
                           new HeroData(GameMaster.Instance.theHero.heroStats.maxHP,
                                         GameMaster.Instance.theHero.heroStats.curHP,
                                         GameMaster.Instance.theHero.heroStats.startAttack));
+
+        gameData.SaveOrders(TradeOrder_Manager.Instance.GetAvailable(), TradeOrder_Manager.Instance.GetActive(), TradeOrder_Manager.Instance.GetCompleted());
+
+        gameData.SaveNanoBuilder(GameMaster.Instance.theHero.nanoBuilder);
 
         bf.Serialize(file, gameData);
 
@@ -90,7 +100,10 @@ public class GameTracker : MonoBehaviour {
 
             // Load the Hero
             GameMaster.Instance.CreateHero(gameData.weaponOne_ID, gameData.weaponTwo_ID, gameData.tool_ID, gameData.armor_ID, 
-                                            gameData.savedHeroData.maxHP, gameData.savedHeroData.curHP, gameData.savedHeroData.Attack);
+                                            gameData.savedHeroData.maxHP, gameData.savedHeroData.curHP, gameData.savedHeroData.Attack, gameData.savedNanoBuilder);
+
+            // Load the Trade Orders
+            TradeOrder_Manager.Instance.LoadOrders(gameData.availableOrders, gameData.activeOrders, gameData.completedOrders);
 
             // If all was succesful we should load the Ship scene
             GameMaster.Instance.RestartToShip();
@@ -114,6 +127,14 @@ public class GameData
     public string weaponTwo_ID { get; protected set; }
     public string armor_ID { get; protected set; }
     public string tool_ID { get; protected set; }
+
+    // Trade Orders:
+    public Dictionary<int, TradeOrder> availableOrders { get; protected set; }
+    public Dictionary<int, TradeOrder> activeOrders { get; protected set; }
+    public Dictionary<int, TradeOrder> completedOrders { get; protected set; }
+
+    // Nanobuilder:
+    public NanoBuilder savedNanoBuilder { get; protected set; }
 
     public GameData()
     {
@@ -143,4 +164,19 @@ public class GameData
         savedHeroData = heroData;
     }
 
+    public void SaveOrders(Dictionary<int, TradeOrder> available, Dictionary<int, TradeOrder> active, Dictionary<int, TradeOrder> completed)
+    {
+        availableOrders = new Dictionary<int, TradeOrder>();
+        activeOrders = new Dictionary<int, TradeOrder>();
+        completedOrders = new Dictionary<int, TradeOrder>();
+
+        availableOrders = available;
+        activeOrders = active;
+        completedOrders = completed;
+    }
+
+    public void SaveNanoBuilder(NanoBuilder builder)
+    {
+        savedNanoBuilder = builder;
+    }
 }

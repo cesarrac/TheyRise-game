@@ -77,7 +77,7 @@ public class WeaponUpgrade : ItemUprade
     }
 }
 
-
+[System.Serializable]
 public class Item {
     public string itemName { get; protected set; }
     public ItemType itemType { get; protected set; }

@@ -70,7 +70,7 @@ public class GameMaster : MonoBehaviour {
 
     // CHARACTER CREATION:
     // Create the Hero data class that will hold all the information of the player's Hero character
-    public void CreateHero(string weaponOne = "Kinetic Rifle", string weaponTwo = "Freeze Gun", string tool = "Mining Drill", string armor = "Vacumn Suit", float maxHP = 100f, float curHP = 100f, float attk = 2)
+    public void CreateHero(string weaponOne = "Kinetic Rifle", string weaponTwo = "Freeze Gun", string tool = "Mining Drill", string armor = "Vacumn Suit", float maxHP = 100f, float curHP = 100f, float attk = 2, NanoBuilder builder = null)
     {
         // Default constructor for test needs a weapon, a tool, and armor.
 
@@ -79,7 +79,7 @@ public class GameMaster : MonoBehaviour {
                             , Items_Database.Instance.GetToolfromID(tool)
                             , maxHP,
                             curHP, 
-                            attk);
+                            attk, builder);
 
         theHero.AddWeapon(Items_Database.Instance.GetWeaponfromID(weaponTwo));
 
@@ -89,6 +89,7 @@ public class GameMaster : MonoBehaviour {
 
         isHeroCreated = true;
     }
+
 
 
 
@@ -341,6 +342,8 @@ public class GameMaster : MonoBehaviour {
 
         // Add a day to the Game Tracker
         GameTracker.Instance.AddDay();
+
+
     }
 
 

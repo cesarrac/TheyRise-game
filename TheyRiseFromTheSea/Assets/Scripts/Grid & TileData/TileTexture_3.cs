@@ -2186,10 +2186,10 @@ public class TileTexture_3 : MonoBehaviour
 
             default:
                 // Select a center tile
-                int select = pseudoRandom.Next(0, 20);
-                if (select > 9)
+                int select = pseudoRandom.Next(0, 11);
+                if (select > 8)
                 {
-                    tileIndex = select - 10;
+                    tileIndex = pseudoRandom.Next(0, 10);
                 }
                 else
                 {

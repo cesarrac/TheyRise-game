@@ -82,7 +82,7 @@ public class Enemy_Master : MonoBehaviour {
         move_slow.startChaseSpeed = 1f;
 
         // FIX THIS TOO! Here I'm going to create the enemies hardcoded for testing, but this also would be nice to get from an external database!
-        Enemy slimer_weak_noAggro = new Enemy("Slimer_weak", attk_weak, move_avg, false);  // The name of the Enemy class has to match the name of the prefab preloaded unto the Object Pool
+        Enemy slimer_weak_noAggro = new Enemy("Slimer_weak", attk_weak, move_avg, true);  // The name of the Enemy class has to match the name of the prefab preloaded unto the Object Pool
         Enemy slimer_weak_Aggro = new Enemy("Slimer_weak", attk_weak, move_avg, true, true);
 
         Enemy slimer_mid_noAggro = new Enemy("Slimer_weak", attk_mid, move_avg, false);

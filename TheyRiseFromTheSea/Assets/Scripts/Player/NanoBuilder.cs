@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+[System.Serializable]
 public class NanoBuilder  {
 
     public int memoryBank { get; protected set; }

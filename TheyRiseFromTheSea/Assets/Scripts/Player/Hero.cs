@@ -15,7 +15,7 @@ public class Hero {
     public UnitStats heroStats { get; protected set; }
 
     // Default Constructor (1 Weapon, Armor, and 1 Tool) with Initial NanoBuilder
-    public Hero(Weapon weapon, Armor _armor, Tool tool, float maxHP, float curHP, float attk)
+    public Hero(Weapon weapon, Armor _armor, Tool tool, float maxHP, float curHP, float attk, NanoBuilder builder = null)
     {
         weapons.Add(weapon);
         armor = _armor;
@@ -25,7 +25,10 @@ public class Hero {
 
         heroStats.curHP = curHP;
 
-        nanoBuilder = new NanoBuilder();
+        if (builder == null)
+            nanoBuilder = new NanoBuilder();
+        else
+            nanoBuilder = builder;
 
     }
 

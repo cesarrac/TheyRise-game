@@ -1,13 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System;
 
 public class Enemy_AttackHandler : Unit_Base {
 
-    Enemy_PathHandler pathHandler;
-
-
-    //	public int targetTilePosX, targetTilePosY;
+    public Enemy_PathHandler pathHandler;
 
     public GameObject playerUnit;
 
@@ -46,17 +44,19 @@ public class Enemy_AttackHandler : Unit_Base {
 
     bool mainTargetIsTerraformer = false, currTargetIsTile = false;
 
-    Rigidbody2D rigid_body;
+    public Rigidbody2D rigid_body
+    {
+        get; protected set;
+    }
 
     TileData targetAsTile;
 
+    public Action<Vector3> AttackActionCB;
 
-    void OnEnable()
-    {
-        ResetFlagsandTargets();
-    }
 
-    void ResetFlagsandTargets()
+ 
+
+    public void ResetFlagsandTargets()
     {
         mainTargetFound = false;
         movingToAttack = false;
@@ -68,12 +68,12 @@ public class Enemy_AttackHandler : Unit_Base {
         playerUnit = null;
     }
 
-    void Awake()
-    {
-        pathHandler = GetComponent<Enemy_PathHandler>();
-        audio_source = GetComponent<AudioSource>();
-        rigid_body = GetComponent<Rigidbody2D>();
-    }
+    //void Awake()
+    //{
+    //    pathHandler = GetComponent<Enemy_PathHandler>();
+    //    audio_source = GetComponent<AudioSource>();
+    //    rigid_body = GetComponent<Rigidbody2D>();
+    //}
 
     public void SetMainTarget(Transform target)
     {
@@ -104,14 +104,6 @@ public class Enemy_AttackHandler : Unit_Base {
 
     void Start()
     {
-        // Initialize Unit stats
-        //stats.Init();
-
-        //		// Get the value of isKamikaze set by the public bool in Move Handler
-        //		isKamikaze = moveHandler.isKamikaze;
-
-        //// Get isPlayerattackingTower from move Handler as well
-        //isPlayerattackingTower = moveHandler.isPlayerattackingTower;
 
         if (resourceGrid == null)
             resourceGrid = ResourceGrid.Grid;
@@ -122,8 +114,6 @@ public class Enemy_AttackHandler : Unit_Base {
         if (!_camShake)
             _camShake = CameraShake.Instance;
 
-        //StartCoroutine("DebugMyStatus");
-
     }
 
     void Update()
@@ -132,10 +122,6 @@ public class Enemy_AttackHandler : Unit_Base {
 
         if (stats.curHP > 0)
         {
-
-            // Only listen for attackingTower once our path handler has set our main target and unit is NOT attacking
-            //if (mainTarget != null && !isAttacking)
-            //    ListenForAttacker();
 
             // Makes sure that if the tower target was POOLED that the target is nulled
             if (towerAttackingMe != null)
@@ -295,7 +281,8 @@ public class Enemy_AttackHandler : Unit_Base {
                 // Play attack sound
                 Sound_Manager.Instance.PlaySound("Slimer Attack");
 
-                StartCoroutine(JumpAttack(mainTarget.position));
+                // StartCoroutine(JumpAttack(mainTarget.position));
+                AttackActionCB(mainTarget.position);
 
                 HandleDamage_ToMainTargetTile();
             }
@@ -322,7 +309,8 @@ public class Enemy_AttackHandler : Unit_Base {
                 // Play attack sound
                 Sound_Manager.Instance.PlaySound("Slimer Attack");
 
-                StartCoroutine(JumpAttack(towerAttackingMe.transform.parent.position));
+                //StartCoroutine(JumpAttack(towerAttackingMe.transform.parent.position));
+                AttackActionCB(towerAttackingMe.transform.parent.position);
 
                 HandleDamageToBattleTower();
             }
@@ -349,7 +337,9 @@ public class Enemy_AttackHandler : Unit_Base {
                 // Play attack sound
                 Sound_Manager.Instance.PlaySound("Slimer Attack");
 
-                StartCoroutine(JumpAttack(playerUnit.transform.position));
+                //StartCoroutine(JumpAttack(playerUnit.transform.position));
+                AttackActionCB(playerUnit.transform.position);
+
                 HandleDamageToUnit();
             }
             else
@@ -372,16 +362,16 @@ public class Enemy_AttackHandler : Unit_Base {
         StopCoroutine("TowerAttack");
     }
 
-    IEnumerator JumpAttack(Vector3 targetPosition)
-    {
+    //IEnumerator JumpAttack(Vector3 targetPosition)
+    //{
 
-        Vector2 jumpDirection = targetPosition - transform.root.position;
-        rigid_body.AddForce(jumpDirection * 1200);
-        yield return new WaitForSeconds(0.1f);
-        rigid_body.AddForce(-jumpDirection * 1200);
-        yield break;
+    //    Vector2 jumpDirection = targetPosition - transform.root.position;
+    //    rigid_body.AddForce(jumpDirection * 1200);
+    //    yield return new WaitForSeconds(0.1f);
+    //    rigid_body.AddForce(-jumpDirection * 1200);
+    //    yield break;
 
-    }
+    //}
 
     void HandleDamage_ToMainTargetTile()
     {

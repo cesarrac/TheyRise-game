@@ -64,8 +64,8 @@ public class Player_HeroAttackHandler : Unit_Base {
             ArmsFollowMouse();
         }
 
-        //if (stats.curHP <= 0)
-        //    Suicide();
+        if (stats.curHP <= 0)
+            Suicide();
     }
 
     public void SetCurrentArms(Transform arms)
