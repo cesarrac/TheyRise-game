@@ -58,7 +58,8 @@ public class GameTracker : MonoBehaviour {
 
         gameData.SaveResources(Ship_Inventory.Instance.rawResourcesMap);
         gameData.SaveDays(Days);
-        gameData.SaveHero(GameMaster.Instance.theHero.weapons[0].itemName,
+        gameData.SaveHero(GameMaster.Instance.theHero.heroName,
+                          GameMaster.Instance.theHero.weapons[0].itemName,
                           GameMaster.Instance.theHero.weapons[1].itemName,
                           GameMaster.Instance.theHero.armor.itemName,
                           GameMaster.Instance.theHero.tools[0].itemName,
@@ -99,8 +100,15 @@ public class GameTracker : MonoBehaviour {
             AddDay(gameData.days);
 
             // Load the Hero
-            GameMaster.Instance.CreateHero(gameData.weaponOne_ID, gameData.weaponTwo_ID, gameData.tool_ID, gameData.armor_ID, 
-                                            gameData.savedHeroData.maxHP, gameData.savedHeroData.curHP, gameData.savedHeroData.Attack, gameData.savedNanoBuilder);
+            GameMaster.Instance.CreateHero(gameData.savedHeroName, 
+                                            gameData.weaponOne_ID,
+                                            gameData.weaponTwo_ID,
+                                            gameData.tool_ID,
+                                            gameData.armor_ID, 
+                                            gameData.savedHeroData.maxHP,
+                                            gameData.savedHeroData.curHP,
+                                            gameData.savedHeroData.Attack,
+                                            gameData.savedNanoBuilder);
 
             // Load the Trade Orders
             TradeOrder_Manager.Instance.LoadOrders(gameData.availableOrders, gameData.activeOrders, gameData.completedOrders);
@@ -120,6 +128,8 @@ public class GameData
     public int days { get; protected set; }
 
     // Hero:
+    // name:
+    public string savedHeroName { get; protected set; }
         // stats:
     public HeroData savedHeroData { get; protected set; }
         // equipment:
@@ -154,8 +164,9 @@ public class GameData
         days = d;
     }
 
-    public void SaveHero(string wpn1, string wpn2, string armor, string tool, HeroData heroData)
+    public void SaveHero(string name, string wpn1, string wpn2, string armor, string tool, HeroData heroData)
     {
+        savedHeroName = name;
         weaponOne_ID = wpn1;
         weaponTwo_ID = wpn2;
         armor_ID = armor;

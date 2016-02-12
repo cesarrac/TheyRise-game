@@ -7,10 +7,12 @@ public class ExtractorStats
     // Seconds it takes to call the extract method and get more of a resource
     public float extractRate { get; protected set; }
     float _extractRate { get { return extractRate; } set { extractRate = Mathf.Clamp(value, 10f, 120f); } } // <------- Use this in a constructor to set extract Rate
+    float startRate;
 
     // How much of a resource this building can extract
     public int extractAmmount { get; protected set; }
     int _extractAmmount { get { return extractAmmount; } set { extractAmmount = Mathf.Clamp(value, 1, 1000); } } // <------- Use this in a constructor to set extract ammount
+    int startAmmnt;
 
     // How many units of a resource can this building store
     public int personalStorageCapacity { get; protected set; }
@@ -27,10 +29,15 @@ public class ExtractorStats
     // Power versus the resources Hardness will result in time (in seconds) it takes for this machine to extract its target resource
     public float extractPower { get; protected set; }
     float _extractPower { get { return extractPower; } set { extractPower = Mathf.Clamp(value, 1, 100); } }
+    float startPower;
 
     // Constructor
     public ExtractorStats(float rate, int ammount, float power, int personalStorageCap, int secondStorageCap = 0, int materialConsumed = 0)
     {
+        startRate = rate;
+        startPower = power;
+        startAmmnt = ammount;
+
         _extractRate = rate;
         _extractAmmount = ammount;
         _personalStorageCap = personalStorageCap;
@@ -48,6 +55,18 @@ public class ExtractorStats
     public void SetCurrentRate(float newRate)
     {
         _extractRate = newRate;
+    }
+
+    public void Energize(float rateBoosted, float powerBoosted)
+    {
+        _extractPower = powerBoosted;
+        _extractRate = rateBoosted;
+    }
+
+    public void DeEnergize()
+    {
+        _extractPower = startPower;
+        _extractRate = startRate;
     }
 }
 
@@ -177,7 +196,29 @@ public class ExtractionBuilding : MonoBehaviour {
         requiredMaterial = TileData.Types.empty;
     }
 
+    public void EnergizeCallback(Action<ExtractionBuilding> cb)
+    {
+        cb(this);
+    }
 
+    public void CountDownToDeEnergize(Action<ExtractionBuilding> cb, float duration)
+    {
+        StartCoroutine(DeEnergizeCountDown(cb, duration));
+    }
+
+
+    IEnumerator DeEnergizeCountDown(Action<ExtractionBuilding> cb, float duration)
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(duration);
+
+            cb(this);
+
+            yield break;
+
+        }
+    }
 
     // METHODS:
 

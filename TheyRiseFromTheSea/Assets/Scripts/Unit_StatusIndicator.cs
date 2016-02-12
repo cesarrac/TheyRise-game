@@ -49,8 +49,8 @@ public class Unit_StatusIndicator : MonoBehaviour {
 
             healthBarRect.localScale = new Vector3(_value, healthBarRect.localScale.y, healthBarRect.localScale.z);
 
-            if (_damage > 0)
-                CreateDamageText(_damage);
+            //if (_damage > 0)
+            //    CreateDamageText(_damage);
         }
 
 	}

@@ -63,23 +63,25 @@ public class GameMaster : MonoBehaviour {
 
 	}
 
-    public void CreateDefaultHero()
+    public void CreateDefaultHero(string name)
     {
-        CreateHero();
+        CreateHero(name);
     }
 
     // CHARACTER CREATION:
     // Create the Hero data class that will hold all the information of the player's Hero character
-    public void CreateHero(string weaponOne = "Kinetic Rifle", string weaponTwo = "Freeze Gun", string tool = "Mining Drill", string armor = "Vacumn Suit", float maxHP = 100f, float curHP = 100f, float attk = 2, NanoBuilder builder = null)
+    public void CreateHero(string name = "Hiro", string weaponOne = "Kinetic Rifle", string weaponTwo = "Freeze Gun", string tool = "Mining Drill", string armor = "Vacumn Suit", float maxHP = 100f, float curHP = 100f, float attk = 2, NanoBuilder builder = null)
     {
         // Default constructor for test needs a weapon, a tool, and armor.
 
-        theHero = new Hero(Items_Database.Instance.GetWeaponfromID(weaponOne)
-                            , Items_Database.Instance.GetArmorfromID(armor)
-                            , Items_Database.Instance.GetToolfromID(tool)
-                            , maxHP,
+        theHero = new Hero(name, 
+                            Items_Database.Instance.GetWeaponfromID(weaponOne),
+                            Items_Database.Instance.GetArmorfromID(armor),
+                            Items_Database.Instance.GetToolfromID(tool),
+                            maxHP,
                             curHP, 
-                            attk, builder);
+                            attk, 
+                            builder);
 
         theHero.AddWeapon(Items_Database.Instance.GetWeaponfromID(weaponTwo));
 

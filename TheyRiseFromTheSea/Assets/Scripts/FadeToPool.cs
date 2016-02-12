@@ -3,67 +3,110 @@ using System.Collections;
 using UnityEngine.UI;
 
 public class FadeToPool : MonoBehaviour {
-	public ObjectPool objPool;
 
-	public float fadeTime;
 	SpriteRenderer sr;
+    Color A = Color.white;
+    Color B = Color.clear;
+    public float colorChangeDuration = 2;
+    private float colorTime;
 
-	public bool trueIfSprite;
+    public bool trueIfSprite;
 	Image img;
 
-	private IEnumerator _coroutine;
+    bool isFading;
 
-	// Use this for initialization
-	void Start () {
-		if (objPool == null) {
-			objPool = GameObject.FindGameObjectWithTag("Pool").GetComponent<ObjectPool>();
-		}
-		if (trueIfSprite) {
-			sr = GetComponent<SpriteRenderer> ();
-		} else {
-			img = GetComponent<Image>();
-		}
+    void OnEnable()
+    {
+        if (trueIfSprite)
+        {
+            sr = GetComponent<SpriteRenderer>();
+            sr.color = A;
 
-		if (sr != null || img != null) {
-			_coroutine = FadeOut (fadeTime);
-			StartCoroutine (_coroutine);
-		}
+            isFading = true;
+        }
+        else
+        {
+            img = GetComponent<Image>();
+            img.color = A;
 
-	}
+            isFading = true;
+        }
+    }
 
+	void Start ()
+    {
 
-
-	IEnumerator FadeOut(float time){
-
-		if (trueIfSprite) {
-			//fade a sprite
-			FadeSprite ();
-		} else {
-			// fade an UI image
-			FadeImg();
+		if (sr != null || img != null)
+        {
+            isFading = true;
 		}
 
-		yield return new WaitForSeconds (time);
-
-		Die ();
 	}
 
+    void Update()
+    {
+        if (isFading && sr != null)
+        {
+            FadeOut();
+        }
+        else if (isFading && img != null)
+        {
+            FadeOutImage();
+        }
+    }
 
 
-	void Die(){
-		StopCoroutine (_coroutine);
-		objPool.PoolObject (gameObject);
-	}
+    void FadeOut()
+    {
+        if (isFading)
+        {
+            sr.color = Color.Lerp(A, B, colorTime);
+
+            if (colorTime < 1)
+            {
+                // increment colorTime it at the desired rate every update:
+                colorTime += Time.deltaTime / colorChangeDuration;
+            }
+
+            if (sr.color == B)
+            {
+                colorTime = 0;
+
+                isFading = false;
+
+                Pool();
+
+            }
+        }
+
+    }
 
 
+    void FadeOutImage()
+    {
+        if (isFading)
+        {
+            img.color = Color.Lerp(A, B, colorTime);
 
-	void FadeSprite(){
-		sr.color = new Color (sr.color.r, sr.color.g, sr.color.b, sr.color.a - 0.6f);
-	}
+            if (colorTime < 1)
+            {
+                // increment colorTime it at the desired rate every update:
+                colorTime += Time.deltaTime / colorChangeDuration;
+            }
 
+            if (img.color == B)
+            {
+                colorTime = 0;
+                isFading = false;
+                Pool();
+            }
+        }
 
+    }
 
-	void FadeImg(){
-		img.color = new Color (img.color.r, img.color.g, img.color.b, img.color.a - 0.6f);
-	}
+    void Pool()
+    {
+        ObjectPool.instance.PoolObject(gameObject);
+    }
+
 }

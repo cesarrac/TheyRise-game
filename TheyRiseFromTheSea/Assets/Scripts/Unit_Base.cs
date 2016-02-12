@@ -416,7 +416,7 @@ public class Unit_Base : MonoBehaviour {
 	}
 
 	public void TakeDebuff(float debuffAmmnt, string statID){
-		statusIndicator.CreateDamageText (debuffAmmnt, statID);
+		//statusIndicator.CreateDamageText (debuffAmmnt, statID);
 	}
 
 	void Die(GameObject target){

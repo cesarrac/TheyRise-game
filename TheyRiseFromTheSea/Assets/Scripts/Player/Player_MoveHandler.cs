@@ -55,6 +55,8 @@ public class Player_MoveHandler : MonoBehaviour {
 
     Equip_Item equip_wpn;
 
+    float dashDistance = 5f;
+
     void Awake()
 	{
 		anim = GetComponentInChildren<Animator> ();
@@ -94,14 +96,19 @@ public class Player_MoveHandler : MonoBehaviour {
 	}
     
 
-	void Update () {
+	void Update ()
+    {
 		debugState = _state;
 
 		MyStateMachine (_state);
 		// Store the axis Inputs in a Vector 2
 		move_vector = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical"));
+        
+        if(_state == State.IDLING)
+        {
+            ListenForMouseDash();
+        }
 
-       //ListenForMouseDash();
 
 	}
 
@@ -207,11 +214,20 @@ public class Player_MoveHandler : MonoBehaviour {
         transform.position = Vector2.MoveTowards(transform.position, dashTarget, mStats.dashSpeed * Time.deltaTime);
 
 
-        var distance = (currPos - transform.position).sqrMagnitude;
+        //var distance = (currPos - transform.position).sqrMagnitude;
 
-        if (distance >= Mouse_Controller.MouseController.dashDistance)
+        //if (distance >= dashDistance)
+        //{
+        //    _state = State.IDLING;
+        //}
+
+        if (dashCountdown <= 0)
         {
             _state = State.IDLING;
+        }
+        else
+        {
+            dashCountdown -= Time.deltaTime;
         }
 
     }
@@ -224,6 +240,8 @@ public class Player_MoveHandler : MonoBehaviour {
             currPos = transform.position;
 
             dashTarget = Mouse_Controller.MouseController.currMouseP;
+
+            dashCountdown = timeDashing;
 
             _state = State.DASHING;
            // StartCoroutine("Dashing");

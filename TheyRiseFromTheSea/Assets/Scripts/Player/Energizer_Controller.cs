@@ -20,17 +20,26 @@ public class Energizer_Controller : MonoBehaviour {
 
     bool countingDown;
 
-
-
-    void Update()
+    public void StartListen()
     {
-        ListenToEnergize();
+        StartCoroutine("Listen");
+    }
+
+    IEnumerator Listen()
+    {
+        while (true)
+        {
+            ListenToEnergize();
+
+            yield return null;
+        }
     }
 
     void ListenToEnergize()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !countingDown)
         {
+
             // From the moment the Player hits the Left Mouse while the Energizer is on...
             // ... we check if the tile under mouse is not empty...
 
@@ -44,6 +53,11 @@ public class Energizer_Controller : MonoBehaviour {
                     if (!countingDown)
                     {
                         countingDown = true;
+
+                        // Stop Listening
+                        StopCoroutine("Listen");
+
+                        // Start Countdown
                         StartCoroutine("Countdown");
                     }
                 }
@@ -122,4 +136,22 @@ public class Energizer_Controller : MonoBehaviour {
     }
 
     //var distance = (mouseV2 - sightV2).sqrMagnitude;
+
+    void EnergizeExtractionBuilding(ExtractionBuilding extractor)
+    {
+        // Calculate boosted Rate and Power...
+        var power = boost * extractor.extractorStats.extractPower;
+        var rate = boost * extractor.extractorStats.extractRate;
+
+        // ... and Energize the Extractor's stats.
+        extractor.extractorStats.Energize(rate, power);
+
+        // Now start counting down to De Energize
+        extractor.CountDownToDeEnergize(DeEnergizeExtractor, BoostDuration);
+    }
+
+    void DeEnergizeExtractor(ExtractionBuilding extractor)
+    {
+        extractor.extractorStats.DeEnergize();
+    }
 }

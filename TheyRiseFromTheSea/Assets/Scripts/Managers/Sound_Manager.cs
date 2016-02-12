@@ -55,7 +55,7 @@ public class Sound_Manager : MonoBehaviour {
                 return;
 
             AudioSource.PlayClipAtPoint(soundMap[id], Camera.main.transform.position);
-            soundCooldown = -0.1f;
+            soundCooldown = -0.2f;
         }
    
     }

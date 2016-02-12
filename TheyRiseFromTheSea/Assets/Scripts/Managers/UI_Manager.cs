@@ -28,9 +28,16 @@ public class UI_Manager : MonoBehaviour
 
     public GameObject availableMissions_panel, activeMissions_panel, completeMissions_panel;
 
-    // MAIN UI PANELS
+    // MAIN MENU PANELS
+    public GameObject mainMenuPanel, charCreationPanel;
+
+    // (CENTRAL LEVEL) MAIN UI PANELS
     public GameObject characterPanel, missionsPanel, resoucesPanel, bpPanel;
     GameObject currActivePanel;
+
+    // Hero Character Info
+    public Text heroName;
+    bool nameIsDisplayed = false;
 
     void Awake()
     {
@@ -65,6 +72,16 @@ public class UI_Manager : MonoBehaviour
 
         //organics_total.text = Ship_Inventory.Instance.DisplayResourceAmount(TileData.Types.organic).ToString();
         //organics_new.text = Ship_Inventory.Instance.tempOrganics.ToString();
+    }
+
+    void DisplayHeroName()
+    {
+        // FIX THIS! We need to replace "Prospector" with the Hero's current rank
+        if (!nameIsDisplayed)
+        {
+            nameIsDisplayed = true;
+            heroName.text = "Prospector " + GameMaster.Instance.theHero.heroName;
+        }
     }
 
     // BLUEPRINT PANEL:
@@ -222,6 +239,9 @@ public class UI_Manager : MonoBehaviour
             // ... activate Character Panel ...
             characterPanel.SetActive(true);
 
+            // ... display the Hero's name ...
+            DisplayHeroName();
+
             // ... and set it as current active
             currActivePanel = characterPanel;
         }
@@ -281,6 +301,44 @@ public class UI_Manager : MonoBehaviour
 
             // and set it as current active.
             currActivePanel = bpPanel;
+        }
+    }
+
+    public void DisplayCharacterCreationPanel()
+    {
+        if (charCreationPanel.activeSelf == false)
+        {
+            // Deactivate curr active panel...
+            if (currActivePanel != null)
+                currActivePanel.SetActive(false);
+
+            // ... make sure Main Menu panel is still not on...
+            if (mainMenuPanel.activeSelf)
+            {
+                mainMenuPanel.SetActive(false);
+            }
+
+            // ... activate CharacterCreation Panel ...
+            charCreationPanel.SetActive(true);
+
+            // and set it as current active.
+            currActivePanel = charCreationPanel;
+        }
+    }
+
+    public void DisplayMainMenuPanel()
+    {
+        if (mainMenuPanel.activeSelf == false)
+        {
+            // Deactivate curr active panel...
+            if (currActivePanel != null)
+                currActivePanel.SetActive(false);
+
+            // ... activate CharacterCreation Panel ...
+            mainMenuPanel.SetActive(true);
+
+            // and set it as current active.
+            currActivePanel = mainMenuPanel;
         }
     }
 }
