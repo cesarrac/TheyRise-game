@@ -128,8 +128,27 @@ public class TradeOrder_Manager : MonoBehaviour {
             else
             {
                 selectedTradeOrder = availableOrders[id];
+
+                // First time player clicks on mission, display its info through UI
+                DisplayTradeOrderInfo();
             }
   
+        }
+        else if (activeOrders.ContainsKey(id))
+        {
+            selectedTradeOrder = activeOrders[id];
+            DisplayTradeOrderInfo();
+        }
+    }
+
+    void DisplayTradeOrderInfo()
+    {
+        if (selectedTradeOrder != null)
+        {
+            UI_Manager.Instance.DisplayMissionInfo(selectedTradeOrder.orderName, selectedTradeOrder.tradeClient.ToString(),
+                                                   selectedTradeOrder.timeLimit.ToString(),
+                                                   selectedTradeOrder.tradeResource.ToString(),
+                                                   selectedTradeOrder.tradeQuota.ToString());
         }
     }
 
@@ -144,6 +163,9 @@ public class TradeOrder_Manager : MonoBehaviour {
 
             // ... and remove it from available orders.
             availableOrders.Remove(id);
+
+            // Stop displaying its info in the UI
+            UI_Manager.Instance.ClearMissionInfo();
         }
 
     }

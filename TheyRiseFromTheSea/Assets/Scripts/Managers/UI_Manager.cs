@@ -24,9 +24,10 @@ public class UI_Manager : MonoBehaviour
 
     public Text days;
 
+    // MISSIONS:
     Dictionary<int, GameObject> loadedMissionsMap = new Dictionary<int, GameObject>();
-
-    public GameObject availableMissions_panel, activeMissions_panel, completeMissions_panel;
+    public GameObject availableMissions_panel, activeMissions_panel, completeMissions_panel, missionInfo;
+    public Text missionName, missionNameDefault, missionClient, missionTime, missionResource, missionAmount;
 
     // MAIN MENU PANELS
     public GameObject mainMenuPanel, charCreationPanel;
@@ -216,6 +217,32 @@ public class UI_Manager : MonoBehaviour
         TradeOrder_Manager.Instance.DisplayOrders();
     }
 
+    public void DisplayMissionInfo(string mName, string mClient, string mTimeLimit, string reqResource, string reqAmmnt)
+    {
+        if (missionNameDefault.gameObject.activeSelf)
+        {
+            missionNameDefault.gameObject.SetActive(false);
+            missionInfo.gameObject.SetActive(true);
+        }
+        missionName.text = mName;
+        missionClient.text = mClient;
+        missionTime.text = mTimeLimit;
+        missionResource.text = reqResource;
+        missionAmount.text = reqAmmnt;
+    }
+
+    public void ClearMissionInfo()
+    {
+        if (!missionNameDefault.gameObject.activeSelf)
+        {
+            missionNameDefault.gameObject.SetActive(true);
+            missionInfo.SetActive(false);
+
+        }
+
+        
+    }
+
     // Save & Load
     public void Save()
     {
@@ -233,8 +260,7 @@ public class UI_Manager : MonoBehaviour
         if (characterPanel.activeSelf == false)
         {
             // Deactivate curr active panel...
-            if (currActivePanel != null)
-                currActivePanel.SetActive(false);
+            DeactivateCurrActivePanel();
 
             // ... activate Character Panel ...
             characterPanel.SetActive(true);
@@ -252,8 +278,7 @@ public class UI_Manager : MonoBehaviour
         if (missionsPanel.activeSelf == false)
         {
             // Deactivate curr active panel...
-            if (currActivePanel != null)
-                currActivePanel.SetActive(false);
+            DeactivateCurrActivePanel();
 
             // ... activate Missions Panel ...
             missionsPanel.SetActive(true);
@@ -271,8 +296,7 @@ public class UI_Manager : MonoBehaviour
         if (resoucesPanel.activeSelf == false)
         {
             // Deactivate curr active panel...
-            if (currActivePanel != null)
-                currActivePanel.SetActive(false);
+            DeactivateCurrActivePanel();
 
             // ... activate Resources Panel ...
             resoucesPanel.SetActive(true);
@@ -290,8 +314,7 @@ public class UI_Manager : MonoBehaviour
         if (bpPanel.activeSelf == false)
         {
             // Deactivate curr active panel...
-            if (currActivePanel != null)
-                currActivePanel.SetActive(false);
+            DeactivateCurrActivePanel();
 
             // ... activate Resources Panel ...
             bpPanel.SetActive(true);
@@ -309,8 +332,7 @@ public class UI_Manager : MonoBehaviour
         if (charCreationPanel.activeSelf == false)
         {
             // Deactivate curr active panel...
-            if (currActivePanel != null)
-                currActivePanel.SetActive(false);
+            DeactivateCurrActivePanel();
 
             // ... make sure Main Menu panel is still not on...
             if (mainMenuPanel.activeSelf)
@@ -331,8 +353,7 @@ public class UI_Manager : MonoBehaviour
         if (mainMenuPanel.activeSelf == false)
         {
             // Deactivate curr active panel...
-            if (currActivePanel != null)
-                currActivePanel.SetActive(false);
+            DeactivateCurrActivePanel();
 
             // ... activate CharacterCreation Panel ...
             mainMenuPanel.SetActive(true);
@@ -340,5 +361,23 @@ public class UI_Manager : MonoBehaviour
             // and set it as current active.
             currActivePanel = mainMenuPanel;
         }
+    }
+
+    void DeactivateCurrActivePanel()
+    {
+        // Deactivate curr active panel...
+        if (currActivePanel != null)
+        {
+            // If the current panel was the Missions panel...
+            if (currActivePanel == missionsPanel)
+            {
+                // Clear its info before deactivating.
+                ClearMissionInfo();
+                
+            }
+
+            currActivePanel.SetActive(false);
+        }
+            
     }
 }
