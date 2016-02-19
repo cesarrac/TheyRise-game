@@ -108,7 +108,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
         // Since this is the last step in initializing the Blueprints, set this here
 
         //selectedBluePrint = availableBlueprints[TileData.Types.terraformer];
-        selectedBluePrint = NanoBuilder.blueprintsMap[TileData.Types.terraformer];
+        selectedBluePrint = NanoBuilder.blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType];
 
         if (selectedBluePrint != null)
         {
@@ -263,7 +263,8 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
     void Build(Blueprint bp)
     {
-        if (bp != null && ResourceGrid.Grid.terraformer_built)
+        //if (bp != null && ResourceGrid.Grid.terraformer_built)
+        if (bp != null)
         {
             // Check Nanobot cost
             if (nanoBots >= bp.nanoBotCost)

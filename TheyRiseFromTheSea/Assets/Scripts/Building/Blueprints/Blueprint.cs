@@ -133,6 +133,16 @@ public class Blueprint
         bp_Tier = new Blueprint_Tier();
     }
 
+    // For a Required Blueprint (like Terraformer, Generator, etc)
+    public Blueprint(string Name, TileData.Types _type)
+    {
+        buildingName = Name;
+        memoryCost = 0;
+        nanoBotCost = 0;
+        tileType = _type;
+        description = " ";
+    }
+
     public void ChangePUCost(int change)
     {
         memoryCost += change;

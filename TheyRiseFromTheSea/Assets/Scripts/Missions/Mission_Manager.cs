@@ -2,105 +2,203 @@
 using System.Collections;
 using System.Collections.Generic;
 
+
 public class Mission_Manager : MonoBehaviour {
-    /* The GM calls on the Mission Manager every time the Ship level is loaded to check if the player currently has a company task. If they don't it will assing a new one. 
-    In between levels, during BALANCE SHEET state, the GM will check if the current task's quota/objective has been met, if it has it will call another method here
-    that removes the current task and adds it to a completed tasks list. That way when the ship loads the Player will get a new task automatically. */
 
-    List<Mission> CurrentMission = new List<Mission>();
-    public List<Mission> CompletedMissions = new List<Mission>();
+    // Example. 
+    // Generate 5 missions and place them on the map. These 5 missions would be removed from a list of Available Missions so they don't get
+    // selected again.
+    // Once the last mission on the map is completed...
+    // Generate 5 missions again from the available missions list.
+    // Every time a mission is generated there's a check to see what day the player is on. This will determine the difficulty. (i.e. Day 2 = Difficulty 2)
 
-    public void CheckForCorpMission()
+    public static Mission_Manager Instance { get; protected set; }
+
+    Dictionary<string, Mission> availableMissions_Map = new Dictionary<string, Mission>();
+    List<Mission> availableMissions = new List<Mission>();
+    public List<Mission> Available { get { return availableMissions; } }
+    List<Mission> completedMissions = new List<Mission>();
+
+    Mission activeMission;
+    public Mission ActiveMission { get { return activeMission; } }
+
+    Mission_Database mission_database;
+
+    void Awake()
     {
-        // If CurrentMission count is 0, player has NO current mission
-        if (CurrentMission.Count == 0)
-        {
-            // Create a new corporate mission (player always has to have a corporate mission!)
-            Mission newMission = CreateCorporateMission();
-            // Make it the current mission
-            CurrentMission.Add(newMission);
 
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            // Player currently has missions, let's make sure that one of them is a corporate mission!
-            bool noCorpMissions = true;
-            foreach(Mission mission in CurrentMission)
-            {
-                if (mission.missionFaction == Mission.Faction.CORPORATE)
-                {
-                    noCorpMissions = false;
-                    return;
-                }
-            }
+            DestroyImmediate(gameObject);
+        }
 
-            if (noCorpMissions)
-            {
-                // Add a mission since we were not able to find a corporate mission
-                // Create a new corporate mission (player always has to have a corporate mission!)
-                Mission newMission = CreateCorporateMission();
-                // Make it the current mission
-                CurrentMission.Add(newMission);
-            }
+        mission_database = new Mission_Database();
+
+        mission_database.InitMissions();
+
+    }
+
+    public void Init()
+    {
+        CheckToGenerateNewMissions();
+    }
+    
+    public Dictionary<string, Mission> GetAvailable()
+    {
+        //availableMissions_Map = new Dictionary<string, Mission>();
+        availableMissions_Map.Clear();
+
+        for (int i = 0; i < availableMissions.Count; i++)
+        {
+            // Unregister the Complete Mission callback so the class can be safely serialized...
+            availableMissions[i].UnRegisterMissionCompleteCallback();
+
+            // ... then add to the dictionary for saving.
+            availableMissions_Map.Add("Available " + i, availableMissions[i]);
+        }
+
+        // Also UnRegister callback on active mission
+        activeMission.UnRegisterMissionCompleteCallback();
+        availableMissions_Map.Add("Active", activeMission);
+
+        return availableMissions_Map;
+    }
+
+    //public void LoadMissions(List<Mission> available, Mission active)
+    //{
+    //    availableMissions = available;
+    //    activeMission = active;
+    //}
+
+    public void LoadAvailableMissions(Mission newMission)
+    {
+        newMission.RegisterMissionCompleteCallback(CompleteMission);
+        availableMissions.Add(newMission);
+    }
+
+    public void LoadActiveMission(Mission newMission)
+    {
+        newMission.RegisterMissionCompleteCallback(CompleteMission);
+        activeMission = newMission;
+        Debug.Log("MISSION MANAGER: current active mission is " + activeMission.MissionName);
+    }
+
+    void CheckToGenerateNewMissions()
+    {
+        if (availableMissions.Count < 1)
+        {
+            GenerateNewSetOfMissions();
         }
     }
 
+    void GenerateNewSetOfMissions()
+    {
+        int difficulty = GameTracker.Instance.Days;
 
-    Mission CreateCorporateMission()
+        availableMissions.Clear();
+
+        // Here, generate 5 new missions from the Mission Database
+        for (int i = 0; i < 5; i++)
+        {
+            availableMissions.Add(MissionGenerator());
+        }
+        // After generating them the set would be sent to UI Manager to display on map
+
+        // FOR TESTING Im hardcoding the active mission
+        activeMission = availableMissions[0];
+
+        Debug.Log("MISSION MANAGER: current active mission is " + activeMission.MissionName);
+
+    }
+
+    Mission MissionGenerator()
     {
         Mission newMission = new Mission();
 
-        int difficulty = Random.Range(0, 6);  //TODO: Add a way for the GM to balance the difficulty instead of picking a random one
-        int total = GetQuotaTotalFromDifficulty(difficulty);
+        // 50 / 50 chance of generating a Science or a Survival mission
+        //int select = Random.Range(0, 4);
+        //if (select == 0 || select == 2)
+        //{
+        //    // Grab a Science mission from the database
+        //    newMission = mission_database.GetMission(MissionType.SCIENCE);
+        //}
+        //else
+        //{
+        //    // Get a Survival mission from the database
+        //    newMission = mission_database.GetMission(MissionType.SURVIVAL);
+        //}
 
-        // First select what type of resource will be required
-        int resourcePick = Random.Range(0, 6);
-        if (resourcePick <= 2)
-        {
-            // Common Ore         
-            newMission = new Mission(Mission.Faction.CORPORATE, Mission.Quota.RequiredResource.COMMON_ORE, total);
-        }
-        else if (resourcePick == 3)
-        {
-            // Water
-            newMission = new Mission(Mission.Faction.CORPORATE, Mission.Quota.RequiredResource.WATER, total);
-        }
-        else if (resourcePick == 4)
-        {
-            // Food
-            newMission = new Mission(Mission.Faction.CORPORATE, Mission.Quota.RequiredResource.FOOD, total);
-        }
-        else
-        {
-            // Enriched Ore
-            newMission = new Mission(Mission.Faction.CORPORATE, Mission.Quota.RequiredResource.ENRICHED_ORE, total);
-        }
+        // *** FOR TESTING I AM FORCING MISSIONS!
+        newMission = mission_database.GetMission(MissionType.SCIENCE);
+
+        // Set its Complete Mission callback...
+        newMission.RegisterMissionCompleteCallback(CompleteMission);
+
+        // ... before returning.
         return newMission;
+
+        //ENCOUNTER Type missions should be generated through some other logic that decides when a boss fight should happen
     }
 
-    int GetQuotaTotalFromDifficulty(int difficulty)
+    // This can be called by a UI element that visually represents available missions as Buttons. When pressed it would become the active mission.
+    public void SelectMission(int missionIndex)
     {
-        int quota = 0;
-        if (difficulty <= 1)
-        {
-            // Easy
-            quota = Random.Range(100, 500);
-        }
-        else if (difficulty == 2)
-        {
-            // Average
-            quota = Random.Range(501, 999);
-        }
-        else if (difficulty == 3 || difficulty == 4)
-        {
-            // Medium
-            quota = Random.Range(1000, 3000);
-        }
-        else
-        {
-            // Hard
-            quota = Random.Range(3000, 7000);
-        }
-        return quota;
+        if (missionIndex > 0 && missionIndex < availableMissions.Count)
+            activeMission = availableMissions[missionIndex];
     }
+
+    // Checks to verify if Mission has been completed:
+    public void CheckSurvivalMissionCompleted()
+    {
+        // A Survival Mission's objective is to gather x amount of y resource.
+        if (Ship_Inventory.Instance.CheckForSpecificResource(activeMission.ObjectiveResource, true) >= activeMission.ObjectiveAmnt)
+        {
+            activeMission.FlagAsCompleted();
+
+            // After flagging a completed mission, unlock the Transporter to allow Player to return to ship
+            Transporter_Handler.instance.LockControls(false);
+        }
+    }
+
+    public void CheckScienceMissionCompleted(int currStageCount)
+    {
+        if (currStageCount >= activeMission.ObjectiveStages)
+        {
+            activeMission.FlagAsCompleted();
+
+            // After flagging a completed mission, unlock the Transporter to allow Player to return to ship
+            Transporter_Handler.instance.LockControls(false);
+        }
+    }
+
+    public void SetMissionStages(StagedProgress_Handler stage_handler)
+    {
+        stage_handler.MaxStages = activeMission.ObjectiveStages;
+    }
+
+    // Function called by GM when Launching back to ship from the Planet to complete the mission
+    public void CompleteActiveMission()
+    {
+        activeMission.CompleteMission();
+    }
+
+    // Function called as callback by the mission once it has been verified as completed
+    void CompleteMission(Mission completed)
+    {
+        if (availableMissions.Contains(completed))
+        {
+            availableMissions.Remove(completed);
+        }
+
+        completedMissions.Add(completed);
+
+        CheckToGenerateNewMissions();
+    }
+
+   
 }

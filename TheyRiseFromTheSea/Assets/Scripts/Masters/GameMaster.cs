@@ -115,6 +115,11 @@ public class GameMaster : MonoBehaviour {
 
         Vector3 playerPosition = new Vector3(posX, posY, 0.0f);
         GameObject Hero = objPool.GetObjectForType("Hero Rig", true, playerPosition);
+
+        // After spawning the player Set up the Active Mission requirements and Enemies
+        SetUpMissionAndEnemies();
+
+
         /*
         HERE we need what Items the player chose to take with them to the surface.
         
@@ -317,7 +322,56 @@ public class GameMaster : MonoBehaviour {
             return null;
         }
 
+        
     }
+
+    void SetUpMissionAndEnemies()
+    {
+        switch (Mission_Manager.Instance.ActiveMission.MissionType)
+        {
+            case MissionType.SCIENCE:
+                // Register Science checks callbacks...
+
+                // FIX THIS!
+                /* In this case we need to wait for the Player to actually build the building/tower that contains 
+                 the component that will need these callbacks. 
+                 For now, just spawn the Enemy Master and have a function that the Staged Building component can call
+                 on its Start to have the callbacks set. */
+
+                // ... then spawn a regular enemy master
+                SpawnEnemyMaster();
+                break;
+            case MissionType.SURVIVAL:
+                // Register Survival checks callback to the Ship Inventory...
+                Ship_Inventory.Instance.RegisterCompleteMissionCallback(Mission_Manager.Instance.CheckSurvivalMissionCompleted);
+
+                // ... then spawn a regular enemy master
+                SpawnEnemyMaster();
+                break;
+            case MissionType.ENCOUNTER:
+                // Spawn a boss enemy master using the active mission's encounter id
+                SpawnBossEnemyMaster(Mission_Manager.Instance.ActiveMission.EncounterID);
+                break;
+            default:
+                Debug.LogError("Not a Valid Mission Type!");
+                break;
+        }
+
+        // After Setting up the Mission and Enemies LOCK the Transporter so the player can't return until the Active Mission is flagged as completed
+        Transporter_Handler.instance.LockControls(true);
+    }
+
+    void SpawnEnemyMaster()
+    {
+        ObjectPool.instance.GetObjectForType("Default Enemy Master", true, Vector3.zero);
+    }
+
+    void SpawnBossEnemyMaster(string id)
+    {
+        ObjectPool.instance.GetObjectForType(id, true, Vector3.zero);
+    }
+
+
 
 	void InitializeInventoryAndSupplies()
 	{
@@ -331,13 +385,19 @@ public class GameMaster : MonoBehaviour {
 
     public void LaunchToPlanet()
     {
+        // Before Launching make sure that the Hero's nanobuilder contains the active mission's required blueprint!
+        BlueprintDatabase.Instance.InitRequiredBlueprint();
+
         SceneManager.LoadScene("Level_Planet");
     }
 
-    public void LaunchToShip()
+    public void ReturnToShip()
     {
         // Tell Ship Inventory to register items that were on the Temporary inventory, since now the Player is finally taking them to the ship
         Ship_Inventory.Instance.RegisterTempInventoryToShip();
+
+        // Complete the current Active Mission
+        Mission_Manager.Instance.CompleteActiveMission();
 
         // load the ship level
         SceneManager.LoadScene("Level_CENTRAL");
@@ -364,10 +424,26 @@ public class GameMaster : MonoBehaviour {
         SceneManager.LoadScene("Level_CharacterCreation");
     }
 
-	public void RestartToShip()
+	public void NewGameLoadShip()
 	{
+
+        // If it is NOT a loaded game, the Trade Orders and Missions need to Initialize
+        TradeOrder_Manager.Instance.InitFirstOrders();
+        Mission_Manager.Instance.Init();
+
         // load the ship level
         SceneManager.LoadScene("Level_CENTRAL");
+
+
+    }
+
+    public void SavedGameLoadShip()
+    {
+        // load the ship level
+        SceneManager.LoadScene("Level_CENTRAL");
+
+        // Check with Game Tracker to see if this is a Loaded Game.
+        // If it is NOT a loaded game, the Blueprints, Trade Orders, and Mission Managers need to Initialize
     }
 
     public void LoadBlueprintsScene()

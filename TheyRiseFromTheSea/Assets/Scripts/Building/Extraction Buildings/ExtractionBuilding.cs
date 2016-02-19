@@ -647,7 +647,7 @@ public class ExtractionBuilding : MonoBehaviour {
     // This Beams all the contents STORED inside of a building to the ship
     public void BeamAllStoredToShip()
     {
-        Ship_Inventory.Instance.ReceiveItems(resourceType, currResourceStored);
+        Ship_Inventory.Instance.ReceiveTemporaryResources(resourceType, currResourceStored);
 
         // This will split the current resources before sending them to ship (for example split between common ore and enriched ore)
         if (splitShipInventoryCallback != null)
@@ -665,7 +665,7 @@ public class ExtractionBuilding : MonoBehaviour {
     {
         // This method on Ship Inventory Receives Items and stores them Temporarily. They will actually become part of the inventory once the Player
         // launches from the Transporter.
-        Ship_Inventory.Instance.ReceiveItems(resourceType, total);
+        Ship_Inventory.Instance.ReceiveTemporaryResources(resourceType, total);
 
         // This will split the current resources before sending them to ship (for example split between common ore and enriched ore)
         if (splitShipInventoryCallback != null)

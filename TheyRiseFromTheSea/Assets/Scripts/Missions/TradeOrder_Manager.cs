@@ -29,15 +29,16 @@ public class TradeOrder_Manager : MonoBehaviour {
             DestroyImmediate(gameObject);
         }
 
-        InitFirstOrders();
+        tradeGenerator = new TradeOrderGenerator();
 
+        // InitFirstOrders();
     }
 
 
 
-    void InitFirstOrders()
+    public void InitFirstOrders()
     {
-        tradeGenerator = new TradeOrderGenerator();
+
 
         activeOrders = new Dictionary<int, TradeOrder>();
         completedOrders = new Dictionary<int, TradeOrder>();
@@ -88,16 +89,11 @@ public class TradeOrder_Manager : MonoBehaviour {
         return completedOrders;
     }
 
-    public void CheckDay(int currDays)
+    public void CheckForNewTradeOrders()
     {
-        // Every time we add a day the Game Tracker will call this function to see if we should load new missions
-        if (currDays % 7 == 0)
+        if (availableOrders.Count < maxAvailable)
         {
-            // Add missions
-            if (availableOrders.Count < maxAvailable)
-            {
-
-            }
+            // Add new Trade orders
         }
     }
 
@@ -106,13 +102,13 @@ public class TradeOrder_Manager : MonoBehaviour {
     {
         foreach(int id in availableOrders.Keys)
         {
-            UI_Manager.Instance.AddAvailableMission(id, availableOrders[id].orderName, availableOrders[id].timeLimit);
+            UI_Manager.Instance.AddAvailableOrder(id, availableOrders[id].orderName, availableOrders[id].timeLimit);
         }
 
         foreach (int id in activeOrders.Keys)
         {
-            UI_Manager.Instance.AddAvailableMission(id, activeOrders[id].orderName, activeOrders[id].timeLimit);
-            UI_Manager.Instance.AddToActiveMissions(id);
+            UI_Manager.Instance.AddAvailableOrder(id, activeOrders[id].orderName, activeOrders[id].timeLimit);
+            UI_Manager.Instance.AddToActiveOrders(id);
         }
     }
 
@@ -129,7 +125,7 @@ public class TradeOrder_Manager : MonoBehaviour {
             {
                 selectedTradeOrder = availableOrders[id];
 
-                // First time player clicks on mission, display its info through UI
+                // First time player clicks on Order, display its info through UI
                 DisplayTradeOrderInfo();
             }
   
@@ -145,7 +141,7 @@ public class TradeOrder_Manager : MonoBehaviour {
     {
         if (selectedTradeOrder != null)
         {
-            UI_Manager.Instance.DisplayMissionInfo(selectedTradeOrder.orderName, selectedTradeOrder.tradeClient.ToString(),
+            UI_Manager.Instance.DisplayOrderInfo(selectedTradeOrder.orderName, selectedTradeOrder.tradeClient.ToString(),
                                                    selectedTradeOrder.timeLimit.ToString(),
                                                    selectedTradeOrder.tradeResource.ToString(),
                                                    selectedTradeOrder.tradeQuota.ToString());
@@ -156,7 +152,7 @@ public class TradeOrder_Manager : MonoBehaviour {
     {
         if (!activeOrders.ContainsKey(id))
         {
-            UI_Manager.Instance.AddToActiveMissions(id);
+            UI_Manager.Instance.AddToActiveOrders(id);
 
             // Add it to active orders...
             activeOrders.Add(id, availableOrders[id]);
@@ -165,7 +161,7 @@ public class TradeOrder_Manager : MonoBehaviour {
             availableOrders.Remove(id);
 
             // Stop displaying its info in the UI
-            UI_Manager.Instance.ClearMissionInfo();
+            UI_Manager.Instance.ClearOrderInfo();
         }
 
     }

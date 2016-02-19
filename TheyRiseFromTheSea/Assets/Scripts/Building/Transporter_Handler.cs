@@ -49,11 +49,11 @@ public class Transporter_Handler : MonoBehaviour {
             }
             else
             {
-                if (isLocked == false)
+                if (Mission_Manager.Instance.ActiveMission.IsCompleted)
                 {
                     LaunchToShip();
                 }
-                else if (isLocked == true && status_indicator != null)
+                else if (status_indicator != null)
                 {
                     status_indicator.CreateStatusMessage("Locked!");
                 }
@@ -67,12 +67,14 @@ public class Transporter_Handler : MonoBehaviour {
 
     void LaunchToShip()
     {
-        GameMaster.Instance.LaunchToShip();
+        GameMaster.Instance.ReturnToShip();
     }
 
     public void LaunchToPlanet()
     {
-        GameMaster.Instance.LaunchToPlanet();
+        // If we don't have a mission, we can't Launch to Planet!
+        if (Mission_Manager.Instance.ActiveMission != null)
+            GameMaster.Instance.LaunchToPlanet();
     }
 
 
@@ -80,10 +82,10 @@ public class Transporter_Handler : MonoBehaviour {
     ///  This allows another component to unlock the Launchpad and
     ///  permit the Player to Launch/Transport back to ship.
     /// </summary>
-    /// <param name="isLock"></param>
-    public void LockControls(bool isLock)
+    /// <param name="locked"></param>
+    public void LockControls(bool locked)
     {
-        isLocked = isLock;
+        isLocked = locked;
         Debug.Log("TRANSPORTER: Lock is " + isLocked);
     }
 

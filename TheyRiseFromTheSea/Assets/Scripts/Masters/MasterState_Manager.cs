@@ -135,7 +135,8 @@ public class MasterState_Manager : MonoBehaviour {
         UI_Manager.Instance.DisplayVictoryPanel();
 
         // Notify the Launchpad/Transporter that it can now launch safely by unlocking its controls.
-        Transporter_Handler.instance.LockControls(false);
+       // Transporter_Handler.instance.LockControls(false);
+
         Debug.Log("MASTER STATE: Unlocking Transporter controls!");
 
         mState = MasterState.WAITING;
@@ -165,7 +166,7 @@ public class MasterState_Manager : MonoBehaviour {
 	public void ReturnToShip()
 	{
         _mState = MasterState.ONSHIP;
-		game_master.RestartToShip ();
+		game_master.NewGameLoadShip ();
 	}
 
     public void NewCharacter()

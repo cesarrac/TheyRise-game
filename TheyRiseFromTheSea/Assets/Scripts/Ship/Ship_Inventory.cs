@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using System;
 
 public class Ship_Inventory : MonoBehaviour {
 
@@ -35,6 +36,8 @@ public class Ship_Inventory : MonoBehaviour {
     List<Armor> availableArmor;
     List<Tool> availableTools;
 
+    Action missionCompletedCB;
+
     void Awake()
     {
         if (Instance == null)
@@ -51,9 +54,14 @@ public class Ship_Inventory : MonoBehaviour {
         }
     }
 
-    void Start()
+    public void RegisterCompleteMissionCallback(Action cb)
     {
+        missionCompletedCB = cb;
+    }
 
+    public void UnRegisterCompleteMissionCallback()
+    {
+        missionCompletedCB = null;
     }
 
     /// <summary>
@@ -62,7 +70,7 @@ public class Ship_Inventory : MonoBehaviour {
     /// </summary>
     /// <param name="rType"></param>
     /// <param name="ammnt"></param>
-    public void ReceiveItems(TileData.Types rType, int ammnt)
+    public void ReceiveTemporaryResources(TileData.Types rType, int ammnt)
     {
         Debug.Log(ammnt + " of " + rType + " beamed to the SHIP!");
         switch (rType)
@@ -89,6 +97,11 @@ public class Ship_Inventory : MonoBehaviour {
 
         // add to the total
         storageTotal += ammnt;
+
+        if (missionCompletedCB != null)
+        {
+            missionCompletedCB();
+        }
     }
 
     public void StoreItems(TileData.Types rType, int ammnt)
@@ -113,6 +126,39 @@ public class Ship_Inventory : MonoBehaviour {
         Debug.Log("Ore has been split! Common = " + commonOreStored + " Enriched = " + enrichedOreStored);
     }
 
+    public int CheckForSpecificResource(TileData.Types resource, bool checkTemp = false)
+    {
+        int ammnt = 0;
+        if (!checkTemp)
+        {
+            if (rawResourcesMap.ContainsKey(resource))
+            {
+                ammnt = rawResourcesMap[resource];
+            }
+        }
+        else
+        {
+          
+            switch (resource)
+            {
+                case TileData.Types.water:
+                    ammnt = tempWater;
+                    break;
+                case TileData.Types.rock:
+                    ammnt = tempOre;
+                    break;
+                case TileData.Types.food:
+                    ammnt = tempFood;
+                    break;
+                default:
+                    // Cant find that resource
+                    break;
+            }
+        }
+
+        return ammnt;
+    }
+
     /// <summary>
     /// Call this from the Launchpad when the Player launches back to the ship. 
     /// At this point Terraformer stages would be complete and the Launchpad should be ready to send items to ship.
@@ -132,7 +178,7 @@ public class Ship_Inventory : MonoBehaviour {
         commonOreStored += tempCommorOre;
         enrichedOreStored += tempEnrichedOre;
 
-
+        UnRegisterCompleteMissionCallback();
     }
 
 
@@ -213,7 +259,7 @@ public class Ship_Inventory : MonoBehaviour {
     }
 
 
-    // MISSIONS:
+    // TRADE ORDERS:
 
     // If the above method returns true a button on the Trade Order UI will allow the player to complete the Order by...
 

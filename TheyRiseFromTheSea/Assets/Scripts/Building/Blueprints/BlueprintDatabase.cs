@@ -25,6 +25,8 @@ public class BlueprintDatabase : MonoBehaviour {
 
     NanoBuilder hero_nanoBuilder;
 
+    Blueprint lastRequired;
+
     void Awake()
     {
 
@@ -39,7 +41,7 @@ public class BlueprintDatabase : MonoBehaviour {
         }
 
 
-        if ( blueprintsMap == null)
+        if (blueprintsMap == null)
         {
             Init();
             InitExtractors();
@@ -54,25 +56,67 @@ public class BlueprintDatabase : MonoBehaviour {
         hero_nanoBuilder = GameMaster.Instance.theHero.nanoBuilder;
 
 
-        // Check if this is the firs time we load the Blueprint screen. If it is we need to load the Terraformer unto the Hero's blueprints map.
-        if (!hero_nanoBuilder.CheckForBlueprint(TileData.Types.terraformer))
-        {
-            // As soon as we have access to the Hero, the first blueprint to load into it would be the Terraformer (this assumes BP database has been Initialized)
-            hero_nanoBuilder.AddBluePrint(TileData.Types.terraformer, blueprintsMap["Terraformer"]);
-            Debug.Log("Hero added blueprint for " + blueprintsMap["Terraformer"].buildingName);
-        }
+        //// Check if this is the firs time we load the Blueprint screen. If it is we need to load the Terraformer unto the Hero's blueprints map.
+        //if (!hero_nanoBuilder.CheckForBlueprint(TileData.Types.terraformer))
+        //{
+        //    // As soon as we have access to the Hero, the first blueprint to load into it would be the Terraformer (this assumes BP database has been Initialized)
+        //    hero_nanoBuilder.AddBluePrint(TileData.Types.terraformer, blueprintsMap["Terraformer"]);
+        //    Debug.Log("Hero added blueprint for " + blueprintsMap["Terraformer"].buildingName);
+        //}
+
+        InitRequiredBlueprint();
 
         // If we are on the Inventory/Blueprint Loader scene, we should display the memory count on the Hero's nanobuilder
         if (SceneManager.GetActiveScene().buildIndex == inventoryLvlIndex)
         {
             DisplayBuilderMemory();
         }
+    }
 
+    // The required Blueprint is dependant on the current active mission
+    public void InitRequiredBlueprint()
+    {
+        if (Mission_Manager.Instance.ActiveMission != null)
+        {
+            // Check if a previous mission had added a Required Blueprint
+            if (lastRequired != null)
+            {
+                // ... Check if the new required Blueprint is NOT of the same type as the old ...
+                if (lastRequired.tileType != Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType)
+                {
+                    // ... If it's NOT of the same type, the last one needs to be removed...
+                    hero_nanoBuilder.RemoveBlueprint(lastRequired.tileType);
 
+                    // ... and the new one ADDED.
+                    if (!hero_nanoBuilder.CheckForBlueprint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType))
+                    {
+                        hero_nanoBuilder.AddBluePrint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType,
+                                                     blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.buildingName]);
+                    }
+                }
+
+                // ... If they ARE of the same type then nothing remains to be done because the BP is already loaded.
+            }
+            else
+            {
+                // In the case of last required being null (no previous missions have loaded anything yet!), add bp as normal...
+                if (!hero_nanoBuilder.CheckForBlueprint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType))
+                {
+                    hero_nanoBuilder.AddBluePrint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType,
+                                                 blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.buildingName]);
+
+                    // ... and set it as the last required for next time.
+                    lastRequired = Mission_Manager.Instance.ActiveMission.RequiredBlueprint;
+                }
+            }
+     
+
+            Debug.Log("BP Database: Initialized the required Blueprint for the active mission!");
+        }
     }
 
 
-    void Init()
+    public void Init()
     {
         blueprintsMap = new Dictionary<string, Blueprint>
         {
@@ -88,10 +132,14 @@ public class BlueprintDatabase : MonoBehaviour {
             {"Machine Gun", new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun, "Short distance, fast firing rate, single target acquisition.") }
         };
 
+        InitExtractors();
+        InitBattleTowers();
+
+
         //blueprints_all["Extractor"].
 
         //// Add +1 to maxBPAllowed since we are using it as a 0 based index below, and to take into account the Terraformer
-       // maxBPAllowed += 1;
+        // maxBPAllowed += 1;
 
         // Always add the terraformer to the Selected Blueprints at its 0 index position
         //selectedBlueprints.Add(blueprints_all["Terraformer"]);
@@ -166,6 +214,7 @@ public class BlueprintDatabase : MonoBehaviour {
             DisplaySelectedBPInfo();
         }
 
+        Debug.Log("Current selected BP is " + curSelectedBP.buildingName);
     }
 
     void DisplaySelectedBPInfo()
@@ -239,11 +288,11 @@ public class BlueprintDatabase : MonoBehaviour {
         {
             foreach(TileData.Types btype in hero_nanoBuilder.bpTypes)
             {
-                // Do not load the Terraformer since it is a Blueprint that is loaded by default
-                if (btype == TileData.Types.terraformer)
-                {
-                    continue;
-                }
+                //// Do not load the Terraformer since it is a Blueprint that is loaded by default
+                //if (btype == TileData.Types.terraformer)
+                //{
+                //    continue;
+                //}
 
                 UI_Manager.Instance.AddBlueprintToBuilder(hero_nanoBuilder.blueprintsMap[btype].buildingName);
             }
@@ -257,12 +306,6 @@ public class BlueprintDatabase : MonoBehaviour {
     {
         if (curSelectedBP != null)
         {
-            //if (selectedBlueprints.Contains(curSelectedBP))
-            //{
-            //    Debug.Log("Removing this blueprint.");
-            //    selectedBlueprints.Remove(curSelectedBP);
-            //}
-            
             // Remove from the Builder
             RemoveLoadedBlueprintFromNanoBuilder();
         }
@@ -274,6 +317,12 @@ public class BlueprintDatabase : MonoBehaviour {
         if (!hero_nanoBuilder.CheckForBlueprint(curSelectedBP.tileType))
         {
             Debug.LogError("Nanobuilder does NOT contain a blueprint for: " + curSelectedBP.buildingName);
+            return;
+        }
+
+        // Make sure that the Player is not trying to UNLOAD the required blueprint for an active mission!
+        if (curSelectedBP.tileType == Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType)
+        {
             return;
         }
 

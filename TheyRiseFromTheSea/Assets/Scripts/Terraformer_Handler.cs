@@ -27,8 +27,6 @@ public class Terraformer_Handler : MonoBehaviour {
 	private State _state = State.IDLING;
 	public State curState { get { return _state; }}
 
-	public Enemy_WAVESpawnerV2 waveSpawner; // control over the spawning of enemy waves
-
 
     bool isWorking = false;
     bool isPlayerNear = false;
@@ -38,12 +36,6 @@ public class Terraformer_Handler : MonoBehaviour {
     void Awake()
 	{
         instance = this;
-
-
-        //if (GameObject.FindGameObjectWithTag ("Spawner") != null) {
-        //	waveSpawner = GameObject.FindGameObjectWithTag ("Spawner").GetComponent<Enemy_WAVESpawnerV2> ();
-        //	//waveSpawner.terraformer = this;
-        //}
 
         build_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
 

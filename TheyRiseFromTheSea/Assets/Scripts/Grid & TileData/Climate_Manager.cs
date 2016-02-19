@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class ClimateMap
 {
@@ -20,6 +20,11 @@ public class ClimateMap
         }
     }
 
+    public ClimateMap()
+    {
+
+    }
+
 }
 
 public enum ClimateType
@@ -36,13 +41,11 @@ public class Climate_Manager : MonoBehaviour {
 
     public static Climate_Manager Instance { get; protected set; }
 
-    ClimateMap desertMap = new ClimateMap(ClimateType.DESERT, GraphicTile.TileLandTypes.SAND);
-    ClimateMap tropicMap = new ClimateMap(ClimateType.TROPIC, GraphicTile.TileLandTypes.SAND, true, GraphicTile.TileLandTypes.MUD);
-    ClimateMap temperateMap = new ClimateMap(ClimateType.TEMPERATE, GraphicTile.TileLandTypes.MUD, true, GraphicTile.TileLandTypes.SAND);
-    ClimateMap coldMap = new ClimateMap(ClimateType.COLD, GraphicTile.TileLandTypes.ASH, true, GraphicTile.TileLandTypes.MUD);
-    ClimateMap articMap = new ClimateMap(ClimateType.ARTIC, GraphicTile.TileLandTypes.ASH);
+    List<ClimateMap> climateMaps = new List<ClimateMap>();
 
     public ClimateMap curClimateMap { get; protected set; }
+
+    public string climateMapID { get; protected set; }
 
     void Awake()
     {
@@ -56,34 +59,68 @@ public class Climate_Manager : MonoBehaviour {
             DestroyImmediate(gameObject);
         }
 
+        InitClimates();
+
+       
+
+    }
+
+
+    void InitClimates()
+    {
+        climateMaps = new List<ClimateMap>()
+        { // 0 = Desert, 1 = Tropic, 2 = Temperate, 3 = Cold, 4 = Artic
+            new ClimateMap(ClimateType.DESERT, GraphicTile.TileLandTypes.SAND),
+            new ClimateMap(ClimateType.TROPIC, GraphicTile.TileLandTypes.SAND, true, GraphicTile.TileLandTypes.MUD),
+            new ClimateMap(ClimateType.TEMPERATE, GraphicTile.TileLandTypes.MUD, true, GraphicTile.TileLandTypes.SAND),
+            new ClimateMap(ClimateType.COLD, GraphicTile.TileLandTypes.ASH, true, GraphicTile.TileLandTypes.MUD),
+            new ClimateMap(ClimateType.ARTIC, GraphicTile.TileLandTypes.ASH),
+        };
+
         // Default:
-        if (curClimateMap == null)
-            curClimateMap = temperateMap;
+        curClimateMap = climateMaps[2];
+
+        Debug.Log("CLIMATE: Climate maps initialized!");
     }
 
     // This can be accessed by a UI button
     public void SelectClimate(string climateType)
     {
+        if (climateMaps == null)
+        {
+            InitClimates();
+        }
+
         switch (climateType)
         {
             case "Artic":
-                curClimateMap = articMap;
+                curClimateMap = climateMaps[4];
                 break;
             case "Cold":
-                curClimateMap = coldMap;
+                curClimateMap = climateMaps[3];
                 break;
             case "Temperate":
-                curClimateMap = temperateMap;
+                curClimateMap = climateMaps[2];
                 break;
             case "Tropic":
-                curClimateMap = tropicMap;
+                curClimateMap = climateMaps[1];
                 break;
             case "Desert":
-                curClimateMap = desertMap;
+                curClimateMap = climateMaps[0];
+                break;
+            case "Unknown":
+                curClimateMap = SelectRandomClimate();
                 break;
             default:
-                curClimateMap = temperateMap;
+                curClimateMap = climateMaps[2];
                 break;
         }
+
+        climateMapID = climateType;
+    }
+
+    ClimateMap SelectRandomClimate()
+    {
+        return climateMaps[Random.Range(0, climateMaps.Count)];
     }
 }

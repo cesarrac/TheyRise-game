@@ -7,6 +7,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
 
+
+
 public class GameTracker : MonoBehaviour {
 
     public static GameTracker Instance { get; protected set; }
@@ -41,12 +43,35 @@ public class GameTracker : MonoBehaviour {
         else
             Days += 1;
 
-        // Check if new missions are available
-        if (TradeOrder_Manager.Instance != null)
+        // Every day / every x days, different things happen on the ship:
+
+        // If 7 days have passed ...
+        if (CheckDays(7))
         {
-            TradeOrder_Manager.Instance.CheckDay(Days);
+            // ... Check if new trade orders are available.
+            TradeOrder_Manager.Instance.CheckForNewTradeOrders();
         }
+
+        // For an Unknown signal event (a boss fight or other story driven encounter) we could...
+        // Option 1 every x amount of days have a random chance of getting an unknown signal event
+        // Option 2 every x amount of days always get an unknonw signal event
+        // Option 3 every x amount of days have if a previous unknown signal event was completed, have a random chance of getting a new one 
+        // These events can be generated according to a specific type of objective. i.e. Scientific exploration means defend a Bio Scanner,
+        // Survival imperative means defend a Grower or face a boss to get its meat
+
+
     }
+
+    bool CheckDays(int x)
+    {
+        // Check if x days have passed by checking for a remainder of 0 when days are divided by days
+        if (Days % x == 0)
+        {
+            return true;
+        }
+        return false;
+    }
+
 
     public void Save()
     {
@@ -70,6 +95,10 @@ public class GameTracker : MonoBehaviour {
         gameData.SaveOrders(TradeOrder_Manager.Instance.GetAvailable(), TradeOrder_Manager.Instance.GetActive(), TradeOrder_Manager.Instance.GetCompleted());
 
         gameData.SaveNanoBuilder(GameMaster.Instance.theHero.nanoBuilder);
+
+        // Save all Available missions
+
+        gameData.CopyMissions(Mission_Manager.Instance.GetAvailable());
 
         bf.Serialize(file, gameData);
 
@@ -113,8 +142,25 @@ public class GameTracker : MonoBehaviour {
             // Load the Trade Orders
             TradeOrder_Manager.Instance.LoadOrders(gameData.availableOrders, gameData.activeOrders, gameData.completedOrders);
 
+            // Load the Missions
+            foreach (string id in gameData.savedMissions.Keys)
+            {
+                if (id != "Active")
+                {
+                    // add it to list of available missions
+                    Mission_Manager.Instance.LoadAvailableMissions(gameData.savedMissions[id]);
+                }
+                else
+                {
+                    // add active mission
+                    Mission_Manager.Instance.LoadActiveMission(gameData.savedMissions[id]);
+                }
+            }
+     
+            //Mission_Manager.Instance.LoadMissions(gameData.availableMissions, gameData.activeMission);
+
             // If all was succesful we should load the Ship scene
-            GameMaster.Instance.RestartToShip();
+            GameMaster.Instance.SavedGameLoadShip();
 
             Debug.Log("TRACKER: Data Loaded Succesfully!");
         }
@@ -145,6 +191,12 @@ public class GameData
 
     // Nanobuilder:
     public NanoBuilder savedNanoBuilder { get; protected set; }
+
+    // Missions:
+    //public List<Mission> availableMissions { get; protected set; }
+    //public Mission activeMission { get; protected set; }
+
+    public Dictionary<string, Mission> savedMissions { get; protected set; }
 
     public GameData()
     {
@@ -189,5 +241,34 @@ public class GameData
     public void SaveNanoBuilder(NanoBuilder builder)
     {
         savedNanoBuilder = builder;
+    }
+
+    //public void SaveMissions(List<Mission> available, Mission active)
+    //{
+    //    availableMissions = new List<Mission>();
+    //    activeMission = new Mission();
+
+    //    availableMissions = available;
+    //    activeMission = active;
+    //}
+
+    //public void SaveMission (string id, Mission mission)
+    //{
+    //    if (savedMissions == null)
+    //    {
+    //        savedMissions = new Dictionary<string, Mission>();
+    //    }
+
+    //    if (!savedMissions.ContainsKey(id))
+    //    {
+    //        savedMissions.Add(id, mission);
+    //    }
+    //}
+
+    public void CopyMissions(Dictionary<string, Mission> available)
+    {
+        savedMissions = new Dictionary<string, Mission>();
+
+        savedMissions = available;
     }
 }

@@ -24,16 +24,16 @@ public class UI_Manager : MonoBehaviour
 
     public Text days;
 
-    // MISSIONS:
-    Dictionary<int, GameObject> loadedMissionsMap = new Dictionary<int, GameObject>();
-    public GameObject availableMissions_panel, activeMissions_panel, completeMissions_panel, missionInfo;
-    public Text missionName, missionNameDefault, missionClient, missionTime, missionResource, missionAmount;
+    // Orders:
+    Dictionary<int, GameObject> loadedOrdersMap = new Dictionary<int, GameObject>();
+    public GameObject availableOrders_panel, activeOrders_panel, completeOrders_panel, orderInfo;
+    public Text orderName, orderNameDefault, orderClient, orderTime, orderResource, orderAmount;
 
     // MAIN MENU PANELS
     public GameObject mainMenuPanel, charCreationPanel;
 
     // (CENTRAL LEVEL) MAIN UI PANELS
-    public GameObject characterPanel, missionsPanel, resoucesPanel, bpPanel;
+    public GameObject characterPanel, OrdersPanel, resoucesPanel, bpPanel;
     GameObject currActivePanel;
 
     // Hero Character Info
@@ -134,7 +134,7 @@ public class UI_Manager : MonoBehaviour
     public void InventoryReady()
     {
         // Load the Ship level
-        GameMaster.Instance.RestartToShip();
+        GameMaster.Instance.NewGameLoadShip();
     }
 
     public void DisplayVictoryPanel()
@@ -154,7 +154,7 @@ public class UI_Manager : MonoBehaviour
     // Load Scenes:
     public void ReturnToShip()
     {
-        GameMaster.Instance.RestartToShip();
+        GameMaster.Instance.NewGameLoadShip();
     }
 
     public void GoToBlueprintsScene()
@@ -173,70 +173,70 @@ public class UI_Manager : MonoBehaviour
     }
 
 
-    // Trade Orders / Missions
+    // Trade Orders / Orders
 
-    public void AddAvailableMission(int id, string name, int timeLeft)
+    public void AddAvailableOrder(int id, string name, int timeLeft)
     {
  
-        if (!loadedMissionsMap.ContainsKey(id))
+        if (!loadedOrdersMap.ContainsKey(id))
         {
             // Get the Button prefab from the Pool ...
-            GameObject mission = ObjectPool.instance.GetObjectForType("Mission", true, Vector3.zero);
+            GameObject order = ObjectPool.instance.GetObjectForType("Trade Order", true, Vector3.zero);
 
         //Parent it to the Builder's transform ...
-        mission.transform.SetParent(availableMissions_panel.transform);
+        order.transform.SetParent(availableOrders_panel.transform);
 
         // Add an onClick listener to this button, to allow it to callback Select Blueprint with its corresponding BP name...
-        mission.GetComponent<Button>().onClick.AddListener(() => { TradeOrder_Manager.Instance.SelectTradeOrderFromUI(id); });
+        order.GetComponent<Button>().onClick.AddListener(() => { TradeOrder_Manager.Instance.SelectTradeOrderFromUI(id); });
 
         // ... and fill both its Text children...
 
         // ... first the Name
-        mission.GetComponentsInChildren<Text>()[0].text = timeLeft.ToString();
+        order.GetComponentsInChildren<Text>()[0].text = timeLeft.ToString();
 
         // ... then the Time Left.
-        mission.GetComponentsInChildren<Text>()[1].text =  name;
+        order.GetComponentsInChildren<Text>()[1].text =  name;
 
 
             // To easily find which is which for removal or later loading them again, add each Button to a Dictionary<string, GameObject>
-            loadedMissionsMap.Add(id, mission);
+            loadedOrdersMap.Add(id, order);
         }
     }
 
-    public void AddToActiveMissions(int id)
+    public void AddToActiveOrders(int id)
     {
-        // All we have to do here is find the mission from available missions and set its parent to the available missions panel
-        if (loadedMissionsMap.ContainsKey(id))
+        // All we have to do here is find the mission from available Orders and set its parent to the available Orders panel
+        if (loadedOrdersMap.ContainsKey(id))
         {
-            loadedMissionsMap[id].transform.SetParent(activeMissions_panel.transform);
+            loadedOrdersMap[id].transform.SetParent(activeOrders_panel.transform);
         }
     }
 
-    public void DisplayMissions()
+    public void DisplayOrders()
     {
         TradeOrder_Manager.Instance.DisplayOrders();
     }
 
-    public void DisplayMissionInfo(string mName, string mClient, string mTimeLimit, string reqResource, string reqAmmnt)
+    public void DisplayOrderInfo(string mName, string mClient, string mTimeLimit, string reqResource, string reqAmmnt)
     {
-        if (missionNameDefault.gameObject.activeSelf)
+        if (orderNameDefault.gameObject.activeSelf)
         {
-            missionNameDefault.gameObject.SetActive(false);
-            missionInfo.gameObject.SetActive(true);
+            orderNameDefault.gameObject.SetActive(false);
+            orderInfo.gameObject.SetActive(true);
         }
-        missionName.text = mName;
-        missionClient.text = mClient;
-        missionTime.text = mTimeLimit;
-        missionResource.text = reqResource;
-        missionAmount.text = reqAmmnt;
+        orderName.text = mName;
+        orderClient.text = mClient;
+        orderTime.text = mTimeLimit;
+        orderResource.text = reqResource;
+        orderAmount.text = reqAmmnt;
     }
 
-    public void ClearMissionInfo()
+    public void ClearOrderInfo()
     {
-        if (!missionNameDefault.gameObject.activeSelf)
+        if (!orderNameDefault.gameObject.activeSelf)
         {
-            missionNameDefault.gameObject.SetActive(true);
-            missionInfo.SetActive(false);
+            orderNameDefault.gameObject.SetActive(true);
+            orderInfo.SetActive(false);
 
         }
 
@@ -273,21 +273,21 @@ public class UI_Manager : MonoBehaviour
         }
     }
 
-    public void DisplayMissionsPanel()
+    public void DisplayOrdersPanel()
     {
-        if (missionsPanel.activeSelf == false)
+        if (OrdersPanel.activeSelf == false)
         {
             // Deactivate curr active panel...
             DeactivateCurrActivePanel();
 
-            // ... activate Missions Panel ...
-            missionsPanel.SetActive(true);
+            // ... activate Orders Panel ...
+            OrdersPanel.SetActive(true);
 
-            // ... show available missions,
-            DisplayMissions();
+            // ... show available Orders,
+            DisplayOrders();
 
             // and set it as current active.
-            currActivePanel = missionsPanel;
+            currActivePanel = OrdersPanel;
         }
     }
 
@@ -368,11 +368,11 @@ public class UI_Manager : MonoBehaviour
         // Deactivate curr active panel...
         if (currActivePanel != null)
         {
-            // If the current panel was the Missions panel...
-            if (currActivePanel == missionsPanel)
+            // If the current panel was the Orders panel...
+            if (currActivePanel == OrdersPanel)
             {
                 // Clear its info before deactivating.
-                ClearMissionInfo();
+                ClearOrderInfo();
                 
             }
 
