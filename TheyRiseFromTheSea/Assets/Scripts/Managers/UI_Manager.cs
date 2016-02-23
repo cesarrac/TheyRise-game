@@ -33,12 +33,19 @@ public class UI_Manager : MonoBehaviour
     public GameObject mainMenuPanel, charCreationPanel;
 
     // (CENTRAL LEVEL) MAIN UI PANELS
-    public GameObject characterPanel, OrdersPanel, resoucesPanel, bpPanel;
+    public GameObject characterPanel, ordersPanel, resoucesPanel, bpPanel, missionsPanel;
     GameObject currActivePanel;
 
     // Hero Character Info
     public Text heroName;
     bool nameIsDisplayed = false;
+
+    // MISSIONS:
+    public Text m1Name, m1Desc, m1Cost;
+    public Text m2Name, m2Desc, m2Cost;
+    public Text m3Name, m3Desc, m3Cost;
+    public Text m4Name, m4Desc, m4Cost;
+    public Text m5Name, m5Desc, m5Cost;
 
     void Awake()
     {
@@ -59,6 +66,8 @@ public class UI_Manager : MonoBehaviour
     {
         days.text = GameTracker.Instance.Days.ToString();
     }
+
+    // *****************************************                             RESOURCES:
 
     public void DisplayTotalResources()
     {
@@ -85,7 +94,8 @@ public class UI_Manager : MonoBehaviour
         }
     }
 
-    // BLUEPRINT PANEL:
+    // *****************************************                             BLUEPRINTS:
+
     public void DisplayNanoBuilderMemory(int curMemory, int totalMemory)
     {
         cur_nano_memory.text = curMemory.ToString();
@@ -151,29 +161,9 @@ public class UI_Manager : MonoBehaviour
         victoryPanel.SetActive(false);
     }
 
-    // Load Scenes:
-    public void ReturnToShip()
-    {
-        GameMaster.Instance.NewGameLoadShip();
-    }
-
-    public void GoToBlueprintsScene()
-    {
-        GameMaster.Instance.LoadBlueprintsScene();
-    }
-
-    public void GoToLaunchScene()
-    {
-        GameMaster.Instance.LoadLauncherScene();
-    }
-
-    public void GoToEquipScene()
-    {
-        GameMaster.Instance.LoadEquipmentScreen();
-    }
 
 
-    // Trade Orders / Orders
+    // *****************************************                            TRADE ORDERS:
 
     public void AddAvailableOrder(int id, string name, int timeLeft)
     {
@@ -239,11 +229,120 @@ public class UI_Manager : MonoBehaviour
             orderInfo.SetActive(false);
 
         }
-
-        
     }
 
-    // Save & Load
+    // *****************************************                            MISSIONS:
+    public void SelectMission(int missionIndex)
+    {
+        Mission_Manager.Instance.SelectMission(missionIndex);
+    }
+    
+    public void AddMission(int num, string name, string desc, int cost, bool isCompleted = false)
+    {
+        string completed = "(Completed)";
+        if (num == 0)
+        {
+            if (isCompleted)
+            {
+                m1Name.text = name + " " + completed;
+            }
+            else
+            {
+                m1Name.text = name;
+            }
+
+            m1Desc.text = desc;
+            m1Cost.text = cost.ToString();
+        }
+        else if (num == 1)
+        {
+            if (isCompleted)
+            {
+                m2Name.text = name + " " + completed;
+            }
+            else
+            {
+                m2Name.text = name;
+            }
+
+            m2Desc.text = desc;
+            m2Cost.text = cost.ToString();
+        }
+        else if (num == 2)
+        {
+            if (isCompleted)
+            {
+                m3Name.text = name + " " + completed;
+            }
+            else
+            {
+                m3Name.text = name;
+            }
+
+            m3Desc.text = desc;
+            m3Cost.text = cost.ToString();
+        }
+        else if (num == 3)
+        {
+            if (isCompleted)
+            {
+                m4Name.text = name + " " + completed;
+            }
+            else
+            {
+                m4Name.text = name;
+            }
+
+            m4Desc.text = desc;
+            m4Cost.text = cost.ToString();
+        }
+        else
+        {
+            if (isCompleted)
+            {
+                m5Name.text = name + " " + completed;
+            }
+            else
+            {
+                m5Name.text = name;
+            }
+
+            m5Desc.text = desc;
+            m5Cost.text = cost.ToString();
+        }
+    }
+
+    public void DisplayMissions()
+    {
+        Mission_Manager.Instance.DisplayAvailableMissions();
+    }
+
+
+
+    // *****************************************                            LOAD SCENES:
+    public void ReturnToShip()
+    {
+        GameMaster.Instance.NewGameLoadShip();
+    }
+
+    public void GoToBlueprintsScene()
+    {
+        GameMaster.Instance.LoadBlueprintsScene();
+    }
+
+    public void GoToLaunchScene()
+    {
+        GameMaster.Instance.LoadLauncherScene();
+    }
+
+    public void GoToEquipScene()
+    {
+        GameMaster.Instance.LoadEquipmentScreen();
+    }
+
+
+    // *****************************************                            SAVE & LOAD GAME:
+
     public void Save()
     {
         GameTracker.Instance.Save();
@@ -254,7 +353,10 @@ public class UI_Manager : MonoBehaviour
         GameTracker.Instance.Load();
     }
 
-    // PANEL CONTROLS
+
+
+    // *****************************************                             PANEL CONTROLS:
+
     public void DisplayCharacterPanel()
     {
         if (characterPanel.activeSelf == false)
@@ -275,19 +377,19 @@ public class UI_Manager : MonoBehaviour
 
     public void DisplayOrdersPanel()
     {
-        if (OrdersPanel.activeSelf == false)
+        if (ordersPanel.activeSelf == false)
         {
             // Deactivate curr active panel...
             DeactivateCurrActivePanel();
 
             // ... activate Orders Panel ...
-            OrdersPanel.SetActive(true);
+            ordersPanel.SetActive(true);
 
             // ... show available Orders,
             DisplayOrders();
 
             // and set it as current active.
-            currActivePanel = OrdersPanel;
+            currActivePanel = ordersPanel;
         }
     }
 
@@ -363,13 +465,32 @@ public class UI_Manager : MonoBehaviour
         }
     }
 
+
+    public void DisplayMissionsPanel()
+    {
+        if (missionsPanel.activeSelf == false)
+        {
+            // Deactivate curr active panel...
+            DeactivateCurrActivePanel();
+
+            // ... activate Missions Panel ...
+            missionsPanel.SetActive(true);
+
+            // ... Display Missions...
+            DisplayMissions();
+
+            // and set it as current active.
+            currActivePanel = missionsPanel;
+        }
+    }
+
     void DeactivateCurrActivePanel()
     {
         // Deactivate curr active panel...
         if (currActivePanel != null)
         {
             // If the current panel was the Orders panel...
-            if (currActivePanel == OrdersPanel)
+            if (currActivePanel == ordersPanel)
             {
                 // Clear its info before deactivating.
                 ClearOrderInfo();
@@ -380,4 +501,6 @@ public class UI_Manager : MonoBehaviour
         }
             
     }
+
+
 }

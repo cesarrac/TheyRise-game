@@ -24,6 +24,8 @@ public class Mission_Manager : MonoBehaviour {
 
     Mission_Database mission_database;
 
+    int missionsCompletedCount = 0;
+
     void Awake()
     {
 
@@ -69,12 +71,6 @@ public class Mission_Manager : MonoBehaviour {
         return availableMissions_Map;
     }
 
-    //public void LoadMissions(List<Mission> available, Mission active)
-    //{
-    //    availableMissions = available;
-    //    activeMission = active;
-    //}
-
     public void LoadAvailableMissions(Mission newMission)
     {
         newMission.RegisterMissionCompleteCallback(CompleteMission);
@@ -90,7 +86,7 @@ public class Mission_Manager : MonoBehaviour {
 
     void CheckToGenerateNewMissions()
     {
-        if (availableMissions.Count < 1)
+        if (missionsCompletedCount >= 5 || missionsCompletedCount == 0)
         {
             GenerateNewSetOfMissions();
         }
@@ -121,20 +117,20 @@ public class Mission_Manager : MonoBehaviour {
         Mission newMission = new Mission();
 
         // 50 / 50 chance of generating a Science or a Survival mission
-        //int select = Random.Range(0, 4);
-        //if (select == 0 || select == 2)
-        //{
-        //    // Grab a Science mission from the database
-        //    newMission = mission_database.GetMission(MissionType.SCIENCE);
-        //}
-        //else
-        //{
-        //    // Get a Survival mission from the database
-        //    newMission = mission_database.GetMission(MissionType.SURVIVAL);
-        //}
+        int select = Random.Range(0, 4);
+        if (select == 0 || select == 2)
+        {
+            // Grab a Science mission from the database
+            newMission = mission_database.GetMission(MissionType.SCIENCE);
+        }
+        else
+        {
+            // Get a Survival mission from the database
+            newMission = mission_database.GetMission(MissionType.SURVIVAL);
+        }
 
-        // *** FOR TESTING I AM FORCING MISSIONS!
-        newMission = mission_database.GetMission(MissionType.SCIENCE);
+        //// *** FOR TESTING I AM FORCING MISSIONS!
+        //newMission = mission_database.GetMission(MissionType.SCIENCE);
 
         // Set its Complete Mission callback...
         newMission.RegisterMissionCompleteCallback(CompleteMission);
@@ -148,8 +144,20 @@ public class Mission_Manager : MonoBehaviour {
     // This can be called by a UI element that visually represents available missions as Buttons. When pressed it would become the active mission.
     public void SelectMission(int missionIndex)
     {
-        if (missionIndex > 0 && missionIndex < availableMissions.Count)
-            activeMission = availableMissions[missionIndex];
+        if (missionIndex >= 0 && missionIndex < availableMissions.Count)
+        {
+            // If the mission is NOT a completed mission, select it
+            if (!availableMissions[missionIndex].IsCompleted)
+            {
+                activeMission = availableMissions[missionIndex];
+
+                // Load the required Blueprint for this mission
+                BlueprintDatabase.Instance.InitRequiredBlueprint();
+
+                Debug.Log("ACTIVE MISSION IS: " + activeMission.MissionName);
+            }
+        }
+            
     }
 
     // Checks to verify if Mission has been completed:
@@ -159,9 +167,6 @@ public class Mission_Manager : MonoBehaviour {
         if (Ship_Inventory.Instance.CheckForSpecificResource(activeMission.ObjectiveResource, true) >= activeMission.ObjectiveAmnt)
         {
             activeMission.FlagAsCompleted();
-
-            // After flagging a completed mission, unlock the Transporter to allow Player to return to ship
-            Transporter_Handler.instance.LockControls(false);
         }
     }
 
@@ -170,9 +175,6 @@ public class Mission_Manager : MonoBehaviour {
         if (currStageCount >= activeMission.ObjectiveStages)
         {
             activeMission.FlagAsCompleted();
-
-            // After flagging a completed mission, unlock the Transporter to allow Player to return to ship
-            Transporter_Handler.instance.LockControls(false);
         }
     }
 
@@ -192,13 +194,28 @@ public class Mission_Manager : MonoBehaviour {
     {
         if (availableMissions.Contains(completed))
         {
-            availableMissions.Remove(completed);
+            //   availableMissions.Remove(completed);
+            missionsCompletedCount++;
         }
 
-        completedMissions.Add(completed);
+        //completedMissions.Add(completed);
 
         CheckToGenerateNewMissions();
     }
 
-   
+   // UI
+   public void DisplayAvailableMissions()
+    {
+        for (int i = 0; i < availableMissions.Count; i++)
+        {
+
+            // FIX ME: Right now the Mission class does not have an Energy Cost variable, I am hardcoding it here!
+            UI_Manager.Instance.AddMission(i, availableMissions[i].MissionName,
+                                              availableMissions[i].MissionName,
+                                              20,
+                                              availableMissions[i].IsCompleted);
+        }
+ 
+    }
+    
 }

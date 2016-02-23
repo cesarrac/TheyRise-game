@@ -59,8 +59,12 @@ public class NanoBuilder  {
 
     public void RemoveBlueprint(TileData.Types bpType)
     {
-        cur_memory += blueprintsMap[bpType].memoryCost;
-        blueprintsMap.Remove(bpType);
+        if (blueprintsMap.ContainsKey(bpType))
+        {
+            cur_memory += blueprintsMap[bpType].memoryCost;
+            blueprintsMap.Remove(bpType);
+        }
+   
 
         if (bpTypes.Contains(bpType))
             bpTypes.Remove(bpType);

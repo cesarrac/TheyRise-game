@@ -84,14 +84,19 @@ public class BlueprintDatabase : MonoBehaviour {
                 // ... Check if the new required Blueprint is NOT of the same type as the old ...
                 if (lastRequired.tileType != Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType)
                 {
-                    // ... If it's NOT of the same type, the last one needs to be removed...
+                    // ... If it's NOT of the same type, the last one needs to be removed from data...
                     hero_nanoBuilder.RemoveBlueprint(lastRequired.tileType);
+                    // ... and from UI...
+                    UI_Manager.Instance.RemoveBlueprintTextFromBuilder(lastRequired.buildingName);
 
                     // ... and the new one ADDED.
                     if (!hero_nanoBuilder.CheckForBlueprint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType))
                     {
                         hero_nanoBuilder.AddBluePrint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType,
                                                      blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.buildingName]);
+
+                        // ... and set it as the last required for next time.
+                        lastRequired = Mission_Manager.Instance.ActiveMission.RequiredBlueprint;
                     }
                 }
 
@@ -311,7 +316,6 @@ public class BlueprintDatabase : MonoBehaviour {
         }
     }
 
-
     void RemoveLoadedBlueprintFromNanoBuilder()
     {
         if (!hero_nanoBuilder.CheckForBlueprint(curSelectedBP.tileType))
@@ -333,6 +337,7 @@ public class BlueprintDatabase : MonoBehaviour {
 
         DisplayBuilderMemory();
     }
+
 
     void DisplayBuilderMemory()
     {
