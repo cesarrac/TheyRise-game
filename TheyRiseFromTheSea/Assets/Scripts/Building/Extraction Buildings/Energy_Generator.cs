@@ -30,7 +30,7 @@ public class Energy_Generator : MonoBehaviour {
 	void Start () {
 
 		if (buildingStatusIndicator == null)
-			buildingStatusIndicator = GetComponent<Building_ClickHandler> ().buildingStatusIndicator;
+			buildingStatusIndicator = GetComponent<Building_Handler> ().buildingStatusIndicator;
 
 
 		// In case Building UI is null

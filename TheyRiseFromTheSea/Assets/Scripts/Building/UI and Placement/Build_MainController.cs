@@ -9,7 +9,7 @@ class Build_MainController:MonoBehaviour
     int currNanoBotCount;
 
     ObjectPool objPool;
-    
+
     void Awake()
     {
         Instance = this;

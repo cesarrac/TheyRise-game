@@ -27,13 +27,14 @@ public class Enemy_Spawner : MonoBehaviour {
     //}
 
 
-    public void ReceiveSpawnCommand(int spawnCount, Enemy enemyToSpwn)
+    public void ReceiveSpawnCommand(int spawnCount, Enemy enemyToSpwn, Vector3 spawnPos)
     {
         totalToSpawn = spawnCount;
         curr_Enemy_toSpwn = enemyToSpwn;
 
         // Select a Spawn Position
-        spawnPosition = GetSpawnPosition();
+        //spawnPosition = GetSpawnPosition();
+        spawnPosition = spawnPos;
 
         StartCoroutine("Spawn");
     }
@@ -101,12 +102,12 @@ public class Enemy_Spawner : MonoBehaviour {
         yield break;
     }
 
-    Vector3 GetSpawnPosition()
-    {
-        int index = Random.Range(0, ResourceGrid.Grid.waterTilesArray.Length);
+    //Vector3 GetSpawnPosition()
+    //{
+    //    int index = Random.Range(0, ResourceGrid.Grid.waterTilesArray.Length);
 
-        return new Vector3(ResourceGrid.Grid.waterTilesArray[index].x, ResourceGrid.Grid.waterTilesArray[index].y, 0);
-    }
+    //    return new Vector3(ResourceGrid.Grid.waterTilesArray[index].x, ResourceGrid.Grid.waterTilesArray[index].y, 0);
+    //}
 
 
     public void StopSpawning()

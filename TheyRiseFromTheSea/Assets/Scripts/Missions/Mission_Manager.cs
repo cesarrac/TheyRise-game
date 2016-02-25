@@ -84,10 +84,11 @@ public class Mission_Manager : MonoBehaviour {
         Debug.Log("MISSION MANAGER: current active mission is " + activeMission.MissionName);
     }
 
-    void CheckToGenerateNewMissions()
+    public void CheckToGenerateNewMissions()
     {
         if (missionsCompletedCount >= 5 || missionsCompletedCount == 0)
         {
+            missionsCompletedCount = 0;
             GenerateNewSetOfMissions();
         }
     }
@@ -106,9 +107,9 @@ public class Mission_Manager : MonoBehaviour {
         // After generating them the set would be sent to UI Manager to display on map
 
         // FOR TESTING Im hardcoding the active mission
-        activeMission = availableMissions[0];
+        //activeMission = availableMissions[0];
 
-        Debug.Log("MISSION MANAGER: current active mission is " + activeMission.MissionName);
+        //Debug.Log("MISSION MANAGER: current active mission is " + activeMission.MissionName);
 
     }
 
@@ -200,7 +201,7 @@ public class Mission_Manager : MonoBehaviour {
 
         //completedMissions.Add(completed);
 
-        CheckToGenerateNewMissions();
+       // CheckToGenerateNewMissions();
     }
 
    // UI

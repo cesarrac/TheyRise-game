@@ -125,16 +125,16 @@ public class BlueprintDatabase : MonoBehaviour {
     {
         blueprintsMap = new Dictionary<string, Blueprint>
         {
-            {"Terraformer", new Blueprint("Terraformer", 0, 0, TileData.Types.terraformer, "Turns bad soil into good soil.") }, // < ---- Always include the Terraformer and no cost
-            {"Sniper Gun", new Blueprint("Sniper Gun", 3, 10, TileData.Types.sniper, "Long distance Target acquisition limited by slow firing rate.") },
-            {"Cannons", new Blueprint("Cannons", 3, 10, TileData.Types.cannons, "Short distance multi target artillery that delivers payload its surrounding areas.")},
-            {"Sea-Witch Crag", new Blueprint("Sea-Witch Crag", 3, 10, TileData.Types.seaWitch, "Manipulate genetic composition to slow, weaken, or shatter an enemy's defenses.") },
-            {"Extractor",  new Blueprint("Extractor", 3, 10, TileData.Types.extractor, "Dig and Mine ore and Dirt with this wonderful piece of machinery.") },
-            {"Desalination Pump", new Blueprint("Desalination Pump", 3, 10, TileData.Types.desalt_s, "Find water. Pump water!") },
-            {"Energy Generator", new Blueprint("Energy Generator", 3, 10, TileData.Types.generator, "Generate energy harnessed from ore with high content of precious metals.") },
-            {"Seaweed Farm",  new Blueprint("Seaweed Farm", 3, 10, TileData.Types.farm_s, "Plant seed, harvest food!")},
-            {"Storage", new Blueprint("Storage", 3, 10, TileData.Types.storage, "Store things and send them to ship automatically!") },
-            {"Machine Gun", new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun, "Short distance, fast firing rate, single target acquisition.") }
+            {"Terraformer", new Blueprint("Terraformer", 0, 0, TileData.Types.terraformer, BuildingType.UTILITY, "Turns bad soil into good soil.") }, // < ---- Always include the Terraformer and no cost
+            {"Sniper Gun", new Blueprint("Sniper Gun", 3, 10, TileData.Types.sniper, BuildingType.BATTLE, "Long distance Target acquisition limited by slow firing rate.") },
+            {"Cannons", new Blueprint("Cannons", 3, 10, TileData.Types.cannons, BuildingType.BATTLE, "Short distance multi target artillery that delivers payload its surrounding areas.")},
+            {"Sea-Witch Crag", new Blueprint("Sea-Witch Crag", 3, 10, TileData.Types.seaWitch, BuildingType.BATTLE, "Manipulate genetic composition to slow, weaken, or shatter an enemy's defenses.") },
+            {"Extractor",  new Blueprint("Extractor", 3, 10, TileData.Types.extractor,BuildingType.UTILITY, "Dig and Mine ore and Dirt with this wonderful piece of machinery.") },
+            {"Desalination Pump", new Blueprint("Desalination Pump", 3, 10, TileData.Types.desalt_s, BuildingType.UTILITY, "Find water. Pump water!") },
+            {"Energy Generator", new Blueprint("Energy Generator", 3, 10, TileData.Types.generator, BuildingType.UTILITY, "Generate energy harnessed from ore with high content of precious metals.") },
+            {"Seaweed Farm",  new Blueprint("Seaweed Farm", 3, 10, TileData.Types.farm_s, BuildingType.UTILITY, "Plant seed, harvest food!")},
+            {"Storage", new Blueprint("Storage", 3, 10, TileData.Types.storage, BuildingType.UTILITY, "Store things and send them to ship automatically!") },
+            {"Machine Gun", new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun, BuildingType.BATTLE, "Short distance, fast firing rate, single target acquisition.") }
         };
 
         InitExtractors();
@@ -205,6 +205,16 @@ public class BlueprintDatabase : MonoBehaviour {
         {
             return null;
         }
+    }
+
+    public BuildingType GetTowerType(string id)
+    {
+        if (blueprintsMap.ContainsKey(id))
+        {
+            return blueprintsMap[id].buildingType;
+        }
+        else
+            return BuildingType.NONE;
     }
 
     // LOADER

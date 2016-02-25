@@ -2,15 +2,25 @@
 using System.Collections.Generic;
 using System.Collections;
 
+
+// Type of Building: Battle or Utility
+public enum BuildingType
+{
+    BATTLE,
+    UTILITY,
+    NONE
+}
+
+
 // Blueprint Upgrade/Tier:
 // Tier 0 = no Upgrade
 // NEEDS: 
 // - The BuildingType
 // - According to the Building Type it would know to affect attack stats or extraction stats
 // - If Building Type = Battle, it would affect:
-    // - Attack stats: Rate of Fire, Damage, or Ammount of Targets (for AoE) and
-    // Tile stats like Shield and HP.
-    // - Extraction stats: Rate of Extraction or Extraction Ammount
+// - Attack stats: Rate of Fire, Damage, or Ammount of Targets (for AoE) and
+// Tile stats like Shield and HP.
+// - Extraction stats: Rate of Extraction or Extraction Ammount
 
 // - Battle Buildings AND Extraction Buildings can get their Tile Stats upgraded (HitPoints, Shield, Defence, Attack)
 // - Only Extraction Buildings can get Extraction Ammnt and Rate of Extraction upgraded
@@ -95,12 +105,7 @@ public class Blueprint_Upgrade
 [System.Serializable]
 public class Blueprint
 {
-    // Type of Building: Battle or Utility
-    public enum BuildingType
-    {
-        BATTLE,
-        UTILITY
-    }
+    public BuildingType buildingType { get; protected set; }
 
     public TileData.Types tileType { get; protected set; }
 
@@ -121,7 +126,7 @@ public class Blueprint
 
     public Blueprint() { }
 
-    public Blueprint (string Name, int PUCost, int NanoBotCost, TileData.Types _Ttype, string desc)
+    public Blueprint (string Name, int PUCost, int NanoBotCost, TileData.Types _Ttype, BuildingType tType, string desc)
     {
         buildingName = Name;
         memoryCost = PUCost;
@@ -129,18 +134,22 @@ public class Blueprint
         tileType = _Ttype;
         description = desc;
 
+        buildingType = tType;
+
         // Initialize this new Blueprint's Tier/Upgrade at 0 (no upgrade)
         bp_Tier = new Blueprint_Tier();
     }
 
     // For a Required Blueprint (like Terraformer, Generator, etc)
-    public Blueprint(string Name, TileData.Types _type)
+    public Blueprint(string Name, TileData.Types _type, BuildingType tType)
     {
         buildingName = Name;
         memoryCost = 0;
         nanoBotCost = 0;
         tileType = _type;
         description = " ";
+
+        buildingType = tType;
     }
 
     public void ChangePUCost(int change)

@@ -63,6 +63,7 @@ public class GameMaster : MonoBehaviour {
 
 	}
 
+
     public void CreateDefaultHero(string name)
     {
         CreateHero(name);
@@ -381,6 +382,18 @@ public class GameMaster : MonoBehaviour {
 	}
 
 
+    public void EndDay()
+    {
+        // Add a day to the Game Tracker
+        GameTracker.Instance.AddDay();
+
+        // Charge Daily Ship consumption and Regenerate the Ship's energy
+        Ship_Manager.Instance.ChargeDailyResources();
+
+        // Generate new Available Missions
+        Mission_Manager.Instance.CheckToGenerateNewMissions();
+    }
+
     // LEVEL LOADING:
 
     public void LaunchToPlanet()
@@ -401,10 +414,6 @@ public class GameMaster : MonoBehaviour {
 
         // load the ship level
         SceneManager.LoadScene("Level_CENTRAL");
-
-        // Add a day to the Game Tracker
-        GameTracker.Instance.AddDay();
-
 
     }
 
@@ -427,9 +436,10 @@ public class GameMaster : MonoBehaviour {
 	public void NewGameLoadShip()
 	{
 
-        // If it is NOT a loaded game, the Trade Orders and Missions need to Initialize
+        // If it is NOT a loaded game, the Trade Orders, Missions, and Ship Manager need to Initialize
         TradeOrder_Manager.Instance.InitFirstOrders();
         Mission_Manager.Instance.Init();
+        Ship_Manager.Instance.InitStartingValues();
 
         // load the ship level
         SceneManager.LoadScene("Level_CENTRAL");

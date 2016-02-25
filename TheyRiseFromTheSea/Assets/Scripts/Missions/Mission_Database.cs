@@ -13,20 +13,20 @@ public class Mission_Database  {
     {
         survivalMissions = new List<Mission>()
         {
-            //new Mission("Food Run", MissionType.SURVIVAL, new Blueprint("Seaweed Farm", TileData.Types.farm_s)),
-            new Mission("Water Run", MissionType.SURVIVAL, new Blueprint("Desalination Pump", TileData.Types.desalt_s), TileData.Types.water, 200)
+            new Mission("Food Run", MissionType.SURVIVAL, new Blueprint("Seaweed Farm", TileData.Types.farm_s, BuildingType.UTILITY)),
+            new Mission("Water Run", MissionType.SURVIVAL, new Blueprint("Desalination Pump", TileData.Types.desalt_s, BuildingType.UTILITY), TileData.Types.water, 200)
         };
 
         scienceMissions = new List<Mission>()
         {
-            //new Mission("Collect Rock Samples", MissionType.SCIENCE, new Blueprint("Extractor", TileData.Types.extractor)),
-            //new Mission("Scan Bio Samples", MissionType.SCIENCE, new Blueprint("Sea-Witch Crag", TileData.Types.desalt_s)),
-            new Mission("Reshape the Environment", MissionType.SCIENCE, new Blueprint("Terraformer", TileData.Types.terraformer), 3)
+            new Mission("Collect Rock Samples", MissionType.SCIENCE, new Blueprint("Extractor", TileData.Types.extractor, BuildingType.UTILITY)),
+            new Mission("Scan Bio Samples", MissionType.SCIENCE, new Blueprint("Sea-Witch Crag", TileData.Types.desalt_s, BuildingType.UTILITY)),
+            new Mission("Reshape the Environment", MissionType.SCIENCE, new Blueprint("Terraformer", TileData.Types.terraformer, BuildingType.UTILITY), 3)
         };
 
         encounterMissions = new List<Mission>()
         {
-            new Mission("Boss Fight!", MissionType.ENCOUNTER, new Blueprint("Machine Gun", TileData.Types.machine_gun))
+            new Mission("Boss Fight!", MissionType.ENCOUNTER, new Blueprint("Machine Gun", TileData.Types.machine_gun, BuildingType.BATTLE))
         };
 
     }

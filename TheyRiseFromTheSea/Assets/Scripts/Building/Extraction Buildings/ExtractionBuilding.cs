@@ -165,7 +165,7 @@ public class ExtractionBuilding : MonoBehaviour {
 
         resource_grid = ResourceGrid.Grid;
 
-        b_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
+        b_statusIndicator = GetComponent<Building_Handler>().buildingStatusIndicator;
 
     }
 
@@ -177,7 +177,7 @@ public class ExtractionBuilding : MonoBehaviour {
         myTransform = _trans;
 
         resource_grid = ResourceGrid.Grid;
-        b_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
+        b_statusIndicator = GetComponent<Building_Handler>().buildingStatusIndicator;
 
         requiredMaterial = requiredMat;
     }
@@ -190,7 +190,7 @@ public class ExtractionBuilding : MonoBehaviour {
         callback = _callback;
 
         resource_grid = ResourceGrid.Grid;
-        b_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
+        b_statusIndicator = GetComponent<Building_Handler>().buildingStatusIndicator;
 
         // all storage units require an empty material since they can take any
         requiredMaterial = TileData.Types.empty;

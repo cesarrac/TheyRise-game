@@ -6,9 +6,6 @@ using System;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
-
-
-
 public class GameTracker : MonoBehaviour {
 
     public static GameTracker Instance { get; protected set; }
@@ -16,11 +13,16 @@ public class GameTracker : MonoBehaviour {
     int days = 1;
     public int Days { get { return days; } set { days = Mathf.Clamp(value, 1, 10000); } }
 
+    public float planetAgressiveness { get; protected set; }
+
     void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+
+            planetAgressiveness = 0f;
+
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -51,6 +53,9 @@ public class GameTracker : MonoBehaviour {
             // ... Check if new trade orders are available.
             TradeOrder_Manager.Instance.CheckForNewTradeOrders();
         }
+
+        // Every time a Day goes by, raise planet agressiveness:
+        planetAgressiveness += 0.1f;
 
         // For an Unknown signal event (a boss fight or other story driven encounter) we could...
         // Option 1 every x amount of days have a random chance of getting an unknown signal event

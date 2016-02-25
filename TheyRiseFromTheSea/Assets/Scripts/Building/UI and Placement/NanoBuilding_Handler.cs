@@ -313,7 +313,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
     {
         // get me the cost of this building by finding its blueprint
         Blueprint bp = GetAvailableBlueprint(_type);
-        Building_ClickHandler b_Handler = building.GetComponent<Building_ClickHandler>();
+        Building_Handler b_Handler = building.GetComponent<Building_Handler>();
         if (bp != null)
             b_Handler.BreakBuilding(bp.nanoBotCost);
     }

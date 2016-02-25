@@ -35,6 +35,8 @@ public class TileData  {
 		empty,
 		water,
         food,
+        oxygen,
+        energy,
 		building,
 		capital,
 		farm_s,

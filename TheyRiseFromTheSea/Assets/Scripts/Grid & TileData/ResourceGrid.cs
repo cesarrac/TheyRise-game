@@ -97,6 +97,8 @@ public class ResourceGrid : MonoBehaviour{
 
     public System.Random pseudoRandom { get; set; }
 
+    Action<Transform> BattleTowerBuiltCB, UtilityTowerBuiltCB, BattleTowerRemoveCB, UtilityTowerRemoveCB;
+
     public int MaxSize
     {
         get
@@ -545,7 +547,7 @@ public class ResourceGrid : MonoBehaviour{
                     }
                     else
                     {
-                        spawnedTiles[tile.posX, tile.posY].GetComponent<Building_ClickHandler>().BreakBuilding(tile.tileStats.NanoBotCost); // Call Break Building from within the building's click handler
+                        spawnedTiles[tile.posX, tile.posY].GetComponent<Building_Handler>().BreakBuilding(tile.tileStats.NanoBotCost); // Call Break Building from within the building's click handler
 
                         //SwapTileType(tile.posX, tile.posY, TileData.Types.empty);   // to KILL TILE I just swap it to an empty! ;) < ----- NOPE! :P
 
@@ -716,6 +718,42 @@ public class ResourceGrid : MonoBehaviour{
 
     }
 
+    public void RegisterTowerBuildCB(Action<Transform> cbBattleAdd, Action<Transform> cbExtractionAdd, Action<Transform> cbBattleRemove, Action<Transform> cbUtilityRemove)
+    {
+        BattleTowerBuiltCB = cbBattleAdd;
+        UtilityTowerBuiltCB = cbExtractionAdd;
+
+        BattleTowerRemoveCB = cbBattleRemove;
+        UtilityTowerRemoveCB = cbUtilityRemove;
+    }
+
+    public void AddTowerBuiltForEnemyMaster(Transform towerTransform)
+    {
+        if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(transform.position).tileName) == BuildingType.UTILITY)
+        {
+            if (UtilityTowerBuiltCB != null)
+                UtilityTowerBuiltCB(towerTransform);
+        }
+        else if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(transform.position).tileName) == BuildingType.BATTLE)
+        {
+            if (BattleTowerBuiltCB != null)
+                BattleTowerBuiltCB(towerTransform);
+        }
+    }
+
+    public void RemoveTowerBuiltForEnemyMaster(Transform towerTransform)
+    {
+        if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(transform.position).tileName) == BuildingType.UTILITY)
+        {
+            if (UtilityTowerRemoveCB != null)
+                UtilityTowerRemoveCB(towerTransform);
+        }
+        else if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(transform.position).tileName) == BuildingType.BATTLE)
+        {
+            if (BattleTowerRemoveCB != null)
+                BattleTowerRemoveCB(towerTransform);
+        }
+    }
    
 
 	/// <summary>
@@ -843,9 +881,15 @@ public class ResourceGrid : MonoBehaviour{
             // Discover the tile to display it
             DiscoverTile(x, y, true, spriteWidth, spriteHeight);
 
-            // IF tile is a Building with an ENERGY COST, apply it to resources
-            //if (tiles[x,y].energyCost > 0){
-            //	playerResources.totalEnergyCost = playerResources.totalEnergyCost + tiles[x,y].energyCost;
+            //if (BlueprintDatabase.Instance.GetTowerType(bpName) == BuildingType.BATTLE)
+            //{
+            //    if (BattleTowerBuiltCB != null)
+            //        BattleTowerBuiltCB(spawnedTiles[x, y].transform);
+            //}
+            //else if (BlueprintDatabase.Instance.GetTowerType(bpName) == BuildingType.UTILITY)
+            //{
+            //    if (UtilityTowerBuiltCB != null)
+            //        UtilityTowerBuiltCB(spawnedTiles[x, y].transform);
             //}
 
         }
@@ -1037,14 +1081,17 @@ public class ResourceGrid : MonoBehaviour{
 
 	public void DiscoverTile(int x, int y, bool trueIfSwapping, int spriteWidth = 0, int spriteHeight = 0)
 	{
-		if (spawnedTiles [x, y] == null) { // if it's null it means it hasn't been spawned
+		if (spawnedTiles [x, y] == null) { // If it's null it means it hasn't been spawned
+
 			//Dont Spawn a tile if the type is Empty
 			// the space will still be walkable because it will still be mapped on the Node Graph
 			
-			if (tiles [x, y].tileType != TileData.Types.empty) {
+			if (tiles [x, y].tileType != TileData.Types.empty)
+            {
 				SpawnDiscoverTile (tiles [x, y].tileName, new Vector3 (x, y, 0.0f), tiles [x, y].tileType, spriteWidth, spriteHeight);
 				// set it so it knows it has been spawned
 				tiles [x, y].hasBeenSpawned = true;
+
 			}
 		} else { // it HAS been spawned
 			if (trueIfSwapping){
@@ -1052,7 +1099,7 @@ public class ResourceGrid : MonoBehaviour{
 				// before adding the new one
 				Destroy (spawnedTiles [x, y].gameObject);
 				SpawnDiscoverTile (tiles [x, y].tileName, new Vector3 (x, y, 0.0f), tiles [x, y].tileType, spriteWidth, spriteHeight);
-			}
+            }
 		}
 	}
 

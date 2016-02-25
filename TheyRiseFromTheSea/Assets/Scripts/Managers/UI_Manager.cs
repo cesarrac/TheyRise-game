@@ -67,6 +67,11 @@ public class UI_Manager : MonoBehaviour
         days.text = GameTracker.Instance.Days.ToString();
     }
 
+    public void EndDay()
+    {
+        GameMaster.Instance.EndDay();
+    }
+
     // *****************************************                             RESOURCES:
 
     public void DisplayTotalResources()

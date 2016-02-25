@@ -36,7 +36,7 @@ public class StagedProgress_Handler : MonoBehaviour {
     {
         instance = this;
 
-        build_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
+        build_statusIndicator = GetComponent<Building_Handler>().buildingStatusIndicator;
 
     }
 

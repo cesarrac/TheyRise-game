@@ -42,7 +42,7 @@ public class Tower_TargettingHandler : Unit_Base
 
     private bool statusIndicated = false;
 
-    Building_ClickHandler build_click_handler;
+    Building_Handler build_click_handler;
 
     Action<Unit_Base> CB_DoDamage;
 
@@ -76,7 +76,7 @@ public class Tower_TargettingHandler : Unit_Base
     void Start()
     {
 
-        build_click_handler = GetComponentInParent<Building_ClickHandler>();
+        build_click_handler = GetComponentInParent<Building_Handler>();
 
         stats.Init();
 
@@ -189,7 +189,7 @@ public class Tower_TargettingHandler : Unit_Base
         }
 
         // Wait for the Building to assemble, before allowing it to do anything
-        if (build_click_handler.state == Building_ClickHandler.State.READY)
+        if (build_click_handler.state == Building_Handler.State.READY)
         {
             MyStateManager(_state);
         }

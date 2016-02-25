@@ -11,6 +11,13 @@ public class Ship_Inventory : MonoBehaviour {
     public int waterStored { get; protected set; }
     public int oreStored { get; protected set; }
     public int foodStored { get; protected set; }
+    public int organicsStored { get; protected set; }
+
+    // Oxygen is NOT gathered on the planet, therefore it has no temporary storage
+    public int oxygenStored { get; protected set; }
+
+    // Same case with Energy
+    public int energyStored { get; protected set; }
 
     public int storageTotal { get; protected set; }
 
@@ -23,6 +30,7 @@ public class Ship_Inventory : MonoBehaviour {
     public int tempFood { get; protected set; }
     public int tempCommorOre { get; protected set; }
     public int tempEnrichedOre { get; protected set; }
+    public int tempOrganics { get; protected set; }
 
 
 
@@ -37,6 +45,7 @@ public class Ship_Inventory : MonoBehaviour {
     List<Tool> availableTools;
 
     Action missionCompletedCB;
+    Action dailyChargeFailCB, dailyChargeSuccessCB;
 
     void Awake()
     {
@@ -264,7 +273,7 @@ public class Ship_Inventory : MonoBehaviour {
     // If the above method returns true a button on the Trade Order UI will allow the player to complete the Order by...
 
     // ... giving their client the required Fabricated Goods ... 
-    public void DeliverGoods(Item good, int ammnt)
+    public void TakeGoods(Item good, int ammnt)
     {
         fabricatedGoodsMap[good] -= ammnt;
 
@@ -274,7 +283,7 @@ public class Ship_Inventory : MonoBehaviour {
         }
     }
     // ... or required Raw Resource.
-    public void DeliverResources(TileData.Types resource, int ammnt)
+    public void TakeResources(TileData.Types resource, int ammnt)
     {
         rawResourcesMap[resource] -= ammnt;
 
@@ -284,6 +293,115 @@ public class Ship_Inventory : MonoBehaviour {
         }
     }
 
+    public void RegisterConsumptionCallbacks(Action cbFail, Action cbSuccess)
+    {
+        if (dailyChargeSuccessCB == null)
+            dailyChargeSuccessCB = cbSuccess;
 
+        if (dailyChargeFailCB == null)
+            dailyChargeFailCB = cbFail;
+    }
+
+    // used by Ship Manager
+
+    public void ConsumeDailyResources(int waterAmmnt, int foodAmmnt, int oxygenAmmnt)
+    {
+        // if ALL 3 return true call the success callback,
+        // if NOT all 3 return true call fail callback
+
+        if (   
+                ConsumeDailyResource(TileData.Types.water, waterAmmnt) &&
+                ConsumeDailyResource(TileData.Types.water, foodAmmnt) &&
+                ConsumeDailyResource(TileData.Types.water, oxygenAmmnt)
+           )
+        {
+
+            // Call the succesful callback to tell the Ship Manager all is good
+            if (dailyChargeSuccessCB != null)
+                dailyChargeSuccessCB();
+        }
+        else
+        {
+            // Call the fail callback to tell the Ship Manager to go into Emergency state 
+            if (dailyChargeFailCB != null)
+                dailyChargeFailCB();
+        }
+
+    }
+    
+    // TODO: Consider making this a function return a bool so that we know if it succeeded or not
+    public bool ConsumeDailyResource(TileData.Types resource, int ammnt)
+    {
+        // If inventory contains this resource...
+        if (rawResourcesMap.ContainsKey(resource))
+        {
+            // ... and more than or equal the ammnt...
+            if (rawResourcesMap[resource] >= ammnt)
+            {
+                // subtract the ammnt from it.
+                rawResourcesMap[resource] -= ammnt;
+
+                CheckIfResourceAtZero(resource);
+
+                return true;
+            }
+            else
+            {
+                // Doesn't have enough of it in store!
+
+
+                return false;
+
+            }
+
+        }
+        else
+        {
+            // It has none of that resource in store!
+            // Call the fail callback to tell the Ship Manager to go into Emergency state 
+            if (dailyChargeFailCB != null)
+                dailyChargeFailCB();
+
+            return false;
+        }
+
+    }
+
+    /// <summary>
+    /// Consumes Energy if stored energy is more than or equal to cost. Returns true if it was succesful.
+    /// </summary>
+    /// <param name="cost"></param>
+    /// <returns></returns>
+    public bool ConsumeEnergy(int cost)
+    {
+        if (rawResourcesMap.ContainsKey(TileData.Types.energy))
+        {
+            if (rawResourcesMap[TileData.Types.energy] >= cost)
+            {
+                rawResourcesMap[TileData.Types.energy] -= cost;
+                return true;
+            }
+            else
+                return false;
+        }
+        else
+            return false;
+    }
+
+    public void RechargeEnergy(int startingEnergy)
+    {
+        if (rawResourcesMap.ContainsKey(TileData.Types.energy))
+        {
+            rawResourcesMap[TileData.Types.energy] = startingEnergy;
+        }
+    }
+
+    void CheckIfResourceAtZero(TileData.Types resource)
+    {
+        if (rawResourcesMap[resource] <= 0)
+        {
+            rawResourcesMap.Remove(resource);
+        }
+    }
 
 }

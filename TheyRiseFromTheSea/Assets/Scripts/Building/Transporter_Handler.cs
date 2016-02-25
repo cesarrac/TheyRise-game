@@ -26,7 +26,7 @@ public class Transporter_Handler : MonoBehaviour {
             //LockControls(true);
 
             // The PreFab for the Transporter only contains the Click Handler if it is on the Planet!
-            status_indicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
+            status_indicator = GetComponent<Building_Handler>().buildingStatusIndicator;
         }
     }
 

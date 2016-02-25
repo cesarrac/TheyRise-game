@@ -37,7 +37,7 @@ public class Terraformer_Handler : MonoBehaviour {
 	{
         instance = this;
 
-        build_statusIndicator = GetComponent<Building_ClickHandler>().buildingStatusIndicator;
+        build_statusIndicator = GetComponent<Building_Handler>().buildingStatusIndicator;
 
     }
 
@@ -111,7 +111,7 @@ public class Terraformer_Handler : MonoBehaviour {
             build_statusIndicator.CreateStatusMessage("Beginning terraforming stage " + _currStageCount, Color.black);
 
             // Tell the enemy spawner it can spawn now that the Terraformer is working
-            Enemy_Master.instance.SetCanSpawn();
+            //Enemy_Master.instance.StartMakingDecisions();
         }
 
 	}
