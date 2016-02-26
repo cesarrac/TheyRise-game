@@ -75,7 +75,7 @@ public class Enemy_Master : MonoBehaviour {
 
     int maxUnitsCap = 10; // max units the Enemy Master can spawn on one action
 
-    int spawnPointRegenRate = 25;
+    int spawnPointRegenRate = 50;
 
     void Awake()
     {
@@ -164,7 +164,7 @@ public class Enemy_Master : MonoBehaviour {
     {
         while (true)
         {
-            yield return new WaitForSeconds(30f);
+            yield return new WaitForSeconds(60f);
             StartDecisionMakingProcess();
             yield break;
         }
@@ -283,11 +283,11 @@ public class Enemy_Master : MonoBehaviour {
 
         Debug.Log("ENEMY MASTER: Active task is " + activeTask.taskType.ToString());
 
-        SelectWaveToSpawn();
+        SelectStrategy();
     }
 
     // Tasks now sorted and active task set, now decide what wave to spawn
-    void SelectWaveToSpawn()
+    void SelectStrategy()
     {
         // The Enemy Master uses Spawn Points as currency to purchase/spawn waves. If it currently has none, go straight to an Economic strategy
         if (spawnPoints <= 0)
@@ -303,7 +303,7 @@ public class Enemy_Master : MonoBehaviour {
             if (activeTask.taskType == EnemyTaskType.PLAYER)
             {
                 // Use Conservative or Rush strategies if criteria is met, if not go to Economic strategy
-                if (timeAtStartofDecision - timeAtStartOfLevel > 60)
+                if (timeAtStartofDecision - timeAtStartOfLevel > 120)
                 {
                     // more than a minute has passed, consider Rushing
                     if (spawnPoints >= (maxSpawnPoints / 2))
@@ -312,7 +312,7 @@ public class Enemy_Master : MonoBehaviour {
                         RushAggressiveStrategy();
 
                     }
-                    else if (spawnPoints >= (maxSpawnPoints / 4))
+                    else if (spawnPoints > (maxSpawnPoints / 4))
                     {
                         // Currently have more than or equal 1/4th of max spawn points, Rush Conservatively!
                         RushConservativeStrategy();
@@ -346,8 +346,10 @@ public class Enemy_Master : MonoBehaviour {
         StartWaitToAct();
     }
 
+    // **************************************************************   BASIC STRATEGIES:
     void EconomicStrategy()
     {
+        Debug.Log("MASTER: Implementing Economic Strategy!");
         SpawnPoints += spawnPointRegenRate;
     }
 
@@ -422,7 +424,28 @@ public class Enemy_Master : MonoBehaviour {
         {
             IssueSpawnCommand(spawnPoints / heavyCost, "Slimer_Heavy_noAggro");
         }
-    
+
+        // Then as a second spawn command, buy as many Mid units as you can without exceeding max Units
+        int midCost = Enemy_Database.Instance.GetEnemy("Slimer_Mid_noAggro").spawnCost;
+        if (spawnPoints < midCost)
+        {
+            return;
+        }
+        else
+        {
+            if (spawnPoints / midCost > maxUnitsCap - CurrUnitsOnField)
+            {
+                Debug.Log("MASTER: Implementing RushAggressiveStrategy Second Spawn Command!");
+                StartCoroutine(WaitForSecondSpawnCommand(maxUnitsCap - CurrUnitsOnField, "Slimer_Mid_noAggro"));
+            }
+            else
+            {
+                Debug.Log("MASTER: Implementing RushAggressiveStrategy Second Spawn Command!");
+                StartCoroutine(WaitForSecondSpawnCommand(spawnPoints / midCost - CurrUnitsOnField, "Slimer_Mid_noAggro"));
+            }
+        }
+      
+
 
     }
 
@@ -442,6 +465,20 @@ public class Enemy_Master : MonoBehaviour {
         else
         {
             IssueSpawnCommand(spawnPoints / weakCost, "Slimer_Weak_noAggro");
+        }
+    }
+
+    IEnumerator WaitForSecondSpawnCommand(int total, string id)
+    {
+        while (true)
+        {
+            if (!Enemy_Spawner.instance.isSpawning)
+            {
+                IssueSpawnCommand(total, id);
+                yield break;
+            }
+
+            yield return null;
         }
     }
 
@@ -501,8 +538,18 @@ public class Enemy_Master : MonoBehaviour {
         return new Vector3(ResourceGrid.Grid.waterTilesArray[index].x, ResourceGrid.Grid.waterTilesArray[index].y, 0);
     }
 
+    public bool CheckSpawnPointsHasCost(int cost)
+    {
+        if (spawnPoints >= cost)
+            return true;
+        else
+            return false;
+    }
 
-
+    void ChargeSpawnPoints(int cost)
+    {
+        spawnPoints -= cost;
+    }
 
     //public void StartMakingDecisions()
     //{
@@ -681,7 +728,6 @@ public class Enemy_Master : MonoBehaviour {
 
     void IssueSpawnCommand(int total, string key)
     {
-
         // Now once Enemies are contructed we would pass them to a Spawner script that would have them ready to spawn them when necessary.
         // The Spawner would just spawn a default enemy prefab with the right components attached. Then it would take this Enemy class to find
         // its correct Sprite, assign it, then give its corresponding components the Attack Stats and Movement Stats.
@@ -693,6 +739,11 @@ public class Enemy_Master : MonoBehaviour {
         {
             // ... an enemy was returned. Now Send a Spawn command with this enemy and the total number we want to spawn.
             Enemy_Spawner.instance.ReceiveSpawnCommand(total, e, spawnPosition);
+
+            // charge the spawn points the cost to spawn that type of enemy
+            ChargeSpawnPoints(e.spawnCost * total);
+
+            CurrUnitsOnField += total;
         }
         else
         {

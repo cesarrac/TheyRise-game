@@ -98,9 +98,9 @@ public class GameMaster : MonoBehaviour {
 
     // HERO & ITEMS LOADING:
     void OnLevelWasLoaded (int level){
-		if (level == 1) {
-			// When we go into a "level" initialize the supplies bought at the store
-			InitializeInventoryAndSupplies();
+		if (level == SceneManager.GetSceneByName("Level_CENTRAL").buildIndex) {
+			//// When we go into a "level" initialize the supplies bought at the store
+			//InitializeInventoryAndSupplies();
 
 			// UnPause the game in case it was paused for mission failed
 			if (Time.timeScale == 0)
@@ -382,12 +382,12 @@ public class GameMaster : MonoBehaviour {
 
 
 
-	void InitializeInventoryAndSupplies()
-	{
-		Debug.Log ("Initializing a level! Ore: " + inventory.ore + " Food: " + inventory.food + " Credits: " + curCredits);
-		Player_ResourceManager resourceMan = GameObject.FindGameObjectWithTag("Capital").GetComponent<Player_ResourceManager>();
-		resourceMan.InitStartingResources (inventory.food, curCredits, 10000);
-	}
+	//void InitializeInventoryAndSupplies()
+	//{
+	//	Debug.Log ("Initializing a level! Ore: " + inventory.ore + " Food: " + inventory.food + " Credits: " + curCredits);
+	//	Player_ResourceManager resourceMan = GameObject.FindGameObjectWithTag("Capital").GetComponent<Player_ResourceManager>();
+	//	resourceMan.InitStartingResources (inventory.food, curCredits, 10000);
+	//}
 
 
     public void EndDay()
@@ -485,9 +485,20 @@ public class GameMaster : MonoBehaviour {
 
     void Update()
 	{
-		
-        //if (Application.loadedLevel == 1)
-        //    CheckIfBuilding(); // this is so Player can know if they can fire or not
+
+        // QUIT:
+        if (Input.GetKey("escape"))
+        {
+            if (MasterState_Manager.Instance != null)
+            {
+                MasterState_Manager.Instance.QuitGame();
+            }
+            else
+            {
+                Application.Quit();
+            }
+       
+        }
     }
 
 	void CheckIfBuilding()

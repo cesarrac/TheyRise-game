@@ -23,7 +23,7 @@ public class Items_Database : MonoBehaviour {
         // FIX THIS! This data should be coming from one giant database of Weapons, Armor and Tools!!!
         weaponsMap = new Dictionary<string, Weapon>
         {
-            {"Kinetic Rifle", new Weapon("Kinetic Rifle", 0, 12, 2f, 2, 50, "explosive bullet") },
+            {"Kinetic Rifle", new Weapon("Kinetic Rifle", 0, 12, 1.5f, 5, 50, "explosive bullet") },
             {"Freeze Gun", new Weapon("Freeze Gun", 0.2f, 100, 3f, 0, 30, "ice bullet")}
         };
 
@@ -33,7 +33,7 @@ public class Items_Database : MonoBehaviour {
     {
         armorMap = new Dictionary<string, Armor>
         {
-            {"Vacumn Suit",  new Armor("Vacumn Suit", 2, 0)}
+            {"Vacumn Suit",  new Armor("Vacumn Suit", 5, 0)}
         };
     }
 

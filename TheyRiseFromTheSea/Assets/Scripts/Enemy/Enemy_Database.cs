@@ -27,27 +27,27 @@ public class Enemy_Database : MonoBehaviour {
 
         // FIX THIS! For now I'm going to initialize the stats within this script but it would be nice to get these values from an external database!
         UnitStats attk_weak = new UnitStats();
-        attk_weak.maxHP = 24f + (24f * planetAgressiveness);
+        attk_weak.maxHP = 12f + (12f * planetAgressiveness);
         attk_weak.startAttack = 2;
-        attk_weak.startDamage = 5 + planetAgressiveness;
+        attk_weak.startDamage = 3 + planetAgressiveness;
         attk_weak.startDefence = 1 + planetAgressiveness;
         attk_weak.startShield = 0;
         attk_weak.startSpecialDmg = 0;
         attk_weak.startRate = 0.6f;
 
         UnitStats attk_mid = new UnitStats();
-        attk_mid.maxHP = 42f + (42f * planetAgressiveness);
+        attk_mid.maxHP = 24f + (24f * planetAgressiveness);
         attk_mid.startAttack = 5;
-        attk_mid.startDamage = 8 + planetAgressiveness;
+        attk_mid.startDamage = 5 + planetAgressiveness;
         attk_mid.startDefence = 3 + planetAgressiveness;
         attk_mid.startShield = 0;
         attk_mid.startSpecialDmg = 0;
         attk_mid.startRate = 0.8f;
 
         UnitStats attk_heavy = new UnitStats();
-        attk_heavy.maxHP = 66f + (66f * planetAgressiveness);
+        attk_heavy.maxHP = 48f + (48f * planetAgressiveness);
         attk_heavy.startAttack = 5;
-        attk_heavy.startDamage = 10 + planetAgressiveness;
+        attk_heavy.startDamage = 8 + planetAgressiveness;
         attk_heavy.startDefence = 1 + planetAgressiveness;
         attk_heavy.startShield = 0;
         attk_heavy.startSpecialDmg = 0;

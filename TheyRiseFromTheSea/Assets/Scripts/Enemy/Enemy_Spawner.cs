@@ -60,9 +60,6 @@ public class Enemy_Spawner : MonoBehaviour {
         {
             if (curr_Enemy_toSpwn != null)
             {
-                //// Select a Spawn Position
-                //spawnPosition = GetSpawnPosition();
-
                 GameObject e = ObjectPool.instance.GetObjectForType(curr_Enemy_toSpwn.name, true, spawnPosition);
 
                 if (e != null)

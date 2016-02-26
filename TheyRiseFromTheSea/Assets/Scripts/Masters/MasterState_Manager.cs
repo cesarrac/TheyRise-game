@@ -56,9 +56,7 @@ public class MasterState_Manager : MonoBehaviour {
 
 	void Update ()
 	{
-		// QUIT:
-		if (Input.GetKey ("escape"))
-			mState = MasterState.QUIT;
+		
 
 		MasterStateMachine (mState);
 	}
@@ -175,4 +173,8 @@ public class MasterState_Manager : MonoBehaviour {
         game_master.NewCharacterScreen();
     }
 
+    public void QuitGame()
+    {
+      mState = MasterState.QUIT;
+    }
 }
