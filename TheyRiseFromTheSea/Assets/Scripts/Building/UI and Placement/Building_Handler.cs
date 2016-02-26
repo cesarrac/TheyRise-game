@@ -115,7 +115,7 @@ public class Building_Handler : MonoBehaviour {
 	void Start () {
 
         // get my tiletype
-        Debug.Log("CLICK HANDLER: pos = " + transform.position);
+        //Debug.Log("CLICK HANDLER: pos = " + transform.position);
         myTileType = resourceGrid.TileFromWorldPoint(transform.position).tileType;
 
         // Register as Built for the Enemy Master to know

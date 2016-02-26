@@ -211,7 +211,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
         }
 
         DisplaySelectedBlueprintName(selectedBluePrint.buildingName);
-        Debug.Log("NANO Buid: Selected Blueprint name is " + selectedBluePrint.buildingName);
+       // Debug.Log("NANO Buid: Selected Blueprint name is " + selectedBluePrint.buildingName);
     }
 
     /// <summary>
@@ -238,14 +238,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
             case TileData.Types.empty:
                 Debug.Log("NANO B: Building on empty!");
-                if (selectedBluePrint.tileType != TileData.Types.terraformer)
-                {
-                    Build(selectedBluePrint);
-                }
-                else
-                {
-                    BuildTerraformer();
-                }
+                Build(selectedBluePrint);
                 break;
 
             case TileData.Types.water:
@@ -258,7 +251,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
                 break;
         }
 
-        Debug.Log("Nanobots left: " + nanoBots);
+       // Debug.Log("Nanobots left: " + nanoBots);
     }
 
     void Build(Blueprint bp)
@@ -275,7 +268,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
             }
             else
             {
-                status_indicator.CreateStatusMessage("Out of Bots!");
+                //status_indicator.CreateStatusMessage("Out of Bots!");
                 Sound_Manager.Instance.PlaySound("Empty");
 
             }
@@ -283,7 +276,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
         }
         else
         {
-            status_indicator.CreateStatusMessage("Can't build that yet!");
+            //status_indicator.CreateStatusMessage("Can't build that yet!");
             Debug.Log("BP = " +  bp);
         }
            

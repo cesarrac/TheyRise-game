@@ -612,7 +612,7 @@ public class ResourceGrid : MonoBehaviour{
         {
             // mine it
             tiles[x, y].maxResourceQuantity -= ammnt;
-            Debug.Log(tiles[x, y].tileType + " extracted by " + ammnt + " out of " + tiles[x, y].maxResourceQuantity);
+            //Debug.Log(tiles[x, y].tileType + " extracted by " + ammnt + " out of " + tiles[x, y].maxResourceQuantity);
 
             if (tiles[x, y].maxResourceQuantity > 0)
             {
@@ -729,13 +729,16 @@ public class ResourceGrid : MonoBehaviour{
 
     public void AddTowerBuiltForEnemyMaster(Transform towerTransform)
     {
-        if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(transform.position).tileName) == BuildingType.UTILITY)
+
+        if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(towerTransform.position).tileName) == BuildingType.UTILITY)
         {
+            Debug.Log("GRID: Registering utility tower built!");
             if (UtilityTowerBuiltCB != null)
                 UtilityTowerBuiltCB(towerTransform);
         }
-        else if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(transform.position).tileName) == BuildingType.BATTLE)
+        else if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(towerTransform.position).tileName) == BuildingType.BATTLE)
         {
+            Debug.Log("GRID: Registering battle tower built!");
             if (BattleTowerBuiltCB != null)
                 BattleTowerBuiltCB(towerTransform);
         }

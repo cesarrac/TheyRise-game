@@ -71,9 +71,9 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 	// The GUN EFFECT:
 	void DamageEnemy()
 	{
-		Debug.Log ("GOT AN ENEMY TO DAMAGE");
+		//Debug.Log ("GOT AN ENEMY TO DAMAGE");
 		if (targetHit.GetComponent<Unit_Base> ()) {
-			Debug.Log("ENEMY UNIT BASE SCRIPT FOUND!");
+			//Debug.Log("ENEMY UNIT BASE SCRIPT FOUND!");
 			Unit_Base enemy = targetHit.GetComponent<Unit_Base> ();
 
 			if (enemy.stats.curHP > 0){

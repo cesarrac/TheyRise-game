@@ -48,7 +48,8 @@ public class Bullet_Tower : MonoBehaviour {
 
 
             // Pool the Bullet Trail that is a child of this gameObject (They need to be pooled separately)
-            ObjectPool.instance.PoolObject(bulletTrail);
+            if (bulletTrail != null)
+                ObjectPool.instance.PoolObject(bulletTrail);
 
             // ... and finally Pool this bullet gameObject.
             ObjectPool.instance.PoolObject(gameObject);

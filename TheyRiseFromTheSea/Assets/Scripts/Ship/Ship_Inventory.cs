@@ -81,7 +81,7 @@ public class Ship_Inventory : MonoBehaviour {
     /// <param name="ammnt"></param>
     public void ReceiveTemporaryResources(TileData.Types rType, int ammnt)
     {
-        Debug.Log(ammnt + " of " + rType + " beamed to the SHIP!");
+       // Debug.Log(ammnt + " of " + rType + " beamed to the SHIP!");
         switch (rType)
         {
             case TileData.Types.water:
@@ -132,7 +132,7 @@ public class Ship_Inventory : MonoBehaviour {
     {
         commonOreStored += common;
         enrichedOreStored += enriched;
-        Debug.Log("Ore has been split! Common = " + commonOreStored + " Enriched = " + enrichedOreStored);
+       // Debug.Log("Ore has been split! Common = " + commonOreStored + " Enriched = " + enrichedOreStored);
     }
 
     public int CheckForSpecificResource(TileData.Types resource, bool checkTemp = false)

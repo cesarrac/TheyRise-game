@@ -61,6 +61,8 @@ public class Enemy_PathHandler : MonoBehaviour
 
     float threshold;
 
+    Func<Transform> GetTargetCB;
+
 
     bool isFullyStopped = false; // < ---- flag sets to true when Full Stop is called
     bool isInRange = false;
@@ -88,19 +90,15 @@ public class Enemy_PathHandler : MonoBehaviour
 
     }
 
-    public void InitTarget()
-    {
-        target = GetMainTarget();
-        StartCoroutine("RequestPath");
-
-        // Set my Attack Handler's main target
-        GetComponent<Enemy_AttackHandler>().SetMainTarget(target);
-    }
-
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         enemy_AttackHandler = GetComponent<Enemy_AttackHandler>();
+    }
+
+    public void RegisterGetTargetCB(Func<Transform> cb)
+    {
+        GetTargetCB = cb;
     }
 
     void Start()
@@ -113,36 +111,35 @@ public class Enemy_PathHandler : MonoBehaviour
 
             InitTarget();
         }
-
-    
-            
-
         _state = State.GETTING_PATH;
 
         //StartCoroutine("DebugMyStatus");
     }
 
-    Transform GetMainTarget()
+    public void InitTarget()
     {
-        if (chasesPlayer)
+
+        if (GetTargetCB != null)
         {
-            if (GameObject.FindGameObjectWithTag("Citizen") != null)
-                return GameObject.FindGameObjectWithTag("Citizen").transform;
-            else
-                return null;
+            target = GetTargetCB();
         }
         else
         {
-            if (alternateMainTarget == null)
-            {
-                return Terraformer_Handler.instance.gameObject.transform;
-            }
-            else
-            {
-                return alternateMainTarget;
-            }
-    
+            target = FindPlayerTarget();
         }
+
+
+        StartCoroutine("RequestPath");
+
+        // Set my Attack Handler's main target
+        GetComponent<Enemy_AttackHandler>().SetMainTarget(target);
+    }
+
+
+    // This is a backup in case the path handler fails to get a Target from the Enemy Master (this will always return the player as the target!)
+    Transform FindPlayerTarget()
+    {
+        return GameObject.FindGameObjectWithTag("Citizen").transform;
     }
 
     void Update()
@@ -334,13 +331,13 @@ public class Enemy_PathHandler : MonoBehaviour
                     // Reset the x
                     currPathPosition.x = target.position.x;
                     currPathPosition.y = currPathPosition.y - 3;
-                    Debug.Log("ENEMY: Trying to Go UNDER the target.");
+                   // Debug.Log("ENEMY: Trying to Go UNDER the target.");
 
                     // If STILL unwalkable go OVER it
                     if (!grid.NodeFromWorldPoint(currPathPosition).isWalkable)
                     {
                         currPathPosition.y = currPathPosition.y + 6;
-                        Debug.Log("ENEMY: Trying to Go OVER the target.");
+                       // Debug.Log("ENEMY: Trying to Go OVER the target.");
                     }
                 }
 
@@ -373,7 +370,7 @@ public class Enemy_PathHandler : MonoBehaviour
         else
         {
             bool currIswalkable = grid.NodeFromWorldPoint(transform.position).isWalkable;
-            print("Could not find a path from this location. This node is walkable: " + currIswalkable + " Target node is walkable: " + grid.NodeFromWorldPoint(currPathPosition).isWalkable);
+            //print("Could not find a path from this location. This node is walkable: " + currIswalkable + " Target node is walkable: " + grid.NodeFromWorldPoint(currPathPosition).isWalkable);
 
 
             if (_state != State.BLOCKED && _state != State.MOVING_TO_TARGET)

@@ -277,12 +277,12 @@ public class Extractor : ExtractionBuilding {
         {
             if (currRock._rockProductionType == Rock.RockProductionType.common)
             {
-                print("Adding Common ore!");
+              //  print("Adding Common ore!");
                 commonOre = currTotal;
             }
             else if (currRock._rockProductionType == Rock.RockProductionType.enriched)
             {
-                print("Adding Enriched ore!");
+              //  print("Adding Enriched ore!");
                 enrichedOre = currTotal;
             }
         }

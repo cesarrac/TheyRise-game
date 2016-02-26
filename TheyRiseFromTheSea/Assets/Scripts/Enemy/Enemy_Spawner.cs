@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class Enemy_Spawner : MonoBehaviour {
 
@@ -10,6 +11,10 @@ public class Enemy_Spawner : MonoBehaviour {
 
     Vector3 spawnPosition;
    // Vector2[] waterSpawnPositions;
+
+    public bool isSpawning { get; protected set; }
+
+    Func<Transform> GetTargetCB;
 
     void Awake()
     {
@@ -26,6 +31,10 @@ public class Enemy_Spawner : MonoBehaviour {
     //    waterSpawnPositions = waterTilePositions;
     //}
 
+    public void RegisterGetTargetCB(Func<Transform> cb)
+    {
+        GetTargetCB = cb;
+    }
 
     public void ReceiveSpawnCommand(int spawnCount, Enemy enemyToSpwn, Vector3 spawnPos)
     {
@@ -36,7 +45,12 @@ public class Enemy_Spawner : MonoBehaviour {
         //spawnPosition = GetSpawnPosition();
         spawnPosition = spawnPos;
 
-        StartCoroutine("Spawn");
+        if (!isSpawning)
+        {
+            isSpawning = true;
+            StartCoroutine("Spawn");
+        }
+
     }
 
     IEnumerator Spawn()
@@ -72,16 +86,19 @@ public class Enemy_Spawner : MonoBehaviour {
                         ePathHandler.mStats.InitStartingMoveStats(curr_Enemy_toSpwn.MovementStats.startMoveSpeed, curr_Enemy_toSpwn.MovementStats.startChaseSpeed);
                         ePathHandler.mStats.InitMoveStats();
 
-                        // If this isn't a player chaser (meaning the player is its main path target) then it needs an alternate path target
-                        if (!curr_Enemy_toSpwn.chasesPlayer)
-                        {
-                            ePathHandler.chasesPlayer = false;
-                            ePathHandler.alternateMainTarget = curr_Enemy_toSpwn.alternateTarget;
-                        }
-                        else
-                        {
-                            ePathHandler.chasesPlayer = true;
-                        }
+                        //// If this isn't a player chaser (meaning the player is its main path target) then it needs an alternate path target
+                        //if (!curr_Enemy_toSpwn.chasesPlayer)
+                        //{
+                        //    ePathHandler.chasesPlayer = false;
+                        //    ePathHandler.alternateMainTarget = curr_Enemy_toSpwn.alternateTarget;
+                        //}
+                        //else
+                        //{
+                        //    ePathHandler.chasesPlayer = true;
+                        //}
+
+                        if (GetTargetCB != null)
+                            ePathHandler.RegisterGetTargetCB(GetTargetCB);
 
                         ePathHandler.InitTarget();
                     }
@@ -93,11 +110,13 @@ public class Enemy_Spawner : MonoBehaviour {
                 yield return new WaitForSeconds(0.5f);
             }
             else
+            {
+                isSpawning = false;
                 yield break;
-          
-
+            }
         }
 
+        isSpawning = false;
         curr_Enemy_toSpwn = null;
         yield break;
     }
@@ -115,5 +134,6 @@ public class Enemy_Spawner : MonoBehaviour {
         StopCoroutine("Spawn");
         totalToSpawn = 0;
         curr_Enemy_toSpwn = null;
+        isSpawning = false;
     }
 }

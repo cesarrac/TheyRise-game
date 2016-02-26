@@ -11,14 +11,17 @@ public class Enemy  {
     public UnitStats UnitStats { get; protected set; }
     public Enemy_PathHandler.MovementStats MovementStats { get; protected set; }
 
+    public int spawnCost { get; protected set; }
+
     // Constructor for an Enemy with no alternate target (attacks player OR Terraformer)
-    public Enemy(string n, UnitStats unitStats, Enemy_PathHandler.MovementStats moveStats, bool chasesP, bool isAggro = false)
+    public Enemy(string n, UnitStats unitStats, Enemy_PathHandler.MovementStats moveStats, int cost, bool chasesP, bool isAggro = false)
     {
         name = n;
         isAggroToBuildings = isAggro;
         UnitStats = unitStats;
         MovementStats = moveStats;
         chasesPlayer = chasesP;
+        spawnCost = cost;
 
     }
 

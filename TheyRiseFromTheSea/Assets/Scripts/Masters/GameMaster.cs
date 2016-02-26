@@ -364,7 +364,15 @@ public class GameMaster : MonoBehaviour {
 
     void SpawnEnemyMaster()
     {
-        ObjectPool.instance.GetObjectForType("Default Enemy Master", true, Vector3.zero);
+        GameObject em = ObjectPool.instance.GetObjectForType("Default Enemy Master", true, Vector3.zero);
+
+        if (em != null)
+        {
+            Enemy_Master master = em.GetComponent<Enemy_Master>();
+            if (master != null)
+                master.StartWaitToAct();
+        }
+
     }
 
     void SpawnBossEnemyMaster(string id)

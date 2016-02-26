@@ -142,7 +142,7 @@ public class Enemy_AttackHandler : Unit_Base {
                 {
                     if (towerAttackingMe != null)
                     {
-                        Debug.Log("ENEMY: Starting tower attack...");
+                        //Debug.Log("ENEMY: Starting tower attack...");
                         StartCoroutine("TowerAggroAttack");
                         isAttacking = true;
                     }
@@ -158,7 +158,7 @@ public class Enemy_AttackHandler : Unit_Base {
                 {
                     if (playerUnit != null)
                     {
-                        Debug.Log("ENEMY: Starting player attack...");
+                        //Debug.Log("ENEMY: Starting player attack...");
                         StartCoroutine("PlayerAttack");
                         isAttacking = true;
                     }
