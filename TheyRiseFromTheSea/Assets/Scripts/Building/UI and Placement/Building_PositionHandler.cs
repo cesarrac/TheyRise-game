@@ -19,19 +19,21 @@ public class Building_PositionHandler : MonoBehaviour {
 	public ResourceGrid resourceGrid;
 	public bool followMouse;
 
-	public TileData.Types tileType;
+    [HideInInspector]
+    public TileData.Types tileType;
 
 	SpriteRenderer sr; // to handle the alpha change
-	Color halfColor;
+	Color invalidPosColor;
 	Color trueColor;
+   
 
 	Vector3 m, lastM;
-	int mX;
-	int mY;
+	int posX;
+	int posY;
 
 	bool canBuild, canAfford; // turns true when building is in proper position
 
-	bool onEnemy = false; // can't build on top or near enemies
+	bool onEneposY = false; // can't build on top or near enemies
 
 	public Player_ResourceManager resourceManager;
     //public int currOreCost; // this will charge the resources manager with the cost sent from UI handler
@@ -46,20 +48,39 @@ public class Building_PositionHandler : MonoBehaviour {
 
     public NanoBuilding_Handler nanoBuild_handler;
 
+    Mouse_Controller mouse_controller;
+
+    // Blueprint name
+    public string bpName { get; protected set; }
+
 	void Awake()
 	{
+        // Get the Sprite Renderer to be able to change the Sprite's color depending on position
 		sr = GetComponent<SpriteRenderer> ();
-		halfColor = Color.red;
-		trueColor = Color.green;
 
-		sr.color = Color.clear;
+        // Clear red color for Invalid Position
+        invalidPosColor =  new Color(1, 0, 0, 0.5f);
+
+        // Clear green color for Valid Position
+        trueColor = new Color(0, 1, 0, 0.5f);
+
+        // Begin as clear Color
+        sr.color = Color.clear;
+
+        // Set posY transform to this tile's Spawn Position (passed in by Discover Tile)
 		transform.position = spawnPos;
 
         resourceGrid = ResourceGrid.Grid;
         objPool = ObjectPool.instance;
         build_controller = Build_MainController.Instance;
+
+        mouse_controller = Mouse_Controller.MouseController;
     }
 
+    public void SetCurrentBlueprintID(string id)
+    {
+        bpName = id;
+    }
 	
 
 	void Update () {
@@ -69,130 +90,115 @@ public class Building_PositionHandler : MonoBehaviour {
 	}
 	
 	void FollowMouse(){
-		m = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-		mX = Mathf.RoundToInt(m.x);
-		mY = Mathf.RoundToInt(m.y);
-		// Making sure that we are not trying to Build outside the BOUNDARIES of the GRID
-		if (mX > resourceGrid.mapSizeX - 3){
-			mX = resourceGrid.mapSizeX - 3;
-		}
-		if (mY > resourceGrid.mapSizeY -3){
-			mY = resourceGrid.mapSizeY - 3;
-		}
-		if (mX < 3){
-			mX = 3;
-		}
-		if (mY < 3){
-			mY = 3;
-		}
-		// Move building with the mouse
-		Vector3 followPos = new Vector3 (mX, mY);
-
-		transform.position = followPos;
 
 
-		if (CheckEmptyBeneath (mX, mY) && !onEnemy) {
+        // Move building with the mouse
+		transform.position = mouse_controller.currMouseP;
+        posX = Mathf.RoundToInt(transform.position.x);
+        posY = Mathf.RoundToInt(transform.position.y);
+
+        if (CheckEmptyBeneath (posX, posY) && !onEneposY) {
 			
 			if (tileType == TileData.Types.extractor) {
-				if (CheckForResource (mX, mY + 1, "ore")) { // top
+				if (CheckForResource (posX, posY + 1, "ore")) { // top
 					sr.color = trueColor;
 					canBuild = true;
-				} else if (CheckForResource (mX, mY - 1,  "ore")) { // bottom
+				} else if (CheckForResource (posX, posY - 1,  "ore")) { // bottom
 					sr.color = trueColor;
 					canBuild = true;
-				} else if (CheckForResource (mX - 1, mY,  "ore")) { // left
+				} else if (CheckForResource (posX - 1, posY,  "ore")) { // left
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX + 1, mY,  "ore")) { // right
+				} else if (CheckForResource (posX + 1, posY,  "ore")) { // right
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX - 1, mY + 1,  "ore")) { // top left
+				} else if (CheckForResource (posX - 1, posY + 1,  "ore")) { // top left
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX + 1, mY + 1,  "ore")) { // top right
+				} else if (CheckForResource (posX + 1, posY + 1,  "ore")) { // top right
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX - 1, mY - 1,  "ore")) { // bottom left
+				} else if (CheckForResource (posX - 1, posY - 1,  "ore")) { // bottom left
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX + 1, mY - 1,  "ore")) { // bottom right
+				} else if (CheckForResource (posX + 1, posY - 1,  "ore")) { // bottom right
 					canBuild = true;
 					sr.color = trueColor;
 				} else {				// NOT ON ROCK
-					sr.color = halfColor;
+					sr.color = invalidPosColor;
 					canBuild = false;
 				}
 			} else if (tileType == TileData.Types.desalt_s) { // THIS building is a Water Pump so it needs to detect WATER
-				if (CheckForResource (mX, mY + 1, "water")) { // top
+				if (CheckForResource (posX, posY + 1, "water")) { // top
 					sr.color = trueColor;
 					canBuild = true;
-				} else if (CheckForResource (mX, mY - 1, "water")) { // bottom
+				} else if (CheckForResource (posX, posY - 1, "water")) { // bottom
 					sr.color = trueColor;
 					canBuild = true;
-				} else if (CheckForResource (mX - 1, mY, "water")) { // left
+				} else if (CheckForResource (posX - 1, posY, "water")) { // left
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX + 1, mY, "water")) { // right
+				} else if (CheckForResource (posX + 1, posY, "water")) { // right
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX - 1, mY + 1, "water")) { // top left
+				} else if (CheckForResource (posX - 1, posY + 1, "water")) { // top left
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX + 1, mY + 1, "water")) { // top right
+				} else if (CheckForResource (posX + 1, posY + 1, "water")) { // top right
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX - 1, mY - 1, "water")) { // bottom left
+				} else if (CheckForResource (posX - 1, posY - 1, "water")) { // bottom left
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX + 1, mY - 1, "water")) { // bottom right
+				} else if (CheckForResource (posX + 1, posY - 1, "water")) { // bottom right
 					canBuild = true;
 					sr.color = trueColor;
 				} else {				// NOT ON Water
-					sr.color = halfColor;
+					sr.color = invalidPosColor;
 					canBuild = false;
 				}
 			}else if (tileType == TileData.Types.generator){ // Energy generators seek for Minerals
-				if (CheckForResource (mX, mY + 1, "mineral")) { // top
+				if (CheckForResource (posX, posY + 1, "mineral")) { // top
 					sr.color = trueColor;
 					canBuild = true;
-				} else if (CheckForResource (mX, mY - 1, "mineral")) { // bottom
+				} else if (CheckForResource (posX, posY - 1, "mineral")) { // bottom
 					sr.color = trueColor;
 					canBuild = true;
-				} else if (CheckForResource (mX - 1, mY, "mineral")) { // left
+				} else if (CheckForResource (posX - 1, posY, "mineral")) { // left
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX + 1, mY, "mineral")) { // right
+				} else if (CheckForResource (posX + 1, posY, "mineral")) { // right
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX - 1, mY + 1, "mineral")) { // top left
+				} else if (CheckForResource (posX - 1, posY + 1, "mineral")) { // top left
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX + 1, mY + 1, "mineral")) { // top right
+				} else if (CheckForResource (posX + 1, posY + 1, "mineral")) { // top right
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX - 1, mY - 1, "mineral")) { // bottom left
+				} else if (CheckForResource (posX - 1, posY - 1, "mineral")) { // bottom left
 					canBuild = true;
 					sr.color = trueColor;
-				} else if (CheckForResource (mX + 1, mY - 1, "mineral")) { // bottom right
+				} else if (CheckForResource (posX + 1, posY - 1, "mineral")) { // bottom right
 					canBuild = true;
 					sr.color = trueColor;
 				} else {				// NOT ON Mineral
-					sr.color = halfColor;
+					sr.color = invalidPosColor;
 					canBuild = false;
 				}
 
 			}else{ // not an extractor or desalt pump or generator
-				if (CheckForEmptySides (mX, mY)) {
+				if (CheckForEmptySides (posX, posY)) {
 						// we are on a legal building position
 					sr.color = trueColor;
 					canBuild = true;
 				} else {// we DO NOT have an empty tile on our sides or beneath
-					sr.color = halfColor;
+					sr.color = invalidPosColor;
 					canBuild = false;
 				}
 			}
 		} else {				// NOT ON EMPTY
-			sr.color = halfColor;
+			sr.color = invalidPosColor;
 			canBuild = false;
 		}
 
@@ -201,8 +207,8 @@ public class Building_PositionHandler : MonoBehaviour {
 		//if (resourceManager.ore >= currOreCost ) {
 		//	canAfford = true;
 		//}
-		// At this point we KNOW the mouse is NOT over a building or a rock, we have found rocks if extractor AND we are not on enemy
-		if (Input.GetMouseButtonDown (0) && canBuild && !onEnemy) {			// So LEFT CLICK to BUILD!! 
+		// At this point we KNOW the mouse is NOT over a building or a rock, we have found rocks if extractor AND we are not on eneposY
+		if (Input.GetMouseButtonDown (0) && canBuild && !onEneposY) {			// So LEFT CLICK to BUILD!! 
 
 			// Subtract the cost
 //			resourceManager.ChargeOreorWater("Ore", -currOreCost);
@@ -211,10 +217,13 @@ public class Building_PositionHandler : MonoBehaviour {
             // Right BEFORE pooling this object we tell Building UI that we are NOT currently building anymore
             build_controller.SetCurrentlyBuildingBool(false);
 
-			// stop following and tell grid to swap this tile to this new building
-			mapPosX = mX;
-			mapPosY = mY;
-			resourceGrid.SwapTileType (mX, mY, tileType, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
+            // stop following and tell grid to swap this tile to this new building
+            //mapPosX = posX;
+            //mapPosY = posY;
+
+            TileData currTile = mouse_controller.GetTileUnderMouse();
+
+			resourceGrid.SwapTileType (currTile.posX, currTile.posY, tileType, bpName,currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
 			followMouse = false;
             
 			// Pool this object
@@ -257,15 +266,17 @@ public class Building_PositionHandler : MonoBehaviour {
 			}
 		}
 	}
+
+
 	bool CheckForEmptySides(int x, int y){
 		int top1 = y +1;
-		int top2 = y +2;
+		//int top2 = y +2;
 		int bottom1 = y - 1;
-		int bottom2 = y - 2;
+		//int bottom2 = y - 2;
 		int left1 = x - 1;
-		int left2 = x - 2;
+		//int left2 = x - 2;
 		int right1 = x + 1;
-		int right2 = x + 2;
+		//int right2 = x + 2;
 
 		if (resourceGrid.tiles [x, top1].tileType == TileData.Types.empty && // top
 			resourceGrid.tiles [left1, top1].tileType == TileData.Types.empty && // top Left
@@ -311,16 +322,16 @@ public class Building_PositionHandler : MonoBehaviour {
 		}
 	}
 
-	// Avoid building right near where an enemy unit is walking
+	// Avoid building right near where an eneposY unit is walking
 	void OnTriggerEnter2D(Collider2D coll){
 		if (coll.gameObject.CompareTag ("Enemy")) {
-			onEnemy = true;
+			onEneposY = true;
 		}
 	}
 
 	void OnTriggerExit2D (Collider2D coll){
 		if (coll.gameObject.CompareTag ("Enemy")) {
-			onEnemy = false;
+			onEneposY = false;
 		}
 	}
 

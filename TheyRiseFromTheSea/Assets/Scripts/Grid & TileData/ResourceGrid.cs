@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.UI;
+using System;
 
 //using System;
 //Random = UnityEngine.Random;
@@ -41,10 +42,8 @@ public class ResourceGrid : MonoBehaviour{
 	public GameObject unitOnPath;
 	public List<Node>pathForEnemy;
 
-//	public Player_SpawnHandler playerSpawnHandler;
-	public GameObject playerCapital; 
-	public GameObject playerCapitalFab;// to spawn at the start of a new level
-	public int capitalSpawnX, capitalSpawnY;
+	public int transportSpawnX, transportSpawnY;
+    public GameObject transporterGObj;
 
 	public Building_UIHandler buildingUIHandler;
 		
@@ -61,36 +60,25 @@ public class ResourceGrid : MonoBehaviour{
 	Node[,] graph; // <--------- old one
     Node[,] grid;
 
-	// FOR DEBUG PURPOSES (Finding coordinates and displaying them on screen)
-	public Text coordinatesText, tiletypeText;
-
-
-	// NOTE: the total represents the total of leader rock tiles, not really the total
-	[Range (5, 55)]
-	public int totalRocksOnMap;
-	[Range (6, 28)]
-	public int totalMineralsOnMap;
-
-	// Center of the map
-	public int centerPosX = 0;
-	public int centerPosY = 0;
-
 	// Access to the Player Hero
 	public GameObject Hero;
 
 	// Access to Master State manager to call when Terraformer is blown up
 	public MasterState_Manager master_state;
 
-	public int totalTilesThatAreWater;
+	//public int totalTilesThatAreWater;
 
 	Map_Generator map_generator;
 
 	[HideInInspector]
 	public Resource_Sprite_Handler res_sprite_handler;
 
-	public bool terraformer_built;
+	public bool transporter_built { get; protected set; }
+    
+    public bool terraformer_built { get; protected set; }
 
-	public GameObject enemy_waveSpawner;
+    // Keep a reference to access the Terraformer's tile once it is built
+    public TileData terraformerTile { get; protected set; }
 
 	GameMaster game_master;
 
@@ -105,6 +93,12 @@ public class ResourceGrid : MonoBehaviour{
     public List<Vector2> emptyTilePositions;
     public Vector2[] emptyTilesArray;
 
+    public bool worldGridInitialized { get; protected set; }
+
+    public System.Random pseudoRandom { get; set; }
+
+    Action<Transform> BattleTowerBuiltCB, UtilityTowerBuiltCB, BattleTowerRemoveCB, UtilityTowerRemoveCB;
+
     public int MaxSize
     {
         get
@@ -113,26 +107,28 @@ public class ResourceGrid : MonoBehaviour{
         }
     }
 
+    void OnEnable()
+    {
+        worldGridInitialized = false;
+    }
+
     void Awake()
 	{
         Grid = this;
 		if (!master_state)
 			master_state = GameObject.FindGameObjectWithTag ("GameController").GetComponent<MasterState_Manager> ();
 
-		if (!map_generator) {
-			map_generator = GetComponent<Map_Generator> ();
-			mapSizeX = map_generator.width;
-			mapSizeY = map_generator.height;
-		} else {
-			mapSizeX = map_generator.width;
-			mapSizeY = map_generator.height;
-		}
+		//if (!map_generator) {
+		//	map_generator = GetComponent<Map_Generator> ();
+		//	mapSizeX = map_generator.width;
+		//	mapSizeY = map_generator.height;
+		//} else {
+		//	mapSizeX = map_generator.width;
+		//	mapSizeY = map_generator.height;
+		//}
 
 		if (!res_sprite_handler)
 			res_sprite_handler = GetComponent<Resource_Sprite_Handler> ();
-
-		if (!enemy_waveSpawner)
-			enemy_waveSpawner = GameObject.FindGameObjectWithTag ("Spawner");
 
 		game_master = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster> ();
 
@@ -147,393 +143,387 @@ public class ResourceGrid : MonoBehaviour{
 		if (playerResources == null)
 			playerResources = GameObject.FindGameObjectWithTag ("Capital").GetComponent<Player_ResourceManager> ();
 
-        //		InitCapitalAndMinerals ();
+        // tiles and spawnedTiles are initialized by MapGenerator
 
-        // Initialize Tile Data array with this map size
-        //		tiles = new TileData[mapSizeX, mapSizeY];
-
-        // Initialize spawned Tiles array, all values will be set to null until tiles are spawned
-        //		spawnedTiles = new GameObject[mapSizeX, mapSizeY];
-
-        // Initialize the Grid, filling tiles positions with Capital, Rocks, and Water
-        //		InitGrid ();
-
-        // This creates the Initial Pathfinding graph taking into account unwakable tiles already spawned (ex. Rock, Water, Capital)
-        //InitPathFindingGraph ();
         InitPathFindingGrid();
-        
 
-//		BuildTheCapital ();
-	}
+        worldGridInitialized = true;
 
-	// DEBUG NOTE: using this Update method to find map coordinates to match them with map graphics
-	void Update()
-	{
-		if (Input.GetMouseButtonDown (1)) {
-			Vector3 m = Input.mousePosition;
-            m.z = 0;
-            Vector3 mouse = Camera.main.ScreenToWorldPoint(m);
-            TileData Tile = TileFromWorldPoint(mouse);
-            TileData.Types tileType = Tile.tileType;
-            int tilePosX = Tile.posX;
-            int tilePosY = Tile.posY;
-            print("Tile under mouse is of type: " + tileType + " tile Position: " + tilePosX + " " + tilePosY);
+        StartCoroutine("WaitForLandingSiteSelection");
 
-			//int mX = Mathf.RoundToInt(m.x);
-			//int mY = Mathf.RoundToInt(m.y);
+        // Give the waterTilePositions to Enemy_Spawner
+        //Enemy_Spawner.instance.InitSpawnPositions(waterTilesArray);
+        InitializeRockandMinerals();
+    }
 
-			//if (mX <= mapSizeX && mY <= mapSizeY && mX > 0 && mY > 0){
-			//	if (coordinatesText != null && tiletypeText != null){
-			//		coordinatesText.text = "X: " + mX + " Y: " + mY;
-			//		tiletypeText.text = "Type: " + tiles[mX, mY].tileType;
-			//	}
-			//}
-			//print ("map coord:" + TileCoordToWorldCoord(mX, mY).ToString() + "world coord: " + m);
-		}
+    // This will wait for the Player to select where to land on initial level load. Once they left click, this stops and never checks again.
+    IEnumerator WaitForLandingSiteSelection()
+    {
+        while (true)
+        {
+            if (!transporter_built && islandVisible)
+            {
+                BuildTheTransporter();
+                yield break;
+            }
+               
 
-		if (!terraformer_built && islandVisible)
-			BuildTheCapital();
+            yield return null;
+        }
+    }
 
-		if (Input.GetMouseButtonDown (0)) {
-			if (!islandVisible) {
-				Vector3 camHolderPos = new Vector3(cameraHolder.position.x,cameraHolder.position.y, -10F);
-				MoveTheIslandMapToFront (camHolderPos);
-			}
-		}
-	}
-
-	void BuildTheCapital()
-	{
-		Vector3 m = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-		int mX = Mathf.RoundToInt(m.x);
-		int mY = Mathf.RoundToInt(m.y);
-
-		if (mX < mapSizeX && mY < mapSizeY && mX > 0 && mY > 0){
-			if (Input.GetMouseButtonDown(0)){
-				InitCapital(mX, mY);
-			}
-		}
-	}
-
-	void MoveTheIslandMapToFront(Vector3 camHolderPos)
+    void Update()
 	{
 
-		islandVisible = true;
-		//TODO: Introduction to each level, the island RISES from the sea as the terraformer activates
+        if (!islandVisible)
+        {
+            Vector3 camHolderPos = new Vector3(cameraHolder.position.x, cameraHolder.position.y, -10F);
+            //MoveTheIslandMapToFront(camHolderPos);
+            islandVisible = true;
 
-//		if (cameraHolder) {
-//			cameraHolder.position = Vector3.Lerp(cameraHolder.position, camHolderPos, 66 * Time.deltaTime);
-//			islandVisible = true;
-//		}
+            //if (Input.GetMouseButtonDown(0))
+            //{
+            //    Vector3 camHolderPos = new Vector3(cameraHolder.position.x, cameraHolder.position.y, -10F);
+            //    //MoveTheIslandMapToFront(camHolderPos);
+            //    islandVisible = true;
+            //}
+        }
+
 	}
 
-	public class OrePatch
+	void BuildTheTransporter()
 	{
-		public int leadPositionX;
-		public int leadPositionY;
-		int pDensity;
-		public int density {get{return pDensity;} set{pDensity = Mathf.Clamp(value, 1, 5);}}
-		public int totalInPatch;
-		public OreTile[] neighborOreTiles;
+        // This code allows the Player to see the entire island upon loading, and select a landing site with the mouse:
 
+        //Vector3 m = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        //int mX = Mathf.RoundToInt(m.x);
+        //int mY = Mathf.RoundToInt(m.y);
 
-		public OrePatch(int xPos, int yPos, int _density)
-		{
-			leadPositionX = xPos;
-			leadPositionY = yPos;
-			density = _density;
-			totalInPatch = _density;
-		}
+        //if (mX < mapSizeX && mY < mapSizeY && mX > 0 && mY > 0){
+        //	if (Input.GetMouseButtonDown(0))
+        //          {
+        //              // Just in case the Wait for Player Landing select coroutine hasn't stopped 
+        //              StopCoroutine("WaitForLandingSiteSelection");
+        //		InitTransporter(mX, mY);
+        //	}
+        //}
 
-		public void SetFormation()
-		{
-			/* formation offset,  indicating how far the neighbor ore tile is from its lead tile.
-			 * Depending on their density they will have a minor offset(more density) or major offset (less density) */
-			int minorOffset = Random.Range (3, 8);
-			int majorOffset = Random.Range (9, 15);
+        // This will grab an empty tile position, check its surrounding tiles and make sure there are no rocks in the way
+        Vector2 t_pos = new Vector2();
 
-			switch (density) {
-			case 1:
-				// This patch only has one rock or mineral
-				break;
-			case 2:
-				// This patch contains two, so neighbor ore array = 1
-				neighborOreTiles = new OreTile[1];
-				// This is the position the neighbor ore can be placed on
-				neighborOreTiles[0] = new OreTile(leadPositionX + majorOffset, leadPositionY - majorOffset);
-				break;
-			case 3:
-				neighborOreTiles = new OreTile[2];
-				neighborOreTiles[0] = new OreTile(leadPositionX + minorOffset, leadPositionY - majorOffset);
-				neighborOreTiles[1] = new OreTile(leadPositionX - minorOffset, leadPositionY - majorOffset);
-				break;
-			case 4:
-				neighborOreTiles = new OreTile[3];
-				neighborOreTiles[0] = new OreTile(leadPositionX, leadPositionY + minorOffset);
-				neighborOreTiles[1] = new OreTile(leadPositionX, leadPositionY - minorOffset);
-				neighborOreTiles[2] = new OreTile(leadPositionX - minorOffset , leadPositionY);
-				break;
-			case 5:
-				neighborOreTiles = new OreTile[4];
-				neighborOreTiles[0] = new OreTile(leadPositionX -minorOffset, leadPositionY);
-				neighborOreTiles[1] = new OreTile(leadPositionX + minorOffset, leadPositionY);
-				neighborOreTiles[2] = new OreTile(leadPositionX + minorOffset , leadPositionY + minorOffset);
-				neighborOreTiles[3] = new OreTile(leadPositionX , leadPositionY + minorOffset);
-				break;
-			default:
-				neighborOreTiles = new OreTile[1];
-				neighborOreTiles[0] = new OreTile(leadPositionX + minorOffset, leadPositionY - minorOffset);
-				break;
-				
-			}
-		}
+        // Try to get a clean empty position 5 times.
+        int getPosAttempts = 10;
+        for (int i = 0; i < getPosAttempts; i++)
+        {
+            if (t_pos == null || t_pos == Vector2.zero)
+            {
+                t_pos = GetStartingPosition();
+            }
+            else
+                break;
+        }
 
-		public class OreTile
-		{
-			public int posX;
-			public int posY;
+        // If unsuccesful spawn in the center of map.
+        if (t_pos == null || t_pos == Vector2.zero)
+        {
+            t_pos = new Vector2((float)mapSizeX / 2, (float)mapSizeY / 2);
+        }
 
-			public OreTile(int x, int y)
-			{
-				posX = x;
-				posY = y;
-			}
-		}
+        InitTransporter(Mathf.RoundToInt(t_pos.x), Mathf.RoundToInt(t_pos.y));
 	}
 
-	void InitCapital(int _terraPosX, int _terraPosY)
-	{
-		// SPAWN PLAYER CAPITAL HERE:
-		tiles [_terraPosX, _terraPosY] = new TileData(_terraPosX, _terraPosY, "Capital", TileData.Types.capital, 0, 10000, 200, 5,0,0,0);
-		SpawnDiscoverTile(tiles [_terraPosX, _terraPosY].tileName, new Vector3(_terraPosX, _terraPosY, 0.0f),tiles [_terraPosX, _terraPosY].tileType);
+    Vector2 GetStartingPosition()
+    {
+        // Select a random empty tile position
+        Vector2 pos = emptyTilesArray[pseudoRandom.Next(0, emptyTilesArray.Length - 1)];
+    
+        // Check its neighbors. 
+        // First check for rocks
+        bool rockInTheWay = false, waterIntheWay = false;
+
+        for (int x = (int) pos.x - 2; x <= pos.x + 2; x++)
+        {
+            for (int y = (int) pos.y - 2; y <= pos.y + 2; y++)
+            {
+                if (CheckForResource(x, y, TileData.Types.rock))
+                {
+                    rockInTheWay = true;
+                }
+
+                if (CheckForResource(x, y, TileData.Types.water))
+                {
+                    waterIntheWay = true;
+                }
+            }
+        }
+
+        // If no water or rock was detected retun position
+        if (!rockInTheWay && !waterIntheWay)
+        {
+            return pos;
+        }
+        else
+        {        // If it doesnt match all criteria return zero and attempt this again
+            return Vector2.zero;
+        }
+
+
+
+    }
+
+    public bool CheckForResource(int x, int y, TileData.Types rType)
+    {
+        if (CheckIsInMapBounds(x, y) == false)
+        {
+            return true;
+        }
+
+        if (tiles[x, y].tileType == rType)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+
+    bool WaterCheck(int x, int y)
+    {
+        if (GetTileType(x, y) == TileData.Types.water)
+        {
+            return true;
+        }
+        if (CheckIsInMapBounds(x - 1, y)) // left
+        {
+            if (GetTileType(x - 1, y) == TileData.Types.water)
+            {
+                return true;
+            }
+        }
+        if (CheckIsInMapBounds(x - 1, y + 1)) // top left
+        {
+            if (GetTileType(x - 1, y) == TileData.Types.water)
+            {
+                return true;
+            }
+        }
+        if (CheckIsInMapBounds(x, y + 1)) // top
+        {
+            if (GetTileType(x - 1, y) == TileData.Types.water)
+            {
+                return true;
+            }
+        }
+        if (CheckIsInMapBounds(x + 1, y + 1)) // top right
+        {
+            if (GetTileType(x - 1, y) == TileData.Types.water)
+            {
+                return true;
+            }
+        }
+        if (CheckIsInMapBounds(x + 1, y)) // right
+        {
+            if (GetTileType(x - 1, y) == TileData.Types.water)
+            {
+                return true;
+            }
+        }
+
+        if (CheckIsInMapBounds(x + 1, y)) // right
+        {
+            if (GetTileType(x - 1, y) == TileData.Types.water)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    void InitTransporter(int _terraPosX, int _terraPosY)
+    {
+        // Define the Transporter tile
+        tiles[_terraPosX, _terraPosY] = new TileData(_terraPosX, _terraPosY, "Transporter", TileData.Types.capital, 0, 10000, 200, 5, 0, 0, 0);
+        DefineMultipleTiles(_terraPosX, _terraPosY, 2, 2, "Transporter", TileData.Types.capital, 0, 100, 200, 5, 0, 0, 0);
+
+        // Spawn the Transporter HERE:
+        SpawnDiscoverTile(tiles[_terraPosX, _terraPosY].tileName, new Vector3(_terraPosX, _terraPosY, 0.0f), tiles[_terraPosX, _terraPosY].tileType, 2, 2);
 
         // Spawn Player / Hero 1 tile down from the terraformer
-        Hero =  game_master.SpawnThePlayer(_terraPosX, _terraPosY - 1);
+        Hero = game_master.SpawnThePlayer(_terraPosX, _terraPosY - 1);
 
-		// TODO: replace capitalPos completely with terraformer pos
-		capitalSpawnX = _terraPosX;
-		capitalSpawnY = _terraPosY;
+        // Setup the Enemies and Missions
+        game_master.SetUpMissionAndEnemies();
 
-		terraformer_built = true;
+        // TODO: replace capitalPos completely with terraformer pos
+        transportSpawnX = _terraPosX;
+        transportSpawnY = _terraPosY;
 
-       
-		// Turn on the Enemy Wave spawner
-		//enemy_waveSpawner.SetActive (true);
+        transporter_built = true;
 
-	}
 
-	public void InitializeRockandMinerals()
+        // Turn on the Enemy Wave spawner
+        //enemy_waveSpawner.SetActive (true);
+
+    }
+
+    //    void MoveTheIslandMapToFront(Vector3 camHolderPos)
+    //	{
+
+    //		islandVisible = true;
+    //		//TODO: Introduction to each level, the island RISES from the sea as the terraformer activates
+
+    ////		if (cameraHolder) {
+    ////			cameraHolder.position = Vector3.Lerp(cameraHolder.position, camHolderPos, 66 * Time.deltaTime);
+    ////			islandVisible = true;
+    ////		}
+    //	}
+
+    public void InitializeRockandMinerals()
+    {
+        Rock_Generator.Instance.GenerateRocks();
+
+  
+    }
+
+    //	bool CheckForWater (int x, int y)
+    //	{
+    //        int waterRange = 2;
+    //		bool hasWater = false;
+    //		// Make sure every position is still within map bounds
+    //		for (int bottomX = x- waterRange; bottomX < x + waterRange; bottomX++){
+    //			for (int bottomY = y- waterRange; bottomY < y + waterRange; bottomY++){
+    //				if (CheckIsInMapBounds(bottomX, bottomY)){
+    //					// It IS in map bounds, now check if it's water
+    //					if (tiles[bottomX, bottomY].tileType == TileData.Types.water){
+    //						hasWater = true;
+    //						break;
+    //					}
+    //				}else{
+    //					// It's NOT in map bounds so just return true because it's most likely water
+    //					hasWater = true;
+    //					break;
+    //				}
+    //			}
+
+    //		}
+
+    //		return hasWater;
+    //	}
+
+    public bool CheckIsInMapBounds(int x, int y)
+    {
+        if (x < mapSizeX && y < mapSizeY && x > 0 && y > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+    public void PlaceOrePatch(OrePatch _patch, Rock.RockType rType)
 	{
-		string rockTypeName = "rock";
-		string mineralTypeName = "mineral";
+        // place the lead ore if there is no rock already on that tile
+        if (tiles[_patch.leadPositionX, _patch.leadPositionY].tileType == TileData.Types.empty)
+        {
+            switch (rType)
+            {
+                case Rock.RockType.sharp:
+                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50, 1);
+                    SpawnRock("sharp rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.sharp);
+                    break;
+                case Rock.RockType.tube:
+                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50, 4);
+                    SpawnRock("tube rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.tube);
+                    break;
+                case Rock.RockType.hex:
+                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50, 8);
+                    SpawnRock("hex rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.hex);
+                    break;
+                default:
+                    tiles[_patch.leadPositionX, _patch.leadPositionY] = new TileData(_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 50, 1);
+                    SpawnRock("sharp rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.sharp);
+                    break;
+            }
+            CreateUnWalkableBorder(_patch.leadPositionX, _patch.leadPositionY);
+        }
+   
 
-
-		centerPosX = mapSizeX / 2;
-		centerPosY = mapSizeY / 2;
-
-		int magicPosX = 0;
-		int magicPosY = 0;
-
-		//Find a position to start creating rock formations
-		for (int x = centerPosX - (centerPosX/4); x < centerPosX + (centerPosX/4); x++) {
-			for (int y = centerPosY - (centerPosY/4); y < centerPosX + (centerPosY/4); y++) {
-				if (CheckIsInMapBounds(x, y)){
-                    if (!CheckForWater(x, y))
-                    {
-                        if (tiles[x, y].tileType == TileData.Types.empty)
-                        {
-                            magicPosX = x;
-                            magicPosY = y;
-                            break;
-                        }
-                    }
-				
-
-				}
-			}
-		} 
-
-		int lastRockPosX = 0;
-		int lastRockPosY = 0;
-
-		// Loop through all the rocks
-		for (int i = 0; i < totalRocksOnMap; i++) {
-//			
-			if (i== 0){
-				SetNewOrePatch(magicPosX, magicPosY, rockTypeName);
-			}else{
-				// pick up/left, up/right, down/left, down/right
-				int pick = Random.Range(1,5);
-				if (pick == 1){
-					SetNewOrePatch(magicPosX - 2, magicPosY + 2, rockTypeName);
-				}else if (pick == 2){
-					SetNewOrePatch(magicPosX + 2, magicPosY + 2, rockTypeName);
-
-				}else if (pick == 3){
-					SetNewOrePatch(magicPosX + 2, magicPosY - 2, rockTypeName);
-				}else if (pick == 4){
-					SetNewOrePatch(magicPosX - 2, magicPosY - 2, rockTypeName);
-				}else {
-					SetNewOrePatch(magicPosX + 3, magicPosY - 2, rockTypeName);
-
-				}
-
-
-			}
-		}
-
-		lastRockPosX = magicPosX + 3;
-		lastRockPosY = magicPosY - 2;
-
-		// Loop through all the minerals
-		for (int j = 0; j < totalMineralsOnMap; j++) {
-			if (j== 0){
-				SetNewOrePatch(lastRockPosX, lastRockPosY, mineralTypeName);
-			}else{
-				// pick up/left, up/right, down/left, down/right
-				int pick = Random.Range(1,5);
-				if (pick == 1){
-					SetNewOrePatch(lastRockPosX - 2, lastRockPosY + 2, mineralTypeName);
-				}else if (pick == 2){
-					SetNewOrePatch(lastRockPosX + 2, lastRockPosY + 2, mineralTypeName);
-					
-				}else if (pick == 3){
-					SetNewOrePatch(lastRockPosX + 2, lastRockPosY - 2, mineralTypeName);
-				}else if (pick == 4){
-					SetNewOrePatch(lastRockPosX - 2, lastRockPosY - 2, mineralTypeName);
-				}else {
-					SetNewOrePatch(lastRockPosX + 3, lastRockPosY - 2, mineralTypeName);
-					
-				}
-				
-				
-			}
-		}
-	}
-
-	bool CheckForWater (int x, int y)
-	{
-        int waterRange = 2;
-		bool hasWater = false;
-		// Make sure every position is still within map bounds
-		for (int bottomX = x- waterRange; bottomX < x + waterRange; bottomX++){
-			for (int bottomY = y- waterRange; bottomY < y + waterRange; bottomY++){
-				if (CheckIsInMapBounds(bottomX, bottomY)){
-					// It IS in map bounds, now check if it's water
-					if (tiles[bottomX, bottomY].tileType == TileData.Types.water){
-						hasWater = true;
-						break;
-					}
-				}else{
-					// It's NOT in map bounds so just return true because it's most likely water
-					hasWater = true;
-					break;
-				}
-			}
-
-		}
-
-		return hasWater;
-	}
-
-	public bool CheckIsInMapBounds(int x, int y)
-	{
-		if (x < mapSizeX && y < mapSizeY && x > 0 && y > 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	void SetNewOrePatch(int leadX, int leadY, string typeName)
-	{
-		// first make sure that there is NO WATER tiles around this lead tile
-		if (!CheckForWater (leadX, leadY)) {
-			Debug.Log ("Found tile with no water around it!");
-			// Calculate the distance from this lead tile to the center of the map,
-			// the closer to the center the DENSER a patch of ore will be
-			float distance = Vector2.Distance (new Vector2 (leadX, leadY), new Vector2 (centerPosX, centerPosY)); 
-			int density = 0;
-			if (distance >= 20) {
-				// pick a 1 or 2 density
-				int pick = Random.Range (0, 3);
-				density = pick;
-			} else if (distance < 20 && distance > 8) {
-				// pick between 4 or 5 density
-				int pick = Random.Range (3, 5);
-				density = pick;
-			} else {
-				density = 5;
-			}
-			OrePatch patch = new OrePatch (leadX, leadY, density);
-			patch.SetFormation ();
-			PlaceOrePatch(patch, typeName);
-		} else {
-			Debug.Log("Could not place ore patch because " + leadX + "," + leadY+ " is a shore!");
-		}
-	}
-
-	void PlaceOrePatch(OrePatch _patch, string typeName)
-	{
-		// place the lead ore if there is no rock already on that tile
-		if (tiles [_patch.leadPositionX, _patch.leadPositionY].tileType == TileData.Types.empty) {
-
-			if (typeName == "rock"){
-				tiles [_patch.leadPositionX, _patch.leadPositionY] = new TileData (_patch.leadPositionX, _patch.leadPositionY, TileData.Types.rock, 6000, 10000);
-				SpawnDiscoverTile (typeName, new Vector3 (_patch.leadPositionX, _patch.leadPositionY, 0.0F), TileData.Types.rock);
-
-			}else if (typeName == "mineral"){
-				tiles [_patch.leadPositionX, _patch.leadPositionY] = new TileData (_patch.leadPositionX, _patch.leadPositionY, TileData.Types.mineral, 3000, 10000);
-				SpawnDiscoverTile (typeName, new Vector3 (_patch.leadPositionX, _patch.leadPositionY, 0.0F), TileData.Types.mineral);
-
-			}
-
-		}
-		if (_patch.neighborOreTiles != null && _patch.neighborOreTiles.Length > 0) {
-			// place the neighbors in their positions
+        // place the neighbors in their positions
+        if (_patch.neighborOreTiles != null && _patch.neighborOreTiles.Length > 0) {
+			
 			for (int i = 0; i < _patch.neighborOreTiles.Length; i++){
-				if (CheckIsInMapBounds(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY)){
-					if (!CheckForWater(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY)){
-						// Place this rock / mineral if there isn't a rock / mineral already on this tile
 
-						if (tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY].tileType == TileData.Types.empty){
-							if (typeName == "rock"){
-								tiles [_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = 
-                                    new TileData (_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY,TileData.Types.rock, 6000, 10000);
-								
-								SpawnDiscoverTile ("rock", new Vector3 (_patch.neighborOreTiles[i].posX,
-								                                        _patch.neighborOreTiles[i].posY, 0.0F), TileData.Types.rock);
-							}else if (typeName == "mineral"){
-								tiles  [_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = 
-                                    new TileData (_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.mineral, 3000, 10000);
-								
-								SpawnDiscoverTile ("mineral", new Vector3 (_patch.neighborOreTiles[i].posX,
-								                                        _patch.neighborOreTiles[i].posY, 0.0F), TileData.Types.mineral);
-								
-							}
-						}
-					}
-				}
-			}
+                if (CheckIsInMapBounds(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY))
+                {
+                    if (tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY].tileType == TileData.Types.empty)
+                    {
+                        switch (rType)
+                        {
+                            case Rock.RockType.sharp:
+                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50, 1);
+                                SpawnRock("sharp rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.sharp);
+                                break;
+                            case Rock.RockType.tube:
+                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50, 2);
+                                SpawnRock("tube rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.tube);
+                                break;
+                            case Rock.RockType.hex:
+                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50, 3);
+                                SpawnRock("hex rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.hex);
+                                break;
+                            default:
+                                tiles[_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY] = new TileData(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, TileData.Types.rock, 6000, 50, 1);
+                                SpawnRock("sharp rock", new Vector3(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY, 0.0F), Rock.RockType.sharp);
+                                break;
+                        }
+
+                        CreateUnWalkableBorder(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY);
+                    }
+                
+                }
+
+                
+            }
 		}
 
 	}
 
-	
+    void CreateUnWalkableBorder(int sourceX, int sourceY)
+    {
+        int width = 1;
+        int height = 1;
+        // This will only work previous to initializing the pathfinding graph
+        for (int w = 0; w <= width; w++)
+        {
+            for (int h = 0; h <= height; h++)
+            {
+                tiles[sourceX + w, sourceY + h].isWalkable = false;
+            }
+        }
 
-	/// <summary>
-	/// Damages the tile.
-	/// </summary>
-	/// <param name="x">The x coordinate.</param>
-	/// <param name="y">The y coordinate.</param>
-	/// <param name="damage">Damage.</param>
-	public void DamageTile(TileData tile, float damage)
+    }
+
+
+
+    /// <summary>
+    /// Damages the tile.
+    /// </summary>
+    /// <param name="x">The x coordinate.</param>
+    /// <param name="y">The y coordinate.</param>
+    /// <param name="damage">Damage.</param>
+    public void DamageTile(TileData tile, float damage)
 	{
 		// make sure there IS a tile there
 		if (spawnedTiles [tile.posX, tile.posY] != null) {
 
 			// If it has 0 or less HP left, kill tile
-			if (tile.hp <= 0) {
+			if (tile.tileStats.HP <= 0) {
 				if (tile.tileType == TileData.Types.capital){
 					// call mission failed
 					master_state.mState = MasterState_Manager.MasterState.MISSION_FAILED;
@@ -545,12 +535,12 @@ public class ResourceGrid : MonoBehaviour{
 
 				}
 			}else{
-				tile.hp -= damage;
-				Debug.Log("Tile: " + tile.tileType + " damaged for " + damage);
-				Debug.Log("It has " + tile.hp + " left!");
+				tile.tileStats.HP -= damage;
+				//Debug.Log("Tile: " + tile.tileType + " damaged for " + damage);
+				//Debug.Log("It has " + tile.hp + " left!");
 
                 // Check again if it needs to be killed, hp <= 0
-                if (tile.hp <= 0)
+                if (tile.tileStats.HP <= 0)
                 {
                     if (tile.tileType == TileData.Types.capital)
                     {
@@ -560,7 +550,9 @@ public class ResourceGrid : MonoBehaviour{
                     }
                     else
                     {
-                        SwapTileType(tile.posX, tile.posY, TileData.Types.empty);   // to KILL TILE I just swap it to an empty! ;)
+                        spawnedTiles[tile.posX, tile.posY].GetComponent<Building_Handler>().BreakBuilding(tile.tileStats.NanoBotCost); // Call Break Building from within the building's click handler
+
+                        //SwapTileType(tile.posX, tile.posY, TileData.Types.empty);   // to KILL TILE I just swap it to an empty! ;) < ----- NOPE! :P
 
                     }
                 }
@@ -579,8 +571,8 @@ public class ResourceGrid : MonoBehaviour{
 	/// <param name="y">The y coordinate.</param>
 	public TileData.Types GetTileType(int x, int y)
 	{
-		return tiles[x,y].tileType;
-	}
+        return tiles[x, y].tileType;
+    }
 
 	/// <summary>
 	/// Gets the tile game object from spawned tiles array.
@@ -590,11 +582,6 @@ public class ResourceGrid : MonoBehaviour{
 	/// <param name="y">The y coordinate.</param>
 	public GameObject GetTileGameObjFromWorldPos(Vector3 worldPos)
 	{
-		//if (spawnedTiles [x, y] != null)
-		//	return spawnedTiles [x, y];
-		//else
-		//	return null;
-
         Vector3 worldBottomLeft = transform.position - Vector3.right * mapSizeX / 2 - Vector3.up * mapSizeY / 2;
         Vector3 worldPoint = worldBottomLeft + Vector3.right * worldPos.x + Vector3.up * worldPos.y;
 
@@ -604,15 +591,33 @@ public class ResourceGrid : MonoBehaviour{
         return spawnedTiles[x, y];
     }
 
-    public int MineARock(int x, int y, int mineAmmnt, bool isHandDrill = false)
+    public GameObject GetTileGameObjFromIntCoords(int x, int y)
+    {
+        if (spawnedTiles[x, y] != null)
+            return spawnedTiles[x, y];
+        else
+            return null;
+    }
+
+    public Vector3 GetTileWorldPos(int x, int y)
+    {
+        Vector3 worldBottomLeft = transform.position - Vector3.right * mapSizeX / 2 - Vector3.up * mapSizeY / 2;
+        Vector3 worldPoint = worldBottomLeft + Vector3.right * x + Vector3.up * y;
+
+        return worldPoint;
+    }
+
+    public int ExtractFromTile(int x, int y, int ammnt, bool isHandDrill = false)
     {
         int resourceMined = 0;
 
-        if (tiles[x,y].maxResourceQuantity >= mineAmmnt)
+        if (tiles[x,y].maxResourceQuantity >= ammnt)
         {
             // mine it
-            tiles[x, y].maxResourceQuantity -= mineAmmnt;
-            if (tiles[x,y].maxResourceQuantity > 0)
+            tiles[x, y].maxResourceQuantity -= ammnt;
+            //Debug.Log(tiles[x, y].tileType + " extracted by " + ammnt + " out of " + tiles[x, y].maxResourceQuantity);
+
+            if (tiles[x, y].maxResourceQuantity > 0)
             {
                 // Spawn rock chunks IF this is a handrill
                 if (isHandDrill)
@@ -623,7 +628,7 @@ public class ResourceGrid : MonoBehaviour{
                         Rock_Handler rockHandler = spawnedTiles[x, y].GetComponent<Rock_Handler>();
                         rockHandler.ShrinkDownSize();
                         // chunks
-                        StartCoroutine(SpawnRockChunks(mineAmmnt, rockHandler.myRockType, spawnedTiles[x, y].transform.position));
+                        StartCoroutine(SpawnRockChunks(ammnt, rockHandler.myRockType, spawnedTiles[x, y].transform.position));
                     }
                 }
               
@@ -631,22 +636,22 @@ public class ResourceGrid : MonoBehaviour{
             else
             {
                 // Deplete the tile
-                SwapTileType(x, y, TileData.Types.empty);
+                SwapTileType(x, y, TileData.Types.empty, "Empty");
             }
 
-            resourceMined = mineAmmnt;
+            resourceMined = ammnt;
         }
         else if (tiles[x,y].maxResourceQuantity > 0)
         {
             // take what's left and deplete it
             resourceMined = tiles[x, y].maxResourceQuantity;
-            SwapTileType(x, y, TileData.Types.empty);
+            SwapTileType(x, y, TileData.Types.empty, "Empty");
         }
         else
         {
             // nothing left
             resourceMined = 0;
-            SwapTileType(x, y, TileData.Types.empty);
+            SwapTileType(x, y, TileData.Types.empty, "Empty");
         }
 
         return resourceMined;
@@ -666,13 +671,9 @@ public class ResourceGrid : MonoBehaviour{
                 SpriteRenderer sr = chunk.GetComponent<SpriteRenderer>();
                 sr.sprite = res_sprite_handler.GetChunkSprite(rockType);
 
-                // FOR NOW I'm painting the minerals yellow until I get a UNIQUE sprite for it
-                if (rockType == Rock.RockType.mineral)
-                    sr.color = Color.yellow;
-
 
                 Rigidbody2D rb = chunk.GetComponent<Rigidbody2D>();
-                int randomForceDirection = Random.Range(0, 4);
+                int randomForceDirection = pseudoRandom.Next(0, 5);
                 float forceAmmt = 10;
                 switch (randomForceDirection)
                 {
@@ -696,14 +697,17 @@ public class ResourceGrid : MonoBehaviour{
                 // Change their tag according to rock type
                 switch (rockType)
                 {
-                    case Rock.RockType.rock:
-                        chunk.tag = "Rock Chunk";
+                    case Rock.RockType.sharp:
+                        chunk.tag = "Sharp Chunk";
                         break;
-                    case Rock.RockType.mineral:
-                        chunk.tag = "Mineral Chunk";
+                    case Rock.RockType.hex:
+                        chunk.tag = "Hex Chunk";
+                        break;
+                    case Rock.RockType.tube:
+                        chunk.tag = "Tube Chunk";
                         break;
                     default:
-                        chunk.tag = "Rock Chunk";
+                        chunk.tag = "Sharp Chunk";
                         break;
                 }
            
@@ -717,6 +721,45 @@ public class ResourceGrid : MonoBehaviour{
 
     }
 
+    public void RegisterTowerBuildCB(Action<Transform> cbBattleAdd, Action<Transform> cbExtractionAdd, Action<Transform> cbBattleRemove, Action<Transform> cbUtilityRemove)
+    {
+        BattleTowerBuiltCB = cbBattleAdd;
+        UtilityTowerBuiltCB = cbExtractionAdd;
+
+        BattleTowerRemoveCB = cbBattleRemove;
+        UtilityTowerRemoveCB = cbUtilityRemove;
+    }
+
+    public void AddTowerBuiltForEnemyMaster(Transform towerTransform)
+    {
+
+        if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(towerTransform.position).tileName) == BuildingType.UTILITY)
+        {
+            Debug.Log("GRID: Registering utility tower built!");
+            if (UtilityTowerBuiltCB != null)
+                UtilityTowerBuiltCB(towerTransform);
+        }
+        else if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(towerTransform.position).tileName) == BuildingType.BATTLE)
+        {
+            Debug.Log("GRID: Registering battle tower built!");
+            if (BattleTowerBuiltCB != null)
+                BattleTowerBuiltCB(towerTransform);
+        }
+    }
+
+    public void RemoveTowerBuiltForEnemyMaster(Transform towerTransform)
+    {
+        if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(transform.position).tileName) == BuildingType.UTILITY)
+        {
+            if (UtilityTowerRemoveCB != null)
+                UtilityTowerRemoveCB(towerTransform);
+        }
+        else if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(transform.position).tileName) == BuildingType.BATTLE)
+        {
+            if (BattleTowerRemoveCB != null)
+                BattleTowerRemoveCB(towerTransform);
+        }
+    }
    
 
 	/// <summary>
@@ -725,9 +768,13 @@ public class ResourceGrid : MonoBehaviour{
 	/// <param name="x">The x coordinate.</param>
 	/// <param name="y">The y coordinate.</param>
 	/// <param name="newType">New type.</param>
-	public void SwapTileType(int x, int y, TileData.Types newType, int nanoBotCost = 0, float spriteSizeX = 0, float spriteSizeY = 0)
+	public void SwapTileType(int x, int y, TileData.Types newType, string bpName, int nanoBotCost = 0, float spriteSizeX = 0, float spriteSizeY = 0)
 	{
-        
+        TileStats tileStats = new TileStats();
+        if (bpName != "Empty")
+        {
+            tileStats = BlueprintDatabase.Instance.GetTileStats(bpName);
+        }
 		// MAKE SURE THIS IS NOT A SPAWNED TILE ALREADY!!! 
 		// So we don't change the grid tile data where we don't want to!
 		if (spawnedTiles [x, y] == null) {
@@ -740,10 +787,10 @@ public class ResourceGrid : MonoBehaviour{
             // round them down to ints
             int spriteWidth = Mathf.RoundToInt(spriteSizeX);
             int spriteHeight = Mathf.RoundToInt(spriteSizeY);
-            Debug.Log(newType + " 's sprite size x: " + spriteWidth + " and size y: " + spriteHeight);
+          
             switch (newType) {
-			case TileData.Types.extractor:
-
+			    case TileData.Types.extractor:
+              
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Extractor", newType, 0, 10000, 5, 5, 0, 0, nanoBotCost);
                     
@@ -751,72 +798,85 @@ public class ResourceGrid : MonoBehaviour{
                         tiles [x, y] = new TileData (x, y, "Extractor",newType, 0, 10000, 5, 5, 0, 0, nanoBotCost);
                    
 				break;
-			case TileData.Types.machine_gun:
-				    
+			    case TileData.Types.machine_gun:
+
                     if (spriteWidth > 0 && spriteHeight > 0)
                     {
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Machine Gun", newType, 0, 10000, 30, 5, 5, 0, nanoBotCost);
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Machine Gun", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                     }
                     else
                     {
-                        tiles[x, y] = new TileData(x, y, "Machine Gun", newType, 0, 10000, 30, 5, 5, 0, nanoBotCost);
+                        tiles[x, y] = new TileData(x, y, "Machine Gun", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                     }
                     break;
-			case TileData.Types.cannons:
+			    case TileData.Types.cannons:
                     if (spriteWidth > 0 && spriteHeight > 0)
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Cannons", newType, 0, 10000, 30, 5, 3, 0, nanoBotCost);
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Cannons", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                     else
-                        tiles [x, y] = new TileData (x, y, "Cannons", newType, 0, 10000, 30, 5, 3, 0, nanoBotCost);
+                        tiles [x, y] = new TileData (x, y, "Cannons", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
 				break;
-			case TileData.Types.harpoonHall:
+			    case TileData.Types.harpoonHall:
                     if(spriteWidth > 0 && spriteHeight > 0)
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Harpooner's Hall", newType, 0, 10000, 50, 6, 0, 0, nanoBotCost);
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Harpooner's Hall", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                     else
-				        tiles [x, y] = new TileData (x, y, "Harpooner's Hall", newType, 0, 10000, 50, 6, 0, 0, nanoBotCost);
+				        tiles [x, y] = new TileData (x, y, "Harpooner's Hall", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
 				break;
-			case TileData.Types.farm_s:
+			    case TileData.Types.farm_s:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Seaweed Farm", newType, 0, 10000, 25, 1, 0, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Seaweed Farm", newType, 0, 10000, 25, 1, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.storage:
+			    case TileData.Types.storage:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Storage", newType, 0, 10000, 35, 2, 0, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Storage", newType, 0, 10000, 35, 2, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.desalt_s:
+			    case TileData.Types.desalt_s:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Desalination Pump", newType, 0, 10000, 15, 1, 0, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Desalination Pump", newType, 0, 10000, 15, 1, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.sniper:
+			    case TileData.Types.sniper:
                     if (spriteWidth > 0 && spriteHeight > 0)
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Sniper Gun", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Sniper Gun", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                     else
-                        tiles [x, y] = new TileData (x, y, "Sniper Gun", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+                        tiles [x, y] = new TileData (x, y, "Sniper Gun", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
 				break;
-			case TileData.Types.seaWitch:
+			    case TileData.Types.seaWitch:
                     if (spriteWidth > 0 && spriteHeight > 0)
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Sea-Witch Crag", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Sea-Witch Crag", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
                     else
-                        tiles [x, y] = new TileData (x, y, "Sea-Witch Crag", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
+                        tiles [x, y] = new TileData (x, y, "Sea-Witch Crag", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
 				break;
-			case TileData.Types.nutrient:
+			    case TileData.Types.nutrient:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Nutrient Generator", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Nutrient Generator", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.generator:
+			    case TileData.Types.generator:
                     if (spriteWidth > 0 && spriteHeight > 0)
                         DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Energy Generator", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
                     else
                         tiles [x, y] = new TileData (x, y, "Energy Generator", newType, 0, 10000, 0, 0, 0, 0, nanoBotCost);
 				break;
-			case TileData.Types.building:
+                case TileData.Types.terraformer:
+                    if (spriteWidth > 0 && spriteHeight > 0)
+                    {
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Terraformer", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
+                        // Keep a record of the Terraformer's main tile
+                        terraformerTile = tiles[x, y];
+                    }
+                    else
+                        tiles[x, y] = new TileData(x, y, "Terraformer", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
+
+                    terraformer_built = true;
+                    break;
+
+                case TileData.Types.building:
 				tiles [x, y] = new TileData (x, y, newType, 0, 10000);
 				break;
 			default:
@@ -827,12 +887,19 @@ public class ResourceGrid : MonoBehaviour{
             // Discover the tile to display it
             DiscoverTile(x, y, true, spriteWidth, spriteHeight);
 
-            // IF tile is a Building with an ENERGY COST, apply it to resources
-            //if (tiles[x,y].energyCost > 0){
-            //	playerResources.totalEnergyCost = playerResources.totalEnergyCost + tiles[x,y].energyCost;
+            //if (BlueprintDatabase.Instance.GetTowerType(bpName) == BuildingType.BATTLE)
+            //{
+            //    if (BattleTowerBuiltCB != null)
+            //        BattleTowerBuiltCB(spawnedTiles[x, y].transform);
+            //}
+            //else if (BlueprintDatabase.Instance.GetTowerType(bpName) == BuildingType.UTILITY)
+            //{
+            //    if (UtilityTowerBuiltCB != null)
+            //        UtilityTowerBuiltCB(spawnedTiles[x, y].transform);
             //}
 
-        } else { 
+        }
+        else { 
 
 			// if we are swapping an already spawned tile we are MOST LIKELY turning it into an empty tile
 			// BUT if this was a building that has an ENERGY cost that must be reflected in Player resources 
@@ -841,79 +908,72 @@ public class ResourceGrid : MonoBehaviour{
 			//	playerResources.totalEnergyCost = playerResources.totalEnergyCost - tiles[x,y].energyCost;
 			//}
 
-			// ALSO if it's a Farm we need to subtract its FOOD production and its WATER consumed
-			if (playerResources.foodProducedPerDay > 0){
+//			// ALSO if it's a Farm we need to subtract its FOOD production and its WATER consumed
+//			if (playerResources.foodProducedPerDay > 0){
 
-				if (tiles[x,y].tileType == TileData.Types.farm_s || tiles[x,y].tileType == TileData.Types.nutrient){
+//				if (tiles[x,y].tileType == TileData.Types.farm_s || tiles[x,y].tileType == TileData.Types.nutrient){
 
-					FoodProduction_Manager foodM = spawnedTiles [x, y].GetComponent<FoodProduction_Manager>();
-					playerResources.CalculateFoodProduction(foodM.foodProduced, foodM.productionRate, foodM.waterConsumed, true);
+//					FoodProduction_Manager foodM = spawnedTiles [x, y].GetComponent<FoodProduction_Manager>();
+//					playerResources.CalculateFoodProduction(foodM.foodProduced, foodM.productionRate, foodM.waterConsumed, true);
 
-				}
-			}
+//				}
+//			}
 
-			// AND if it's a STORAGE we need to subtract all the ORE and WATER from the resources
-			if (tiles[x,y].tileType == TileData.Types.storage){
+//			// AND if it's a STORAGE we need to subtract all the ORE and WATER from the resources
+//			if (tiles[x,y].tileType == TileData.Types.storage){
 
-				Storage storage = spawnedTiles[x,y].GetComponent<Storage>();
-//				
-				// remove the storage building from the list
-				playerResources.RemoveStorageBuilding(storage);
-			}
+//				Storage storage = spawnedTiles[x,y].GetComponent<Storage>();
+////				
+//				// remove the storage building from the list
+//				playerResources.RemoveStorageBuilding(storage);
+//			}
 
-			// If it's an EXTRACTOR also need to subtract from Ore Produced
-			if (tiles[x,y].tileType == TileData.Types.extractor){
+//			// If it's an EXTRACTOR also need to subtract from Ore Produced
+//			if (tiles[x,y].tileType == TileData.Types.extractor){
 
-				Extractor extra = spawnedTiles [x, y].GetComponent<Extractor>();
+//				Extractor extra = spawnedTiles [x, y].GetComponent<Extractor>();
 
-				playerResources.CalculateOreProduction(extra.extractAmmnt, extra.extractRate, true);
-			}
+//				playerResources.CalculateOreProduction(extra.extractAmmnt, extra.extractRate, true);
+//			}
 
-			// Same thing for a WATER PUMP
-			if (tiles[x,y].tileType == TileData.Types.desalt_s || tiles[x,y].tileType == TileData.Types.desalt_m 
-			    || tiles[x,y].tileType == TileData.Types.desalt_l){
+//			// Same thing for a WATER PUMP
+//			if (tiles[x,y].tileType == TileData.Types.desalt_s || tiles[x,y].tileType == TileData.Types.desalt_m 
+//			    || tiles[x,y].tileType == TileData.Types.desalt_l){
 
-				DeSalt_Plant pump = spawnedTiles [x, y].GetComponent<DeSalt_Plant>();
+//				DeSalt_Plant pump = spawnedTiles [x, y].GetComponent<DeSalt_Plant>();
 
-				playerResources.CalculateWaterProduction(pump.waterPumped, pump.pumpRate, true);
-			}
+//				playerResources.CalculateWaterProduction(pump.waterPumped, pump.pumpRate, true);
+//			}
 
-			// If it's a ENERGY GENERATOR we have to subtract Energy //TODO: Add an energy produced per day panel
-			if (tiles[x,y].tileType == TileData.Types.generator){
+//			// If it's a ENERGY GENERATOR we have to subtract Energy //TODO: Add an energy produced per day panel
+//			if (tiles[x,y].tileType == TileData.Types.generator){
 
-				Energy_Generator gen = spawnedTiles [x,y].GetComponent<Energy_Generator>();
+//				Energy_Generator gen = spawnedTiles [x,y].GetComponent<Energy_Generator>();
 
-				playerResources.ChangeResource("Energy", -gen.energyUnitsGenerated);
-			}
+//				playerResources.ChangeResource("Energy", -gen.energyUnitsGenerated);
+//			}
 
 
             //*********   NANO BOTS RETURNED:
 
             // Return bots... THIS WILL NEED TO EQUAL A NANOBOTS COST LATER, JUST USING 10
-            int returnNanoCost = tiles[x, y].nanoBotCost;
+            int returnNanoCost = tiles[x, y].tileStats.NanoBotCost;
 
             NanoBuilding_Handler nanoBuilder = Hero.GetComponent<NanoBuilding_Handler>();
-            if (nanoBotCost > 0)
-                nanoBuilder.nanoBots += nanoBotCost;
-            else
-                nanoBuilder.nanoBots += returnNanoCost;
+        
+            nanoBuilder.nanoBots += returnNanoCost;
 
             Debug.Log("GRID: Returning " + returnNanoCost + " NANOBOTS ");
 
 
 
-
-            //*********   POOL SPAWNED TILE:
-
-            //			Destroy(spawnedTiles[x,y].gameObject);
-            objPool.PoolObject(spawnedTiles[x, y].gameObject);
-
-
-
             // ***********  DEFINE NEW EMPTY TILES:
 
+            // Store the gameobject before doing anything to it.
+            GameObject tileToBeDestroyed = spawnedTiles[x, y];
+
             // If a tile was set as a group of multiple tiles to cover the space of its sprite, we nee to turn ALL of them to empty
-            if (spriteSizeX > 0 || spriteSizeX > 0) // < ----- the way we are swapping for an empty tile, these are always = 0 in this case
+            if (spriteSizeX > 0 || spriteSizeY > 0) // < ----- the way we are swapping for an empty tile, these are always = 0 in this case
             {
 
                 tiles[x, y] = new TileData(x, y, newType, 0, 1);
@@ -921,12 +981,13 @@ public class ResourceGrid : MonoBehaviour{
             else
             {
                 // we need the size of the tile that WAS here. We can get the gameobject from spawnedTiles[,], and from that get the Sprite
-                if (spawnedTiles[x, y].GetComponent<SpriteRenderer>() != null)
+                if (tileToBeDestroyed != null)
                 {
+                   
                     int width = Mathf.RoundToInt(spawnedTiles[x, y].GetComponent<SpriteRenderer>().sprite.bounds.size.x);
                     int height = Mathf.RoundToInt(spawnedTiles[x, y].GetComponent<SpriteRenderer>().sprite.bounds.size.y);
                     // Define these as empty using this new width and height (doing this since the arguments passed in would be 0 for an empty SwapTile)
-                    DefineMultipleEmptyTiles(x, y, width, height);
+                    DefineMultipleEmptyTiles(x, y, width, height, tileToBeDestroyed);
                 }
                 else
                 {
@@ -936,53 +997,107 @@ public class ResourceGrid : MonoBehaviour{
 
 
             }
-			
-            // ******** DEFINE AS NULL GAMEOBJECT
-            
-            // Make it null as a spawnedTiles
-            spawnedTiles[x, y] = null;
+
+
+            //*********   POOL SPAWNED TILE:
+
+            // Use the stored gameobject variable from above to pool it. This represents the base tile of this object, the other placemarkers in the spawnedTiles array have been removed.
+            objPool.PoolObject(tileToBeDestroyed);
+        
         }
 	}
 
     void DefineMultipleTiles(int x, int y, int spriteWidth, int spriteHeight, string name, TileData.Types newType, int quantity, int moveCost, float hp, float defence, float attack, float shield, int nanoBotCost  )
     {
-        for (int w = 0; w < spriteWidth; w++)
+        for (int w = -(spriteWidth - 1); w < spriteWidth; w++)
         {
             for (int h = 0; h < spriteHeight; h++)
             {
-                tiles[x + w, y + h] = new TileData(x + w, y + h, name, newType, quantity, moveCost, hp, defence, attack, shield, nanoBotCost);
-                
-                grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable;
+                // ******** MAKE SURE we are not changing tiles that are NOT empty
+                if(tiles[x + w, y + h].tileType == TileData.Types.empty)
+                {
+                    tiles[x + w, y + h] = new TileData(x + w, y + h, name, newType, quantity, moveCost, hp, defence, attack, shield, nanoBotCost);
+
+                    grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable;
+                }
+              
 
             }
 
         }
     }
 
-    void DefineMultipleEmptyTiles(int x, int y, int spriteWidth, int spriteHeight)
+    //void DefineMultipleTilesAsGameObjects(int x, int y, int spriteWidth, int spriteHeight, GameObject tileGameObj)
+    //{
+    //    for (int w = -(spriteWidth - 1); w < spriteWidth; w++)
+    //    {
+    //        for (int h = -1; h < spriteHeight; h++)
+    //        {
+    //            spawnedTiles[x + w, y + h] = tileGameObj;
+    //        }
+    //    }
+    //}
+
+    void DefineMultipleEmptyTiles(int x, int y, int spriteWidth, int spriteHeight, GameObject oldGameObj)
     {
-        for (int w = 0; w < spriteWidth; w++)
+        // Store the current tiletype to check against
+        TileData.Types formerType = tiles[x, y].tileType;
+        Debug.Log("Defining multiple empty tiles of " + formerType);
+        for (int w = -(spriteWidth - 1); w < spriteWidth; w++)
         {
             for (int h = 0; h < spriteHeight; h++)
             {
-                tiles[x + w, y + h] = new TileData(x + w, y + h, TileData.Types.empty, 0, 0);
+                // ONLY swap the tiles that are equal to tile type stored above and the same gameobject
+                if (tiles[x + w, y + h].tileType == formerType && spawnedTiles[x + w, y + h] == oldGameObj)
+                {
+                    tiles[x + w, y + h] = new TileData(x + w, y + h, TileData.Types.empty, 0, 1);
 
-                grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable;
+                    grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable;
+
+                    if (spawnedTiles[x + w, y + h] != null)
+                        spawnedTiles[x + w, y + h] = null;
+                }
+
             }
 
         }
     }
+
+    //void DefineResourceTiles(int x, int y, int areaWidth, int areaHeight, TileData.Types newType, int quantity)
+    //{
+    //    for (int w = 0; w < areaWidth; w++)
+    //    {
+    //        for (int h = 0; h < areaHeight; h++)
+    //        {
+    //            // ******** MAKE SURE we are not changing tiles that are NOT empty
+    //            if (tiles[x + w, y + h].tileType == TileData.Types.empty)
+    //            {
+    //                tiles[x + w, y + h] = new TileData(x, y, newType, quantity, 10000);
+
+    //               // grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable; < ----------- NOT affecting the grid here because it will become unwalkable when Grid is initialized on Start()
+    //            }
+
+
+    //        }
+
+    //    }
+    //}
+
+
 
 	public void DiscoverTile(int x, int y, bool trueIfSwapping, int spriteWidth = 0, int spriteHeight = 0)
 	{
-		if (spawnedTiles [x, y] == null) { // if it's null it means it hasn't been spawned
+		if (spawnedTiles [x, y] == null) { // If it's null it means it hasn't been spawned
+
 			//Dont Spawn a tile if the type is Empty
 			// the space will still be walkable because it will still be mapped on the Node Graph
 			
-			if (tiles [x, y].tileType != TileData.Types.empty) {
+			if (tiles [x, y].tileType != TileData.Types.empty)
+            {
 				SpawnDiscoverTile (tiles [x, y].tileName, new Vector3 (x, y, 0.0f), tiles [x, y].tileType, spriteWidth, spriteHeight);
 				// set it so it knows it has been spawned
 				tiles [x, y].hasBeenSpawned = true;
+
 			}
 		} else { // it HAS been spawned
 			if (trueIfSwapping){
@@ -990,7 +1105,7 @@ public class ResourceGrid : MonoBehaviour{
 				// before adding the new one
 				Destroy (spawnedTiles [x, y].gameObject);
 				SpawnDiscoverTile (tiles [x, y].tileName, new Vector3 (x, y, 0.0f), tiles [x, y].tileType, spriteWidth, spriteHeight);
-			}
+            }
 		}
 	}
 
@@ -1001,8 +1116,8 @@ public class ResourceGrid : MonoBehaviour{
 		// spawn the half tile from the pool
 		GameObject discoverTile = objPool.GetObjectForType ("Half_Tile", false, Vector3.zero);
         if (discoverTile != null) {
-            discoverTile.transform.position = position;
             DiscoverTile dTile = discoverTile.GetComponent<DiscoverTile>();
+            dTile.transform.position = position;
             dTile.objPool = objPool;
             dTile.master_state = master_state;
             dTile.r_sprite_handler = res_sprite_handler;
@@ -1017,8 +1132,21 @@ public class ResourceGrid : MonoBehaviour{
             }
 
         }
-
 	}
+
+    void SpawnRock(string rockName, Vector3 position, Rock.RockType rockType)
+    {
+        GameObject discoverTile = objPool.GetObjectForType("Half_Tile", false, Vector3.zero);
+        if (discoverTile != null)
+        {
+            DiscoverTile dTile = discoverTile.GetComponent<DiscoverTile>();
+            dTile.transform.position = position;
+            dTile.objPool = objPool;
+            dTile.master_state = master_state;
+            dTile.r_sprite_handler = res_sprite_handler;
+            dTile.DiscoverRock(rockName, (int)position.x, (int)position.y, tileHolder, rockType);
+        }
+    }
 
 	/// <summary>
 	/// Adds the credits for kill to Resources
@@ -1050,7 +1178,7 @@ public class ResourceGrid : MonoBehaviour{
                 Vector3 worldPoint = worldBottomLeft + Vector3.right * x + Vector3.up * y;
                 //print("World Point: " + worldPoint);
                 bool walkable = tiles[x, y].isWalkable;
-                grid[x, y] = new Node(walkable, worldPoint, x, y);
+                grid[x, y] = new Node(walkable, worldPoint, x, y, tiles[x, y].movementCost);
             }
         }
     }
@@ -1074,7 +1202,18 @@ public class ResourceGrid : MonoBehaviour{
         int x = Mathf.RoundToInt(worldPoint.x);
         int y = Mathf.RoundToInt(worldPoint.y);
 
-        return tiles[x, y];
+        if (CheckIsInMapBounds(x, y))
+        {
+            return tiles[x, y];
+        }
+        else
+            return null;
+    }
+
+    public void SwitchTileWalkability (int x, int y, bool trueIfWalkable)
+    {
+        tiles[x, y].isWalkable = trueIfWalkable;
+        grid[x, y].isWalkable = trueIfWalkable;
     }
 
     public List<Node> GetNeighbors(Node node)

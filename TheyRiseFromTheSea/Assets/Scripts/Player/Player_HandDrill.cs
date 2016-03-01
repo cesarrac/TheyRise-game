@@ -44,12 +44,15 @@ public class Player_HandDrill : MonoBehaviour {
         miningCountDown = miningTime;
     }
 
+
     void Start()
     {
-        
 
-        resourceGrid = GetComponentInParent<Player_MoveHandler>().resourceGrid;
-        objPool = GetComponentInParent<Player_HeroAttackHandler>().objPool;
+        sightStart = GetComponentInParent<Player_HeroAttackHandler>().sightStart;
+
+        resourceGrid = ResourceGrid.Grid;
+
+        objPool = ObjectPool.instance;
 
         lineR = sightStart.GetComponent<LineRenderer>();
         // Set line renderer sorting layer
@@ -220,9 +223,9 @@ public class Player_HandDrill : MonoBehaviour {
 
     void Extract(int x, int y)
     {
-        if (resourceGrid.MineARock(x, y, mineAmmnt, true) > 0)
+        if (resourceGrid.ExtractFromTile(x, y, mineAmmnt, true) > 0)
         {
-            Debug.Log("Extracting " + resourceGrid.MineARock(x, y, mineAmmnt) + " out of " + resourceGrid.tiles[x,y].maxResourceQuantity);
+            Debug.Log("Extracting " + resourceGrid.ExtractFromTile(x, y, mineAmmnt) + " out of " + resourceGrid.tiles[x,y].maxResourceQuantity);
         }
        
        

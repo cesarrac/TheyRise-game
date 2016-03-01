@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class MasterState_Manager : MonoBehaviour {
 
@@ -12,7 +13,7 @@ public class MasterState_Manager : MonoBehaviour {
 	/// - Pause CoRoutines in other scripts by changing Master State
 	/// </summary>
 
-	public enum MasterState { WAITING, LOADING, START, PAUSED, MISSION_FAILED, MISSION_SUCCESS, CONTINUE, QUIT }
+	public enum MasterState { WAITING, LOADING, START, PAUSED, MISSION_FAILED, PLAYER_DEAD,  MISSION_SUCCESS, ONSHIP,CONTINUE, ON_EQUIP, ON_BLUEPRINTS, QUIT }
 
 	private MasterState _mState = MasterState.WAITING;
 
@@ -23,23 +24,39 @@ public class MasterState_Manager : MonoBehaviour {
 
 	public GameObject missionFailedPanel;
 
+    public static MasterState_Manager Instance { get; protected set; }
+
 	void Awake () 
 	{
-		game_master = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster> ();
+        Instance = this;
 
-		// If for some reason the mission failed panel is still active, deactivate it
-		if (missionFailedPanel) {
-			if (missionFailedPanel.activeSelf)
-				missionFailedPanel.SetActive(false);
-		}
+
+
+        // ON PLANET:
+        if (SceneManager.GetActiveScene().name == "Level_Planet")
+        {
+            // If for some reason the mission failed panel is still active, deactivate it
+            if (missionFailedPanel)
+            {
+                if (missionFailedPanel.activeSelf)
+                    missionFailedPanel.SetActive(false);
+            }
+            mState = MasterState.START;
+        }
+        else if (SceneManager.GetActiveScene().name == "Level_CENTRAL")
+        {
+            _mState = MasterState.ONSHIP;
+        }
 	}
 	
+    void Start()
+    {
+        if (!game_master) game_master = GameMaster.Instance;
+    }
 
 	void Update ()
 	{
-		// QUIT:
-		if (Input.GetKey ("escape"))
-			mState = MasterState.QUIT;
+		
 
 		MasterStateMachine (mState);
 	}
@@ -68,9 +85,21 @@ public class MasterState_Manager : MonoBehaviour {
 			// Pause game and tell GameMaster to load level or go back to ship level
 			MissionFailed();
 			break;
-		case MasterState.MISSION_SUCCESS:
+        case MasterState.PLAYER_DEAD:
+            // Pause game and tell GameMaster to load level or go back to ship level
+            MissionFailed();
+            break;
+        case MasterState.MISSION_SUCCESS:
+                // Load a progress scene where the player sees what items they got and what they have left
+                MissionSuccess();
 			break;
-		case MasterState.QUIT:
+        case MasterState.ONSHIP:
+                if (Time.timeScale == 0)
+                {
+                    Time.timeScale = 1;
+                }
+            break;
+            case MasterState.QUIT:
 			//TODO: Here we would begin the save progress function and then quit the application
 			Application.Quit();
 			break;
@@ -90,6 +119,26 @@ public class MasterState_Manager : MonoBehaviour {
 			missionFailedPanel.SetActive(true);
 		}
 	}
+
+    void MissionSuccess()
+    {
+        //if (Time.timeScale != 0)
+        //{
+        //    UI_Manager.Instance.DisplayVictoryPanel();
+
+        //    StopAllCoroutines();
+
+        //    Time.timeScale = 0;
+        //}
+        UI_Manager.Instance.DisplayVictoryPanel();
+
+        // Notify the Launchpad/Transporter that it can now launch safely by unlocking its controls.
+       // Transporter_Handler.instance.LockControls(false);
+
+        Debug.Log("MASTER STATE: Unlocking Transporter controls!");
+
+        mState = MasterState.WAITING;
+    }
 
 	// BUTTONS:
 	public void PauseButton()
@@ -111,8 +160,21 @@ public class MasterState_Manager : MonoBehaviour {
 		game_master.MissionRestart ();
 	}
 
+
 	public void ReturnToShip()
 	{
-		game_master.GoBackToShip ();
+        _mState = MasterState.ONSHIP;
+		game_master.NewGameLoadShip ();
 	}
+
+    public void NewCharacter()
+    {
+        _mState = MasterState.ONSHIP;
+        game_master.NewCharacterScreen();
+    }
+
+    public void QuitGame()
+    {
+      mState = MasterState.QUIT;
+    }
 }

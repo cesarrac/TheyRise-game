@@ -13,8 +13,6 @@ public class Mesh_Generator : MonoBehaviour {
 
 	public GameObject _FLOOR;
 	
-	public bool is2D;
-	
 	List<Vector3> vertices;
 	List<int> triangles;
 	
@@ -69,13 +67,10 @@ public class Mesh_Generator : MonoBehaviour {
 		mesh.uv = uvs;
 
 		
-		// NOTE: should only create walls if it is a 3D camera view
-		if (is2D) {
-			Generate2DColliders();
-		} else {
-			CreateWallMesh ();
-			
-		}
+
+        // Generate 2D Edge Colliders
+	    Generate2DColliders();
+
 		
 	}
 
@@ -116,6 +111,9 @@ public class Mesh_Generator : MonoBehaviour {
         islandMesh.triangles = landTriangles;
         islandMesh.RecalculateNormals();
 
+        // Give the Mesh to the ground's mesh collider
+        ground.GetComponent<MeshCollider>().sharedMesh = islandMesh;
+
         GenerateShoreWaterMesh(islandMesh, map);
 
     }
@@ -124,56 +122,108 @@ public class Mesh_Generator : MonoBehaviour {
     {
 
         shoreWatermap.GetComponent<MeshFilter>().mesh = newMesh;
-        //Mesh wallMesh;
-        //shoreWatermap.GetComponent<MeshFilter>().mesh = wallMesh = new Mesh();
-        //wallMesh.name = "Shore Mesh";
+        //Mesh shoreMesh;
+        //shoreWatermap.GetComponent<MeshFilter>().mesh = shoreMesh = new Mesh();
+        //shoreMesh.name = "Shore Mesh";
 
-        //CalculateMeshOutlines();
+        ////CalculateMeshOutlines();
 
-        //List<Vector3> wallVertices = new List<Vector3>();
-        //List<int> wallTriangles = new List<int>();
+        //// Each of the shore vertices have to point to each point in of the outline
 
+        //List<Vector3> shoreVerts = new List<Vector3>();
+        //List<int> shoreTris = new List<int>();
 
+        //// Vector3[] wallVerts = new Vector3[outlines.Count];
+        //List<Vector2> uvs = new List<Vector2>();
+
+        //// int triCount = 0;
         //foreach (List<int> outline in outlines)
         //{
-        //    for (int i = 0; i < outline.Count - 1; i++)
+        //    for (int i = 0; i < outline.Count; i++)
         //    {
-        //        int startIndex = wallVertices.Count;
-        //        wallVertices.Add(vertices[outline[i]]); // left vertex
-        //        wallVertices.Add(vertices[outline[i + 1]]); // right vertex
-        //        wallVertices.Add(vertices[outline[i]] + Vector3.up); // top left
-        //        wallVertices.Add(vertices[outline[i + 1]] + Vector3.up); // top right
 
-        //        // First triangle
-        //        wallTriangles.Add(startIndex + 0);
-        //        wallTriangles.Add(startIndex + 1);
-        //        wallTriangles.Add(startIndex + 3);
-        //        // Second triangle
-        //        wallTriangles.Add(startIndex + 0);
-        //        wallTriangles.Add(startIndex + 3);
-        //        wallTriangles.Add(startIndex + 2);
+        //        Vector3 v = new Vector3(vertices[outline[i]].x, vertices[outline[i]].z, 0);
+        //        shoreVerts.Add(v);
+        //        uvs.Add(new Vector2(v.x, v.y));
+
+        //        shoreTris.Add(i);
+        //        shoreTris.Add(i + 2);
+        //        shoreTris.Add(i + 3);
+
+        //        shoreTris.Add(i);
+        //        shoreTris.Add(i + 3);
+        //        shoreTris.Add(i + 4);
+
+        //        shoreTris.Add(i);
+        //        shoreTris.Add(i + 4);
+        //        shoreTris.Add(i + 5);
 
         //    }
-        //}
 
-        //wallMesh.vertices = wallVertices.ToArray();
-        //wallMesh.triangles = wallTriangles.ToArray();
-        //wallMesh.RecalculateNormals();
+        //    shoreMesh.vertices = shoreVerts.ToArray();
+        //    shoreMesh.uv = uvs.ToArray();
 
-        //int tileAmount = 32;
-        //Vector2[] uvs = new Vector2[wallVertices.Count];
-        //for (int i = 0; i < wallVertices.Count; i++)
-        //{
-        //    float percentX = Mathf.InverseLerp(-map.GetLength(0) / 2, map.GetLength(0) / 2, wallVertices[i].x) * tileAmount;
-        //    float percentY = Mathf.InverseLerp(-map.GetLength(0) / 2, map.GetLength(0) / 2, wallVertices[i].z) * tileAmount;
-        //    uvs[i] = new Vector2(percentX, percentY);
-        //}
-        //wallMesh.uv = uvs;
+        //    shoreMesh.triangles = shoreTris.ToArray();
+        //    shoreMesh.RecalculateNormals();
 
 
+            //int[] shoreTriangles = new int[map.GetLength(0) * map.GetLength(1) * 6];
+            //for (int ti = 0, vi = 0, y = 0; y < map.GetLength(1); y++, vi++)
+            //{
+            //    for (int x = 0; x < map.GetLength(0); x++, ti += 6, vi++)
+            //    {
+            //        shoreTriangles[ti] = vi;
+            //        shoreTriangles[ti + 3] = shoreTriangles[ti + 2] = vi + 1;
+            //        shoreTriangles[ti + 4] = shoreTriangles[ti + 1] = vi + map.GetLength(0) + 1;
+            //        shoreTriangles[ti + 5] = vi + map.GetLength(0) + 2;
+            //    }
+            //}
+
+            //shoreMesh.triangles = shoreTriangles;
+            //shoreMesh.RecalculateNormals();
+
+
+            //foreach (List<int> outline in outlines)
+            //{
+            //    for (int i = 0; i < outline.Count - 1; i++)
+            //    {
+            //        int startIndex = wallVertices.Count;
+            //        wallVertices.Add(vertices[outline[i]]); // left vertex
+            //        wallVertices.Add(vertices[outline[i + 1]]); // right vertex
+            //        wallVertices.Add(vertices[outline[i]] + Vector3.up); // top left
+            //        wallVertices.Add(vertices[outline[i + 1]] + Vector3.up); // top right
+
+            //        // First triangle
+            //        wallTriangles.Add(startIndex + 0);
+            //        wallTriangles.Add(startIndex + 1);
+            //        wallTriangles.Add(startIndex + 3);
+            //        // Second triangle
+            //        wallTriangles.Add(startIndex + 0);
+            //        wallTriangles.Add(startIndex + 3);
+            //        wallTriangles.Add(startIndex + 2);
+
+            //    }
+            //}
+
+            //wallMesh.vertices = wallVertices.ToArray();
+            //wallMesh.triangles = wallTriangles.ToArray();
+            //wallMesh.RecalculateNormals();
+
+            //int tileAmount = 32;
+            //Vector2[] uvs = new Vector2[wallVertices.Count];
+            //for (int i = 0; i < wallVertices.Count; i++)
+            //{
+            //    float percentX = Mathf.InverseLerp(-map.GetLength(0) / 2, map.GetLength(0) / 2, wallVertices[i].x) * tileAmount;
+            //    float percentY = Mathf.InverseLerp(-map.GetLength(0) / 2, map.GetLength(0) / 2, wallVertices[i].z) * tileAmount;
+            //    uvs[i] = new Vector2(percentX, percentY);
+            //}
+            //wallMesh.uv = uvs;
 
 
 
+
+
+       // }
     }
     void Generate2DColliders()
 	{
@@ -250,40 +300,7 @@ public class Mesh_Generator : MonoBehaviour {
 //		}
 //	}
 
-	void CreateWallMesh()
-	{
-		
-		CalculateMeshOutlines ();
-		
-		List<Vector3> wallVertices = new List<Vector3> ();
-		List<int> wallTriangles = new List<int> ();
-		Mesh wallMesh = new Mesh ();
-		float wallHeight = 5;
-		
-		foreach (List <int> outline in outlines) {
-			for (int i =0 ; i < outline.Count -1; i++){
-				int startIndex = wallVertices.Count;
-				wallVertices.Add(vertices[outline[i]]); // left vertex
-				wallVertices.Add(vertices[outline[i + 1]]); // right vertex
-				wallVertices.Add(vertices[outline[i]] - Vector3.up * wallHeight); // bottom left
-				wallVertices.Add(vertices[outline[i + 1]] - Vector3.up * wallHeight); // bottom right
-				
-				// First triangle
-				wallTriangles.Add(startIndex + 0);
-				wallTriangles.Add(startIndex + 2);
-				wallTriangles.Add(startIndex + 3);
-				// Second triangle
-				wallTriangles.Add(startIndex + 3);
-				wallTriangles.Add(startIndex + 1);
-				wallTriangles.Add(startIndex + 0);
-				
-			}
-		}
-		
-		wallMesh.vertices = wallVertices.ToArray ();
-		wallMesh.triangles = wallTriangles.ToArray ();
-		walls.mesh = wallMesh;
-	}
+
 	
 	void TriangulateSquare(Square square) {
 		switch (square.configuration) {
@@ -423,9 +440,12 @@ public class Mesh_Generator : MonoBehaviour {
 				}
 			}
 		}
-	}
-	
-	void FollowOutline(int vertexIndex, int outlineIndex)
+        
+    }
+
+
+
+    void FollowOutline(int vertexIndex, int outlineIndex)
 	{
 		outlines [outlineIndex].Add (vertexIndex);
 		checkedVertices.Add (vertexIndex);

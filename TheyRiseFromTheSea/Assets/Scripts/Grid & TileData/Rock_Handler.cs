@@ -3,13 +3,14 @@ using System.Collections;
 
 public class Rock_Handler : MonoBehaviour {
 
-    Rock myRock;
+    public Rock myRock;
 
     SpriteRenderer sprite_renderer;
 
     public Resource_Sprite_Handler res_sprite_handler;
 
-    public Rock.RockType myRockType { get; private set; }
+    public Rock.RockType myRockType;
+
 
     void Awake()
     {
@@ -19,6 +20,7 @@ public class Rock_Handler : MonoBehaviour {
     public void InitRock(Rock.RockType _type, Rock.RockSize _size)
     {
         myRock = new Rock(_type, _size);
+        myRockType = myRock._rockType;
     } 
 
     public void ShrinkDownSize()

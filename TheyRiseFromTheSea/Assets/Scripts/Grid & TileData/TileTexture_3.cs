@@ -2,8 +2,190 @@
 using System.Collections;
 using System.Collections.Generic;
 
+
+[System.Serializable]
+public class GraphicTile
+{
+    // Tile attributes/types:
+
+    public enum TilePositionTypes       // Defines their position using the tile's world coordinates
+    {
+        BOTTOM, TOP, LEFT, RIGHT,
+        BOTTOM_LEFT_CORNER, BOTTOM_RIGHT_CORNER,
+        TOP_LEFT_CORNER, TOP_RIGHT_CORNER,
+        LEFT_BOTTOM_DIAG, RIGHT_BOTTOM_DIAG,
+        LEFT_TOP_DIAG, RIGHT_TOP_DIAG, CENTER, CLEAR
+    }
+
+    public enum TileEdgeTypes { CLIFF_SHORE, SHORE_CLIFF, CLIFF, SHORE, CENTER, UNDEFINED }  // Defines Shore/Edge type according to tiles around them
+
+    public enum TileLandTypes { ASH, SAND, MUD }    // Defines types of land
+
+    TilePositionTypes myTilePosType;
+    TileEdgeTypes myTileEdgeType = TileEdgeTypes.UNDEFINED;
+    TileLandTypes myTileLandType;
+    Vector2 myPos;
+
+    public TilePositionTypes MyTilePosType
+    {
+        get
+        {
+            return myTilePosType;
+        }
+
+        set
+        {
+            myTilePosType = value;
+        }
+    }
+    public TileEdgeTypes MyTileEdgeType
+    {
+        get
+        {
+            return myTileEdgeType;
+        }
+
+        set
+        {
+            myTileEdgeType = value;
+        }
+    }
+    public TileLandTypes MyTileLandType
+    {
+        get
+        {
+            return myTileLandType;
+        }
+
+        set
+        {
+            myTileLandType = value;
+        }
+    }
+    public Vector2 MyPos
+    {
+        get
+        {
+            return myPos;
+        }
+
+        set
+        {
+            myPos = value;
+        }
+    }
+
+    // Constructors:
+
+    // Empty
+    public GraphicTile() { }
+
+    // One for CLEAR tiles
+    public GraphicTile(TilePositionTypes tilePosType, Vector2 myPosition)
+    {
+        myTilePosType = tilePosType;
+        myPos = myPosition;
+    }
+    // Another for all the LAND tiles
+    public GraphicTile(TilePositionTypes tilePosType, TileEdgeTypes tileEdgeType, TileLandTypes tileLandType, Vector2 myPosition)
+    {
+        myTilePosType = tilePosType;
+        myTileEdgeType = tileEdgeType;
+        myTileLandType = tileLandType;
+        myPos = myPosition;
+    }
+
+    public GraphicTile(TileLandTypes myLandType)
+    {
+        myTileLandType = myLandType;
+    }
+}
+
+class LandRegion : GraphicTile
+{
+
+    // Those regions will need:
+    // A starting position (this will be its bottom left corner)
+    // A total of tiles in the region
+    // a way to decide width and height
+    // A 2D array to hold the tile data
+    // A way to decide which tiles will be land and which will be clear (to create interesting shapes hopefully!)
+    // A way to define all the tiles in the region that are NOT clear (tilePosType, edgeType & landType)
+    // A way to determine where to place regions so that they don't all end up right next to each other
+    // To cap the width and height, two variables of maxWidth and maxHeight
+
+    // They follow these rules:
+    // They have a minimum of 1 tile
+    // Their maximum dimensions cannot exceed the dimensions of the island map (width, height)
+    // They are not right next to each other.
+
+
+
+    GraphicTile[] regionTiles;
+    public GraphicTile[] RegionTiles { get { return regionTiles; } set { regionTiles = value; } }
+
+    public List<Vector2> tilePosList;
+    Vector2[] tilePositions;
+    public Vector2[] TilePositions { get { return tilePositions; } set { tilePositions = value; } }
+
+    Vector2 startingPosition;
+    public Vector2 StartingPosition { get { return startingPosition; } set { startingPosition = value; } }
+
+    int maxTilesAllowed;
+    public int MaxTiles { get { return maxTilesAllowed; } set { maxTilesAllowed = value; } }
+
+    int width, height;
+
+    // Constructor
+
+    public LandRegion(Vector2 startingPos, int maxTiles)
+    {
+        startingPosition = startingPos;
+        maxTilesAllowed = maxTiles;
+        /*
+        tilePositions = new Vector2[maxTiles];
+        tilePositions[0] = startingPos;
+        */
+
+        // Init the tile pos list
+        tilePosList = new List<Vector2>();
+
+
+    }
+
+    public void CleanUpListAndCreateArray()
+    {
+        foreach (Vector2 v2 in tilePosList)
+        {
+            if (v2 == null)
+            {
+                tilePosList.Remove(v2);
+            }
+        }
+
+        // Once all null vector 2's have been removed, turn this list into an array
+        tilePositions = new Vector2[tilePosList.Count];
+        tilePositions = tilePosList.ToArray();
+
+        InitRegionTiles(tilePositions.Length);
+    }
+
+    void InitRegionTiles(int length)
+    {
+        regionTiles = new GraphicTile[length];
+        for (int x = 0; x < regionTiles.Length; x++)
+        {
+            regionTiles[x] = new GraphicTile();
+        }
+    }
+}
+
+
+
 public class TileTexture_3 : MonoBehaviour
 {
+    public static TileTexture_3 instance { get; protected set; }
+
     Texture2D Texture1, Texture2, Texture3;
 
     [Header("Tile Sheet Settings:")]
@@ -31,190 +213,16 @@ public class TileTexture_3 : MonoBehaviour
     public TileSheet rippleSheet;
 
 
-    [System.Serializable]
-    public class GraphicTile
-    {
-        // Tile attributes/types:
-
-        public enum TilePositionTypes       // Defines their position using the tile's world coordinates
-        {
-            BOTTOM, TOP, LEFT, RIGHT,
-            BOTTOM_LEFT_CORNER, BOTTOM_RIGHT_CORNER,
-            TOP_LEFT_CORNER, TOP_RIGHT_CORNER,
-            LEFT_BOTTOM_DIAG, RIGHT_BOTTOM_DIAG,
-            LEFT_TOP_DIAG, RIGHT_TOP_DIAG, CENTER, CLEAR
-        }
-
-        public enum TileEdgeTypes { CLIFF_SHORE, SHORE_CLIFF, CLIFF, SHORE, CENTER, UNDEFINED }  // Defines Shore/Edge type according to tiles around them
-
-        public enum TileLandTypes { ASH, SAND, MUD }    // Defines types of land
-
-        TilePositionTypes myTilePosType;
-        TileEdgeTypes myTileEdgeType = TileEdgeTypes.UNDEFINED;
-        TileLandTypes myTileLandType;
-        Vector2 myPos;
-
-        public TilePositionTypes MyTilePosType
-        {
-            get
-            {
-                return myTilePosType;
-            }
-
-            set
-            {
-                myTilePosType = value;
-            }
-        }
-        public TileEdgeTypes MyTileEdgeType
-        {
-            get
-            {
-                return myTileEdgeType;
-            }
-
-            set
-            {
-                myTileEdgeType = value;
-            }
-        }
-        public TileLandTypes MyTileLandType
-        {
-            get
-            {
-                return myTileLandType;
-            }
-
-            set
-            {
-                myTileLandType = value;
-            }
-        }
-        public Vector2 MyPos
-        {
-            get
-            {
-                return myPos;
-            }
-
-            set
-            {
-                myPos = value;
-            }
-        }
-        
-        // Constructors:
-
-        // Empty
-        public GraphicTile(){  }
-
-        // One for CLEAR tiles
-        public GraphicTile(TilePositionTypes tilePosType, Vector2 myPosition)
-        {
-            myTilePosType = tilePosType;
-            myPos = myPosition;
-        }
-            // Another for all the LAND tiles
-        public GraphicTile(TilePositionTypes tilePosType, TileEdgeTypes tileEdgeType, TileLandTypes tileLandType, Vector2 myPosition)
-        {
-            myTilePosType = tilePosType;
-            myTileEdgeType = tileEdgeType;
-            myTileLandType = tileLandType;
-            myPos = myPosition;
-        }
-
-        public GraphicTile(TileLandTypes myLandType)
-        {
-            myTileLandType = myLandType;
-        }
-    }
-
-    class LandRegion : GraphicTile
-    {
-
-        // Those regions will need:
-        // A starting position (this will be its bottom left corner)
-        // A total of tiles in the region
-        // a way to decide width and height
-        // A 2D array to hold the tile data
-        // A way to decide which tiles will be land and which will be clear (to create interesting shapes hopefully!)
-        // A way to define all the tiles in the region that are NOT clear (tilePosType, edgeType & landType)
-        // A way to determine where to place regions so that they don't all end up right next to each other
-        // To cap the width and height, two variables of maxWidth and maxHeight
-
-        // They follow these rules:
-        // They have a minimum of 1 tile
-        // Their maximum dimensions cannot exceed the dimensions of the island map (width, height)
-        // They are not right next to each other.
-
-
-        
-        GraphicTile[] regionTiles;
-        public GraphicTile[] RegionTiles { get { return regionTiles; } set { regionTiles = value; } }
-
-        public List<Vector2> tilePosList;
-        Vector2[] tilePositions;
-        public Vector2[] TilePositions { get { return tilePositions; } set { tilePositions = value; } }
-
-        Vector2 startingPosition;
-        public Vector2 StartingPosition { get { return startingPosition; } set { startingPosition = value; } }
-
-        int maxTilesAllowed;
-        public int MaxTiles { get { return maxTilesAllowed; } set { maxTilesAllowed = value; } }
-        
-        int width, height;
-
-        // Constructor
-
-        public LandRegion (Vector2 startingPos, int maxTiles)
-        {
-            startingPosition = startingPos;
-            maxTilesAllowed = maxTiles;
-            /*
-            tilePositions = new Vector2[maxTiles];
-            tilePositions[0] = startingPos;
-            */
-
-            // Init the tile pos list
-            tilePosList = new List<Vector2>();
-
-           
-        }
-
-        public void CleanUpListAndCreateArray()
-        {
-            foreach(Vector2 v2 in tilePosList)
-            {
-                if (v2 == null)
-                {
-                    tilePosList.Remove(v2);
-                }
-            }
-
-            // Once all null vector 2's have been removed, turn this list into an array
-            tilePositions = new Vector2[tilePosList.Count];
-            tilePositions = tilePosList.ToArray();
-
-            InitRegionTiles(tilePositions.Length);
-        }
-
-        void InitRegionTiles(int length)
-        {
-            regionTiles = new GraphicTile[length];
-            for (int x = 0; x < regionTiles.Length; x++)
-            {
-                regionTiles[x] = new GraphicTile();
-            }
-        }
-    }
-
+   
     // A 2D array that will hold all the baseGraphicTiles and their attributes according to the positions of the island map
     GraphicTile[,] baseGraphicTiles, secondGraphicTiles;
 
+    public Dictionary<Vector2, GraphicTile> all_GraphicTiles = new Dictionary<Vector2, GraphicTile>();
+
     // A List of Graphic Tile that can be considered for land types
     List<GraphicTile> tilesToConsider;
-    // A List of Graphic Tile that contains tiles that can only be BASE land types & tiles for Others
-   // List<GraphicTile> tilesForOthers;
+
+    public Vector2[] centerTiles;
 
     // A List that holds all the Land Regions created
     List<LandRegion> landRegions;
@@ -223,9 +231,8 @@ public class TileTexture_3 : MonoBehaviour
     [Header("Mesh Renderers:")]
     public MeshRenderer base_renderer, second_renderer, shore_renderer;
 
-    // A variable that is set by the map or by a method that calculates distance to equator, sets the base land type (setting it to Ash right now)
-    [Header ("Select Base Land Type:")]
-    public GraphicTile.TileLandTypes baseLandType = GraphicTile.TileLandTypes.ASH;
+    GraphicTile.TileLandTypes baseLandType;
+    GraphicTile.TileLandTypes secondaryLandType;
 
     Color[] clearPixels;
 
@@ -234,13 +241,21 @@ public class TileTexture_3 : MonoBehaviour
     [HideInInspector]
     public int randomFillPercent;
 
+    public System.Random pseudoRandom;
+
     public Map_Generator mapGenerator;
 
     int ripplesWidth, ripplesHeight;
 
+    bool isSettingShoreTile = false;
+    bool isSettingShoreCorner = false;
+
+    public bool hasTopLayer = false;
 
     void Awake()
     {
+        instance = this;
+
         if (!base_renderer || !second_renderer)
         {
             Debug.LogError("TILETEXTURE: Renderers are missing!!!");
@@ -283,15 +298,26 @@ public class TileTexture_3 : MonoBehaviour
         // All i need is the first ripple tile's pixels, since this will be animated
         tiles[0] = rippleSheet.tileSheetTexture.GetPixels(0 * tileResolution, 0, tileResolution, tileResolution);
 
-         
-       
-
         return tiles;
+    }
+
+    void GetClimateLandTypes()
+    {
+        baseLandType = Climate_Manager.Instance.curClimateMap.baseLandType;
+        if (Climate_Manager.Instance.curClimateMap.hasTopLayer)
+        {
+            hasTopLayer = true;
+            secondaryLandType = Climate_Manager.Instance.curClimateMap.secondLandType;
+        }
+       
     }
 
     // THIS IS CALLED BY MAP GENERATOR
     public void DefineTilesAndGenerateBaseTexture(Vector2[] emptyTilesArray, int islandWidth, int islandHeight)
     {
+        // Define the Land Types using the Climate Manager
+        GetClimateLandTypes();
+
         ripplesWidth = islandWidth;
         ripplesHeight = islandHeight;
 
@@ -322,7 +348,9 @@ public class TileTexture_3 : MonoBehaviour
                 {
                     // Tile is water, not land, so define tileType as clear
 
-                    baseGraphicTiles[mapX, mapY] = new GraphicTile(GraphicTile.TilePositionTypes.CLEAR, thisPosition);
+                    // baseGraphicTiles[mapX, mapY] = new GraphicTile(GraphicTile.TilePositionTypes.CLEAR, thisPosition);
+
+                    all_GraphicTiles.Add(thisPosition, new GraphicTile(GraphicTile.TilePositionTypes.CLEAR, thisPosition));
 
                     // set pixels to clear
                     thisTilePixels = clearPixels;
@@ -335,12 +363,141 @@ public class TileTexture_3 : MonoBehaviour
                     // Tile IS land so define it:
 
                     // Check Tile's neighbors to define this new tile
-                    baseGraphicTiles[mapX, mapY] = CheckTileNeighbors(emptyTilesArray, thisPosition, baseLandType);
+                    GraphicTile thisTile = CheckTileNeighbors(emptyTilesArray, thisPosition, baseLandType);
+                    //baseGraphicTiles[mapX, mapY] = CheckTileNeighbors(emptyTilesArray, thisPosition, baseLandType);
 
                     // Set the land type to be of the base land type
-                    //baseGraphicTiles[mapX, mapY].MyTileLandType = baseLandType;
+                    thisTile.MyTileLandType = baseLandType;
 
-                    GraphicTile thisTile = baseGraphicTiles[mapX, mapY];
+                    all_GraphicTiles.Add(thisPosition, thisTile);
+
+                    //int offset_x = 0;
+                    //int offset_y = 0;
+
+                    // Reset is shore tile flag
+                    isSettingShoreTile = false;
+
+                    //if (thisTile.MyTilePosType != GraphicTile.TilePositionTypes.CENTER)
+                    //{
+                    //    isSettingShoreTile = true;
+                    //    isSettingShoreCorner = false;
+
+                    //    switch (thisTile.MyTilePosType)
+                    //    {
+                    //        case GraphicTile.TilePositionTypes.BOTTOM:
+                    //            offset_y = -1;
+                    //            isSettingShoreTile = false;
+                    //            break;
+                    //        case GraphicTile.TilePositionTypes.BOTTOM_LEFT_CORNER:
+                    //           // offset_y = -1;
+                    //            offset_x = -1;
+                    //            isSettingShoreCorner = true;
+                    //            break;
+                    //        //case GraphicTile.TilePositionTypes.BOTTOM_RIGHT_CORNER:
+                    //        //    offset_x = 1;
+                    //        //    //offset_y = -1;
+                    //        //    break;
+
+                    //        case GraphicTile.TilePositionTypes.LEFT_BOTTOM_DIAG:
+                    //            offset_x = -1;
+                    //            //offset_y = -1;
+                    //            break;
+
+                    //        case GraphicTile.TilePositionTypes.LEFT:
+                    //            offset_x = -1;
+                    //            break;
+
+                    //        //case GraphicTile.TilePositionTypes.TOP_LEFT_CORNER:
+                    //        //    offset_x = -1;
+                    //        //    //offset_y = 1;
+                    //        //    break;
+                    //        //case GraphicTile.TilePositionTypes.TOP:
+                    //        //    offset_y = 1;
+                    //        //    isSettingShoreTile = false;
+                    //        //    break;
+                    //        //case GraphicTile.TilePositionTypes.TOP_RIGHT_CORNER:
+                    //        //    //offset_y = 1;
+                    //        //    offset_x = 1;
+                    //        //    break;
+                    //        //case GraphicTile.TilePositionTypes.RIGHT_BOTTOM_DIAG:
+                    //        //    offset_x = 1;
+                    //        //    //offset_y = 1;
+                    //        //    break;
+                    //        //case GraphicTile.TilePositionTypes.LEFT_TOP_DIAG:
+                    //        //    offset_x = -1;
+                    //        //   // offset_y = 1;
+                    //        //    break;
+                    //        //case GraphicTile.TilePositionTypes.RIGHT_TOP_DIAG:
+                    //        //    offset_x = 1;
+                    //        //    //offset_y = 1;
+                    //        //    break;
+
+                    //        //case GraphicTile.TilePositionTypes.RIGHT:
+                    //        //    offset_x = 1;
+                    //        //    break;
+
+                    //        default:
+                    //            offset_x = 0;
+                    //            offset_y = 0;
+                    //            isSettingShoreTile = false;
+                    //            break;
+
+                    //    }
+
+                    //    int tileIndex = FindIndex(thisTile.MyTilePosType, thisTile.MyTileEdgeType, baseLandType);
+
+                    //    thisTilePixels = tiles[tileIndex];
+
+                    //    texture.SetPixels((mapX + offset_x) * tileResolution, (mapY + offset_y) * tileResolution, tileResolution, tileResolution, thisTilePixels);
+
+                    //    tilesToConsider.Add(thisTile);
+
+                    //    if (isSettingShoreTile)
+                    //    {
+                    //        if (isSettingShoreCorner)
+                    //        {
+                    //            if (thisTile.MyTilePosType == GraphicTile.TilePositionTypes.BOTTOM_LEFT_CORNER || thisTile.MyTilePosType == GraphicTile.TilePositionTypes.BOTTOM_RIGHT_CORNER)
+                    //            {
+                    //                // Set a bottom shore tile
+                    //                thisTilePixels = tiles[FindIndex(GraphicTile.TilePositionTypes.BOTTOM, thisTile.MyTileEdgeType, thisTile.MyTileLandType)];
+                    //                SetExtraCentersOnTexture(texture, mapX, mapY, thisTilePixels, tileResolution);
+                    //            }
+                    //            else if (thisTile.MyTilePosType == GraphicTile.TilePositionTypes.TOP_LEFT_CORNER || thisTile.MyTilePosType == GraphicTile.TilePositionTypes.TOP_RIGHT_CORNER)
+                    //            {
+                    //                // Set a top shore tile
+                    //                thisTilePixels = tiles[FindIndex(GraphicTile.TilePositionTypes.TOP, thisTile.MyTileEdgeType, thisTile.MyTileLandType)];
+                    //                SetExtraCentersOnTexture(texture, mapX, mapY, thisTilePixels, tileResolution);
+                    //            }
+                    //        }
+                    //        else
+                    //        {
+                    //            // Set a Center tile to account for the empty space left after setting the offset
+                    //            thisTilePixels = tiles[FindIndex(GraphicTile.TilePositionTypes.CENTER, GraphicTile.TileEdgeTypes.CENTER, thisTile.MyTileLandType)];
+                    //            SetExtraCentersOnTexture(texture, mapX, mapY, thisTilePixels, tileResolution);
+
+                    //        }
+
+                    //        //if (thisTile.MyTilePosType == GraphicTile.TilePositionTypes.BOTTOM_LEFT_CORNER || )
+                    //        //{
+                    //        //    // Set a half center tiles
+                    //        //    thisTilePixels = tiles[FindIndex(GraphicTile.TilePositionTypes.CENTER, GraphicTile.TileEdgeTypes.CENTER, thisTile.MyTileLandType)];
+                    //        //    SetExtraCentersOnTexture(texture, mapX, mapY, thisTilePixels, 16);
+                    //        //}
+                    //        //else
+                    //        //{
+                    //        //    // Set a Center tile to account for the empty space left after setting the offset
+                    //        //    thisTilePixels = tiles[FindIndex(GraphicTile.TilePositionTypes.CENTER, GraphicTile.TileEdgeTypes.CENTER, thisTile.MyTileLandType)];
+                    //        //    SetExtraCentersOnTexture(texture, mapX, mapY, thisTilePixels, tileResolution);
+                    //        //}
+
+                    //    }
+
+                    //}
+
+                    //else
+                    //{
+
+                    //}
 
                     int tileIndex = FindIndex(thisTile.MyTilePosType, thisTile.MyTileEdgeType, baseLandType);
 
@@ -373,12 +530,20 @@ public class TileTexture_3 : MonoBehaviour
         // Split the List of tiles to Consider between those tiles that are edges and those that are center( We are ONLY considering tiles that are NOT clear/water)
         SortGraphicTiles(tilesToConsider);
 
+
+
+    }
+
+    void SetExtraCentersOnTexture(Texture2D tex, int x, int y, Color[] tilePixels, int tileRes)
+    {
+        tex.SetPixels(x * tileRes, y * tileRes, tileResolution, tileResolution, tilePixels);
     }
 
     public void DefineTilesAndGenerateSecondTexture(Vector2[] emptyTilesArray, int islandWidth, int islandHeight)
     {
         // Make sure this Mesh object shares the same mesh as Base mesh
         Mesh islandMesh = base_renderer.gameObject.GetComponent<MeshFilter>().mesh;
+
         second_renderer.gameObject.GetComponent<MeshFilter>().mesh = islandMesh;
 
         int texWidth = islandWidth * tileResolution;
@@ -386,9 +551,9 @@ public class TileTexture_3 : MonoBehaviour
         Texture2D texture2 = new Texture2D(texWidth, texHeight);
         texture2.name = "Top Land Texture";
 
-        GraphicTile.TileLandTypes landType = GetNewLandType(baseLandType);
+        //GraphicTile.TileLandTypes landType = GetNewLandType(baseLandType);
         // Split Base land type's tile sheet, based on the already set base land type
-        Color[][] tiles = SplitTileSheet(landType);
+        Color[][] tiles = SplitTileSheet(secondaryLandType);
         // Use this array to Set Pixels
         Color[] thisTilePixels;
 
@@ -402,7 +567,20 @@ public class TileTexture_3 : MonoBehaviour
                 if (!CheckIfTileExists(emptyTilesArray, thisPosition))
                 {
                     // Tile is water, not land, so define tileType as clear
-                    secondGraphicTiles[mapX, mapY] = new GraphicTile(GraphicTile.TilePositionTypes.CLEAR, thisPosition);
+                    // secondGraphicTiles[mapX, mapY] = new GraphicTile(GraphicTile.TilePositionTypes.CLEAR, thisPosition);
+                    if (!all_GraphicTiles.ContainsKey(thisPosition))
+                    {
+                        all_GraphicTiles.Add(thisPosition, new GraphicTile(GraphicTile.TilePositionTypes.CLEAR, thisPosition));
+
+                    }
+                    else
+                    {
+                        if (all_GraphicTiles[thisPosition].MyTilePosType != GraphicTile.TilePositionTypes.CLEAR)
+                        {
+                            all_GraphicTiles[thisPosition].MyTilePosType = GraphicTile.TilePositionTypes.CLEAR;
+                        }
+                    }
+
                     // set pixels to clear
                     thisTilePixels = clearPixels;
 
@@ -414,13 +592,24 @@ public class TileTexture_3 : MonoBehaviour
                     // Tile IS land so define it:
 
                     // Check Tile's neighbors to define this new tile
-                    secondGraphicTiles[mapX, mapY] = CheckTileNeighbors(emptyTilesArray, thisPosition, landType, true);
+                    GraphicTile thisTile = CheckTileNeighbors(emptyTilesArray, thisPosition, secondaryLandType, true);
+
+                    if (!all_GraphicTiles.ContainsKey(thisPosition))
+                    {
+                        all_GraphicTiles.Add(thisPosition, thisTile);
+                    }
+                    else
+                    {
+                        all_GraphicTiles.Remove(thisPosition);
+
+                        all_GraphicTiles.Add(thisPosition, thisTile);
+
+                    }
 
 
-                    GraphicTile thisTile = secondGraphicTiles[mapX, mapY];
 
 
-                    thisTilePixels = tiles[FindIndex(thisTile.MyTilePosType, thisTile.MyTileEdgeType, landType)];
+                    thisTilePixels = tiles[FindIndex(thisTile.MyTilePosType, thisTile.MyTileEdgeType, secondaryLandType)];
 
                     texture2.SetPixels(mapX * tileResolution, mapY * tileResolution, tileResolution, tileResolution, thisTilePixels);
 
@@ -433,7 +622,8 @@ public class TileTexture_3 : MonoBehaviour
             // Apply texture
             texture2.Apply();
 
-           // second_renderer.sharedMaterial.mainTexture = texture2;
+            // Give the mesh collider the same mesh
+            second_renderer.gameObject.GetComponent<MeshCollider>().sharedMesh = islandMesh;
 
             Texture2 = texture2;
 
@@ -469,10 +659,17 @@ public class TileTexture_3 : MonoBehaviour
         }
         // Pass the list of positions as an array
         // These are ONLY Center tiles, so the top layer can avoid the shores and leave that for the base land type
+        centerTiles = secondaryTilePositions.ToArray();
 
-        GenerateShoreRippleTexture(shoreTilePositions.ToArray());
+       // GenerateShoreRippleTexture(shoreTilePositions.ToArray());
 
-        mapGenerator.GenerateTopLayerMap(secondaryTilePositions.ToArray());
+        if (hasTopLayer)
+        {
+            mapGenerator.GenerateTopLayerMap(centerTiles);
+        }
+        else
+            ApplyTextures();
+   
 
        
     }
@@ -935,70 +1132,70 @@ public class TileTexture_3 : MonoBehaviour
    
     }
 
-    void BuildSecondaryTexture(int width, int height, LandRegion[] Regions)
-    {
-        // Make sure this Mesh object shares the same mesh as Base mesh
-        Mesh islandMesh = base_renderer.gameObject.GetComponent<MeshFilter>().mesh;
-        second_renderer.gameObject.GetComponent<MeshFilter>().mesh = islandMesh;
+    //void BuildSecondaryTexture(int width, int height, LandRegion[] Regions)
+    //{
+    //    // Make sure this Mesh object shares the same mesh as Base mesh
+    //    Mesh islandMesh = base_renderer.gameObject.GetComponent<MeshFilter>().mesh;
+    //    second_renderer.gameObject.GetComponent<MeshFilter>().mesh = islandMesh;
         
         
-        int textureWidth = width * tileResolution;
-        int textureHeight = height * tileResolution;
-        Texture2D texture2 = new Texture2D(textureWidth, textureHeight);
-        texture2.name = "Secondary Land Texture";
+    //    int textureWidth = width * tileResolution;
+    //    int textureHeight = height * tileResolution;
+    //    Texture2D texture2 = new Texture2D(textureWidth, textureHeight);
+    //    texture2.name = "Secondary Land Texture";
 
-        // Turn land regions into an array for faster searching
-        //LandRegion[] Regions = landRegions.ToArray();
+    //    // Turn land regions into an array for faster searching
+    //    //LandRegion[] Regions = landRegions.ToArray();
 
-        GraphicTile.TileLandTypes currLandType = Regions[0].RegionTiles[0].MyTileLandType;
+    //    GraphicTile.TileLandTypes currLandType = Regions[0].RegionTiles[0].MyTileLandType;
 
         
-        Color[][] tiles = SplitTileSheet(currLandType);
-        // Use this array to Set Pixels
-        Color[] thisTilePixels;
+    //    Color[][] tiles = SplitTileSheet(currLandType);
+    //    // Use this array to Set Pixels
+    //    Color[] thisTilePixels;
 
-        Debug.Log("Regions total = " + Regions.Length);
+    //    Debug.Log("Regions total = " + Regions.Length);
 
-        //NOTE: Try setting the pixels for each region first, since we know their locations
+    //    //NOTE: Try setting the pixels for each region first, since we know their locations
 
-        for (int i = 0; i < Regions.Length; i++)
-        {
-            for (int t = 0; t < Regions[i].RegionTiles.Length; t++)
-            {
-                GraphicTile thisTile = Regions[i].RegionTiles[t];
-                Debug.Log("This tile " + Regions[i].RegionTiles[t]);
-                if (thisTile.MyTilePosType != GraphicTile.TilePositionTypes.CLEAR)
-                {
-                    if (thisTile.MyTileLandType != currLandType)
-                    {
-                        currLandType = thisTile.MyTileLandType;
-                        tiles = SplitTileSheet(currLandType);
-                    }
+    //    for (int i = 0; i < Regions.Length; i++)
+    //    {
+    //        for (int t = 0; t < Regions[i].RegionTiles.Length; t++)
+    //        {
+    //            GraphicTile thisTile = Regions[i].RegionTiles[t];
+    //            Debug.Log("This tile " + Regions[i].RegionTiles[t]);
+    //            if (thisTile.MyTilePosType != GraphicTile.TilePositionTypes.CLEAR)
+    //            {
+    //                if (thisTile.MyTileLandType != currLandType)
+    //                {
+    //                    currLandType = thisTile.MyTileLandType;
+    //                    tiles = SplitTileSheet(currLandType);
+    //                }
 
-                    thisTilePixels = tiles[FindIndex(thisTile.MyTilePosType, thisTile.MyTileEdgeType, thisTile.MyTileLandType)];
-                    texture2.SetPixels((int)thisTile.MyPos.x * tileResolution, (int)thisTile.MyPos.y * tileResolution, tileResolution, tileResolution, thisTilePixels);
-                }
-                else
-                {
-                    // set pixels to clear
-                    thisTilePixels = clearPixels;
-                    texture2.SetPixels((int)thisTile.MyPos.x * tileResolution, (int)thisTile.MyPos.y * tileResolution, tileResolution, tileResolution, thisTilePixels);
-                }
+    //                thisTilePixels = tiles[FindIndex(thisTile.MyTilePosType, thisTile.MyTileEdgeType, thisTile.MyTileLandType)];
+    //                texture2.SetPixels((int)thisTile.MyPos.x * tileResolution, (int)thisTile.MyPos.y * tileResolution, tileResolution, tileResolution, thisTilePixels);
+    //            }
+    //            else
+    //            {
+    //                // set pixels to clear
+    //                thisTilePixels = clearPixels;
+    //                texture2.SetPixels((int)thisTile.MyPos.x * tileResolution, (int)thisTile.MyPos.y * tileResolution, tileResolution, tileResolution, thisTilePixels);
+    //            }
 
-            }
-        }
+    //        }
+    //    }
  
-        texture2.filterMode = FilterMode.Bilinear;
+    //    texture2.filterMode = FilterMode.Bilinear;
 
-        Texture2 = texture2;
-        /*
-        // Apply texture
-        texture2.Apply();
+    //    Texture2 = texture2;
+    //    /*
+    //    // Apply texture
+    //    texture2.Apply();
 
-        second_renderer.sharedMaterial.mainTexture = texture2;
-        */
-        ApplyTextures();
-    }
+    //    second_renderer.sharedMaterial.mainTexture = texture2;
+    //    */
+    //    ApplyTextures();
+    //}
 
     int CheckIfGraphicTileMatches (Vector2[] tilePositions, Vector2 posToCheck)
     {
@@ -1459,6 +1656,11 @@ public class TileTexture_3 : MonoBehaviour
                     myTileEdgeType = DefineTypeFromUndefinedNeighbors(true);
                     newTile = new GraphicTile(GraphicTile.TilePositionTypes.TOP_LEFT_CORNER, myTileEdgeType, GraphicTile.TileLandTypes.ASH, new Vector2(posX, posY));
                 }
+                else if (!_top && !_left && _right && _bottom)
+                {
+                    myTileEdgeType = DefineTypeFromUndefinedNeighbors(true);
+                    newTile = new GraphicTile(GraphicTile.TilePositionTypes.LEFT_TOP_DIAG, myTileEdgeType, GraphicTile.TileLandTypes.ASH, new Vector2(posX, posY));
+                }
                 // else it's a center
                 else
                 {
@@ -1495,6 +1697,10 @@ public class TileTexture_3 : MonoBehaviour
                 else if (!_top && !_left && _right && !_bottom && _bottRight)
                 {
                     newTile = new GraphicTile(GraphicTile.TilePositionTypes.TOP_LEFT_CORNER, GraphicTile.TileEdgeTypes.SHORE, myLandType, new Vector2(posX, posY));
+                }
+                else if (!_top && !_left && _right && _bottom && _bottLeft)
+                {
+                    newTile = new GraphicTile(GraphicTile.TilePositionTypes.LEFT_TOP_DIAG, GraphicTile.TileEdgeTypes.SHORE, myLandType, new Vector2(posX, posY));
                 }
                 // else it's a center
                 else
@@ -1735,69 +1941,69 @@ public class TileTexture_3 : MonoBehaviour
                 // Select a cliff of this edgetype
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM)
                 {
-                    tileIndex = Random.Range(80, 89);
+                    tileIndex = pseudoRandom.Next(90, 100);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP)
                 {
-                    tileIndex = Random.Range(135, 139);
+                    tileIndex = pseudoRandom.Next(145, 150);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT)
                 {
-                    tileIndex = Random.Range(70, 79);
+                    tileIndex = pseudoRandom.Next(80, 90);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT)
                 {
-                    tileIndex = Random.Range(60, 69);
+                    tileIndex = pseudoRandom.Next(70, 80);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_LEFT_CORNER)
                 {
                     // Pick between large corner or small corner
-                    int pick = Random.Range(0, 3);
+                    int pick = pseudoRandom.Next(0, 3);
                     if (pick <= 1)
                     {
-                        tileIndex = Random.Range(151, 154);
+                        tileIndex = pseudoRandom.Next(161, 165);
                     }
                     else
                     {
-                        tileIndex = Random.Range(55, 59);
+                        tileIndex = pseudoRandom.Next(65, 70);
                     }
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_RIGHT_CORNER)
                 {
                     // Pick between large corner or small corner
-                    int pick = Random.Range(0, 3);
+                    int pick = pseudoRandom.Next(0, 3);
                     if (pick <= 1)
                     {
-                        tileIndex = Random.Range(155, 159);
+                        tileIndex = pseudoRandom.Next(165, 170);
                     }
                     else
                     {
-                        tileIndex = Random.Range(50, 54);
+                        tileIndex = pseudoRandom.Next(60, 65);
                     }
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(170, 174);
+                    tileIndex = pseudoRandom.Next(180, 185);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(175, 179);
+                    tileIndex = pseudoRandom.Next(185, 190);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(140, 144);
+                    tileIndex = pseudoRandom.Next(150, 155);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(145, 149);
+                    tileIndex = pseudoRandom.Next(155, 160);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(160, 164);
+                    tileIndex = pseudoRandom.Next(170, 175);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(165, 169);
+                    tileIndex = pseudoRandom.Next(175, 180);
                 }
 
                 break;
@@ -1805,122 +2011,122 @@ public class TileTexture_3 : MonoBehaviour
                 // Select a cliff shore of this edgetype
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM)
                 {
-                    tileIndex = Random.Range(120, 124);
+                    tileIndex = pseudoRandom.Next(130, 135);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP)
                 {
-                    tileIndex = Random.Range(180, 184);
+                    tileIndex = pseudoRandom.Next(190, 195);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT)
                 {
-                    tileIndex = Random.Range(5, 9);
+                    tileIndex = pseudoRandom.Next(15, 20);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT)
                 {
-                    tileIndex = Random.Range(15, 19);
+                    tileIndex = pseudoRandom.Next(25, 30);
                 }
                 // USING CLIFF CORNERS AND DIAGONALS HERE 
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_LEFT_CORNER)
                 {
                     // Pick between large corner or small corner
-                    int pick = Random.Range(0, 3);
+                    int pick = pseudoRandom.Next(0, 3);
                     if (pick <= 1)
                     {
-                        tileIndex = Random.Range(151, 154);
+                        tileIndex = pseudoRandom.Next(161, 165);
                     }
                     else
                     {
-                        tileIndex = Random.Range(55, 59);
+                        tileIndex = pseudoRandom.Next(65, 70);
                     }
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_RIGHT_CORNER)
                 {
                     // Pick between large corner or small corner
-                    int pick = Random.Range(0, 3);
+                    int pick = pseudoRandom.Next(0, 3);
                     if (pick <= 1)
                     {
-                        tileIndex = Random.Range(155, 159);
+                        tileIndex = pseudoRandom.Next(165, 170);
                     }
                     else
                     {
-                        tileIndex = Random.Range(50, 54);
+                        tileIndex = pseudoRandom.Next(60, 65);
                     }
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(170, 174);
+                    tileIndex = pseudoRandom.Next(180, 185);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(175, 179);
+                    tileIndex = pseudoRandom.Next(185, 190);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(140, 144);
+                    tileIndex = pseudoRandom.Next(150, 155);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(145, 149);
+                    tileIndex = pseudoRandom.Next(155, 160);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(160, 164);
+                    tileIndex = pseudoRandom.Next(170, 175);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(165, 169);
+                    tileIndex = pseudoRandom.Next(175, 180);
                 }
                 break;
             case GraphicTile.TileEdgeTypes.SHORE_CLIFF:
                 // select a shore cliff of this edge type
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM)
                 {
-                    tileIndex = Random.Range(125, 129);
+                    tileIndex = pseudoRandom.Next(135, 140);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP)
                 {
-                    tileIndex = Random.Range(185, 189);
+                    tileIndex = pseudoRandom.Next(195, 200);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT)
                 {
-                    tileIndex = Random.Range(0, 4);
+                    tileIndex = pseudoRandom.Next(10, 15);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT)
                 {
-                    tileIndex = Random.Range(10, 14);
+                    tileIndex = pseudoRandom.Next(20, 25);
                 }
                 // USING SHORE CORNERS AND DIAGONALS HERE (WHERE AVAILABLE)
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(115, 119);
+                    tileIndex = pseudoRandom.Next(125, 130);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(110, 114);
+                    tileIndex = pseudoRandom.Next(120, 125);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(20, 24);
+                    tileIndex = pseudoRandom.Next(30, 35);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(25, 29);
+                    tileIndex = pseudoRandom.Next(35, 40);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(40, 44);
+                    tileIndex = pseudoRandom.Next(50, 55);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(45, 49);
+                    tileIndex = pseudoRandom.Next(55, 60);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(30, 34);
+                    tileIndex = pseudoRandom.Next(40, 45);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(35, 39);
+                    tileIndex = pseudoRandom.Next(45, 50);
                 }
                 break;
 
@@ -1928,59 +2134,68 @@ public class TileTexture_3 : MonoBehaviour
                 // select a shore cliff of this edge type
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM)
                 {
-                    tileIndex = Random.Range(100, 109);
+                    tileIndex = pseudoRandom.Next(110, 120);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP)
                 {
-                    tileIndex = Random.Range(130, 139);
+                    tileIndex = pseudoRandom.Next(140, 150);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT)
                 {
-                    tileIndex = Random.Range(95, 99);
+                    tileIndex = pseudoRandom.Next(105, 110);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT)
                 {
-                    tileIndex = Random.Range(90, 94);
+                    tileIndex = pseudoRandom.Next(100, 105);
                 }
 
                 // USING SHORE CORNERS AND DIAGONALS HERE (WHERE AVAILABLE)
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(115, 119);
+                    tileIndex = pseudoRandom.Next(125, 130);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.BOTTOM_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(110, 114);
+                    tileIndex = pseudoRandom.Next(120, 125);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_LEFT_CORNER)
                 {
-                    tileIndex = Random.Range(20, 24);
+                    tileIndex = pseudoRandom.Next(30, 35);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.TOP_RIGHT_CORNER)
                 {
-                    tileIndex = Random.Range(25, 29);
+                    tileIndex = pseudoRandom.Next(35, 40);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(40, 44);
+                    tileIndex = pseudoRandom.Next(50, 55);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_BOTTOM_DIAG)
                 {
-                    tileIndex = Random.Range(45, 49);
+                    tileIndex = pseudoRandom.Next(55, 60);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.LEFT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(30, 34);
+                    tileIndex = pseudoRandom.Next(40, 45);
                 }
                 if (myPosType == GraphicTile.TilePositionTypes.RIGHT_TOP_DIAG)
                 {
-                    tileIndex = Random.Range(35, 39);
+                    tileIndex = pseudoRandom.Next(45, 50);
                 }
                 break;
 
             default:
-                // Center tile
-                tileIndex = 150;
+                // Select a center tile
+                int select = pseudoRandom.Next(0, 11);
+                if (select > 8)
+                {
+                    tileIndex = pseudoRandom.Next(0, 10);
+                }
+                else
+                {
+                    tileIndex = 160;
+                }
+
                 break;
 
         }
@@ -2147,10 +2362,40 @@ public class TileTexture_3 : MonoBehaviour
         //Texture1.Apply();
         //Texture2.Apply();
 
-        base_renderer.sharedMaterial.mainTexture = Texture1;
-        //base_renderer.materials[1].mainTexture = Texture2;
-        second_renderer.sharedMaterial.mainTexture = Texture2;
+        if (hasTopLayer)
+        {
+            base_renderer.sharedMaterial.mainTexture = Texture1;
+            second_renderer.sharedMaterial.mainTexture = Texture2;
+           // shore_renderer.sharedMaterial.mainTexture = Texture3;
 
-        shore_renderer.sharedMaterial.mainTexture = Texture3;
+        }
+        else
+        {
+            base_renderer.sharedMaterial.mainTexture = Texture1;
+           // shore_renderer.sharedMaterial.mainTexture = Texture3;
+        }
+            
+
+    }
+
+    public GraphicTile GetGraphicTileFromPos(Vector3 position)
+    {
+        Vector2 pos = new Vector2(Mathf.Round(position.x), Mathf.Round(position.y));
+        if (all_GraphicTiles.ContainsKey(pos))
+        {
+            return all_GraphicTiles[pos];
+        }
+        else
+            return null;
+    }
+
+    public GraphicTile GetGraphicTileFromPos(Vector2 position)
+    {
+        if (all_GraphicTiles.ContainsKey(position))
+        {
+            return all_GraphicTiles[position];
+        }
+        else
+            return null;
     }
 }

@@ -3,26 +3,7 @@ using System.Collections;
 
 public class Player_GunBaseClass : MonoBehaviour {
 
-	[System.Serializable]
-	public class GunStats
-	{
-		float _fireRate;
-		public float curFireRate { get {return _fireRate;} set { _fireRate = Mathf.Clamp(value, 0f, 2f);}}
-		public float startingFireRate;
-
-		public int weaponIndex;
-		public string projectileType;
-
-		public float kickAmmt;
-
-		public void Init()
-		{
-			curFireRate = startingFireRate;
-		
-		}
-	}
-
-	public GunStats gunStats = new GunStats();
+    public GunStats gunStats;
 
 
 	public Transform sightStart, sightEnd; // where the gun's range starts and ends
@@ -44,18 +25,19 @@ public class Player_GunBaseClass : MonoBehaviour {
 	public Rigidbody2D rigid_body;
 
 	// Handle the weapon sorting layer from here
-	public SpriteRenderer sprite_renderer;
+	//public SpriteRenderer sprite_renderer;
 
 	public Transform bulletTrailFab;
 
 	public GameMaster gameMaster;
 
-    public AudioClip shootSound;
-    public AudioSource source;
+    public bool isReloading { get; protected set; }
+
+    public Unit_StatusIndicator status_Indicator { get; protected set; }
 
 	void Awake()
 	{
-		sprite_renderer = GetComponent<SpriteRenderer> ();
+		//sprite_renderer = GetComponent<SpriteRenderer> ();
 		//parent_srenderer = GetComponentInParent<SpriteRenderer> ();
 
         objPool = ObjectPool.instance;
@@ -76,71 +58,107 @@ public class Player_GunBaseClass : MonoBehaviour {
 //		}
 
 	}
-	public void FollowMouse()
-	{
-		mousePosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+	//public void FollowMouse()
+	//{
+	//	mousePosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
        
-		float mouseDirection = Mathf.Atan2 ((mousePosition.y - sightStart.position.y), (mousePosition.x - sightStart.position.x)) * Mathf.Rad2Deg - 90;		
-		if (mousePosition != transform.root.position) {
-			sightStart.rotation = Quaternion.AngleAxis (-mouseDirection, Vector3.forward);
-			transform.rotation = Quaternion.AngleAxis (mouseDirection, Vector3.forward);
-            mousePosition.z = 0;
+	//	float mouseDirection = Mathf.Atan2 ((mousePosition.y - sightStart.position.y), (mousePosition.x - sightStart.position.x)) * Mathf.Rad2Deg - 90;		
+	//	if (mousePosition != transform.root.position) {
+	//		sightStart.rotation = Quaternion.AngleAxis (mouseDirection, Vector3.forward);
+	//		transform.rotation = Quaternion.AngleAxis (mouseDirection, Vector3.forward);
+ //           mousePosition.z = 0;
             
-        }
+ //       }
 
-	}
+	//}
 
-//	public void CanFire()
-//	{	
-//
-//		if (countDownToFire >= gunStats.startingFireRate) {
-//			canFire = true;
-//
-//		} else {
-//			countDownToFire += Time.deltaTime;
-//		}
-//	}
+    //public void CanFire()
+    //{
 
-	public void CheckForShoot()
+    //    if (countDownToFire >= gunStats.startingFireRate)
+    //    {
+    //        canFire = true;
+
+    //    }
+    //    else
+    //    {
+    //        countDownToFire += Time.deltaTime;
+    //    }
+    //}
+
+    public void CheckForShoot()
 	{
 
-		// BRACKEY's way:
-		if (gunStats.curFireRate == 0) {
-			if (Input.GetButtonDown ("Fire1")) {
-				if (gameMaster){
-					if (gameMaster._canFireWeapon) 
-						FireWeapon ();
-				}else{
-					Debug.Log("GUN: GM is null!!!");
-				}
-			}
-			
-		} else {
-			if (Input.GetButton ("Fire1") && Time.time > countDownToFire) {
-				if (gameMaster){
-					if (gameMaster._canFireWeapon) {
-						countDownToFire = Time.time + 1 / gunStats.curFireRate;
-						FireWeapon ();
-					}
-				}
-			}
-		}
+		if (gunStats.curChamberAmmo > 0)
+        {
+            if (gunStats.curFireRate == 0)
+            {
+                if (Input.GetButtonDown("Fire1"))
+                {
+                    //if (gameMaster){
+                    //	if (gameMaster._canFireWeapon) 
+                    //		FireWeapon ();
+                    //}else{
+                    //	Debug.Log("GUN: GM is null!!!");
+                    //}
+                    FireWeapon();
+                }
+
+            }
+            else
+            {
+                if (Input.GetButton("Fire1") && Time.time > countDownToFire)
+                {
+                    //if (gameMaster){
+                    //	if (gameMaster._canFireWeapon) {
+                    //		countDownToFire = Time.time + 1 / gunStats.curFireRate;
+                    //		FireWeapon ();
+                    //	}
+                    //}
+                    countDownToFire = Time.time + 1 / gunStats.curFireRate;
+                    FireWeapon();
+                }
+            }
+        }
+        else
+        {
+            // Chamber out of Bullets, must Reload
+            if (!isReloading)
+            {
+                isReloading = true;
+
+                //status_Indicator.CreateStatusMessage("Reloading!");
+
+                StartCoroutine("Reload");
+            }
+        }
+	
 
 	}
 
     void FireWeapon()
     {
         if (!Build_MainController.Instance.currentlyBuilding)
-        { 
-        // Fire an Raycast towards the mouse to check for a hit
-        targetInSight = RaycastToGetTarget();
-        // Actually shoot the bullet
-        VisualProjectileShoot();
-        // Play gun shot sound
-        source.PlayOneShot(shootSound, 0.5f);
-        // Apply gun kick to Player
-        //		GunKick ();
-        StartCoroutine(GunKick());
+        {
+            // Fire an Raycast towards the mouse to check for a hit
+            targetInSight = RaycastToGetTarget();
+
+            // Actually shoot the bullet
+            VisualProjectileShoot();
+
+            // Play gun shot sound
+            Sound_Manager.Instance.PlaySound(gameObject.name);
+
+            if (targetInSight != null)
+            {
+                
+                // Apply gun kick to Player
+                StartCoroutine(GunKick());
+                // Take a bullet from the gun's chamber ammo
+                gunStats.curChamberAmmo--;
+            }
+
+       
         }
 	}
 
@@ -150,15 +168,13 @@ public class Player_GunBaseClass : MonoBehaviour {
 	{
 		Debug.DrawLine (transform.position, sightEnd.position, Color.cyan);
 
-		RaycastHit2D hit = Physics2D.Linecast (transform.position, sightEnd.position, mask.value);
+		RaycastHit2D hit = Physics2D.Linecast (sightStart.position, sightEnd.position, mask.value);
 		if (hit.collider != null) {
 
 			if (hit.collider.CompareTag ("Enemy")) {
-
+               // Debug.Log("GUN DETECTED ENEMY!");
 				// Linecast HIT an enemy, so store the enemy unit as the target
 				return hit.collider.gameObject;
-
-				Debug.Log ("PLAYER GUN: Hit an enemy!");
 
 			} else {
 				return null;
@@ -173,39 +189,35 @@ public class Player_GunBaseClass : MonoBehaviour {
 	{
 		string _projectileType = gunStats.projectileType;
 
-
 		// Get the bullet from object pool using the name of the ammo type
-		GameObject projectile = objPool.GetObjectForType (_projectileType, true, sightEnd.position);
+		GameObject projectile = objPool.GetObjectForType (_projectileType, true, sightStart.position);
 		if (projectile) {
-			Debug.Log("Firing " + _projectileType + " !");
-            //			// give it the position of the player
-            //			projectile.transform.position = sightStart.position;
-            projectile.GetComponent<SpriteRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
-
-
-			// give it the object pool so it can pool itself
-			projectile.GetComponent<Bullet_FastMoveHandler> ().objPool = objPool;
+			//Debug.Log("Firing " + _projectileType + " !");
+            //projectile.GetComponent<SpriteRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
 
 			// and access to this gun to do damage
-			projectile.GetComponent<Bullet_FastMoveHandler> ().myWeapon = this;
+			projectile.GetComponent<Bullet_Player> ().myWeapon = this;
 
-			// and its direction
-			Vector3 dir = mousePosition - sightStart.position;
-			float angle = Mathf.Atan2 (dir.y, dir.x) * Mathf.Rad2Deg - 90;
-			projectile.transform.eulerAngles = new Vector3 (0, 0, angle);
+            // and its direction
+            Vector3 dir = sightEnd.position - sightStart.position;
 
-			// Now fire the bullet trail right behind it
-			GameObject bulletTrail = objPool.GetObjectForType("BulletTrail", true, sightEnd.position);
-			if (bulletTrail){
-                bulletTrail.GetComponent<LineRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
-                // and its direction
-                float trailAngle = Mathf.Atan2 (dir.y, dir.x) * Mathf.Rad2Deg;
-				bulletTrail.transform.eulerAngles = new Vector3 (0, 0, trailAngle);
-				bulletTrail.transform.SetParent(projectile.transform);
-				bulletTrail.GetComponent<EasyPool>().objPool = objPool;
-			}
+            projectile.transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90);
 
-		} else {
+            // Now fire the bullet trail right behind it ...
+            GameObject bulletTrail = objPool.GetObjectForType("BulletTrail", true, sightStart.position);
+
+			if (bulletTrail)
+            {
+                //bulletTrail.GetComponent<LineRenderer>().sortingOrder = sprite_renderer.sortingOrder - 10;
+
+                // ...and  set Rotation
+                bulletTrail.transform.eulerAngles = new Vector3 (0, 0, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg);
+                bulletTrail.transform.SetParent(projectile.transform);
+            }
+
+		}
+        else
+        {
 			Debug.Log("cant find " + _projectileType + " in Pool!");
 		}
 	}
@@ -228,5 +240,18 @@ public class Player_GunBaseClass : MonoBehaviour {
 		yield break;
 	}
 
+
+    IEnumerator Reload()
+    {
+        while (true)
+        {
+            // Wait for time in seconds according to this gun's Reload Speed stat
+            yield return new WaitForSeconds(gunStats.curReloadSpeed);
+            // Add bullets
+            gunStats.curChamberAmmo = gunStats.startingChamberAmmo;
+            isReloading = false;
+            yield break;
+        }
+    }
 
 }

@@ -3,9 +3,6 @@ using System.Collections;
 
 public class EasyPool : MonoBehaviour {
 
-
-	public ObjectPool objPool;
-
 	public float timeBeforePool;
 
 	private float poolCountdown;
@@ -18,15 +15,10 @@ public class EasyPool : MonoBehaviour {
 
     void OnEnable()
     {
-        objPool = ObjectPool.instance;
         state = State.COUNTING;
         poolCountdown = timeBeforePool;
     }
 	void Update () {
-
-        if (objPool == null)
-            objPool = ObjectPool.instance;
-            //objPool = GameObject.FindGameObjectWithTag ("Pool").GetComponent<ObjectPool> ();
 
 		if (state == State.POOLED)
 			poolCountdown = timeBeforePool;
@@ -35,7 +27,7 @@ public class EasyPool : MonoBehaviour {
 		if (poolCountdown <= 0 && state == State.COUNTING) {
 
 			// Pool object
-			objPool.PoolObject (this.gameObject);
+			ObjectPool.instance.PoolObject (this.gameObject);
 			state = State.POOLED;
 
 

@@ -4,8 +4,8 @@ using UnityEngine.UI;
 
 public class Unit_StatusIndicator : MonoBehaviour {
 
-	[SerializeField]
-	private RectTransform healthBarRect;
+	
+	public RectTransform healthBarRect;
 
 	[SerializeField]
 	private Canvas canvas;
@@ -27,23 +27,32 @@ public class Unit_StatusIndicator : MonoBehaviour {
 
 	}
 
-	public void SetHealth(float _cur, float _max, float _damage = 0)
+	public virtual void SetHealth(float _cur, float _max, float _damage = 0)
 	{
-		float _value = _cur / _max;
+        if (healthBarRect != null)
+        {
+            float _value = _cur / _max;
 
-		if (_value < 0.4f) {
-			healthBarRect.gameObject.GetComponent<Image> ().color = Color.red;
+            if (_value < 0.4f)
+            {
+                healthBarRect.gameObject.GetComponent<Image>().color = Color.red;
 
-		} else if (_value < 0.6f) {
-			healthBarRect.gameObject.GetComponent<Image> ().color = Color.yellow;
-		} else {
-			healthBarRect.gameObject.GetComponent<Image> ().color = Color.green;
-		}
+            }
+            else if (_value < 0.6f)
+            {
+                healthBarRect.gameObject.GetComponent<Image>().color = Color.yellow;
+            }
+            else
+            {
+                healthBarRect.gameObject.GetComponent<Image>().color = Color.green;
+            }
 
-		healthBarRect.localScale = new Vector3 (_value, healthBarRect.localScale.y, healthBarRect.localScale.z);
+            healthBarRect.localScale = new Vector3(_value, healthBarRect.localScale.y, healthBarRect.localScale.z);
 
-		if (_damage > 0)
-			CreateDamageText (_damage);
+            //if (_damage > 0)
+            //    CreateDamageText(_damage);
+        }
+
 	}
 
 	public void CreateDamageText(float _damage, string damageTypeID = "Damage")
@@ -104,5 +113,39 @@ public class Unit_StatusIndicator : MonoBehaviour {
 		}
 	}
 
+
+    public void CreateStatusMessage(string _message, Color color = default(Color))
+    {
+        Vector2 min = new Vector2(0.5f, 0.5f);
+        Vector2 max = new Vector2(0.5f, 0.5f);
+        Vector2 size = new Vector2(306, 64);
+        Vector3 scale = new Vector3(1, 1, 1);
+        Vector3 _scaleCalc = canvas.transform.localScale - scale;
+
+        GameObject _statusMsgText = ObjectPool.instance.GetObjectForType("Status Text", true, Vector3.zero);
+
+        if (_statusMsgText != null)
+        {
+
+            RectTransform rectTransform = _statusMsgText.GetComponent<RectTransform>();
+            rectTransform.SetParent(canvas.transform, true);
+            rectTransform.anchorMax = min;
+            rectTransform.anchorMin = max;
+            rectTransform.offsetMax = Vector2.zero;
+            rectTransform.offsetMin = Vector2.zero;
+            rectTransform.sizeDelta = size;
+            rectTransform.localScale = -_scaleCalc;
+
+
+            _statusMsgText.GetComponent<Text>().text = _message;
+            if (color != Color.clear)
+                _statusMsgText.GetComponent<Text>().color = color;
+
+        }
+        else
+        {
+            Debug.Log("STATUS INDICATOR: Could NOT find Status Text in Pool!");
+        }
+    }
 
 }

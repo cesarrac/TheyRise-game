@@ -1,239 +1,474 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System;
 
 public class Enemy_AttackHandler : Unit_Base {
 
-    Enemy_PathHandler pathHandler;
+    public Enemy_PathHandler pathHandler;
 
-
-    //	public int targetTilePosX, targetTilePosY;
-
-    //	public GameObject playerUnit;
-
-    ////	public bool canAttack;
-
-    //	public bool startCounter = true;
+    public GameObject playerUnit;
 
     //	// KAMIKAZE:
     //	public bool isKamikaze;
-    //	private float countDownToPool = 1f;
 
-    [Header ("If ON, this unit will always attack buildings nearby")]
-    public bool aggroOnBuildings;
 
-    public enum State { MOVING, ATTACK_TILE, ATTACK_UNIT, POOLING_TARGET };
+    public enum State { MOVING, ATTACK_TILE, ATTACK_UNIT, ATTACKING, POOLING_TARGET };
 
     private State _state = State.MOVING;
 
     //	[HideInInspector]
     //	public State state { get { return _state; } set { _state = value; } }
 
-    //	public State debugState;
+    public State debugState;
 
-
-    private float attackCountDown;
-
-    [Header("Camera Shake Ammount:")]
+    [Header("Camera Shake Ammount (Kamikaze Attacks):")]
     public float canShakeAmmount;
     public CameraShake _camShake;
 
-    //	private bool isPlayerAttacker;
 
-    public GameObject attacker; // < ----- public to set from other scripts
-    GameObject unitAttackingMe; // < ----- private that will be set to attacker 
-   
+    public GameObject attackingTower; // < ----- public to set from other scripts
+    GameObject towerAttackingMe; // < ----- private that will be set to attackingTower 
 
-    void Awake()
+    public Transform mainTarget { get; protected set; } // < ---- always the same as my path's original target.
+
+
+    float attackRange = 5.0f; // < ------- threshold target's can't pass without being attacked by this unit
+    public float AttackRange { get { return attackRange; } set { attackRange = Mathf.Clamp(value, 2.0f, 8.0f); } }
+
+    bool movingToAttack;
+
+    public bool isAttacking { get; protected set; }
+
+    bool mainTargetFound;
+
+    bool mainTargetIsTerraformer = false, currTargetIsTile = false;
+
+    public Rigidbody2D rigid_body
     {
-        pathHandler = GetComponent<Enemy_PathHandler>();
-        audio_source = GetComponent<AudioSource>();
+        get; protected set;
+    }
+
+    TileData targetAsTile;
+
+    public Action<Vector3> AttackActionCB;
+
+
+ 
+
+    public void ResetFlagsandTargets()
+    {
+        mainTargetFound = false;
+        movingToAttack = false;
+        isAttacking = false;
+        mainTargetIsTerraformer = false;
+
+        attackingTower = null;
+        towerAttackingMe = null;
+        playerUnit = null;
+    }
+
+    //void Awake()
+    //{
+    //    pathHandler = GetComponent<Enemy_PathHandler>();
+    //    audio_source = GetComponent<AudioSource>();
+    //    rigid_body = GetComponent<Rigidbody2D>();
+    //}
+
+    public void SetMainTarget(Transform target)
+    {
+        mainTarget = target;
+
+        if (mainTarget.gameObject.tag == "Citizen")
+        {
+            mainTargetIsTerraformer = false;
+
+            // If this unit is NO-Aggro to buildings we can go ahead and set playerUnit here so it attacks the player as soon as it is in range
+            if (!isAggroToBuildings)
+            {
+                playerUnit = mainTarget.gameObject;
+                currTargetIsTile = false;
+            }
+                
+        }
+        else
+        {
+           // towerAttackingMe = target.gameObject;
+
+            mainTargetIsTerraformer = true;
+
+            // Set the Target tile to the terraformer
+            targetAsTile = ResourceGrid.Grid.terraformerTile;
+        }
     }
 
     void Start()
     {
 
-        //		// Get the value of isKamikaze set by the public bool in Move Handler
-        //		isKamikaze = moveHandler.isKamikaze;
-
-        //// Get isPlayerAttacker from move Handler as well
-        //isPlayerAttacker = moveHandler.isPlayerAttacker;
-
-        // Initialize Unit stats
-        stats.Init();
-        Debug.Log("ENEMY stats Initialized!");
-        Debug.Log("attack: " + stats.curAttack + " rate: " + stats.curRateOfAttk);
-
-        // Get the Grid from the Move Handler
         if (resourceGrid == null)
             resourceGrid = ResourceGrid.Grid;
 
-        // This receives the Object Pool from the Wave Spawner, but just in case...
         if (objPool == null)
             objPool = ObjectPool.instance;
 
-        // Set attack Countdown to this Unit's starting attack rate
-        attackCountDown = stats.startAttack;
-
-        // Should receive Camera Shake script from the Wave Spawner, but just in case:
         if (!_camShake)
             _camShake = CameraShake.Instance;
 
     }
 
-    // Update is called once per frame
     void Update()
     {
+        debugState = _state;
 
-        // If I don't have any HP left, Pool myself
-        if (stats.curHP <= 0)
-            Suicide();
-
-        MyStateMachine(_state);
-
-        //debugState = state;
-
-        if (attacker != null && unitAttackingMe == null)
-        {
-            Debug.Log("ENEMY: Unit is attacking me!!");
-            unitAttackingMe = attacker;
-            attacker = null;
-            pathHandler.SwitchPathTarget(unitAttackingMe.transform.parent);
-            if (_state != State.ATTACK_TILE)
-            {
-                _state = State.ATTACK_TILE;
-            }
-
-        }
-           
-    }
-
-    void MyStateMachine(State _curState)
-    {
-        switch (_curState)
-        {
-            case State.MOVING:
-                // Not attacking
-                //if (unitAttackingMe != null || attacker != null)
-                //{
-                //    unitAttackingMe = null;
-                //    attacker = null;
-                //}
-               
-                break;
-            case State.ATTACK_TILE:
-                CountDownToAttack(false);
-                break;
-            case State.ATTACK_UNIT:
-               // CountDownToAttack(true);
-                break;
-            //		case State.POOLING_TARGET:
-            //			if (unitToPool != null){
-            //				PoolTarget(unitToPool);
-            //			}else{
-            //				_state = State.MOVING;
-            //			}
-            //			break;
-            default:
-                // Unit is not attacking
-                break;
-        }
-    }
-
-
-    void CountDownToAttack(bool trueIfUnit)
-    {
-        if (attackCountDown <= 0)
-        {
-            // Attack
-            if (trueIfUnit)
-            {
-
-                // attack unit
-                //HandleDamageToUnit();
-
-            }
-            else
-            {
-
-                // attack tile
-                HandleDamageToTile();
-            }
-            // reset countdown
-            attackCountDown = stats.curRateOfAttk;
-
-        }
-        else
+        if (stats.curHP > 0)
         {
 
-            attackCountDown -= Time.deltaTime;
-        }
-    }
-
-    void HandleDamageToTile()
-    {
-        if (pathHandler != null)
-        {
-            // Check if tile can still take damage, if so Unit_Base damages it
-            if (AttackTile(resourceGrid.TileFromWorldPoint(unitAttackingMe.transform.position)))
+            // Makes sure that if the tower target was POOLED that the target is nulled
+            if (towerAttackingMe != null)
             {
-
-                // Change Move Handler state to stop movement
-                //				moveHandler.state = Enemy_MoveHandler.State.ATTACKING;
-
-            }
-            else
-            {
-
-                // Tile has been destroyed, start Moving again
-                pathHandler.SwitchToMoving();
-
-                // Set state back to moving to stop attacking
-                _state = State.MOVING;
-
-                if (unitAttackingMe != null || attacker != null)
+                if (!towerAttackingMe.activeSelf)
                 {
-                    unitAttackingMe = null;
-                    attacker = null;
+                    towerAttackingMe = null;
+                    // And just in case this happened in the middle of an attack, Stop Attack routines
+                    StopAttackCoRoutines();
                 }
 
             }
 
+            // If at any time the path handler is in range of the target and isAttacking is false, call attack!
+            if (pathHandler.InRange && !isAttacking)
+            {
+                if (currTargetIsTile || mainTargetIsTerraformer)
+                {
+                    if (towerAttackingMe != null)
+                    {
+                        //Debug.Log("ENEMY: Starting tower attack...");
+                        StartCoroutine("TowerAggroAttack");
+                        isAttacking = true;
+                    }
+                    else
+                    {
+                        StopAttackCoRoutines();
+                        StartCoroutine("TowerisMainTargetAttack");
+                        isAttacking = true;
+                    }
+
+                }
+                else
+                {
+                    if (playerUnit != null)
+                    {
+                        //Debug.Log("ENEMY: Starting player attack...");
+                        StartCoroutine("PlayerAttack");
+                        isAttacking = true;
+                    }
+
+                }
+            }
+        }
+
+
+
+    }
+
+    void LateUpdate()
+    {
+
+        // If I don't have any HP left, Pool myself and stop doing everything else
+        if (stats.curHP <= 0)
+        {
+            Suicide();
         }
     }
 
-    //	/// <summary>
-    //	/// Handles the damage to unit by using
-    //	/// method from Unit_Base class.
-    //	/// </summary>
-    //	void HandleDamageToUnit()
-    //	{
 
-    //		// Verify that Player Unit is not null
-    //		if (playerUnit != null) {
+    IEnumerator DebugMyStatus()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(5f);
+            string status = "isAttacking = " + isAttacking + " towerAttackingMe = " + towerAttackingMe + " attackingTower = " + attackingTower + 
+                " playerUnit = " + playerUnit +" In Range = " + pathHandler.InRange + " currTargetIsTile = " + currTargetIsTile;
+            Debug.Log("ENEMY ATTACK STATUS: " + status);
+        }
+    }
 
-    //			// Store the unit's Unit_Base to access its stats
-    //			Unit_Base unitToHit = playerUnit.GetComponent<Unit_Base> ();
 
-    //			// Call the attack
-    //			AttackOtherUnit (unitToHit);
+    //    //  GENERAL ATTACK BEHAVIOR:
+    //    /// Units always start with an assigned MAIN target, they get it from their path handler's target transform. This is their main objective.
+    //    /// If they stop to attack something else on the way and survive they will always continue towards that MAIN TARGET.
+    //    /// When they are IN RANGE of that MAIN TARGET they stop moving along their path and start attacking UNTIL:
+    //    ///    - their target is dead.
+    //    ///    - they are dead.
+    //    ///    - or their target is no longer in range. 
+    //    ///      IN this case they would need to continue moving 
+    //    ///      towards their target to get in range, starting the process again.
+    //    /// Once a unit gets in range of their main target ONCE, they will ignore all other targets.
+    void ListenForAttacker()
+    {
+        if (!isAttacking)
+        {
+            if (isAggroToBuildings)
+            {
+                //                 AGGRESSIVE TO BUILDING ATTACK BEHAVIOR:
+                //  Rule: If any tower attacks this unit or is in range and the unit currently does NOT have an attack target besides the player, they ALWAYS will go and attack the tower. 
+                // If they DONT have a tower attacking them and the player attacks them, they will go and attack the player until a tower attacks or their main target is in range.
 
-    //		} else {
+                if (attackingTower != null && towerAttackingMe == null)
+                {
 
-    //			// Player unit is dead, we can STOP attack
-    //			_state = State.MOVING;
-    //		}
+                    Debug.Log("A tower is attacking me!!");
 
-    //	}
+                    StopAttackCoRoutines();
+
+                    towerAttackingMe = attackingTower;
+                    attackingTower = null;
+
+                    currTargetIsTile = true;
+
+                    // Switch the path handlers target to this tower IF this tower is NOT the main target
+                    if (towerAttackingMe.transform != mainTarget || towerAttackingMe.transform.parent != mainTarget)
+                        pathHandler.SwitchPathTarget(towerAttackingMe.transform.parent);
+
+
+                }
+                // If BOTH are null, THEN I can get a player as a target
+                else if (attackingTower == null && towerAttackingMe == null)
+                {
+                   if (playerUnit != null)
+                    {
+                        currTargetIsTile = false;
+
+                        StopAttackCoRoutines();
+
+                        // Switch the path handlers target to this Player IF this Player is NOT the main target
+                        if (playerUnit.transform != mainTarget)
+                            pathHandler.SwitchPathTarget(playerUnit.transform);
+                    }
+                }
+
+            }
+            else
+            {
+                // NON-AGGRESSIVE TO BUILDING ATTACK BEHAVIOR:
+                // Rule: If Player is attacking this unit, they will go attack the player. BUT if a tower attacks this unit, they ignore it and keep moving towards their main target.
+                // These units never attack towers UNLESS a tower is their Main Target.
+
+                if (playerUnit != null)
+                {
+                    StopAttackCoRoutines();
+
+                    // Switch the path handlers target to this Player IF this Player is NOT the main target
+                    if (playerUnit.transform != mainTarget)
+                        pathHandler.SwitchPathTarget(playerUnit.transform);
+                }
+
+            }
+        }
+
+    }
+
+
+    IEnumerator TowerisMainTargetAttack()
+    {
+        while (true)
+        {
+           
+            if (mainTarget != null && pathHandler.InRange) 
+            {
+               // Debug.Log("ENEMY: Attacking the tower!");
+
+                // Play attack sound
+                Sound_Manager.Instance.PlaySound("Slimer Attack");
+
+                // StartCoroutine(JumpAttack(mainTarget.position));
+                AttackActionCB(mainTarget.position);
+
+                HandleDamage_ToMainTargetTile();
+            }
+            else
+            {
+               
+                isAttacking = false;
+                yield break;
+            }
+
+            yield return new WaitForSeconds(stats.curRateOfAttk);
+        }
+    }
+
+    IEnumerator TowerAggroAttack()
+    {
+        while (true)
+        {
+
+            if (towerAttackingMe != null && pathHandler.InRange)
+            {
+                // Debug.Log("ENEMY: Attacking the tower!");
+
+                // Play attack sound
+                Sound_Manager.Instance.PlaySound("Slimer Attack");
+
+                //StartCoroutine(JumpAttack(towerAttackingMe.transform.parent.position));
+                AttackActionCB(towerAttackingMe.transform.parent.position);
+
+                HandleDamageToBattleTower();
+            }
+            else
+            {
+
+                isAttacking = false;
+                yield break;
+            }
+
+            yield return new WaitForSeconds(stats.curRateOfAttk);
+        }
+    }
+
+    IEnumerator PlayerAttack()
+    {
+        while (true)
+        {
+
+            if (playerUnit != null && pathHandler.InRange)
+            {
+                //Debug.Log("ENEMY: Attacking the player!");
+
+                // Play attack sound
+                Sound_Manager.Instance.PlaySound("Slimer Attack");
+
+                //StartCoroutine(JumpAttack(playerUnit.transform.position));
+                AttackActionCB(playerUnit.transform.position);
+
+                HandleDamageToUnit();
+            }
+            else
+            {
+                if (!pathHandler.InRange)
+                {
+                    Debug.Log("ENEMY: Missed! Player DODGED!!");
+                }
+                isAttacking = false;
+                yield break;
+            }
+            yield return new WaitForSeconds(stats.curRateOfAttk);
+        }
+    }
+
+    void StopAttackCoRoutines()
+    {
+        isAttacking = false;
+        StopCoroutine("PlayerAttack");
+        StopCoroutine("TowerAttack");
+    }
+
+    //IEnumerator JumpAttack(Vector3 targetPosition)
+    //{
+
+    //    Vector2 jumpDirection = targetPosition - transform.root.position;
+    //    rigid_body.AddForce(jumpDirection * 1200);
+    //    yield return new WaitForSeconds(0.1f);
+    //    rigid_body.AddForce(-jumpDirection * 1200);
+    //    yield break;
+
+    //}
+
+    void HandleDamage_ToMainTargetTile()
+    {
+        if (pathHandler != null)
+        {
+            if (mainTargetIsTerraformer)
+            {
+                if (!AttackTile(targetAsTile))
+                {
+                    // Set state back to moving
+                    _state = State.MOVING;
+
+                    // Set attacking flag to false to stop attacking
+                    isAttacking = false;
+
+                    Debug.Log("ENEMY: Stopped damaging tower!");
+
+                    // Stop Tower Attack coroutine
+                    StopCoroutine("TowerAttack");
+                }
+            }
+
+        }
+    }
+
+
+    void HandleDamageToBattleTower()
+    {
+        if (pathHandler != null)
+        {
+            // Check if tile can still take damage, if so Unit_Base damages it
+            if (!AttackTile(resourceGrid.TileFromWorldPoint(towerAttackingMe.transform.parent.position)))
+            {
+                // Set state back to moving
+                _state = State.MOVING;
+
+                // Set attacking flag to false to stop attacking
+                isAttacking = false;
+
+                if (towerAttackingMe != null)
+                {
+                    towerAttackingMe = null;
+                    attackingTower = null;
+                }
+
+                Debug.Log("ENEMY: Stopped damaging tower!");
+
+                // Stop Tower Attack coroutine
+                StopCoroutine("TowerAttack");
+            }
+        }
+    }
+
+
+    void HandleDamageToUnit()
+    {
+
+        if (!AttackUnit(playerUnit.GetComponent<Unit_Base>()))
+        {
+
+            // Set state back to moving
+            _state = State.MOVING;
+
+            // Set attacking flag to false to stop attacking
+            isAttacking = false;
+
+            playerUnit = null;
+
+            StopCoroutine("PlayerAttack");
+
+        }
+
+    }
 
     void Suicide()
     {
-        // get a Dead sprite to mark my death spot
-        GameObject deadE = objPool.GetObjectForType("dead", false, transform.position); // Get the dead unit object
+        // Get the Blood splat!
+        GameObject deadE = objPool.GetObjectForType("Blood FX particles 2", true, transform.position);
 
-        if (deadE != null)
+        // Calculate the z rotation needed for the blood particle effects to shoot at the angle the shot came from
+        if (towerAttackingMe != null)
         {
-            deadE.GetComponent<EasyPool>().objPool = objPool;
+            var dir = towerAttackingMe.transform.position - transform.position;
+            float bloodAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            deadE.transform.eulerAngles = new Vector3(0, 0, bloodAngle);
+
+            // Register my death with Enemy master and tell them a Tower killed me
+            Enemy_Master.instance.RegisterDeath(towerAttackingMe.transform);
+        }
+        else if (playerUnit != null)
+        {
+            var dir = playerUnit.transform.position - transform.position;
+            float bloodAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            deadE.transform.eulerAngles = new Vector3(0, 0, bloodAngle);
+
+            // Register my death with Enemy master and tell them a Player killed me
+            Enemy_Master.instance.RegisterDeath(playerUnit.transform);
         }
 
         // make sure we Pool any Damage Text that might be on this gameObject
@@ -243,38 +478,18 @@ public class Enemy_AttackHandler : Unit_Base {
             objPool.PoolObject(dmgTxt.gameObject);
         }
 
+        // Stop Attack and Path coroutines!
+        isAttacking = false;
+        playerUnit = null;
+        towerAttackingMe = null;
+        StopAttackCoRoutines();
+        pathHandler.FullStop();
+
         // and Pool myself
         objPool.PoolObject(gameObject);
     }
 
-    ////	void PoolTarget(GameObject target)
-    ////	{
-    ////		unitToPool = null;
-    ////
-    ////		Destroy (target.GetComponent<Player_AttackHandler>().unitParent);
-    ////
-    ////		GameObject deadE = objPool.GetObjectForType("dead", false); // Get the dead unit object
-    ////		if (deadE != null) {
-    ////			deadE.GetComponent<EasyPool> ().objPool = objPool;
-    ////			deadE.transform.position = target.transform.position;
-    ////		}
-    ////
-    ////		if (!isKamikaze) {
-    ////			// if we are pooling it means its dead so we should check for target again
-    ////			playerUnit = null;
-    ////
-    ////			// Tell move handler we are no longer attacking
-    ////			moveHandler.state = Enemy_MoveHandler.State.MOVING;
-    ////
-    ////			// Set state back to moving (if there's another target to attack the Unit or Tile will cause state to change to attacking)
-    ////			_state = State.MOVING;
-    ////
-    ////		} else {
-    ////			// kamikaze units just pool themselves when they hit
-    ////			objPool.PoolObject(this.gameObject);
-    ////		}
-    ////	
-    ////	}
+
 
     //	/// <summary>
     //	/// Special Attack for when Enemy reaches the Capital,
@@ -345,76 +560,6 @@ public class Enemy_AttackHandler : Unit_Base {
     //		}
     //	}
 
-    void OnTriggerEnter2D(Collider2D coll)
-    {
-        
-        //if (coll.gameObject.CompareTag("Building"))
-        //{
-        //    if (aggroOnBuildings)
-        //    {
-        //        pathHandler.SwitchToAttacking();
-        //        Debug.Log("Unit has changed to Attacking!!");
-        //    }
-        //}
-        //if (isKamikaze)
-        //{
-        //    if (coll.gameObject.tag == "Building")
-        //    {
-        //        // if unit hits a building, we blow up
-        //        KamikazeAttack((int)coll.gameObject.transform.position.x, (int)coll.gameObject.transform.position.y);
-        //    }
-        //    if (coll.gameObject.tag == "Citizen")
-        //    {
-        //        // if unit hits a Player Unit, 
-        //        // we get the Unit base and blow up
-        //        if (coll.gameObject.GetComponentInChildren<Unit_Base>() != null)
-        //        {
-        //            KamikazeAttack(0, 0, coll.gameObject.GetComponentInChildren<Unit_Base>());
-        //        }
-        //        else
-        //        {
-        //            Debug.Log("ENEMY ATTACK: Could not find Player unit's attack handler!");
-        //        }
-        //    }
-        //}
-        //else if (isPlayerAttacker)
-        //{
-        //    if (coll.gameObject.tag == "Citizen")
-        //    {
-        //        moveHandler.targetPlayer = coll.gameObject;
-        //    }
-        //}
-    }
-
-    //	void OnCollisionStay2D(Collision2D coll)
-    //	{
-    //		if (!isKamikaze) {
-    //			if (coll.gameObject.tag == "Citizen"){
-    //				Debug.Log ("ENEMY ATTACK: HIT the Hero!! EFF YEA!");
-    ////				AttackOtherUnit(coll.gameObject.GetComponent<Player_HeroAttackHandler>());
-    //				if (playerUnit == null){
-    //					playerUnit = coll.gameObject;
-    //					moveHandler.targetPlayer = playerUnit;
-    //					_state = State.ATTACK_UNIT;
-    //				}
-    //			}
-    //		}
-    //	}
-
-    //	void OnCollisionExit2D(Collision2D coll)
-    //	{
-    //		if (!isKamikaze) {
-    //			if (coll.gameObject.tag == "Citizen"){
-    //				Debug.Log ("ENEMY ATTACK: HIT the Hero!! EFF YEA!");
-    //				//				AttackOtherUnit(coll.gameObject.GetComponent<Player_HeroAttackHandler>());
-    //				if (playerUnit != null){
-    //					playerUnit = null;
-    //					// move handler doesn't make this null so it can continue to follow player
-
-    //					_state = State.MOVING;
-    //				}
-    //			}
-    //		}
-    //	}
+  
 
 }

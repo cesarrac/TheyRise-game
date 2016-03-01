@@ -55,14 +55,6 @@ public class Map_Generator : MonoBehaviour {
 		
 	}
 	
-	void Update()
-	{
-//		if (Input.GetMouseButtonDown (0)) {
-//			GenerateMap();
-//		}
-	}
-	
-	
 	void GenerateMap()
 	{
 		map = new int[width, height];
@@ -131,8 +123,9 @@ public class Map_Generator : MonoBehaviour {
         grid.mapSizeX = width;
         grid.mapSizeY = height;
 		grid.tiles = new TileData[width, height];
+        
 
-		int countWaterTiles = 0;
+		//int countWaterTiles = 0;
         // Initialize the grid's water tile positions list
         grid.waterTilePositions = new List<Vector2>();
 
@@ -148,37 +141,43 @@ public class Map_Generator : MonoBehaviour {
                     grid.emptyTilePositions.Add(new Vector2(x, y));
 
 				}else {
-					grid.tiles[x,y] = new TileData(x, y, TileData.Types.water, 200, 2);
+					grid.tiles[x,y] = new TileData(x, y, TileData.Types.water, 2000000, 2);
 
                     // fill a list of water tiles positions as vector 2 to be used as potential spawn positions for enemies
                     grid.waterTilePositions.Add(new Vector2(x, y));
 
-                    countWaterTiles++;
+                    //countWaterTiles++;
 				}
 			}
 		}
 		grid.spawnedTiles = new GameObject[width, height];
 
 		// let the grid know how many of these tiles are water so it can get spawn positions
-		grid.totalTilesThatAreWater = countWaterTiles;
-        
-		grid.InitializeRockandMinerals ();
-
+		//grid.totalTilesThatAreWater = countWaterTiles;
+       
         // turn water tiles list into an array for faster searching
         grid.waterTilesArray = grid.waterTilePositions.ToArray();
 
         // do the same to the empty tiles list
         grid.emptyTilesArray = grid.emptyTilePositions.ToArray();
 
+        // Give the pseudoRandom to the Resource Grid to maintain unity with the seed
+        grid.pseudoRandom = pseudoRandom;
+
 //        // Build island Texture
-//        TileTexture tileTexture = _Floor.GetComponent<TileTexture>();
-//        tileTexture.BuildTexture(grid.emptyTilesArray, iMap.GetLength(0), iMap.GetLength(1));
 		TileTexture_3 tileTexture = _Floor.GetComponent<TileTexture_3>();
+
+        // Also pass the same pseudoRandom to the TileTexture generator to maintain the seed
         tileTexture.seed = seed;
         tileTexture.randomFillPercent = randomFillPercent;
+        tileTexture.pseudoRandom = pseudoRandom;
+
+        // Generate the proper texture:
 		tileTexture.DefineTilesAndGenerateBaseTexture(grid.emptyTilesArray, iMap.GetLength(0), iMap.GetLength(1));
 
-        //GenerateTopLayerMap();
+        // After texture is rendered generate rocks
+        //grid.InitializeRockandMinerals();
+
     }
 
     public void GenerateTopLayerMap(Vector2[] centerPositions)

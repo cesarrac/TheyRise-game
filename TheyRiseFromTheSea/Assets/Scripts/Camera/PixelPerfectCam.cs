@@ -51,21 +51,30 @@ public class PixelPerfectCam : MonoBehaviour {
 
 		_camera = this.GetComponentInChildren<Camera>();
 
+    
 
-		if(!_camera){
+        if (!_camera){
 			Debug.LogWarning("No camera for pixel perfect cam to use");
 		}else{
 			_camera.orthographic = true;
-            // If camera has access to player, resize
-            if (followTarget)
-			    ResizeCamToTargetSize();
-		
-		}
 
-		if (!_cameraHolder) {
+            // If camera has access to player, resize
+       //     if (followTarget)
+			    //ResizeCamToTargetSize();
+
+         
+
+        }
+
+		if (!_cameraHolder)
+        {
 			_cameraHolder = this.transform;
 		}
-	}
+
+        // Move the camera to the center of the map and zoom out
+        _cameraHolder.transform.position = new Vector3(ResourceGrid.Grid.transform.position.x, ResourceGrid.Grid.transform.position.y, -10f);
+        _camera.orthographicSize = 37f;
+    }
 	
 	public void ResizeCamToTargetSize(){
 		if(_currentScreenWidth != Screen.width || _currentScreenHeight != Screen.height){

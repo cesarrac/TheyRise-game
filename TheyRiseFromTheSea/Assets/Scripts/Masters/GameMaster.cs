@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameMaster : MonoBehaviour {
+
+    public static GameMaster Instance { get; protected set; }
 
 	private int _storedCredits;
 	public int curCredits { get { return _storedCredits; }set{ _storedCredits = Mathf.Clamp (value, 0, 100000000); }}
@@ -17,30 +20,87 @@ public class GameMaster : MonoBehaviour {
 
 	bool levelInitialized;
 
+    int levelCount; // using this in a CRUDE way to count how many times the player has been to the surface.
+
+    public Hero theHero { get; protected set; }
+    public bool isHeroCreated { get; protected set; }
+
 	void Awake()
 	{
-		DontDestroyOnLoad (this.gameObject);
-		
-		// CHEATING!!!
-		curCredits = 1000;
-		Debug.Log ("GM is awake!");
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            DestroyImmediate(gameObject);
+        }
 
-        if (Application.loadedLevel == 1)
+        // CHEATING!!!
+        curCredits = 1000;
+		//Debug.Log ("GM is awake!");
+
+        // Set values for Grid and Object Pool if we are on Planet level
+        if (SceneManager.GetActiveScene().name == "Level_Planet")
         {
             resourceGrid = ResourceGrid.Grid;
             objPool = ObjectPool.instance;
 
         }
 
+        //if (!isHeroCreated)
+        //{
+        //    isHeroCreated = true;
+        //    CreateHero();
+        //}
+
+        if (theHero != null)
+        {
+            Debug.Log("HERO: current BP count = " + theHero.nanoBuilder.blueprintsMap.Count);
+
+        }
+
 	}
 
- 
-	// LEVEL LOADING:
 
-	void OnLevelWasLoaded (int level){
-		if (level == 1) {
-			// When we go into a "level" initialize the supplies bought at the store
-			InitializeInventoryAndSupplies();
+    public void CreateDefaultHero(string name)
+    {
+        CreateHero(name);
+    }
+
+    // CHARACTER CREATION:
+    // Create the Hero data class that will hold all the information of the player's Hero character
+    public void CreateHero(string name = "Hiro", string weaponOne = "Kinetic Rifle", string weaponTwo = "Freeze Gun", string tool = "Mining Drill", string armor = "Vacumn Suit", float maxHP = 100f, float curHP = 100f, float attk = 2, NanoBuilder builder = null)
+    {
+        // Default constructor for test needs a weapon, a tool, and armor.
+
+        theHero = new Hero(name, 
+                            Items_Database.Instance.GetWeaponfromID(weaponOne),
+                            Items_Database.Instance.GetArmorfromID(armor),
+                            Items_Database.Instance.GetToolfromID(tool),
+                            maxHP,
+                            curHP, 
+                            attk, 
+                            builder);
+
+        theHero.AddWeapon(Items_Database.Instance.GetWeaponfromID(weaponTwo));
+
+       // Debug.Log("Hero Created!");
+       // Debug.Log("Hero is wielding: " + theHero.weapons[0].itemName + " armor: " + theHero.armor.itemName + " and tool: " + theHero.tools[0].itemName);
+      //  Debug.Log("and " + theHero.weapons[1].itemName);
+
+        isHeroCreated = true;
+    }
+
+
+
+
+    // HERO & ITEMS LOADING:
+    void OnLevelWasLoaded (int level){
+		if (level == SceneManager.GetSceneByName("Level_CENTRAL").buildIndex) {
+			//// When we go into a "level" initialize the supplies bought at the store
+			//InitializeInventoryAndSupplies();
 
 			// UnPause the game in case it was paused for mission failed
 			if (Time.timeScale == 0)
@@ -48,29 +108,212 @@ public class GameMaster : MonoBehaviour {
 		}
 	}
 
-	public void LoadLevel()
-	{
-		if (Application.loadedLevel == 2) {
-			Application.LoadLevel (1);
-		} else {
-			Application.LoadLevel(2);
-		}
-	}
-
-    // HERO/PLAYER LOADING:
+    // HERO/PLAYER LOADING (Called by Resource Grid after Map has been initialized):
     public GameObject SpawnThePlayer(int posX, int posY)
     {
         resourceGrid = ResourceGrid.Grid;
         objPool = ObjectPool.instance;
-        /* Going to need a position that is 100% for sure an empty land tile.
-        To do that I'll need to load the player once the map generator and resource Grid have done their thing */
-        Vector3 playerPosition = new Vector3(posX, posY, 0.0f);
-        GameObject Hero = objPool.GetObjectForType("Hero", true, playerPosition);
 
+        Vector3 playerPosition = new Vector3(posX, posY, 0.0f);
+        GameObject Hero = objPool.GetObjectForType("Hero Rig", true, playerPosition);
+
+        // After spawning the player Set up the Active Mission requirements and Enemies
+        //SetUpMissionAndEnemies();
+
+
+        /*
+        HERE we need what Items the player chose to take with them to the surface.
+        
+        We'll need to know Equipped Items: Armor/Space Suit, Weapons, and Tools
+        And all Consumable items.
+        
+        The correct set needs to be spawned as GameObjects and made children of the Hero GObj.
+        
+        We'll need to tell the Player_HeroAttackHandler how many weapons and tools the player has available and link
+        the Weapon and Tool variables in that script to the corresponding child gameobjects.
+        
+        Default is 2 Weapons, 1 Tool
+
+        Then for the weapons we need to tell its Gun base class to Upgrade any stats if the Weapon was upgraded...
+
+        ...and finally, apply any upgrades to Tools.
+
+        Hero base class.
+        Armor.
+        List of Weapons.
+        List of Tools.
+        List of consumables.
+        List of abilities.
+
+        upgradeWeapon function (type of upgrade U, type of weapon W){
+            Weapons[w].upgrade(U);
+        }
+
+        In Weapons class:
+        upgrade (type of upgrade U){
+            switch(U){
+                case attack rate type:
+                weapon.stats.attackRate = U.attackRate;
+                break;
+            }
+        }
+
+        ** Solution:
+     
+        -Get the Weapon's Component from the name of the weapon ( from Hero class) for each weapon
+        - The same for Tools
+        - By default Weapon 1 should be active other weapons and tool gameobjects should be inactive
+            
+
+        */
         if (Hero)
         {
+            // ***** FIX THIS! Right now this assumes that ALL weapons are guns and have gunstats. There should be a weapon type to 
+            // differentiate what a Melee weapon's component might need in terms of stats VS. what a gun gets for gunStats.
+
+            // Get the Hero's attack handler.
+            Player_HeroAttackHandler hero_attkHandler = Hero.GetComponent<Player_HeroAttackHandler>();
+
+            // Spawn Weapons:
+
+            // Get the first weapon by using the item's name. Name should match the gameobject pre-loaded by Object Pool
+            GameObject wpn1 = ObjectPool.instance.GetObjectForType(theHero.weapons[0].itemName, true, Hero.transform.position);
+            if (wpn1)
+            {
+                /* *** TRY THIS FOR ANIMATIONS: ****
+                Once the weapon gets instantiated, parent it to the Front Rig's weapon Holder (this transform can be stored as a var on an EquipWeapon script on the Hero parent)
+                since this is the default direction.
+                Then when the animator goes to activate another rig, EquipWeapon would switch its parent to the correct direction's weapon holder. Since it itself will
+                always have a Transform defaulted to 0 the weapon Holder should take care of giving it the correct rotation and position.
+
+                Like so:
+                wpn1.transform.SetParent(Hero.GetComponent<Equip_Weapon>().Weapon_Down);
+                
+                */
+
+                // Use the method in Equip Weapon to set the default transform to down...
+                Hero.GetComponent<Equip_Item>().SwitchRig(Equip_Item.EquipState.DOWN);
+
+                // .. and set the sprite according to this weapon's name
+                Hero.GetComponent<Equip_Item>().SwitchSprite(theHero.weapons[0].itemName);
+
+                // Set the Wpn 1's transform to be a child of the Hero...
+                wpn1.transform.SetParent(Hero.transform);
+
+                // ... then shift it slightly into position.
+                wpn1.transform.localPosition = new Vector3(-0.18f, 0.65f, 0);
+
+                // Then through its Gun base class, set its stats (this will include any upgrades the Hero might have added)
+               // wpn1.GetComponent<Player_GunBaseClass>().gunStats = theHero.weapons[0].gunStats;
+                if (theHero.weapons[0].gunStats.shootsProjectiles)
+                {
+                    wpn1.GetComponent<Player_GunBaseClass>().gunStats = new GunStats(theHero.weapons[0].gunStats.startingFireRate,
+                                                              theHero.weapons[0].gunStats.startingReloadSpeed,
+                                                              theHero.weapons[0].gunStats.startingChamberAmmo,
+                                                              theHero.weapons[0].gunStats.damage,
+                                                              theHero.weapons[0].gunStats.kickAmmt,
+                                                              theHero.weapons[0].gunStats.projectileType);
+                }
+                else
+                {
+                    wpn1.GetComponent<Player_GunBaseClass>().gunStats = new GunStats(theHero.weapons[0].gunStats.startingFireRate,
+                                                              theHero.weapons[0].gunStats.startingReloadSpeed,
+                                                              theHero.weapons[0].gunStats.startingChamberAmmo,
+                                                              theHero.weapons[0].gunStats.damage,
+                                                              theHero.weapons[0].gunStats.kickAmmt);
+                }
+          
+                // Assign it to the Hero's attack handler
+                hero_attkHandler.AddEquippedItems(wpn1);
+            }
+
+            // Keep spawning weapons if the Hero has more equipped...
+            if (theHero.weapons.Count > 1)
+            {
+                for (int i = 1; i < theHero.weapons.Count; i++)
+                {
+                    // Spawn the next gun...
+                    GameObject otherWpn = ObjectPool.instance.GetObjectForType(theHero.weapons[i].itemName, true, Hero.transform.position);
+
+                    if (otherWpn)
+                    {
+                        otherWpn.transform.SetParent(Hero.transform);
+
+                        otherWpn.transform.localPosition = new Vector3(-0.18f, 0.65f, 0);
+
+                        if (theHero.weapons[0].gunStats.shootsProjectiles)
+                        {
+                            otherWpn.GetComponent<Player_GunBaseClass>().gunStats = new GunStats(theHero.weapons[0].gunStats.startingFireRate,
+                                                                      theHero.weapons[0].gunStats.startingReloadSpeed,
+                                                                      theHero.weapons[0].gunStats.startingChamberAmmo,
+                                                                      theHero.weapons[0].gunStats.damage,
+                                                                      theHero.weapons[0].gunStats.kickAmmt,
+                                                                      theHero.weapons[0].gunStats.projectileType);
+                        }
+                        else
+                        {
+                            otherWpn.GetComponent<Player_GunBaseClass>().gunStats = new GunStats(theHero.weapons[0].gunStats.startingFireRate,
+                                                                      theHero.weapons[0].gunStats.startingReloadSpeed,
+                                                                      theHero.weapons[0].gunStats.startingChamberAmmo,
+                                                                      theHero.weapons[0].gunStats.damage,
+                                                                      theHero.weapons[0].gunStats.kickAmmt);
+                        }
+
+                        // Assign it to the Hero's attack handler
+                        hero_attkHandler.AddEquippedItems(otherWpn);
+
+                        // ... making sure to set its gameobject to inactive.
+                        otherWpn.SetActive(false);
+                    }
+                }
+            }
+
+            // Spawn Tools:
+            // Do the same process for the tools.
+            GameObject tool1 = ObjectPool.instance.GetObjectForType(theHero.tools[0].itemName, true, Hero.transform.position);
+            if (tool1)
+            {
+                // Set parent to Hero...
+                tool1.transform.SetParent(Hero.transform);
+
+                // ... and shift position.
+                tool1.transform.localPosition = new Vector3(-0.18f, 0.65f, 0);
+
+                // This gameobject (tool1) needs to start as inactive, so pass in false to its SetActive func.
+                tool1.SetActive(false);
+
+                // Assign it to the attack handler.
+                hero_attkHandler.AddEquippedItems(tool1);
+            }
+            // Again we check if more tools are equipped. (The player is limited to two tools at a time)
+            if (theHero.tools.Count > 1)
+            {
+                for (int i = 1; i < theHero.weapons.Count; i++)
+                {
+                    // Spawn the next Tool...
+                    GameObject otherTool = ObjectPool.instance.GetObjectForType(theHero.tools[i].itemName, true, Hero.transform.position);
+
+                    if (otherTool)
+                    {
+                        otherTool.transform.SetParent(Hero.transform);
+
+                        otherTool.transform.localPosition = new Vector3(-0.18f, 0.65f, 0);
+
+                        // ... making sure to set its gameobject to inactive.
+                        otherTool.SetActive(false);
+
+                        // Assign it to the attack handler.
+                        hero_attkHandler.AddEquippedItems(otherTool);
+                    }
+                }
+            }
+
+            // Set the Hero's unit stats
+            hero_attkHandler.stats = theHero.heroStats;
+
+            // Then set the rest of the necessary values
             Hero.GetComponent<Player_MoveHandler>().resourceGrid = resourceGrid;
-            Hero.GetComponent<Player_HeroAttackHandler>().objPool = objPool;
+            hero_attkHandler.objPool = objPool;
             Hero.GetComponent<Player_PickUpItems>().objPool = objPool;
             resourceGrid.cameraHolder.gameObject.GetComponent<PixelPerfectCam>().followTarget = Hero;
             return Hero;
@@ -80,51 +323,188 @@ public class GameMaster : MonoBehaviour {
             return null;
         }
 
+        
     }
 
-	void InitializeInventoryAndSupplies()
+    public void SetUpMissionAndEnemies()
+    {
+        switch (Mission_Manager.Instance.ActiveMission.MissionType)
+        {
+            case MissionType.SCIENCE:
+                // Register Science checks callbacks...
+
+                // FIX THIS!
+                /* In this case we need to wait for the Player to actually build the building/tower that contains 
+                 the component that will need these callbacks. 
+                 For now, just spawn the Enemy Master and have a function that the Staged Building component can call
+                 on its Start to have the callbacks set. */
+
+                // ... then spawn a regular enemy master
+                SpawnEnemyMaster();
+                break;
+            case MissionType.SURVIVAL:
+                // Register Survival checks callback to the Ship Inventory...
+                Ship_Inventory.Instance.RegisterCompleteMissionCallback(Mission_Manager.Instance.CheckSurvivalMissionCompleted);
+
+                // ... then spawn a regular enemy master
+                SpawnEnemyMaster();
+                break;
+            case MissionType.ENCOUNTER:
+                // Spawn a boss enemy master using the active mission's encounter id
+                SpawnBossEnemyMaster(Mission_Manager.Instance.ActiveMission.EncounterID);
+                break;
+            default:
+                Debug.LogError("Not a Valid Mission Type!");
+                break;
+        }
+
+        // After Setting up the Mission and Enemies LOCK the Transporter so the player can't return until the Active Mission is flagged as completed
+        Transporter_Handler.instance.LockControls(true);
+    }
+
+    void SpawnEnemyMaster()
+    {
+        GameObject em = ObjectPool.instance.GetObjectForType("Default Enemy Master", true, Vector3.zero);
+
+        if (em != null)
+        {
+            Enemy_Master master = em.GetComponent<Enemy_Master>();
+            if (master != null)
+                master.Initialize();
+        }
+
+    }
+
+    void SpawnBossEnemyMaster(string id)
+    {
+        ObjectPool.instance.GetObjectForType(id, true, Vector3.zero);
+    }
+
+
+
+	//void InitializeInventoryAndSupplies()
+	//{
+	//	Debug.Log ("Initializing a level! Ore: " + inventory.ore + " Food: " + inventory.food + " Credits: " + curCredits);
+	//	Player_ResourceManager resourceMan = GameObject.FindGameObjectWithTag("Capital").GetComponent<Player_ResourceManager>();
+	//	resourceMan.InitStartingResources (inventory.food, curCredits, 10000);
+	//}
+
+
+    public void EndDay()
+    {
+        // Add a day to the Game Tracker
+        GameTracker.Instance.AddDay();
+
+        // Charge Daily Ship consumption and Regenerate the Ship's energy
+        Ship_Manager.Instance.ChargeDailyResources();
+
+        // Generate new Available Missions
+        Mission_Manager.Instance.CheckToGenerateNewMissions();
+    }
+
+    // LEVEL LOADING:
+
+    public void LaunchToPlanet()
+    {
+        // Before Launching make sure that the Hero's nanobuilder contains the active mission's required blueprint!
+        BlueprintDatabase.Instance.InitRequiredBlueprint();
+
+        SceneManager.LoadScene("Level_Planet");
+    }
+
+    public void ReturnToShip()
+    {
+        // Tell Ship Inventory to register items that were on the Temporary inventory, since now the Player is finally taking them to the ship
+        Ship_Inventory.Instance.RegisterTempInventoryToShip();
+
+        // Complete the current Active Mission
+        Mission_Manager.Instance.CompleteActiveMission();
+
+        // load the ship level
+        SceneManager.LoadScene("Level_CENTRAL");
+
+    }
+
+
+    // Restart a level by loading it again
+    public void MissionRestart()
 	{
-		Debug.Log ("Initializing a level! Ore: " + inventory.ore + " Food: " + inventory.food + " Credits: " + curCredits);
-		Player_ResourceManager resourceMan = GameObject.FindGameObjectWithTag("Capital").GetComponent<Player_ResourceManager>();
-		resourceMan.InitStartingResources (inventory.food, curCredits, 10000);
+        // FIX THIS! Instead of just re-loading and re-calculating the level we should load the map that we were just in (including Textures, TileData, seed, etc.)
+
+        // For now we are just re-loading the Planet Level
+        SceneManager.LoadScene("Level_Planet");
+
 	}
 
-//	void InitializeHeroAndResourceGrid()
-//	{
-//		resourceGrid = GameObject.FindGameObjectWithTag ("Map").GetComponent<ResourceGrid> ();
-//		player_weapon = GameObject.FindGameObjectWithTag ("Citizen").GetComponentInChildren<Player_GunBaseClass> ();
-//		building_UIHandler = GameObject.FindGameObjectWithTag ("Capital").GetComponent<Building_UIHandler> ();
-//
-//		Debug.Log ("GM: Initialized Grid, Hero & B UI");
-//		// TODO: Spawn the Hero here
-//	}
+    public void NewCharacterScreen()
+    {
+        SceneManager.LoadScene("Level_CharacterCreation");
+    }
 
-
-	// Restart a level by loading it again
-	public void MissionRestart()
+	public void NewGameLoadShip()
 	{
-		Application.LoadLevel (1);
-	}
 
-	public void GoBackToShip()
-	{
-		// load the ship level
-		Application.LoadLevel (0);
-	}
+        // If it is NOT a loaded game, the Trade Orders, Missions, and Ship Manager need to Initialize
+        TradeOrder_Manager.Instance.InitFirstOrders();
+        Mission_Manager.Instance.Init();
+        Ship_Manager.Instance.InitStartingValues();
 
-	// DURING A LEVEL:
-	
-	void Update()
+        // load the ship level
+        SceneManager.LoadScene("Level_CENTRAL");
+
+
+    }
+
+    public void SavedGameLoadShip()
+    {
+        // load the ship level
+        SceneManager.LoadScene("Level_CENTRAL");
+
+        // Check with Game Tracker to see if this is a Loaded Game.
+        // If it is NOT a loaded game, the Blueprints, Trade Orders, and Mission Managers need to Initialize
+    }
+
+    public void LoadBlueprintsScene()
+    {
+        SceneManager.LoadScene("Level_Blueprints");
+
+    }
+
+    public void LoadEquipmentScreen()
+    {
+        SceneManager.LoadScene("Level_Equip");
+
+    }
+
+    public void LoadLauncherScene()
+    {
+        SceneManager.LoadScene("Level_Launch");
+
+    }
+    // DURING A LEVEL:
+
+    void Update()
 	{
-		
-        if (Application.loadedLevel == 1)
-            CheckIfBuilding(); // this is so Player can know if they can fire or not
+
+        // QUIT:
+        if (Input.GetKey("escape"))
+        {
+            if (MasterState_Manager.Instance != null)
+            {
+                MasterState_Manager.Instance.QuitGame();
+            }
+            else
+            {
+                Application.Quit();
+            }
+       
+        }
     }
 
 	void CheckIfBuilding()
 	{
 
-			if (ResourceGrid.Grid.terraformer_built && !Build_MainController.Instance.currentlyBuilding) {
+			if (ResourceGrid.Grid.transporter_built && !Build_MainController.Instance.currentlyBuilding) {
 				_canFireWeapon = true;
 			} else {
 				_canFireWeapon = false;

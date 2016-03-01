@@ -14,13 +14,13 @@ public class Loader : MonoBehaviour {
 		gm = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster> ();
 	}
 
-	public void LoadLevelFromGM()
-	{
-		if (gm) {
-			gm.LoadLevel ();
-		} else {
-			Debug.Log("Can't load next level! GM script not found!");
-		}
-	}
+	//public void LoadLevelFromGM()
+	//{
+	//	if (gm) {
+	//		gm.LoadLevel ();
+	//	} else {
+	//		Debug.Log("Can't load next level! GM script not found!");
+	//	}
+	//}
 
 }

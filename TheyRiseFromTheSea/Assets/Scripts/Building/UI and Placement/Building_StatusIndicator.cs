@@ -21,14 +21,8 @@ public class Building_StatusIndicator : MonoBehaviour {
 	private Canvas canvas;
 	
 	private GameObject _damageText, _statusMsgText;
-	
-	[HideInInspector]
-	public ObjectPool objPool;
-
 
 	void Start () {
-
-        objPool = ObjectPool.instance;
 
         if (healthBarRect == null) {
 			Debug.Log("BUILDING INDICATOR: No health bar referenced!!");
@@ -63,7 +57,7 @@ public class Building_StatusIndicator : MonoBehaviour {
 		Vector3 scale = new Vector3(1, 1, 1);
 		Vector3 _scaleCalc = canvas.transform.localScale - scale;
 		
-		_damageText = objPool.GetObjectForType ("Building Damage Text", true, Vector3.zero);
+		_damageText = ObjectPool.instance.GetObjectForType ("Building Damage Text", true, Vector3.zero);
 		
 		if (_damageText != null) {
 
@@ -79,11 +73,6 @@ public class Building_StatusIndicator : MonoBehaviour {
 			_damageText.GetComponent<Text>().color = Color.red;
 			_damageText.GetComponent<Text>().text = _damage.ToString ();
 
-
-			// since I know I'm going to give the Text object the Easy Pool script, I might as well
-			// fill up its object pool variable here
-			if (_damageText.GetComponent<EasyPool> () != null)
-				_damageText.GetComponent<EasyPool> ().objPool = objPool;
 		} else {
 			Debug.Log ("STATUS INDICATOR: Could NOT find Damage Text in Pool!");
 		}
@@ -97,7 +86,7 @@ public class Building_StatusIndicator : MonoBehaviour {
 		Vector3 scale = new Vector3(1, 1, 1);
 		Vector3 _scaleCalc = canvas.transform.localScale - scale;
 		
-		_statusMsgText = objPool.GetObjectForType ("Status Text", true, Vector3.zero);
+		_statusMsgText = ObjectPool.instance.GetObjectForType ("Status Text", true, Vector3.zero);
 		
 		if (_statusMsgText != null) {
 			
@@ -114,11 +103,6 @@ public class Building_StatusIndicator : MonoBehaviour {
 			_statusMsgText.GetComponent<Text>().text = _message;
 			if (color != Color.clear)
 				_statusMsgText.GetComponent<Text>().color = color;
-			
-			// since I know I'm going to give the Text object the Easy Pool script, I might as well
-			// fill up its object pool variable here
-			if (_statusMsgText.GetComponent<EasyPool> () != null)
-				_statusMsgText.GetComponent<EasyPool> ().objPool = objPool;
 
 		} else {
 			Debug.Log ("STATUS INDICATOR: Could NOT find Status Text in Pool!");
