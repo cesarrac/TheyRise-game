@@ -6,7 +6,7 @@ public class Enemy_Spawner : MonoBehaviour {
 
     public static Enemy_Spawner instance;
 
-    int totalToSpawn = 0;
+    int totalToSpawn = 0, curSpawnCount = 0;
     Enemy curr_Enemy_toSpwn;
 
     Vector3 spawnPosition;
@@ -15,6 +15,8 @@ public class Enemy_Spawner : MonoBehaviour {
     public bool isSpawning { get; protected set; }
 
     Func<Transform> GetTargetCB;
+
+    EnemyIncoming_Indicator curIndicator;
 
     void Awake()
     {
@@ -39,15 +41,15 @@ public class Enemy_Spawner : MonoBehaviour {
     public void ReceiveSpawnCommand(int spawnCount, Enemy enemyToSpwn, Vector3 spawnPos)
     {
         totalToSpawn = spawnCount;
+        curSpawnCount = 0;
         curr_Enemy_toSpwn = enemyToSpwn;
 
-        // Select a Spawn Position
-        //spawnPosition = GetSpawnPosition();
         spawnPosition = spawnPos;
 
         if (!isSpawning)
         {
             isSpawning = true;
+            //IndicateIncomingEnemy(curr_Enemy_toSpwn, totalToSpawn);
             StartCoroutine("Spawn");
         }
 
@@ -64,6 +66,13 @@ public class Enemy_Spawner : MonoBehaviour {
 
                 if (e != null)
                 {
+                    // Pass the first enemy spawned as the Enemy Transform that the Indicator will track
+                    if (curSpawnCount == 0 && curIndicator != null)
+                    {
+                        curIndicator.InitEnemyToTrack(e.transform);
+                    }
+
+
                     // Assign the unit's attack stats
                     if (e.GetComponent<Unit_Base>() != null)
                     {
@@ -103,6 +112,7 @@ public class Enemy_Spawner : MonoBehaviour {
           
 
                 totalToSpawn--;
+                curSpawnCount++;
 
                 yield return new WaitForSeconds(0.5f);
             }
@@ -116,6 +126,31 @@ public class Enemy_Spawner : MonoBehaviour {
         isSpawning = false;
         curr_Enemy_toSpwn = null;
         yield break;
+    }
+
+
+    public void CreateIndicator(Vector3 spawnPos)
+    {
+        GameObject indicator = ObjectPool.instance.GetObjectForType("Enemy Indicator", true, spawnPos);
+        if (indicator != null)
+        {
+            indicator.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform);
+            if (indicator.GetComponent<EnemyIncoming_Indicator>() != null)
+            {
+                curIndicator = indicator.GetComponent<EnemyIncoming_Indicator>();
+                curIndicator.InitSpawnPos(spawnPos);
+
+            }
+        }
+    }
+
+    void IndicateIncomingEnemy(Enemy currEnemy, int total)
+    {
+        // TODO: Use the currEnemy to assess threat and total units incoming
+
+        // Display the arrow
+        //UI_Manager.Instance.DisplayEnemyIndicator(spawnPosition);
+
     }
 
     //Vector3 GetSpawnPosition()

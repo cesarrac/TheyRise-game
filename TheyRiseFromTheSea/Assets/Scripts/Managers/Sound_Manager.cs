@@ -38,7 +38,7 @@ public class Sound_Manager : MonoBehaviour {
             soundMap.Add(sound.name, sound);
         }
 
-        Debug.Log("SOUNDMAN: Sound map initialized with " + soundMap.Count + " sounds!");
+       // Debug.Log("SOUNDMAN: Sound map initialized with " + soundMap.Count + " sounds!");
     }
 
     void Update()

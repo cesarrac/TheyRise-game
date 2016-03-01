@@ -17,12 +17,12 @@ public class Player_AssaultRifle : Player_GunBaseClass {
     void Start()
 	{
 
-        Debug.Log("Gun Stats starting stats: rate " + gunStats.startingFireRate + " ammo " + gunStats.startingChamberAmmo + " r spd " + gunStats.startingReloadSpeed);
+       // Debug.Log("Gun Stats starting stats: rate " + gunStats.startingFireRate + " ammo " + gunStats.startingChamberAmmo + " r spd " + gunStats.startingReloadSpeed);
     
         // Initialize gun stats
         gunStats.Init();
 
-        Debug.Log("Gun Stats: rate " + gunStats.curFireRate + " ammo " + gunStats.curChamberAmmo + " r spd " + gunStats.curReloadSpeed);
+       // Debug.Log("Gun Stats: rate " + gunStats.curFireRate + " ammo " + gunStats.curChamberAmmo + " r spd " + gunStats.curReloadSpeed);
 
         objPool = ObjectPool.instance;
 

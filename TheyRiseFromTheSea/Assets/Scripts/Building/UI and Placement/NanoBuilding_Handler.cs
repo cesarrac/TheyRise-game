@@ -87,8 +87,8 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
         availableBlueprintsTypes = NanoBuilder.bpTypes.ToArray();
 
-        Debug.Log("NANO B: First BP in available blueprints types is " + availableBlueprintsTypes[0].ToString());
-        Debug.Log("NANO B: The Hero's nanobuilder currently has " + NanoBuilder.blueprintsMap.Count + " blueprints loaded.");
+       // Debug.Log("NANO B: First BP in available blueprints types is " + availableBlueprintsTypes[0].ToString());
+       // Debug.Log("NANO B: The Hero's nanobuilder currently has " + NanoBuilder.blueprintsMap.Count + " blueprints loaded.");
         
 
         SetBPSprites();
@@ -110,11 +110,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
         //selectedBluePrint = availableBlueprints[TileData.Types.terraformer];
         selectedBluePrint = NanoBuilder.blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType];
 
-        if (selectedBluePrint != null)
-        {
-            Debug.Log("NANO B: Selected blueprint's type is currently " + selectedBluePrint.tileType);
-        }
-        else
+        if (selectedBluePrint == null)
         {
             Debug.LogError("NANO B: The Selected Blueprint is null! WTF?! Did the GM loose track of the Hero?!");
         }

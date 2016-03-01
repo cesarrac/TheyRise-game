@@ -47,6 +47,9 @@ public class UI_Manager : MonoBehaviour
     public Text m4Name, m4Desc, m4Cost;
     public Text m5Name, m5Desc, m5Cost;
 
+    // ENEMY INCOMING INDICATOR:
+    //public GameObject incomingIndicator;
+
     void Awake()
     {
         Instance = this;
@@ -507,5 +510,24 @@ public class UI_Manager : MonoBehaviour
             
     }
 
+    //public void DisplayEnemyIndicator(Vector3 enemyPos)
+    //{
+    //    // TODO: later on we can add space to show total enemies and the threat level!
+    //    if (!incomingIndicator.activeSelf)
+    //    {
+    //        incomingIndicator.SetActive(true);
 
+    //    }
+
+
+    //    incomingIndicator.GetComponentInChildren<EnemyIncoming_Indicator>().InitSpawnPos(enemyPos);
+    //}
+
+    //public void StopDisplayingEnemyIndicator()
+    //{
+    //    if (incomingIndicator.activeSelf)
+    //    {
+    //        incomingIndicator.SetActive(false);
+    //    }
+    //}
 }

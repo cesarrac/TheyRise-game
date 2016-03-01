@@ -13,6 +13,9 @@ public class Detect_Visible_Objects : MonoBehaviour {
 
             // Change layer to Enemies layer
             coll.gameObject.layer = enemiesLayerID;
+
+            // As soon as an enemy becomes visible, stop showing the Incoming indicator if there is one active
+            //UI_Manager.Instance.StopDisplayingEnemyIndicator();
       
         }
 
@@ -29,7 +32,6 @@ public class Detect_Visible_Objects : MonoBehaviour {
     {
         if (coll.gameObject.CompareTag("Enemy"))
         {
-
             // Change layer to Not Visible layer
             coll.gameObject.layer = notVisibleLayerID;
         }

@@ -276,7 +276,7 @@ public class Rock_Generator : MonoBehaviour {
             density = 5;
         }
         OrePatch patch = new OrePatch(leadX, leadY, density, rType);
-        Debug.Log("ORE PATCH at lead x " + leadX + " lead Y " + leadY);
+       // Debug.Log("ORE PATCH at lead x " + leadX + " lead Y " + leadY);
         patch.SetFormation();
         ResourceGrid.Grid.PlaceOrePatch(patch, rType);
     }

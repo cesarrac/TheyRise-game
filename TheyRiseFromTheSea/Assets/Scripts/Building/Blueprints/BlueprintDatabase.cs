@@ -160,7 +160,7 @@ public class BlueprintDatabase : MonoBehaviour {
     void InitBattleTowers()
     {
         battleTowersMap = new Dictionary<string, Blueprint_Battle>();
-        battleTowersMap.Add("Machine Gun", new Blueprint_Battle(12, 2, 0.8f, 5, 25, 2, 1, 0));
+        battleTowersMap.Add("Machine Gun", new Blueprint_Battle(12, 2, 0.12f, 2, 25, 2, 1, 0));
         battleTowersMap.Add("Sniper Gun", new Blueprint_Battle(12, 2, 1.5f, 8 ,25, 2, 1, 0));
         battleTowersMap.Add("Terraformer", new Blueprint_Battle(0, 0, 0, 0, 2500, 0, 2, 0));
     }
@@ -169,7 +169,7 @@ public class BlueprintDatabase : MonoBehaviour {
     {
         if (extractorsMap.ContainsKey(id))
         {
-            Debug.Log("BP Database: Found stats for " + id);
+           // Debug.Log("BP Database: Found stats for " + id);
             extractor.Init(resourceType, extractorsMap[id].extractorStats.extractRate, extractorsMap[id].extractorStats.extractPower,
                 extractorsMap[id].extractorStats.extractAmmount, extractorsMap[id].extractorStats.personalStorageCapacity, objTransform);
         }
@@ -179,7 +179,7 @@ public class BlueprintDatabase : MonoBehaviour {
     {
         if (battleTowersMap.ContainsKey(id))
         {
-            Debug.Log("BP Database: Found stats for " + id);
+           // Debug.Log("BP Database: Found stats for " + id);
             InitGunStats(battleTowersMap[id].battleStats);
             InitUnitStats(battleTowersMap[id].unitStats);
         }
@@ -189,7 +189,7 @@ public class BlueprintDatabase : MonoBehaviour {
     {
         if (battleTowersMap.ContainsKey(id))
         {
-            Debug.Log("BP Database: Found stats for " + id);
+           // Debug.Log("BP Database: Found stats for " + id);
             InitUnitStats(battleTowersMap[id].unitStats);
         }
     }
@@ -198,7 +198,7 @@ public class BlueprintDatabase : MonoBehaviour {
     {
         if (battleTowersMap.ContainsKey(id))
         {
-            Debug.Log("BP DATABASE: Found initial tile stats for " + id);
+           // Debug.Log("BP DATABASE: Found initial tile stats for " + id);
             return battleTowersMap[id].tileStats;
         }
         else
@@ -229,7 +229,7 @@ public class BlueprintDatabase : MonoBehaviour {
             DisplaySelectedBPInfo();
         }
 
-        Debug.Log("Current selected BP is " + curSelectedBP.buildingName);
+       // Debug.Log("Current selected BP is " + curSelectedBP.buildingName);
     }
 
     void DisplaySelectedBPInfo()
@@ -279,7 +279,7 @@ public class BlueprintDatabase : MonoBehaviour {
 
         DisplayBuilderMemory();
 
-        Debug.Log("Hero loaded blueprint for: " + curSelectedBP.buildingName);
+       // Debug.Log("Hero loaded blueprint for: " + curSelectedBP.buildingName);
 
     }
 
@@ -298,7 +298,7 @@ public class BlueprintDatabase : MonoBehaviour {
 
     void ReloadOnNanoBuilder()
     {
-        Debug.Log("Reloading Hero Bluerprints...");
+       // Debug.Log("Reloading Hero Bluerprints...");
         if (hero_nanoBuilder.blueprintsMap.Count > 0)
         {
             foreach(TileData.Types btype in hero_nanoBuilder.bpTypes)

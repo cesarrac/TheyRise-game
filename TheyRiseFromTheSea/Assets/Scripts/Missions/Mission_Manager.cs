@@ -168,6 +168,9 @@ public class Mission_Manager : MonoBehaviour {
         if (Ship_Inventory.Instance.CheckForSpecificResource(activeMission.ObjectiveResource, true) >= activeMission.ObjectiveAmnt)
         {
             activeMission.FlagAsCompleted();
+
+            // Display objective completed message
+            UI_Manager.Instance.DisplayVictoryPanel();
         }
     }
 
@@ -176,6 +179,9 @@ public class Mission_Manager : MonoBehaviour {
         if (currStageCount >= activeMission.ObjectiveStages)
         {
             activeMission.FlagAsCompleted();
+
+            // Display objective completed message
+            UI_Manager.Instance.DisplayVictoryPanel();
         }
     }
 

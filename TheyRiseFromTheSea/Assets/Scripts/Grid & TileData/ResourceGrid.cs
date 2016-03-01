@@ -354,6 +354,9 @@ public class ResourceGrid : MonoBehaviour{
         // Spawn Player / Hero 1 tile down from the terraformer
         Hero = game_master.SpawnThePlayer(_terraPosX, _terraPosY - 1);
 
+        // Setup the Enemies and Missions
+        game_master.SetUpMissionAndEnemies();
+
         // TODO: replace capitalPos completely with terraformer pos
         transportSpawnX = _terraPosX;
         transportSpawnY = _terraPosY;

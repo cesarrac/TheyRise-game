@@ -86,7 +86,7 @@ public class Transporter_Handler : MonoBehaviour {
     public void LockControls(bool locked)
     {
         isLocked = locked;
-        Debug.Log("TRANSPORTER: Lock is " + isLocked);
+       // Debug.Log("TRANSPORTER: Lock is " + isLocked);
     }
 
 

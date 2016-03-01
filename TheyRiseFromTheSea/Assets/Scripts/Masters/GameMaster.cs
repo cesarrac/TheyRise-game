@@ -39,7 +39,7 @@ public class GameMaster : MonoBehaviour {
 
         // CHEATING!!!
         curCredits = 1000;
-		Debug.Log ("GM is awake!");
+		//Debug.Log ("GM is awake!");
 
         // Set values for Grid and Object Pool if we are on Planet level
         if (SceneManager.GetActiveScene().name == "Level_Planet")
@@ -86,9 +86,9 @@ public class GameMaster : MonoBehaviour {
 
         theHero.AddWeapon(Items_Database.Instance.GetWeaponfromID(weaponTwo));
 
-        Debug.Log("Hero Created!");
-        Debug.Log("Hero is wielding: " + theHero.weapons[0].itemName + " armor: " + theHero.armor.itemName + " and tool: " + theHero.tools[0].itemName);
-        Debug.Log("and " + theHero.weapons[1].itemName);
+       // Debug.Log("Hero Created!");
+       // Debug.Log("Hero is wielding: " + theHero.weapons[0].itemName + " armor: " + theHero.armor.itemName + " and tool: " + theHero.tools[0].itemName);
+      //  Debug.Log("and " + theHero.weapons[1].itemName);
 
         isHeroCreated = true;
     }
@@ -118,7 +118,7 @@ public class GameMaster : MonoBehaviour {
         GameObject Hero = objPool.GetObjectForType("Hero Rig", true, playerPosition);
 
         // After spawning the player Set up the Active Mission requirements and Enemies
-        SetUpMissionAndEnemies();
+        //SetUpMissionAndEnemies();
 
 
         /*
@@ -326,7 +326,7 @@ public class GameMaster : MonoBehaviour {
         
     }
 
-    void SetUpMissionAndEnemies()
+    public void SetUpMissionAndEnemies()
     {
         switch (Mission_Manager.Instance.ActiveMission.MissionType)
         {
@@ -370,7 +370,7 @@ public class GameMaster : MonoBehaviour {
         {
             Enemy_Master master = em.GetComponent<Enemy_Master>();
             if (master != null)
-                master.StartWaitToAct();
+                master.Initialize();
         }
 
     }

@@ -65,7 +65,7 @@ public class Enemy_Master : MonoBehaviour {
     Transform nearestUtilityTower, nearestBattleTower;
 
     // Spawn Points: currency the Enemy Master uses to buy/spawn units
-    int maxSpawnPoints = 100;
+    int maxSpawnPoints = 200;
     int spawnPoints;
     public int SpawnPoints { get { return spawnPoints; } set { spawnPoints = Mathf.Clamp(value, 0, 1000); } }
 
@@ -155,24 +155,49 @@ public class Enemy_Master : MonoBehaviour {
     // To sort tasks by score they each need to be applied to this formula:
     // Assignment Priority Score = (4 - (general score + modifier)) / distance to target
 
-    public void StartWaitToAct()
+    public void Initialize()
     {
-        StartCoroutine("WaitToAct");
+        // At init wait 5 seconds before starting to indicate first enemies
+        StartCoroutine(WaitToAct(5, true));
     }
 
-    IEnumerator WaitToAct()
+    void StartWaitToAct()
+    {
+        // Get a spawn position for this next wave
+        spawnPosition = GetSpawnPosition();
+
+        // ONLY CREATE A SPAWN INDICATOR WHEN THERE ARE SOME SPAWN POINTS LEFT! (To avoid creating one when Economic Strategy will be implemented)
+        if (spawnPoints > 0)
+        {
+            // Notify the incoming indicator of the position the enemy will be coming from
+            Enemy_Spawner.instance.CreateIndicator(spawnPosition);
+        }
+
+
+        StartCoroutine(WaitToAct(15));
+    }
+
+    IEnumerator WaitToAct(float time, bool first = false)
     {
         while (true)
         {
-            yield return new WaitForSeconds(60f);
-            StartDecisionMakingProcess();
+            yield return new WaitForSeconds(time);
+            if (!first)
+            {
+                StartDecisionMakingProcess();
+            }
+            else
+            {
+                StartWaitToAct();
+            }
+    
             yield break;
         }
     }
 
     void StartDecisionMakingProcess()
     {
-        Debug.Log("Starting to make a decision!");
+       // Debug.Log("Starting to make a decision!");
         timeAtStartofDecision = Time.time;
         CalcModifiers();
 
@@ -216,8 +241,8 @@ public class Enemy_Master : MonoBehaviour {
             // If the count is not divisible by 3 or it results in less than 1, no modifier is added yet.
         }
 
-        // Get a spawn position for this next wave
-        spawnPosition = GetSpawnPosition();
+        //// Get a spawn position for this next wave
+        //spawnPosition = GetSpawnPosition();
 
         // Calculate distances
 
@@ -275,7 +300,7 @@ public class Enemy_Master : MonoBehaviour {
         // Set the active task
         activeTask = orderedTasks[0];
 
-        Debug.Log("ENEMY MASTER Assignment scores: ");
+        //Debug.Log("ENEMY MASTER Assignment scores: ");
         for (int i = 0; i < tasks.Length; i++)
         {
             Debug.Log(orderedTasks[i].taskType.ToString() + " score = " + orderedTasks[i].AssignmentScore);
@@ -293,7 +318,7 @@ public class Enemy_Master : MonoBehaviour {
         if (spawnPoints <= 0)
         {
             EconomicStrategy();
-            StartWaitToAct();
+            //StartWaitToAct();
             return;
         }
 
@@ -343,7 +368,7 @@ public class Enemy_Master : MonoBehaviour {
         }
 
         // After a strategy has been executed, wait to decide what to do next
-        StartWaitToAct();
+       // StartWaitToAct();
     }
 
     // **************************************************************   BASIC STRATEGIES:
@@ -351,6 +376,17 @@ public class Enemy_Master : MonoBehaviour {
     {
         Debug.Log("MASTER: Implementing Economic Strategy!");
         SpawnPoints += spawnPointRegenRate;
+
+        // Check if any indicators were created so we can pool them here
+        //if (enemy_indicator != null)
+        //{
+        //    if (enemy_indicator.gameObject.activeSelf == true)
+        //    {
+        //        ObjectPool.instance.PoolObject(enemy_indicator.gameObject);
+        //    }
+        //}
+
+        StartWaitToAct();
     }
 
     void ConservativeStrategy()
@@ -406,6 +442,8 @@ public class Enemy_Master : MonoBehaviour {
                 IssueSpawnCommand(spawnPoints / weakCost, "Slimer_Weak_noAggro");
             }
         }
+
+        StartWaitToAct();
     }
 
     void RushAggressiveStrategy()
@@ -444,9 +482,8 @@ public class Enemy_Master : MonoBehaviour {
                 StartCoroutine(WaitForSecondSpawnCommand(spawnPoints / midCost - CurrUnitsOnField, "Slimer_Mid_noAggro"));
             }
         }
-      
 
-
+        StartWaitToAct();
     }
 
     void RushConservativeStrategy()
@@ -466,6 +503,9 @@ public class Enemy_Master : MonoBehaviour {
         {
             IssueSpawnCommand(spawnPoints / weakCost, "Slimer_Weak_noAggro");
         }
+
+        StartWaitToAct();
+
     }
 
     IEnumerator WaitForSecondSpawnCommand(int total, string id)
