@@ -47,8 +47,8 @@ public class UI_Manager : MonoBehaviour
     public Text m4Name, m4Desc, m4Cost;
     public Text m5Name, m5Desc, m5Cost;
 
-    // ENEMY INCOMING INDICATOR:
-    //public GameObject incomingIndicator;
+    public GameObject buildWarningGObj;
+    public Text buildWarning;
 
     void Awake()
     {
@@ -100,6 +100,16 @@ public class UI_Manager : MonoBehaviour
             nameIsDisplayed = true;
             heroName.text = "Prospector " + GameMaster.Instance.theHero.heroName;
         }
+    }
+
+    public void DisplayBuildWarning(TileData.Types resource)
+    {
+        if (buildWarningGObj.activeSelf == false)
+        {
+            buildWarningGObj.gameObject.SetActive(true);
+        }
+
+        buildWarning.text = "Need more " + resource.ToString() + "!";
     }
 
     // *****************************************                             BLUEPRINTS:

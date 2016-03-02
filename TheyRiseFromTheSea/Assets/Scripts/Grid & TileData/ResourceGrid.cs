@@ -628,7 +628,8 @@ public class ResourceGrid : MonoBehaviour{
                         Rock_Handler rockHandler = spawnedTiles[x, y].GetComponent<Rock_Handler>();
                         rockHandler.ShrinkDownSize();
                         // chunks
-                        StartCoroutine(SpawnRockChunks(ammnt, rockHandler.myRockType, spawnedTiles[x, y].transform.position));
+                        SpawnResourceDropFromHandMining(spawnedTiles[x, y].transform.position, ammnt, rockHandler.myRock._rockProductionType);
+                        //StartCoroutine(SpawnRockChunks(ammnt, rockHandler.myRockType, spawnedTiles[x, y].transform.position));
                     }
                 }
               
@@ -657,69 +658,78 @@ public class ResourceGrid : MonoBehaviour{
         return resourceMined;
     }
 
-    IEnumerator SpawnRockChunks(int chunkCount, Rock.RockType rockType, Vector3 position)
+    void SpawnResourceDropFromHandMining(Vector3 pos, int ammnt, Rock.RockProductionType rockProdType)
     {
-        for (int i = 0; i <= chunkCount; i++)
+        GameObject drop = ObjectPool.instance.GetObjectForType("Resource Drop", true, pos);
+        if (drop != null)
         {
-            GameObject chunk = objPool.GetObjectForType("Chunk of Rock", true, position);
-            if (chunk)
-            {
-                /* Currently NOT using the rocktype for anything BUT I could use it to assign the chunk's correct sprite.
-                The Problem with that is it might not change fast enough to not show up as the wrong sprite for a moment before popping back.
-                I'll need to assign the correct sprite from an array (probably on the res_sprite manager) of rock chunks, separated by type and maybe size. 
-                ALSO will need to change the spawned chunk's tag to its rock type's tag so when the Player picks up the chunk they get the correct resource added. */
-                SpriteRenderer sr = chunk.GetComponent<SpriteRenderer>();
-                sr.sprite = res_sprite_handler.GetChunkSprite(rockType);
-
-
-                Rigidbody2D rb = chunk.GetComponent<Rigidbody2D>();
-                int randomForceDirection = pseudoRandom.Next(0, 5);
-                float forceAmmt = 10;
-                switch (randomForceDirection)
-                {
-                    case 0:
-                        rb.AddForce(Vector2.down * forceAmmt, ForceMode2D.Impulse);
-                        break;
-                    case 1:
-                        rb.AddForce(Vector2.up * forceAmmt, ForceMode2D.Impulse);
-                        break;
-                    case 2:
-                        rb.AddForce(Vector2.right * forceAmmt, ForceMode2D.Impulse);
-                        break;
-                    case 3:
-                        rb.AddForce(Vector2.left * forceAmmt, ForceMode2D.Impulse);
-                        break;
-                    default:
-                        rb.AddForce(Vector2.up * forceAmmt, ForceMode2D.Impulse);
-                        break;
-                }
-
-                // Change their tag according to rock type
-                switch (rockType)
-                {
-                    case Rock.RockType.sharp:
-                        chunk.tag = "Sharp Chunk";
-                        break;
-                    case Rock.RockType.hex:
-                        chunk.tag = "Hex Chunk";
-                        break;
-                    case Rock.RockType.tube:
-                        chunk.tag = "Tube Chunk";
-                        break;
-                    default:
-                        chunk.tag = "Sharp Chunk";
-                        break;
-                }
-           
-            }
-
-            yield return new WaitForSeconds(0.05f);
-
+            drop.GetComponent<ResourceDrop>().InitRock(rockProdType, ammnt);
         }
-
-        yield break;
-
     }
+
+    //IEnumerator SpawnRockChunks(int chunkCount, Rock.RockType rockType, Vector3 position)
+    //{
+    //    for (int i = 0; i <= chunkCount; i++)
+    //    {
+    //        GameObject chunk = objPool.GetObjectForType("Chunk of Rock", true, position);
+    //        if (chunk)
+    //        {
+    //            /* Currently NOT using the rocktype for anything BUT I could use it to assign the chunk's correct sprite.
+    //            The Problem with that is it might not change fast enough to not show up as the wrong sprite for a moment before popping back.
+    //            I'll need to assign the correct sprite from an array (probably on the res_sprite manager) of rock chunks, separated by type and maybe size. 
+    //            ALSO will need to change the spawned chunk's tag to its rock type's tag so when the Player picks up the chunk they get the correct resource added. */
+    //            SpriteRenderer sr = chunk.GetComponent<SpriteRenderer>();
+    //            sr.sprite = res_sprite_handler.GetChunkSprite(rockType);
+
+
+    //            Rigidbody2D rb = chunk.GetComponent<Rigidbody2D>();
+    //            int randomForceDirection = pseudoRandom.Next(0, 5);
+    //            float forceAmmt = 10;
+    //            switch (randomForceDirection)
+    //            {
+    //                case 0:
+    //                    rb.AddForce(Vector2.down * forceAmmt, ForceMode2D.Impulse);
+    //                    break;
+    //                case 1:
+    //                    rb.AddForce(Vector2.up * forceAmmt, ForceMode2D.Impulse);
+    //                    break;
+    //                case 2:
+    //                    rb.AddForce(Vector2.right * forceAmmt, ForceMode2D.Impulse);
+    //                    break;
+    //                case 3:
+    //                    rb.AddForce(Vector2.left * forceAmmt, ForceMode2D.Impulse);
+    //                    break;
+    //                default:
+    //                    rb.AddForce(Vector2.up * forceAmmt, ForceMode2D.Impulse);
+    //                    break;
+    //            }
+
+    //            // Change their tag according to rock type
+    //            switch (rockType)
+    //            {
+    //                case Rock.RockType.sharp:
+    //                    chunk.tag = "Sharp Chunk";
+    //                    break;
+    //                case Rock.RockType.hex:
+    //                    chunk.tag = "Hex Chunk";
+    //                    break;
+    //                case Rock.RockType.tube:
+    //                    chunk.tag = "Tube Chunk";
+    //                    break;
+    //                default:
+    //                    chunk.tag = "Sharp Chunk";
+    //                    break;
+    //            }
+           
+    //        }
+
+    //        yield return new WaitForSeconds(0.05f);
+
+    //    }
+
+    //    yield break;
+
+    //}
 
     public void RegisterTowerBuildCB(Action<Transform> cbBattleAdd, Action<Transform> cbExtractionAdd, Action<Transform> cbBattleRemove, Action<Transform> cbUtilityRemove)
     {

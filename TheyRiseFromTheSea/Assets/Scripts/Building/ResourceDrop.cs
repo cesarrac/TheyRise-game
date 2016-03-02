@@ -13,6 +13,7 @@ public class ResourceDrop : MonoBehaviour {
     int randomForceDirection;
 
     ResourceDrop_PlayerDetect player_detect;
+    TileData.Types resourceType;
 
     void Awake()
     {
@@ -30,28 +31,44 @@ public class ResourceDrop : MonoBehaviour {
         }
     }
 
+    public void InitRock(Rock.RockProductionType rock, int ammnt)
+    {
+        totalAmmntOfResource = ammnt;
+        rockProdType = rock;
+        resourceType = TileData.Types.rock;
+    }
+
     void Start()
     {
         player_detect = GetComponentInChildren<ResourceDrop_PlayerDetect>();
-          
-        if (extractionSource.resourceType == TileData.Types.water)
+         
+        if (extractionSource != null)
         {
-            // For water we always need to make sure to push away from the water
-            var origin = ResourceGrid.Grid.GetTileWorldPos(extractionSource.originTile.posX, extractionSource.originTile.posY);
-            var target = ResourceGrid.Grid.GetTileWorldPos(extractionSource.targetTile.posX, extractionSource.targetTile.posY);
-            var heading = -(target - origin);
-            rb.AddForce(heading * forceAmmt, ForceMode2D.Impulse);
+            if (extractionSource.resourceType == TileData.Types.water)
+            {
+                // For water we always need to make sure to push away from the water
+                var origin = ResourceGrid.Grid.GetTileWorldPos(extractionSource.originTile.posX, extractionSource.originTile.posY);
+                var target = ResourceGrid.Grid.GetTileWorldPos(extractionSource.targetTile.posX, extractionSource.targetTile.posY);
+                var heading = -(target - origin);
+                rb.AddForce(heading * forceAmmt, ForceMode2D.Impulse);
 
-            // FIX THIS! This below should cause the R Drop to "bob"in the waves if it is on water... but for some reason it keeps sending it to Vector3.zero position...
-           //StartCoroutine("WaitToLand");
+                // FIX THIS! This below should cause the R Drop to "bob"in the waves if it is on water... but for some reason it keeps sending it to Vector3.zero position...
+                //StartCoroutine("WaitToLand");
 
+            }
+            else
+            {
+                randomForceDirection = ResourceGrid.Grid.pseudoRandom.Next(0, 3);
+                Push(randomForceDirection);
+            }
         }
         else
         {
             randomForceDirection = ResourceGrid.Grid.pseudoRandom.Next(0, 3);
             Push(randomForceDirection);
         }
-      
+
+
     }
 
     void Push(int randomForceDirection)
@@ -125,6 +142,14 @@ public class ResourceDrop : MonoBehaviour {
         if (extractionSource != null)
         {
             extractionSource.PickUpAndBeamToShip(totalAmmntOfResource);
+
+            StopCoroutine("Wave");
+
+            ObjectPool.instance.PoolObject(gameObject);
+        }
+        else
+        {
+            Ship_Inventory.Instance.ReceiveTemporaryResources(resourceType, totalAmmntOfResource);
 
             StopCoroutine("Wave");
 

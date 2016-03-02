@@ -63,6 +63,17 @@ public class Ship_Inventory : MonoBehaviour {
         }
     }
 
+    void Update()
+    {
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                ReceiveTemporaryResources(TileData.Types.rock, 20);
+            }
+        }
+    }
+
     public void RegisterCompleteMissionCallback(Action cb)
     {
         missionCompletedCB = cb;
@@ -168,6 +179,53 @@ public class Ship_Inventory : MonoBehaviour {
         return ammnt;
     }
 
+    public bool CheckForResourceByAmmnt(TileData.Types resource, int ammnt, bool checkTemp = true)
+    {
+        bool containsResource = false;
+
+        if (checkTemp)
+        {
+            switch (resource)
+            {
+                case TileData.Types.water:
+                    if (tempWater >= ammnt)
+                    {
+                        containsResource = true;
+                    }
+                    break;
+                case TileData.Types.rock:
+                    if (tempOre >= ammnt)
+                    {
+                        containsResource = true;
+                    }
+                    break;
+                case TileData.Types.food:
+                    if (tempFood >= ammnt)
+                    {
+                        containsResource = true;
+                    }
+                    break;
+                default:
+                    // Cant find that resource
+                    containsResource = false;
+                    break;
+            }
+        }
+        else
+        {
+            if (rawResourcesMap.ContainsKey(resource))
+            {
+                if (rawResourcesMap[resource] >= ammnt)
+                {
+                    containsResource = true;
+                }
+            }
+        }
+
+
+        return containsResource;
+    }
+
     /// <summary>
     /// Call this from the Launchpad when the Player launches back to the ship. 
     /// At this point Terraformer stages would be complete and the Launchpad should be ready to send items to ship.
@@ -267,6 +325,29 @@ public class Ship_Inventory : MonoBehaviour {
         return false;
     }
 
+    // FOR BUILDING WE USE THE TEMPORARY INVENTORY (on the planet surface inventory)
+    public void ChargeResourcesFromTemp(TileData.Types resource, int ammnt)
+    {
+        switch (resource)
+        {
+            case TileData.Types.water:
+                tempWater -= ammnt;
+                Player_UIHandler.instance.DisplayTransporterStorage(resource, tempWater);
+                break;
+            case TileData.Types.rock:
+                tempOre -= ammnt;
+                Player_UIHandler.instance.DisplayTransporterStorage(resource, tempOre);
+                break;
+            case TileData.Types.food:
+                tempFood -= ammnt;
+                Player_UIHandler.instance.DisplayTransporterStorage(resource, tempFood);
+                break;
+            default:
+                // Cant find that resource
+                
+                break;
+        }
+    }
 
     // TRADE ORDERS:
 

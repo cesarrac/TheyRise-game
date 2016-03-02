@@ -109,8 +109,8 @@ public class Resource_Sprite_Handler : MonoBehaviour {
     {
         Sprite chunkSprite = new Sprite();
         int randomSharpSelection = Random.Range(0, sharpChunks.Length);
-        int randomHexSelection = Random.Range(0, hexSprites.Length);
-        int randomTubeSelection = Random.Range(0, tubeSprites.Length);
+        int randomHexSelection = Random.Range(0, hexChunks.Length);
+        int randomTubeSelection = Random.Range(0, tubeChunks.Length);
 
         switch (rockType)
         {

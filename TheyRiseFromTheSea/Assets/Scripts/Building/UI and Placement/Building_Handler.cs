@@ -34,15 +34,19 @@ public class Building_Handler : MonoBehaviour {
 	// Storing the building's energy cost here to access it from other scripts
 	public int energyCost {  get; private set; }
 
-	public float dissasemblyTime = 20f; // seconds
-	private float dissasemblyCountDown;
-	private bool isDissasembling = false, isFading = false;
-	SpriteRenderer s_renderer;
+    //public float dissasemblyTime = 20f; // seconds
+    //private float dissasemblyCountDown;
+    private bool isDissasembling = false, isFading = false;
+    SpriteRenderer s_renderer;
 
 	Color A = Color.white;
 	Color B = Color.clear;
-	public float colorChangeDuration = 2;
+	float constructionDuration = 12; // time in seconds the building takes to fade in / build
+    float constructionCountDown = 0;
 	private float colorTime;
+
+    float onePercentConstructionDuration = 0;
+    float percentConstructionCompleted = 0;
 
 	private bool playerIsNear = false;// Only turns true if the player walks up to the building
 
@@ -66,27 +70,39 @@ public class Building_Handler : MonoBehaviour {
 		// Make sure to reset the color
 		s_renderer = GetComponent<SpriteRenderer> ();
 
-		FadeIn ();
-		// reset timer variables
-		isDissasembling = false;
+        if (gameObject.name == "Transporter")
+        {
+            constructionDuration = 2f;
+        }
+
+
+        //FadeIn();
+
+        // Assemble
+        _state = State.ASSEMBLING;
+
+        // reset timer variables
+        isDissasembling = false;
 		isFading = false;
 
-		// Assemble
-		_state = State.ASSEMBLING;
 
         // set cost
         //nanoBotsNeeded = nanoBotCost / 10;
         nanoBotsCreated = 0;
 
+        onePercentConstructionDuration = constructionDuration / 100f;
+        //constructionCountDown = constructionDuration;
+
     }
 	void Awake()
 	{
-		dissasemblyCountDown = dissasemblyTime;
+        //dissasemblyCountDown = dissasemblyTime;
 
-		_state = State.ASSEMBLING;
-		s_renderer = GetComponent<SpriteRenderer> ();
-		s_renderer.color = B;
-		FadeIn ();
+        _state = State.ASSEMBLING;
+        s_renderer = GetComponent<SpriteRenderer>();
+        s_renderer.color = B;
+        FadeIn();
+         
 
         buildMainController = Build_MainController.Instance;
         objPool = ObjectPool.instance;
@@ -99,18 +115,36 @@ public class Building_Handler : MonoBehaviour {
 		
 		if (colorTime < 1){ 
 			// increment colorTime it at the desired rate every update:
-			colorTime += Time.deltaTime/colorChangeDuration;
+			colorTime += Time.deltaTime/constructionDuration;
+            constructionCountDown += Time.deltaTime;
+            percentConstructionCompleted = constructionCountDown / onePercentConstructionDuration;
+            
+            if (buildingStatusIndicator != null)
+            {
+                buildingStatusIndicator.ShowConstructionPercent(percentConstructionCompleted);
+            }
 		}
 
         // FINISHED BUILDING:
-		if (s_renderer.color == A){
+		if (s_renderer.color == A)
+        {
 			colorTime = 0;
 
-			_state = State.READY;
+            if (buildingStatusIndicator != null)
+            {
+                buildingStatusIndicator.StopDisplayingPercentage();
+            }
 
-            Sound_Manager.Instance.PlaySound("Build Finish");
+            FinishBuilding();
 		}
 	}
+
+    void FinishBuilding()
+    {
+        _state = State.READY;
+
+        Sound_Manager.Instance.PlaySound("Build Finish");
+    }
 
 	void Start () {
 
@@ -230,7 +264,7 @@ public class Building_Handler : MonoBehaviour {
 			
 			if (colorTime < 1){ 
 				// increment colorTime it at the desired rate every update:
-				colorTime += Time.deltaTime/colorChangeDuration;
+				colorTime += Time.deltaTime/constructionDuration;
 			}
 			
 			if (s_renderer.color == B){
@@ -278,22 +312,6 @@ public class Building_Handler : MonoBehaviour {
     }
 
 
-	//void Dissasemble()
-	//{
-	//	if (dissasemblyCountDown <= 0) {
-	//		dissasemblyCountDown = dissasemblyTime;
-	//		isDissasembling = true;
-	//		isFading = true;
-	//		// Start making the nanobots for disassembly
-	//		_state = State.RECYCLE_NANOBOTS;
-
-	//	} else {
-
-	//		dissasemblyCountDown -= Time.deltaTime;
-	//	}
-
-	//}
-
 	// Once this building is dissasembled it will return the bots to the Hero
 	void CreateNanoBot()
 	{
@@ -305,16 +323,6 @@ public class Building_Handler : MonoBehaviour {
             else
                 nanobot.GetComponent<NanoBot_MoveHandler>().player = resourceGrid.Hero.transform;
         }
-
-		//nanoBotsCreated++;
-
-		//if (nanoBotsCreated >= 10) {
-		//	// After nanobots are created now Sell to swap the tile
-		//	Sell ();
-		//} else {
-		//	// keep making them
-		//	_state = State.RECYCLE_NANOBOTS;
-		//}
 
 	}
 
@@ -409,7 +417,6 @@ public class Building_Handler : MonoBehaviour {
 
             }
         }
-        //Sell();
     }
 
 

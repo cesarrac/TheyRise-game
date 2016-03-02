@@ -255,19 +255,32 @@ public class NanoBuilding_Handler : MonoBehaviour {
         //if (bp != null && ResourceGrid.Grid.terraformer_built)
         if (bp != null)
         {
-            // Check Nanobot cost
-            if (nanoBots >= bp.nanoBotCost)
+            //Debug.Log("BP requires " + bp.buildReq.reqResourcesMap.Count + " resources.");
+            if (CheckBuildCost(bp) == false)
             {
-                // Can Build!
-                build_controller.BuildThis(bp);
-                nanoBots -= bp.nanoBotCost;
+                Sound_Manager.Instance.PlaySound("Empty");
+                return;
             }
             else
             {
-                //status_indicator.CreateStatusMessage("Out of Bots!");
-                Sound_Manager.Instance.PlaySound("Empty");
-
+                // Can Build!
+                build_controller.BuildThis(bp);
+                ChargeBuildResources(bp);
             }
+
+            //// Check Nanobot cost
+            //if (nanoBots >= bp.nanoBotCost)
+            //{
+            //    // Can Build!
+            //    build_controller.BuildThis(bp);
+            //    nanoBots -= bp.nanoBotCost;
+            //}
+            //else
+            //{
+            //    //status_indicator.CreateStatusMessage("Out of Bots!");
+            //    Sound_Manager.Instance.PlaySound("Empty");
+
+            //}
 
         }
         else
@@ -276,6 +289,29 @@ public class NanoBuilding_Handler : MonoBehaviour {
             Debug.Log("BP = " +  bp);
         }
            
+    }
+
+    bool CheckBuildCost(Blueprint bp)
+    {
+        // Check cost from the blueprint's required resources
+        foreach (TileData.Types resource in bp.buildReq.reqResourcesMap.Keys)
+        {
+            if (Ship_Inventory.Instance.CheckForResourceByAmmnt(resource, bp.buildReq.reqResourcesMap[resource]) == false)
+            {
+                UI_Manager.Instance.DisplayBuildWarning(resource);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    void ChargeBuildResources(Blueprint bp)
+    {
+        foreach (TileData.Types resource in bp.buildReq.reqResourcesMap.Keys)
+        {
+            Ship_Inventory.Instance.ChargeResourcesFromTemp(resource, bp.buildReq.reqResourcesMap[resource]);
+        }
     }
 
     void BuildTerraformer()

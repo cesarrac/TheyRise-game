@@ -2,6 +2,34 @@
 using System.Collections.Generic;
 using System.Collections;
 
+[System.Serializable]
+public class BuildRequirement
+{
+    public Dictionary<TileData.Types, int> reqResourcesMap { get; protected set; }
+
+    // Constructors for requiring 1, 2, or up to 3 resources to build something
+    public BuildRequirement(TileData.Types r1, int r1Ammnt)
+    {
+        reqResourcesMap = new Dictionary<TileData.Types, int>();
+        reqResourcesMap.Add(r1, r1Ammnt);
+    }
+
+    public BuildRequirement(TileData.Types r1, int r1Ammnt, TileData.Types r2, int r2Ammnt)
+    {
+        reqResourcesMap = new Dictionary<TileData.Types, int>();
+        reqResourcesMap.Add(r1, r1Ammnt);
+        reqResourcesMap.Add(r2, r2Ammnt);
+    }
+
+    public BuildRequirement(TileData.Types r1, int r1Ammnt, TileData.Types r2, int r2Ammnt, TileData.Types r3, int r3Ammnt)
+    {
+        reqResourcesMap = new Dictionary<TileData.Types, int>();
+        reqResourcesMap.Add(r1, r1Ammnt);
+        reqResourcesMap.Add(r2, r2Ammnt);
+        reqResourcesMap.Add(r3, r3Ammnt);
+    }
+}
+
 
 // Type of Building: Battle or Utility
 public enum BuildingType
@@ -124,9 +152,12 @@ public class Blueprint
     // Tier / Upgrade level of this Blueprint
     public Blueprint_Tier bp_Tier { get; protected set; }
 
+    //public Dictionary<TileData.Types, int> reqResources { get; protected set; }
+    public BuildRequirement buildReq { get; protected set; }
+
     public Blueprint() { }
 
-    public Blueprint (string Name, int PUCost, int NanoBotCost, TileData.Types _Ttype, BuildingType tType, string desc)
+    public Blueprint (string Name, int PUCost, int NanoBotCost, TileData.Types _Ttype, BuildingType tType, BuildRequirement bReq, string desc)
     {
         buildingName = Name;
         memoryCost = PUCost;
@@ -135,6 +166,15 @@ public class Blueprint
         description = desc;
 
         buildingType = tType;
+
+        buildReq = bReq;
+
+        //reqResources = new Dictionary<TileData.Types, int>();
+
+        //foreach (TileData.Types r in bReq.reqResourcesMap.Keys)
+        //{
+        //    reqResources.Add(r, bReq.reqResourcesMap[r]);
+        //}
 
         // Initialize this new Blueprint's Tier/Upgrade at 0 (no upgrade)
         bp_Tier = new Blueprint_Tier();
@@ -151,6 +191,8 @@ public class Blueprint
 
         buildingType = tType;
     }
+
+    
 
     public void ChangePUCost(int change)
     {

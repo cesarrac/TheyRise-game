@@ -676,7 +676,7 @@ public class ExtractionBuilding : MonoBehaviour {
 
     }
 
-    public void SpawnPickUp()
+    public void SpawnResourceDrop()
     {
         GameObject drop = ObjectPool.instance.GetObjectForType("Resource Drop", true, myTransform.position);
         if (drop != null)

@@ -22,6 +22,8 @@ public class Building_StatusIndicator : MonoBehaviour {
 	
 	private GameObject _damageText, _statusMsgText;
 
+    public Text constructionPercent;
+
 	void Start () {
 
         if (healthBarRect == null) {
@@ -108,4 +110,28 @@ public class Building_StatusIndicator : MonoBehaviour {
 			Debug.Log ("STATUS INDICATOR: Could NOT find Status Text in Pool!");
 		}
 	}
+
+    public void ShowConstructionPercent(float percent)
+    {
+        if (constructionPercent != null)
+        {
+            if (!constructionPercent.gameObject.activeSelf)
+            {
+                constructionPercent.gameObject.SetActive(true);
+            }
+
+            constructionPercent.text = percent.ToString("f0") + "%";
+        }
+    }
+
+    public void StopDisplayingPercentage()
+    {
+        if (constructionPercent != null)
+        {
+            if (constructionPercent.gameObject.activeSelf)
+            {
+                constructionPercent.gameObject.SetActive(false);
+            }
+        }
+    }
 }
