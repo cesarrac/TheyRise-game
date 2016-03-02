@@ -56,7 +56,7 @@ public class Player_HandDrill : MonoBehaviour {
 
         lineR = sightStart.GetComponent<LineRenderer>();
         // Set line renderer sorting layer
-        lineR.sortingLayerName = GetComponentInParent<SpriteRenderer>().sortingLayerName;
+        //lineR.sortingLayerName = GetComponentInParent<SpriteRenderer>().sortingLayerName;
        
         if (!resourceGrid) Debug.Log("WTF?! No grid attached!");
     }

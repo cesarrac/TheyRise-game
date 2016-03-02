@@ -158,7 +158,7 @@ public class Enemy_Master : MonoBehaviour {
     public void Initialize()
     {
         // At init wait 5 seconds before starting to indicate first enemies
-        StartCoroutine(WaitToAct(5, true));
+        StartCoroutine(WaitToAct(30, true));
     }
 
     void StartWaitToAct()
@@ -174,7 +174,7 @@ public class Enemy_Master : MonoBehaviour {
         }
 
 
-        StartCoroutine(WaitToAct(15));
+        StartCoroutine(WaitToAct(30));
     }
 
     IEnumerator WaitToAct(float time, bool first = false)

@@ -21,7 +21,7 @@ public class Extractor : ExtractionBuilding {
     Vector3 currRockWorldPos;
     Vector3 currRockTilePos;
 
-
+    Building_Handler build_handler;
 
     void OnEnable()
     {
@@ -30,6 +30,8 @@ public class Extractor : ExtractionBuilding {
         currRockWorldPos = new Vector3();
 
         myTransform = transform;
+
+        build_handler = GetComponent<Building_Handler>();
 
         _state = State.SEARCHING;
     }
@@ -80,7 +82,11 @@ public class Extractor : ExtractionBuilding {
 		//	}
 		//}
 
-		MyStateMachine (_state);
+        if (build_handler.state == Building_Handler.State.READY)
+        {
+            MyStateMachine(_state);
+        }
+	
 	}
 
 	void MyStateMachine(State curState)
@@ -152,7 +158,7 @@ public class Extractor : ExtractionBuilding {
                 {
                     if (!pickUpSpawned)
                     {
-                        SpawnPickUp();
+                        SpawnResourceDrop();
                         commonOreCount = 0;
                         enrichedOreCount = 0;
                         pickUpSpawned = true;

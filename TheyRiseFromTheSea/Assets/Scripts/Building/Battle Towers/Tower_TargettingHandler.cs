@@ -42,7 +42,7 @@ public class Tower_TargettingHandler : Unit_Base
 
     private bool statusIndicated = false;
 
-    Building_Handler build_click_handler;
+    Building_Handler build_handler;
 
     Action<Unit_Base> CB_DoDamage;
 
@@ -76,7 +76,7 @@ public class Tower_TargettingHandler : Unit_Base
     void Start()
     {
 
-        build_click_handler = GetComponentInParent<Building_Handler>();
+        build_handler = GetComponentInParent<Building_Handler>();
 
         stats.Init();
 
@@ -189,7 +189,7 @@ public class Tower_TargettingHandler : Unit_Base
         }
 
         // Wait for the Building to assemble, before allowing it to do anything
-        if (build_click_handler.state == Building_Handler.State.READY)
+        if (build_handler.state == Building_Handler.State.READY)
         {
             MyStateManager(_state);
         }
@@ -530,8 +530,13 @@ public class Tower_TargettingHandler : Unit_Base
 
     void OnTriggerStay2D(Collider2D coll)
     {
+        // If the building is not ready yet, it hasn't been built, it can't get a target!
+        if (build_handler.state != Building_Handler.State.READY)
+        {
+            return;
+        }
 
-        // NOT in Manual Control:
+            // NOT in Manual Control:
         if (coll.gameObject.CompareTag("Enemy") && targetUnit == null && _state != State.STARVED && _state != State.MANUAL_CONTROL)
         {
 

@@ -1,15 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Player_PickUpItems : MonoBehaviour {
+public class Player_PickUpItems : MonoBehaviour
+{
 
     public ObjectPool objPool;
 
- //   public Player_ResourceManager resource_manager;
+    //   public Player_ResourceManager resource_manager;
 
-	//Rock rock, mineral;
+    //Rock rock, mineral;
 
- //   bool isOnShip = false;
+    //   bool isOnShip = false;
 
     void Start()
     {
@@ -34,7 +35,7 @@ public class Player_PickUpItems : MonoBehaviour {
         //    rock = new Rock(Rock.RockType.sharp, Rock.RockSize.single);
         //    mineral = new Rock(Rock.RockType.hex, Rock.RockSize.single);
         //}
- 
+
     }
 
     // PICK UP CHUNKS OF ROCK!
@@ -47,7 +48,7 @@ public class Player_PickUpItems : MonoBehaviour {
                 coll.gameObject.GetComponent<ResourceDrop>().PickUp();
             }
         }
-       
+
         //if (coll.gameObject.CompareTag("Rock Chunk"))
         //{
         //    if (resource_manager && objPool)
@@ -73,5 +74,16 @@ public class Player_PickUpItems : MonoBehaviour {
         //        Debug.Log("PLAYER PICKUP: Resource Manager & Object Pool not set!");
         //    }
         //}
+    }
+
+    void OnCollisionStay2D(Collision2D coll)
+    {
+        if (coll.gameObject.CompareTag("Resource Drop"))
+        {
+            if (coll.gameObject.GetComponent<ResourceDrop>() != null)
+            {
+                coll.gameObject.GetComponent<ResourceDrop>().PickUp();
+            }
+        }
     }
 }

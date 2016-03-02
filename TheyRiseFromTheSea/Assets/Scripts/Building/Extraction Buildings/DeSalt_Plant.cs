@@ -36,11 +36,15 @@ public class DeSalt_Plant : ExtractionBuilding {
     //public int PersonalStorageCap { get; protected set; }
 
 
+    Building_Handler build_handler;
+
     void OnEnable()
     {
         currResourceStored = 0;
 
         myTransform = transform;
+
+        build_handler = GetComponent<Building_Handler>();
 
         _state = State.SEARCHING;
     }
@@ -73,24 +77,27 @@ public class DeSalt_Plant : ExtractionBuilding {
 	void Update () 
 	{
 
-		//if (!selecting && myStorage == null) {
-			
-		//	lineR.enabled = false;
-			
-		//	// This means that either the Storage we were using was destroyed OR is full, so change _state to stop extraction
-		//	_state = State.NOSTORAGE;
-			
-		//} else if (!selecting && myStorage != null) {
-			
-		//	// Give the Player Resource Manager our stats to show on Food Production panel
-		//	if (!statsInitialized){
-		//		playerResources.CalculateWaterProduction(waterPumped, pumpRate, false);
-		//		statsInitialized = true;
-		//	}
-		//}
+        //if (!selecting && myStorage == null) {
 
-		MyStateMachine (_state);
-	}
+        //	lineR.enabled = false;
+
+        //	// This means that either the Storage we were using was destroyed OR is full, so change _state to stop extraction
+        //	_state = State.NOSTORAGE;
+
+        //} else if (!selecting && myStorage != null) {
+
+        //	// Give the Player Resource Manager our stats to show on Food Production panel
+        //	if (!statsInitialized){
+        //		playerResources.CalculateWaterProduction(waterPumped, pumpRate, false);
+        //		statsInitialized = true;
+        //	}
+        //}
+
+        if (build_handler.state == Building_Handler.State.READY)
+        {
+            MyStateMachine(_state);
+        }
+    }
 
 
     void MyStateMachine(State curState)
@@ -141,7 +148,7 @@ public class DeSalt_Plant : ExtractionBuilding {
                 {
                     if (!pickUpSpawned)
                     {
-                        SpawnPickUp();
+                        SpawnResourceDrop();
                         pickUpSpawned = true;
                     }
 
