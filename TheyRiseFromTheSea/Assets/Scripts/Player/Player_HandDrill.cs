@@ -25,10 +25,11 @@ public class Player_HandDrill : MonoBehaviour {
     int mX, mY;
 
     // Where the beam shoots from
-    public Transform sightStart;
+    public Transform sightStart, sightEnd;
+
     // Range is a set float, when trying to mine calculate distance between mouse and sighStart, if its <= to range THEN player can mine
     public float range = 5;
-    Vector2 sightV2, mouseV2;
+    Vector2 sightV3, mouseV3;
     Vector3 m;
 
     // Using a Line Renderer on the Sight Start object to shoot the beam
@@ -50,13 +51,15 @@ public class Player_HandDrill : MonoBehaviour {
 
         sightStart = GetComponentInParent<Player_HeroAttackHandler>().sightStart;
 
+        sightEnd = sightStart.GetChild(0).transform;
+
         resourceGrid = ResourceGrid.Grid;
 
         objPool = ObjectPool.instance;
 
-        lineR = sightStart.GetComponent<LineRenderer>();
-        // Set line renderer sorting layer
-        //lineR.sortingLayerName = GetComponentInParent<SpriteRenderer>().sortingLayerName;
+        //lineR = sightStart.GetComponent<LineRenderer>();
+
+        lineR = GetComponentInChildren<LineRenderer>();
        
         if (!resourceGrid) Debug.Log("WTF?! No grid attached!");
     }
@@ -69,13 +72,20 @@ public class Player_HandDrill : MonoBehaviour {
 
     public void FollowMouse()
     {
+        //float wpnRotation = GetComponentInParent<Player_HeroAttackHandler>().wpnRotationAngle;
+        //transform.rotation = Quaternion.AngleAxis(wpnRotation, Vector3.forward);
+
+        Vector3 dir = sightEnd.position - sightStart.position;
+
+        transform.eulerAngles = new Vector3(0, 0, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + 90);
+
         m = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        float mouseDirection = Mathf.Atan2((m.y - sightStart.position.y), (m.x - sightStart.position.x)) * Mathf.Rad2Deg - 90;
-        if (m != transform.root.position)
-        {
-            sightStart.rotation = Quaternion.AngleAxis(mouseDirection, Vector3.forward);
-            transform.rotation = Quaternion.AngleAxis(mouseDirection, Vector3.forward);
-        }
+        //float mouseDirection = Mathf.Atan2((m.y - sightStart.position.y), (m.x - sightStart.position.x)) * Mathf.Rad2Deg - 90;
+        //if (m != transform.root.position)
+        //{
+        //    sightStart.rotation = Quaternion.AngleAxis(mouseDirection, Vector3.forward);
+        //    transform.rotation = Quaternion.AngleAxis(mouseDirection, Vector3.forward);
+        //}
 
     }
 
@@ -88,15 +98,15 @@ public class Player_HandDrill : MonoBehaviour {
                 // If Player continues to hold down button, show Beam and start timer
                 if (Input.GetMouseButtonDown(0))
                 {
-                    sightV2 = new Vector2(sightStart.position.x, sightStart.position.y);
-                    mouseV2 = new Vector2(m.x, m.y);
+                    sightV3 = new Vector3(sightStart.position.x, sightStart.position.y, 0);
+                    mouseV3 = new Vector3(m.x, m.y, 0);
 
                     var mouseX = m.x;
 
                     // Keep making sure the mouse stays in range
-                    var distance = (mouseV2 - sightV2).sqrMagnitude;
+                    var distance = (mouseV3 - sightV3).sqrMagnitude;
 
-                    if (distance <= range)
+                    if (distance <= range * range)
                     {
                         mX = Mathf.RoundToInt(m.x);
                         mY = Mathf.RoundToInt(m.y);
@@ -178,12 +188,15 @@ public class Player_HandDrill : MonoBehaviour {
 
         
            RaycastHit2D ray = Physics2D.Raycast(sightStart.position, sightStart.up, range, mask);
+            
            if (ray.collider != null)
            {
                 if (ray.collider.gameObject.CompareTag("Rock"))
                 {
-                    lineR.SetPosition(0, sightStart.position);
-                    lineR.SetPosition(1, ray.point);
+                    Vector3 rayEnd = transform.InverseTransformPoint(ray.point);
+                    Vector3 sighStartPos = transform.InverseTransformPoint(sightStart.position);
+                    lineR.SetPosition(0, sighStartPos);
+                    lineR.SetPosition(1, rayEnd);
                     // Mine
                     Mine();
                 }
@@ -219,6 +232,7 @@ public class Player_HandDrill : MonoBehaviour {
         }
 
         lineR.enabled = false;
+        yield break;
     }
 
     void Extract(int x, int y)
