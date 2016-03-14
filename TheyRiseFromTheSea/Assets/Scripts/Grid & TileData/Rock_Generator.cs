@@ -26,8 +26,8 @@ public class OrePatch
     {
         /* formation offset,  indicating how far the neighbor ore tile is from its lead tile.
          * Depending on their density they will have a minor offset(more density) or major offset (less density) */
-        int minorOffset = Random.Range(1, 4);
-        int majorOffset = Random.Range(4, 6);
+        int minorOffset = ResourceGrid.Grid.pseudoRandom.Next(1, 4);
+        int majorOffset = ResourceGrid.Grid.pseudoRandom.Next(4, 6);
 
         switch (density)
         {
@@ -90,6 +90,9 @@ public class Rock_Generator : MonoBehaviour {
     [Range(6, 28)]
     public int totalMineralsOnMap;
 
+    int distanceToWater = 5;
+
+    
 
     void Awake()
     {
@@ -121,8 +124,7 @@ public class Rock_Generator : MonoBehaviour {
     */
 
     public void GenerateRocks()
-    {
-  
+    {  
         for (int i = 0; i < totalRocksOnMap; i++)
         {
             // Here we attempt to get a position for this rock. A legal position means there's no water around it.
@@ -181,9 +183,9 @@ public class Rock_Generator : MonoBehaviour {
         // If Water is found, this flag will turn true.
         bool waterFound = false;
 
-        for (int x = (int)tempPos.x - 8; x < tempPos.x + 8; x++)
+        for (int x = (int)tempPos.x - distanceToWater; x < tempPos.x + distanceToWater; x++)
         {
-            for (int y = (int)tempPos.y - 8; y < tempPos.y + 8; y++)
+            for (int y = (int)tempPos.y - distanceToWater; y < tempPos.y + distanceToWater; y++)
             {
                 if (ResourceGrid.Grid.CheckForResource(x, y, TileData.Types.water) == true)
                 {
@@ -219,7 +221,7 @@ public class Rock_Generator : MonoBehaviour {
             {
                 case GraphicTile.TileLandTypes.ASH:
                     // Choose from Tube or Sharp rock
-                    int choice = Random.Range(0, 2);
+                    int choice = ResourceGrid.Grid.pseudoRandom.Next(0, 2);
 
                     if (choice == 0)
                     {
@@ -262,13 +264,13 @@ public class Rock_Generator : MonoBehaviour {
         if (distance >= 15)
         {
             // pick a 1 or 2 density
-            int pick = Random.Range(0, 2);
+            int pick = ResourceGrid.Grid.pseudoRandom.Next(0, 2);
             density = pick;
         }
         else if (distance < 15 && distance > 8)
         {
             // pick between 4 or 5 density
-            int pick = Random.Range(2, 4);
+            int pick = ResourceGrid.Grid.pseudoRandom.Next(2, 4);
             density = pick;
         }
         else

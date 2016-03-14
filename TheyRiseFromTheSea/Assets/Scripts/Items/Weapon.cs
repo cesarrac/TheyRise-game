@@ -23,7 +23,8 @@ public class GunStats
     public int weaponIndex;
     public string projectileType;
 
-    public float kickAmmt { get; protected set; }
+    public float kickAmmt;
+    public float KickAmmnt { get { return kickAmmt; } }
 
     public bool shootsProjectiles { get; protected set; }
 

@@ -60,6 +60,7 @@ public class Player_HandDrill : MonoBehaviour {
         //lineR = sightStart.GetComponent<LineRenderer>();
 
         lineR = GetComponentInChildren<LineRenderer>();
+        lineR.enabled = false;
        
         if (!resourceGrid) Debug.Log("WTF?! No grid attached!");
     }

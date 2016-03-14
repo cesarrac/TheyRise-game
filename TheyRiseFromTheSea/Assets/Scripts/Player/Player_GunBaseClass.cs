@@ -149,14 +149,16 @@ public class Player_GunBaseClass : MonoBehaviour {
             // Play gun shot sound
             Sound_Manager.Instance.PlaySound(gameObject.name);
 
-            if (targetInSight != null)
-            {
+            // Apply gun kick to Player
+            StartCoroutine(GunKick());
+            // Take a bullet from the gun's chamber ammo
+            gunStats.curChamberAmmo--;
+
+            //if (targetInSight != null)
+            //{
                 
-                // Apply gun kick to Player
-                StartCoroutine(GunKick());
-                // Take a bullet from the gun's chamber ammo
-                gunStats.curChamberAmmo--;
-            }
+              
+            //}
 
        
         }
@@ -233,10 +235,12 @@ public class Player_GunBaseClass : MonoBehaviour {
 
 	IEnumerator GunKick()
 	{
-		Vector2 kickDirection = mousePosition - transform.root.position;
-		rigid_body.AddForce (-kickDirection * gunStats.kickAmmt);
+        mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        Vector2 kickDirection = mousePosition - transform.root.position;
+		rigid_body.AddForce (-kickDirection * gunStats.KickAmmnt);
 		yield return new WaitForSeconds (0.1f);
-		rigid_body.AddForce (kickDirection * gunStats.kickAmmt);
+		rigid_body.AddForce (kickDirection * gunStats.KickAmmnt);
 		yield break;
 	}
 

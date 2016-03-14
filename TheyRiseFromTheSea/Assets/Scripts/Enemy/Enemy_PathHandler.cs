@@ -514,67 +514,67 @@ public class Enemy_PathHandler : MonoBehaviour
         mStats.curMoveSpeed = mStats.startMoveSpeed;
     }
 
-    void OnCollisionEnter2D(Collision2D coll)
-    {
-        if (coll.gameObject.CompareTag("Rock"))
-        {
-            Debug.Log("Colliding with ROCK!");
+    //void OnCollisionEnter2D(Collision2D coll)
+    //{
+    //    if (coll.gameObject.CompareTag("Rock"))
+    //    {
+    //        Debug.Log("Colliding with ROCK!");
 
-            FullStop();
+    //        FullStop();
 
-            // Try bouncing off the rock!
-            BounceOffObstacle(coll.transform.position);
+    //        // Try bouncing off the rock!
+    //        BounceOffObstacle(coll.transform.position);
           
 
-            // Make the position of my collision with the rock an unwalkable tile so we don't path through it again
-            grid.NodeFromWorldPoint(coll.transform.position).isWalkable = false;
+    //        // Make the position of my collision with the rock an unwalkable tile so we don't path through it again
+    //        grid.NodeFromWorldPoint(coll.transform.position).isWalkable = false;
 
-            _state = State.ESCAPING;
+    //        _state = State.ESCAPING;
 
-        }
+    //    }
 
-        //if (_state == State.BLOCKED)
-        //{
-        //    // A blocked enemy will detect hitting another Enemy to check if they have a way out
-        //    if (coll.gameObject.CompareTag("Enemy"))
-        //    {
-        //        // When a unit hits another unit they should compare target's. 
-        //        if (coll.gameObject.GetComponent<Enemy_PathHandler>().currPathPosition == currPathPosition)
-        //        {
-        //            // If the targets are the same, the unit that is closest to the target will give their current path to the other unit.
-        //            var theirDistance = Vector3.Distance(coll.transform.position, currPathPosition);
-        //            var myDistance = Vector3.Distance(transform.position, currPathPosition);
+    //    //if (_state == State.BLOCKED)
+    //    //{
+    //    //    // A blocked enemy will detect hitting another Enemy to check if they have a way out
+    //    //    if (coll.gameObject.CompareTag("Enemy"))
+    //    //    {
+    //    //        // When a unit hits another unit they should compare target's. 
+    //    //        if (coll.gameObject.GetComponent<Enemy_PathHandler>().currPathPosition == currPathPosition)
+    //    //        {
+    //    //            // If the targets are the same, the unit that is closest to the target will give their current path to the other unit.
+    //    //            var theirDistance = Vector3.Distance(coll.transform.position, currPathPosition);
+    //    //            var myDistance = Vector3.Distance(transform.position, currPathPosition);
 
-        //            if (theirDistance < myDistance)
-        //            {
-        //                Enemy_PathHandler theirPath = coll.gameObject.GetComponent<Enemy_PathHandler>();
-        //                if (theirPath.path != null)
-        //                {
-        //                    Debug.Log("I'VE COLLIDED AGAINST A BROTHER! They are closer to the target than me!");
+    //    //            if (theirDistance < myDistance)
+    //    //            {
+    //    //                Enemy_PathHandler theirPath = coll.gameObject.GetComponent<Enemy_PathHandler>();
+    //    //                if (theirPath.path != null)
+    //    //                {
+    //    //                    Debug.Log("I'VE COLLIDED AGAINST A BROTHER! They are closer to the target than me!");
 
-        //                    // Stop moving on path
-        //                    FullStop();
+    //    //                    // Stop moving on path
+    //    //                    FullStop();
 
-        //                    // Now set my escape position to be equal to their next path position, so I will try to escape using their path which should be good to go.
+    //    //                    // Now set my escape position to be equal to their next path position, so I will try to escape using their path which should be good to go.
 
-        //                    escapePos = theirPath.path[theirPath.targetIndex];
+    //    //                    escapePos = theirPath.path[theirPath.targetIndex];
 
-        //                    // Start my escape if I'm not already escaping
-        //                    if (!isEscapingObstacle)
-        //                    {
-        //                        isEscapingObstacle = true;
-        //                        StartCoroutine("EscapeObstacle");
+    //    //                    // Start my escape if I'm not already escaping
+    //    //                    if (!isEscapingObstacle)
+    //    //                    {
+    //    //                        isEscapingObstacle = true;
+    //    //                        StartCoroutine("EscapeObstacle");
 
-        //                    }
-        //                }
+    //    //                    }
+    //    //                }
 
 
-        //            }
-        //        }
-        //    }
-        //}
+    //    //            }
+    //    //        }
+    //    //    }
+    //    //}
  
-    }
+    //}
 
     void OnCollisionExit2D(Collision2D coll)
     {
