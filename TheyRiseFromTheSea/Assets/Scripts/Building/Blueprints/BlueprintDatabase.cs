@@ -348,6 +348,19 @@ public class BlueprintDatabase : MonoBehaviour {
         DisplayBuilderMemory();
     }
 
+    public void ResetNanoBuilder()
+    {
+        // Removes all currently loaded blueprints, except the one REQUIRED by the current mission
+        //foreach(Blueprint bp in hero_nanoBuilder.blueprintsMap.Values)
+        //{
+        //    if (bp != Mission_Manager.Instance.ActiveMission.RequiredBlueprint)
+        //    {
+        //        hero_nanoBuilder.RemoveBlueprint(bp.tileType);
+        //    }
+        //}
+        hero_nanoBuilder.RemoveAllLoadedBlueprints();
+        UI_Manager.Instance.RemoveAllBlueprintsText();
+    }
 
     void DisplayBuilderMemory()
     {

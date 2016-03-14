@@ -39,7 +39,9 @@ public class Player_HandDrill : MonoBehaviour {
     int mySortingOrder;
 
     public LayerMask mask;
-	
+
+    Vector3 rayPoint;
+
     void OnEnable()
     {
         miningCountDown = miningTime;
@@ -136,7 +138,7 @@ public class Player_HandDrill : MonoBehaviour {
 
             case State.EXTRACTING:
                 // Give the player resources the ammount extracted
-                Extract(mX, mY);
+                Extract(Mathf.RoundToInt(rayPoint.x), Mathf.RoundToInt(rayPoint.y));
                 // if player is still pressing button, go to mining again
                 _state = State.MINING;
                 break;
@@ -194,6 +196,7 @@ public class Player_HandDrill : MonoBehaviour {
            {
                 if (ray.collider.gameObject.CompareTag("Rock"))
                 {
+                    rayPoint = ray.point;
                     Vector3 rayEnd = transform.InverseTransformPoint(ray.point);
                     Vector3 sighStartPos = transform.InverseTransformPoint(sightStart.position);
                     lineR.SetPosition(0, sighStartPos);

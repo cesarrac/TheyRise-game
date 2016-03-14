@@ -159,6 +159,17 @@ public class UI_Manager : MonoBehaviour
         }
     }
 
+    public void RemoveAllBlueprintsText()
+    {
+        foreach(string key in loadedBlueprints.Keys)
+        {
+            ObjectPool.instance.PoolObject(loadedBlueprints[key]);
+        }
+
+        // after pooling all text objects, clear the Dictionary
+        loadedBlueprints.Clear();
+    }
+
     public void InventoryReady()
     {
         // Load the Ship level
