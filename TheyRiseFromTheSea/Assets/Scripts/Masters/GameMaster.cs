@@ -431,6 +431,15 @@ public class GameMaster : MonoBehaviour {
 	{
         // FIX THIS! Instead of just re-loading and re-calculating the level we should load the map that we were just in (including Textures, TileData, seed, etc.)
 
+        // Is the hero dead?
+        if (theHero.heroStats.curHP < theHero.heroStats.maxHP)
+        {
+            theHero.heroStats.curHP = theHero.heroStats.maxHP;
+        }
+
+        // Reset the temporary inventory containing all resources that had been gathered during the level
+        Ship_Inventory.Instance.ResetTempInventory();
+
         // For now we are just re-loading the Planet Level
         SceneManager.LoadScene("Level_Planet");
 

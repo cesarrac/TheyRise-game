@@ -45,7 +45,7 @@ public class ResourceGrid : MonoBehaviour{
 	public int transportSpawnX, transportSpawnY;
     public GameObject transporterGObj;
 
-	public Building_UIHandler buildingUIHandler;
+    public Building_UIHandler buildingUIHandler;
 		
 	public ObjectPool objPool;
 
@@ -232,6 +232,8 @@ public class ResourceGrid : MonoBehaviour{
         InitTransporter(Mathf.RoundToInt(t_pos.x), Mathf.RoundToInt(t_pos.y));
 	}
 
+
+
     Vector2 GetStartingPosition()
     {
         // Select a random empty tile position
@@ -357,11 +359,11 @@ public class ResourceGrid : MonoBehaviour{
         // Setup the Enemies and Missions
         game_master.SetUpMissionAndEnemies();
 
-        // TODO: replace capitalPos completely with terraformer pos
         transportSpawnX = _terraPosX;
         transportSpawnY = _terraPosY;
 
         transporter_built = true;
+
 
 
         // Turn on the Enemy Wave spawner
@@ -909,71 +911,76 @@ public class ResourceGrid : MonoBehaviour{
             //}
 
         }
-        else { 
+        else {
 
-			// if we are swapping an already spawned tile we are MOST LIKELY turning it into an empty tile
-			// BUT if this was a building that has an ENERGY cost that must be reflected in Player resources 
-			//	by subtracting from the total ENERGY cost
-			//if (tiles[x,y].energyCost > 0){
-			//	playerResources.totalEnergyCost = playerResources.totalEnergyCost - tiles[x,y].energyCost;
-			//}
+            // if we are swapping an already spawned tile we are MOST LIKELY turning it into an empty tile
+            // BUT if this was a building that has an ENERGY cost that must be reflected in Player resources 
+            //	by subtracting from the total ENERGY cost
+            //if (tiles[x,y].energyCost > 0){
+            //	playerResources.totalEnergyCost = playerResources.totalEnergyCost - tiles[x,y].energyCost;
+            //}
 
-//			// ALSO if it's a Farm we need to subtract its FOOD production and its WATER consumed
-//			if (playerResources.foodProducedPerDay > 0){
+            //			// ALSO if it's a Farm we need to subtract its FOOD production and its WATER consumed
+            //			if (playerResources.foodProducedPerDay > 0){
 
-//				if (tiles[x,y].tileType == TileData.Types.farm_s || tiles[x,y].tileType == TileData.Types.nutrient){
+            //				if (tiles[x,y].tileType == TileData.Types.farm_s || tiles[x,y].tileType == TileData.Types.nutrient){
 
-//					FoodProduction_Manager foodM = spawnedTiles [x, y].GetComponent<FoodProduction_Manager>();
-//					playerResources.CalculateFoodProduction(foodM.foodProduced, foodM.productionRate, foodM.waterConsumed, true);
+            //					FoodProduction_Manager foodM = spawnedTiles [x, y].GetComponent<FoodProduction_Manager>();
+            //					playerResources.CalculateFoodProduction(foodM.foodProduced, foodM.productionRate, foodM.waterConsumed, true);
 
-//				}
-//			}
+            //				}
+            //			}
 
-//			// AND if it's a STORAGE we need to subtract all the ORE and WATER from the resources
-//			if (tiles[x,y].tileType == TileData.Types.storage){
+            //			// AND if it's a STORAGE we need to subtract all the ORE and WATER from the resources
+            //			if (tiles[x,y].tileType == TileData.Types.storage){
 
-//				Storage storage = spawnedTiles[x,y].GetComponent<Storage>();
-////				
-//				// remove the storage building from the list
-//				playerResources.RemoveStorageBuilding(storage);
-//			}
+            //				Storage storage = spawnedTiles[x,y].GetComponent<Storage>();
+            ////				
+            //				// remove the storage building from the list
+            //				playerResources.RemoveStorageBuilding(storage);
+            //			}
 
-//			// If it's an EXTRACTOR also need to subtract from Ore Produced
-//			if (tiles[x,y].tileType == TileData.Types.extractor){
+            //			// If it's an EXTRACTOR also need to subtract from Ore Produced
+            //			if (tiles[x,y].tileType == TileData.Types.extractor){
 
-//				Extractor extra = spawnedTiles [x, y].GetComponent<Extractor>();
+            //				Extractor extra = spawnedTiles [x, y].GetComponent<Extractor>();
 
-//				playerResources.CalculateOreProduction(extra.extractAmmnt, extra.extractRate, true);
-//			}
+            //				playerResources.CalculateOreProduction(extra.extractAmmnt, extra.extractRate, true);
+            //			}
 
-//			// Same thing for a WATER PUMP
-//			if (tiles[x,y].tileType == TileData.Types.desalt_s || tiles[x,y].tileType == TileData.Types.desalt_m 
-//			    || tiles[x,y].tileType == TileData.Types.desalt_l){
+            //			// Same thing for a WATER PUMP
+            //			if (tiles[x,y].tileType == TileData.Types.desalt_s || tiles[x,y].tileType == TileData.Types.desalt_m 
+            //			    || tiles[x,y].tileType == TileData.Types.desalt_l){
 
-//				DeSalt_Plant pump = spawnedTiles [x, y].GetComponent<DeSalt_Plant>();
+            //				DeSalt_Plant pump = spawnedTiles [x, y].GetComponent<DeSalt_Plant>();
 
-//				playerResources.CalculateWaterProduction(pump.waterPumped, pump.pumpRate, true);
-//			}
+            //				playerResources.CalculateWaterProduction(pump.waterPumped, pump.pumpRate, true);
+            //			}
 
-//			// If it's a ENERGY GENERATOR we have to subtract Energy //TODO: Add an energy produced per day panel
-//			if (tiles[x,y].tileType == TileData.Types.generator){
+            //			// If it's a ENERGY GENERATOR we have to subtract Energy //TODO: Add an energy produced per day panel
+            //			if (tiles[x,y].tileType == TileData.Types.generator){
 
-//				Energy_Generator gen = spawnedTiles [x,y].GetComponent<Energy_Generator>();
+            //				Energy_Generator gen = spawnedTiles [x,y].GetComponent<Energy_Generator>();
 
-//				playerResources.ChangeResource("Energy", -gen.energyUnitsGenerated);
-//			}
+            //				playerResources.ChangeResource("Energy", -gen.energyUnitsGenerated);
+            //			}
 
 
             //*********   NANO BOTS RETURNED:
 
-            // Return bots... THIS WILL NEED TO EQUAL A NANOBOTS COST LATER, JUST USING 10
-            int returnNanoCost = tiles[x, y].tileStats.NanoBotCost;
+            //// Return bots... 
+            ////int returnNanoCost = tiles[x, y].tileStats.NanoBotCost;
 
-            NanoBuilding_Handler nanoBuilder = Hero.GetComponent<NanoBuilding_Handler>();
-        
-            nanoBuilder.nanoBots += returnNanoCost;
+            ////NanoBuilding_Handler nanoBuilder = Hero.GetComponent<NanoBuilding_Handler>();
 
-            Debug.Log("GRID: Returning " + returnNanoCost + " NANOBOTS ");
+            ////nanoBuilder.nanoBots += returnNanoCost;
+
+            ////Debug.Log("GRID: Returning " + returnNanoCost + " NANOBOTS ");
+
+
+            // ******   RETURN RESOURCES USED FOR BUILDING:
+            Hero.GetComponent<NanoBuilding_Handler>().ReturnBuildResources(tiles[x, y].tileType);
+            // This above will return ALL resources spent on building. Maybe consider returning only a % of the resources.
 
 
 

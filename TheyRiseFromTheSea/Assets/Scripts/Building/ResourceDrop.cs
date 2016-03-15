@@ -12,8 +12,11 @@ public class ResourceDrop : MonoBehaviour {
     float forceAmmt = 10;
     int randomForceDirection;
 
-    ResourceDrop_PlayerDetect player_detect;
     TileData.Types resourceType;
+
+    public bool goesToPlayer = false, goesToTransporter = true;
+
+    Vector3 targetPosition;
 
     void Awake()
     {
@@ -40,10 +43,15 @@ public class ResourceDrop : MonoBehaviour {
 
     void Start()
     {
-        player_detect = GetComponentInChildren<ResourceDrop_PlayerDetect>();
+        if (goesToPlayer)
+            targetPosition = ResourceGrid.Grid.Hero.transform.position;
+
+        if (goesToTransporter)
+            targetPosition = Transporter_Handler.instance.GetTransporterPosition();
          
         if (extractionSource != null)
         {
+            // Once spawned, if on Water bob in the waves...
             if (extractionSource.resourceType == TileData.Types.water)
             {
                 // For water we always need to make sure to push away from the water
@@ -56,6 +64,7 @@ public class ResourceDrop : MonoBehaviour {
                 //StartCoroutine("WaitToLand");
 
             }
+            // If not on water just Push in a random direction
             else
             {
                 randomForceDirection = ResourceGrid.Grid.pseudoRandom.Next(0, 3);
@@ -67,7 +76,6 @@ public class ResourceDrop : MonoBehaviour {
             randomForceDirection = ResourceGrid.Grid.pseudoRandom.Next(0, 3);
             Push(randomForceDirection);
         }
-
 
     }
 
@@ -128,12 +136,21 @@ public class ResourceDrop : MonoBehaviour {
 
     void Update()
     {
-        if (player_detect != null)
+        // By default it will go to the Transporter, unless goesToPlayer is true
+        if (targetPosition != null)
         {
-            if (player_detect.isPlayerDetected)
-            {
-                transform.position = Vector2.MoveTowards(transform.position, player_detect.playerPos, 5 * Time.deltaTime);
-            }
+            transform.position = Vector2.MoveTowards(transform.position, targetPosition, 5 * Time.deltaTime);
+
+            // Are we there yet?
+            ListenForTarget();
+        }
+    }
+
+    void ListenForTarget()
+    {
+        if (Vector2.Distance(transform.position, targetPosition) <= 0.1f)
+        {
+            PickUp();
         }
     }
 

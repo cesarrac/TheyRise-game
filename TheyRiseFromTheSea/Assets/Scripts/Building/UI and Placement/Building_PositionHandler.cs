@@ -234,8 +234,13 @@ public class Building_PositionHandler : MonoBehaviour {
 			// CANCEL THE BUILD
 			PoolObject(gameObject);
             build_controller.SetCurrentlyBuildingBool(false);
-            // give back the nanobots spent on this building
-            nanoBuild_handler.nanoBots += currNanoBotCost;
+
+            //// give back the nanobots spent on this building
+            //nanoBuild_handler.nanoBots += currNanoBotCost;
+
+            // give back the resources spent on this building because build was Cancelled
+            nanoBuild_handler.ReturnBuildResources(tileType);
+
            
         }
 	}

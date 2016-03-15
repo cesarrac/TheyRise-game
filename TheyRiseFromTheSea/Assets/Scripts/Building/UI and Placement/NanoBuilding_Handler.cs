@@ -314,6 +314,19 @@ public class NanoBuilding_Handler : MonoBehaviour {
         }
     }
 
+    public void ReturnBuildResources(TileData.Types bpTileType)
+    {
+        if (GetAvailableBlueprint(bpTileType) != null)
+        {
+            Blueprint bp = GetAvailableBlueprint(bpTileType);
+
+            foreach (TileData.Types resource in bp.buildReq.reqResourcesMap.Keys)
+            {
+                Ship_Inventory.Instance.ReceiveTemporaryResources(resource, bp.buildReq.reqResourcesMap[resource]);
+            }
+        }
+    }
+
     void BuildTerraformer()
     {
         build_controller.BuildThis(selectedBluePrint);

@@ -158,6 +158,7 @@ public class MasterState_Manager : MonoBehaviour {
 	public void RestartLevel()
 	{
 		game_master.MissionRestart ();
+        UnPause();
 	}
 
 

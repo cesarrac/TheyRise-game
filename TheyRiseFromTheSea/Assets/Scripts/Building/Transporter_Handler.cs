@@ -106,4 +106,8 @@ public class Transporter_Handler : MonoBehaviour {
         }
     }
 
+    public Vector3 GetTransporterPosition()
+    {
+        return transform.position;
+    }
 }
