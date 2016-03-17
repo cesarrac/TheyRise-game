@@ -61,6 +61,11 @@ public class MasterState_Manager : MonoBehaviour {
 		MasterStateMachine (mState);
 	}
 
+    public void DoCheat()
+    {
+        Ship_Inventory.Instance.ReceiveTemporaryResources(TileData.Types.rock, 100);
+    }
+
 	void MasterStateMachine(MasterState _curState)
 	{
 		switch (_curState) {

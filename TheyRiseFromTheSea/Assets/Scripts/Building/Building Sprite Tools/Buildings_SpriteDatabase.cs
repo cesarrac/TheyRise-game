@@ -23,7 +23,7 @@ class Buildings_SpriteDatabase : MonoBehaviour
   
     void InitSprites()
     {
-        buildingSprites = new BuildingSprite[10];
+        buildingSprites = new BuildingSprite[11];
 
         // Machine Gun
         buildingSprites[0] = new BuildingSprite("Machine Gun", buildings[0], TileData.Types.machine_gun);
@@ -45,7 +45,8 @@ class Buildings_SpriteDatabase : MonoBehaviour
         buildingSprites[8] = new BuildingSprite("Storage", buildings[8], TileData.Types.storage);
         // Terraformer
         buildingSprites[9] = new BuildingSprite("Terraformer", buildings[4], TileData.Types.terraformer);
-
+        // Plastic Wall
+        buildingSprites[10] = new BuildingSprite("Plastic Wall", buildings[8], TileData.Types.wall);
 
     }
 

@@ -67,57 +67,62 @@ public class BlueprintDatabase : MonoBehaviour {
         InitRequiredBlueprint();
 
         // If we are on the Inventory/Blueprint Loader scene, we should display the memory count on the Hero's nanobuilder
-        if (SceneManager.GetActiveScene().buildIndex == inventoryLvlIndex)
-        {
-            DisplayBuilderMemory();
-        }
+        //if (SceneManager.GetActiveScene().name == "Level_CENTRAL")
+        //{
+        //    LoadAllBlueprints();
+        //    //DisplayBuilderMemory();
+        //}
     }
+
+
 
     // The required Blueprint is dependant on the current active mission
     public void InitRequiredBlueprint()
     {
-        if (Mission_Manager.Instance.ActiveMission != null)
-        {
-            // Check if a previous mission had added a Required Blueprint
-            if (lastRequired != null)
-            {
-                // ... Check if the new required Blueprint is NOT of the same type as the old ...
-                if (lastRequired.tileType != Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType)
-                {
-                    // ... If it's NOT of the same type, the last one needs to be removed from data...
-                    hero_nanoBuilder.RemoveBlueprint(lastRequired.tileType);
-                    // ... and from UI...
-                    UI_Manager.Instance.RemoveBlueprintTextFromBuilder(lastRequired.buildingName);
+        LoadAllBlueprints();
 
-                    // ... and the new one ADDED.
-                    if (!hero_nanoBuilder.CheckForBlueprint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType))
-                    {
-                        hero_nanoBuilder.AddBluePrint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType,
-                                                     blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.buildingName]);
+        //if (Mission_Manager.Instance.ActiveMission != null)
+        //{
+        //    // Check if a previous mission had added a Required Blueprint
+        //    if (lastRequired != null)
+        //    {
+        //        // ... Check if the new required Blueprint is NOT of the same type as the old ...
+        //        if (lastRequired.tileType != Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType)
+        //        {
+        //            // ... If it's NOT of the same type, the last one needs to be removed from data...
+        //            hero_nanoBuilder.RemoveBlueprint(lastRequired.tileType);
+        //            // ... and from UI...
+        //            UI_Manager.Instance.RemoveBlueprintTextFromBuilder(lastRequired.buildingName);
 
-                        // ... and set it as the last required for next time.
-                        lastRequired = Mission_Manager.Instance.ActiveMission.RequiredBlueprint;
-                    }
-                }
+        //            // ... and the new one ADDED.
+        //            if (!hero_nanoBuilder.CheckForBlueprint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType))
+        //            {
+        //                hero_nanoBuilder.AddBluePrint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType,
+        //                                             blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.buildingName]);
 
-                // ... If they ARE of the same type then nothing remains to be done because the BP is already loaded.
-            }
-            else
-            {
-                // In the case of last required being null (no previous missions have loaded anything yet!), add bp as normal...
-                if (!hero_nanoBuilder.CheckForBlueprint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType))
-                {
-                    hero_nanoBuilder.AddBluePrint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType,
-                                                 blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.buildingName]);
+        //                // ... and set it as the last required for next time.
+        //                lastRequired = Mission_Manager.Instance.ActiveMission.RequiredBlueprint;
+        //            }
+        //        }
 
-                    // ... and set it as the last required for next time.
-                    lastRequired = Mission_Manager.Instance.ActiveMission.RequiredBlueprint;
-                }
-            }
+        //        // ... If they ARE of the same type then nothing remains to be done because the BP is already loaded.
+        //    }
+        //    else
+        //    {
+        //        // In the case of last required being null (no previous missions have loaded anything yet!), add bp as normal...
+        //        if (!hero_nanoBuilder.CheckForBlueprint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType))
+        //        {
+        //            hero_nanoBuilder.AddBluePrint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType,
+        //                                         blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.buildingName]);
+
+        //            // ... and set it as the last required for next time.
+        //            lastRequired = Mission_Manager.Instance.ActiveMission.RequiredBlueprint;
+        //        }
+        //    }
      
 
-            Debug.Log("BP Database: Initialized the required Blueprint for the active mission!");
-        }
+        //    Debug.Log("BP Database: Initialized the required Blueprint for the active mission!");
+        //}
     }
 
 
@@ -134,7 +139,8 @@ public class BlueprintDatabase : MonoBehaviour {
             {"Energy Generator", new Blueprint("Energy Generator", 3, 10, TileData.Types.generator, BuildingType.UTILITY, new BuildRequirement(TileData.Types.rock, 20),"Generate energy harnessed from ore with high content of precious metals.") },
             {"Seaweed Farm",  new Blueprint("Seaweed Farm", 3, 10, TileData.Types.farm_s, BuildingType.UTILITY, new BuildRequirement(TileData.Types.rock, 20),"Plant seed, harvest food!")},
             {"Storage", new Blueprint("Storage", 3, 10, TileData.Types.storage, BuildingType.UTILITY, new BuildRequirement(TileData.Types.rock, 20),"Store things and send them to ship automatically!") },
-            {"Machine Gun", new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun, BuildingType.BATTLE, new BuildRequirement(TileData.Types.rock, 10),"Short distance, fast firing rate, single target acquisition.") }
+            {"Machine Gun", new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun, BuildingType.BATTLE, new BuildRequirement(TileData.Types.rock, 10),"Short distance, fast firing rate, single target acquisition.") },
+            {"Plastic Wall", new Blueprint("Plastic Wall", 3, 10, TileData.Types.wall, BuildingType.BATTLE, new BuildRequirement(TileData.Types.rock, 10), "A little better than a child's toy fort.") }
         };
 
         InitExtractors();
@@ -163,6 +169,7 @@ public class BlueprintDatabase : MonoBehaviour {
         battleTowersMap.Add("Machine Gun", new Blueprint_Battle(12, 2, 0.12f, 2, 25, 2, 1, 0));
         battleTowersMap.Add("Sniper Gun", new Blueprint_Battle(12, 2, 1.5f, 8 ,25, 2, 1, 0));
         battleTowersMap.Add("Terraformer", new Blueprint_Battle(0, 0, 0, 0, 2500, 0, 2, 0));
+        battleTowersMap.Add("Plastic Wall", new Blueprint_Battle(0, 0, 0, 0, 20, 0, 1, 0));
     }
 
     public void GetExtractorStats(string id, Transform objTransform, ExtractionBuilding extractor, TileData.Types resourceType)
@@ -236,6 +243,14 @@ public class BlueprintDatabase : MonoBehaviour {
     {
         // Display the info to the Info Panel from the stored selected BP (curSelectedBP)
         UI_Manager.Instance.DisplayBPInfo(curSelectedBP.buildingName, curSelectedBP.description);
+    }
+
+    void LoadAllBlueprints()
+    {
+        foreach (Blueprint bp in blueprintsMap.Values)
+        {
+            hero_nanoBuilder.AddBluePrint(bp.tileType, bp);
+        }
     }
 
     // Player presses the Load button

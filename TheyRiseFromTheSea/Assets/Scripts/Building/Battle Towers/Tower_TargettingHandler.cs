@@ -499,8 +499,8 @@ public class Tower_TargettingHandler : Unit_Base
         {
 
             // Tell the enemy this Tower is attacking it if it doesn't already have an attacker
-            if (target.gameObject.GetComponent<Enemy_AttackHandler>().attackingTower == null)
-                target.gameObject.GetComponent<Enemy_AttackHandler>().attackingTower = gameObject;
+            //if (target.gameObject.GetComponent<Enemy_AttackHandler>().attackingTower == null)
+            //    target.gameObject.GetComponent<Enemy_AttackHandler>().attackingTower = gameObject;
 
             // Lose a bullet
             ammoCount--;

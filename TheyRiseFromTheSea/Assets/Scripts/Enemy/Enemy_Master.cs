@@ -73,9 +73,11 @@ public class Enemy_Master : MonoBehaviour {
 
     Vector3 spawnPosition = new Vector3();
 
-    int maxUnitsCap = 10; // max units the Enemy Master can spawn on one action
+    int maxUnitsCap = 3; // max units the Enemy Master can spawn on one action
 
     int spawnPointRegenRate = 50;
+
+    public float waitTime = 30f;
 
     void Awake()
     {
@@ -122,6 +124,8 @@ public class Enemy_Master : MonoBehaviour {
     {
         if (battleTowersBuilt.Contains(towerTransform))
             battleTowersBuilt.Remove(towerTransform);
+
+        Debug.Log("MASTER : Removing battle tower! ");
     }
 
     void AddUtilityTowerBuilt(Transform towerTransform)
@@ -138,6 +142,9 @@ public class Enemy_Master : MonoBehaviour {
     {
         if (utilityTowersBuilt.Contains(towerTransform))
             utilityTowersBuilt.Remove(towerTransform);
+
+        Debug.Log("MASTER : Removing utility tower! ");
+
     }
 
 
@@ -158,7 +165,7 @@ public class Enemy_Master : MonoBehaviour {
     public void Initialize()
     {
         // At init wait 5 seconds before starting to indicate first enemies
-        StartCoroutine(WaitToAct(30, true));
+        StartCoroutine(WaitToAct(waitTime, true));
     }
 
     void StartWaitToAct()
@@ -174,7 +181,7 @@ public class Enemy_Master : MonoBehaviour {
         }
 
 
-        StartCoroutine(WaitToAct(30));
+        StartCoroutine(WaitToAct(waitTime));
     }
 
     IEnumerator WaitToAct(float time, bool first = false)
@@ -248,12 +255,12 @@ public class Enemy_Master : MonoBehaviour {
 
         if (utilityTowerCount > 0)
         {
-            nearestUtilityTower = GetNearestTower(utilityTowersBuilt, spawnPosition);
+            nearestUtilityTower = GetNearestTower(utilityTowersBuilt.ToArray(), spawnPosition);
         }
 
         if (battleTowerCount > 0)
         {
-            nearestBattleTower = GetNearestTower(battleTowersBuilt, spawnPosition);
+            nearestBattleTower = GetNearestTower(battleTowersBuilt.ToArray(), spawnPosition);
         }
 
         // Calculate Assignment Scores: (0 Kill Player, 1 Destroy Utility, 2 Destroy Battle Tower)
@@ -300,13 +307,16 @@ public class Enemy_Master : MonoBehaviour {
         // Set the active task
         activeTask = orderedTasks[0];
 
-        //Debug.Log("ENEMY MASTER Assignment scores: ");
-        for (int i = 0; i < tasks.Length; i++)
-        {
-            Debug.Log(orderedTasks[i].taskType.ToString() + " score = " + orderedTasks[i].AssignmentScore);
-        }
+        // NOTE: Forcing a specific active task below for Testing
+        //activeTask = new EnemyTask(EnemyTaskType.BATTLE, 1);
 
-        Debug.Log("ENEMY MASTER: Active task is " + activeTask.taskType.ToString());
+        //Debug.Log("ENEMY MASTER Assignment scores: ");
+        //for (int i = 0; i < tasks.Length; i++)
+        //{
+        //    Debug.Log(orderedTasks[i].taskType.ToString() + " score = " + orderedTasks[i].AssignmentScore);
+        //}
+
+        //Debug.Log("ENEMY MASTER: Active task is " + activeTask.taskType.ToString());
 
         SelectStrategy();
     }
@@ -325,46 +335,53 @@ public class Enemy_Master : MonoBehaviour {
         // To select what Wave to spawn we are first considering what the active Task is, each task has a different strategy
         if (activeTask != null)
         {
-            if (activeTask.taskType == EnemyTaskType.PLAYER)
-            {
-                // Use Conservative or Rush strategies if criteria is met, if not go to Economic strategy
-                if (timeAtStartofDecision - timeAtStartOfLevel > 120)
-                {
-                    // more than a minute has passed, consider Rushing
-                    if (spawnPoints >= (maxSpawnPoints / 2))
-                    {
-                        // Currently have half of max Spawn points or more, Rush Aggressively!
-                        RushAggressiveStrategy();
 
-                    }
-                    else if (spawnPoints > (maxSpawnPoints / 4))
-                    {
-                        // Currently have more than or equal 1/4th of max spawn points, Rush Conservatively!
-                        RushConservativeStrategy();
-                    }
-                    else if (spawnPoints >= 20)
-                    {
-                        ConservativeStrategy();
-                    }
-                    else
-                    {
-                        EconomicStrategy();
-                    }
+            // FIX ME: There should be different implementation of strategies depending on the active task's type.
+            //         It should implement a different strategy when attacking a battle tower than when it attacks the player.
+            //         Right now the selection of strategy is dependant on the ammount of Spawn Points (currency used to spawn units)
+            //         the Enemy Master currently has available AND how much time has passed since it made its first decision.
+
+            // Use Conservative or Rush strategies if criteria is met, if not go to Economic strategy
+            if (timeAtStartofDecision - timeAtStartOfLevel > 120)
+            {
+                // more than a minute has passed, consider Rushing
+                if (spawnPoints >= (maxSpawnPoints / 2))
+                {
+                    // Currently have half of max Spawn points or more, Rush Aggressively!
+                    RushAggressiveStrategy();
+
+                }
+                else if (spawnPoints > (maxSpawnPoints / 4))
+                {
+                    // Currently have more than or equal 1/4th of max spawn points, Rush Conservatively!
+                    RushConservativeStrategy();
+                }
+                else if (spawnPoints >= 20)
+                {
+                    ConservativeStrategy();
                 }
                 else
                 {
-                    // During the 1st minute, if Kill Player is active task, always go Conservative
-                    ConservativeStrategy();
+                    EconomicStrategy();
                 }
             }
-            else if (activeTask.taskType == EnemyTaskType.UTILITY)
+            else
             {
-                // Use Agressive strategy only if the player is more than half way done with their mission goal, else go Conservative
+                // During the 1st minute, if Kill Player is active task, always go Conservative
+                ConservativeStrategy();
             }
-            else if (activeTask.taskType == EnemyTaskType.BATTLE)
-            {
-                // Use Agressive or Rush Agressive if possible, or attempt Rush Conservative if not able. Else go Conservative.
-            }
+            //if (activeTask.taskType == EnemyTaskType.PLAYER)
+            //{
+             
+            //}
+            //else if (activeTask.taskType == EnemyTaskType.UTILITY)
+            //{
+            //    // Use Agressive strategy only if the player is more than half way done with their mission goal, else go Conservative
+            //}
+            //else if (activeTask.taskType == EnemyTaskType.BATTLE)
+            //{
+            //    // Use Agressive or Rush Agressive if possible, or attempt Rush Conservative if not able. Else go Conservative.
+            //}
         }
 
         // After a strategy has been executed, wait to decide what to do next
@@ -548,26 +565,31 @@ public class Enemy_Master : MonoBehaviour {
         return ResourceGrid.Grid.Hero.transform; 
     }
 
-    Transform GetNearestTower(List<Transform> towers, Vector3 spawnPos)
+    Transform GetNearestTower(Transform[] towers, Vector3 spawnPos)
     {
         float nearestDistance = 0;
+        Transform t = null;
 
+        // Immediately return the first tower on the array if the array contains only one element
+        if (towers.Length == 1)
+            return towers[0];
+
+        // Loop through the array and find the one with the nearest distance to the spawn position
         foreach (Transform trans in towers)
         {
             float newDistance = (trans.position - spawnPos).magnitude;
             if (nearestDistance == 0)
             {
                 nearestDistance = newDistance;
-                return trans;
             }
             else if (newDistance < nearestDistance)
             {
                 nearestDistance = newDistance;
-                return trans;
+                t = trans;
             }
         }
 
-        return null;
+        return t;
     }
 
 

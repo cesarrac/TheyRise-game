@@ -46,15 +46,21 @@ public class NanoBuilder  {
 
     public void AddBluePrint(TileData.Types bpType, Blueprint bp)
     {
-        blueprintsMap.Add(bpType, bp);
-
-        if (bpType != TileData.Types.terraformer)
+        if (!blueprintsMap.ContainsKey(bpType))
         {
-            cur_memory -= bp.memoryCost;
+            blueprintsMap.Add(bpType, bp);
         }
 
         if (!bpTypes.Contains(bpType))
+        {
             bpTypes.Add(bpType);
+
+            if (bpType != TileData.Types.terraformer)
+            {
+                cur_memory -= bp.memoryCost;
+            }
+        }
+           
     }
 
     public void RemoveBlueprint(TileData.Types bpType)

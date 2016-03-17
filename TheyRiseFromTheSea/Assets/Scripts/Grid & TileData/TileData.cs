@@ -53,7 +53,8 @@ public class TileData  {
 		storage,
 		sniper,
 		generator,
-        terraformer
+        terraformer,
+        wall
 	}
 	public Types tileType;
 

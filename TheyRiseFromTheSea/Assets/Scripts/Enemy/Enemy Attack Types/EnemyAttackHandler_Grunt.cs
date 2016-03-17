@@ -5,14 +5,16 @@ public class EnemyAttackHandler_Grunt : Enemy_AttackHandler {
 
     void OnEnable()
     {
+        InitPathfindingTargetAction();
         ResetFlagsandTargets();
+
     }
 
     void Awake()
     {
         AttackActionCB = Attack;
         AttackRange = 5;
-        pathHandler = GetComponent<Enemy_PathHandler>();
+
         audio_source = GetComponent<AudioSource>();
         rigid_body = GetComponent<Rigidbody2D>();
     }

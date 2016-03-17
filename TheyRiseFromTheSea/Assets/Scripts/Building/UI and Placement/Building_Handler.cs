@@ -144,6 +144,9 @@ public class Building_Handler : MonoBehaviour {
         _state = State.READY;
 
         Sound_Manager.Instance.PlaySound("Build Finish");
+
+        // Register as Built for the Enemy Master to know
+        resourceGrid.AddTowerBuiltForEnemyMaster(transform);
     }
 
 	void Start () {
@@ -151,9 +154,6 @@ public class Building_Handler : MonoBehaviour {
         // get my tiletype
         //Debug.Log("CLICK HANDLER: pos = " + transform.position);
         myTileType = resourceGrid.TileFromWorldPoint(transform.position).tileType;
-
-        // Register as Built for the Enemy Master to know
-        resourceGrid.AddTowerBuiltForEnemyMaster(transform);
 
 
         if (myTileType != TileData.Types.capital)
@@ -295,7 +295,10 @@ public class Building_Handler : MonoBehaviour {
     {
         // Define the tile again in case this was a pooled object and for some reason it didn't re-define its tile. This might make it unnecessary to do it on start.
         myTile = ResourceGrid.Grid.TileFromWorldPoint(transform.position);
-        Debug.Log("My tile pos X " + myTile.posX + " pos Y " + myTile.posY);
+
+        // Unregister the tower for the Enemy master
+        ResourceGrid.Grid.RemoveTowerBuiltForEnemyMaster(transform);
+
         ResourceGrid.Grid.SwapTileType(myTile.posX, myTile.posY, TileData.Types.empty, "Empty", myTile.tileStats.NanoBotCost);
 
         Sound_Manager.Instance.PlaySound("Build Break");

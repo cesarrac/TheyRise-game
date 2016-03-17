@@ -122,12 +122,31 @@ public class Enemy_PathHandler : MonoBehaviour
         if (GetTargetCB != null)
         {
             target = GetTargetCB();
+            // Make one last check to make sure that this new target is not null or pointing to an inactive (pooled) object
+            if (target == null || target.gameObject.activeSelf == false)
+            {
+                // Then just set it to the player
+                target = FindPlayerTarget();
+            }
         }
         else
         {
             target = FindPlayerTarget();
         }
 
+        isFullyStopped = false;
+
+        StartCoroutine("RequestPath");
+
+        // Set my Attack Handler's main target
+        GetComponent<Enemy_AttackHandler>().SetMainTarget(target);
+    }
+
+    void SetAltTarget(Transform t)
+    {
+        target = t;
+
+        isFullyStopped = false;
 
         StartCoroutine("RequestPath");
 
@@ -172,13 +191,9 @@ public class Enemy_PathHandler : MonoBehaviour
     void CheckForNullTarget()
     {
         // Check if the target's gameobject has been POOLED, if it has make the target null so it starts getting a path again
-        if (target != null)
+        if (target == null || target.gameObject.activeSelf == false)
         {
-            if (target.gameObject.activeSelf == false)
-            {
-                //target = null;
-                SwitchTargetBackToMain();
-            }
+            InitTarget();
         }
     }
 
@@ -200,26 +215,26 @@ public class Enemy_PathHandler : MonoBehaviour
         }
         else
         {
-            // Target NOT in range or NOT currently active
+            //    // Target NOT in range or NOT currently active
 
-            // If this unit had finished its path and the target has moved (most likely it's a Player), unflag finishedPath
-            if (target != null)
-            {
-                if (finishedPath)
-                {
-                    finishedPath = false;
-                    ContinueOnPath();
-                    //print("My target's position is: " + target);
+            //    //// If this unit had finished its path and the target has moved (most likely it's a Player), unflag finishedPath
+            //    //if (target != null)
+            //    //{
+            //    //    if (finishedPath)
+            //    //    {
+            //    //        finishedPath = false;
+            //    //        ContinueOnPath();
+            //    //        //print("My target's position is: " + target);
 
-                }
-            }
+            //    //    }
+            //    //}
 
 
             // Swith Back to main target (if needed) and continue getting a path.
             if (isFullyStopped)
             {
                 // This will check if Target needs to be reset to main target and continue on the path towards it
-                SwitchTargetBackToMain();
+                InitTarget();
             }
         }
     }
@@ -232,7 +247,7 @@ public class Enemy_PathHandler : MonoBehaviour
         threshold = enemy_AttackHandler.AttackRange;
         if (target != null)
         {
-            if ((target.position - transform.position).sqrMagnitude <= threshold)
+            if ((target.position - transform.position).sqrMagnitude <= threshold * threshold)
             {
                 return true;
             }
@@ -245,17 +260,17 @@ public class Enemy_PathHandler : MonoBehaviour
     }
 
 
-    public void SwitchTargetBackToMain()
-    {
+    //public void SwitchTargetBackToMain()
+    //{
 
-        // If the savedTarget is null that means we never called SwitchPath, so we are currently chasing the main target set at spawn
-        if (savedTarget != null)
-        {
-            target = savedTarget;
-        }
-        ContinueOnPath();
-        //Debug.Log("Continuing PATH TO Main Target.");
-    }
+    //    // If the savedTarget is null that means we never called SwitchPath, so we are currently chasing the main target set at spawn
+    //    if (savedTarget != null)
+    //    {
+    //        target = savedTarget;
+    //    }
+    //    ContinueOnPath();
+    //    //Debug.Log("Continuing PATH TO Main Target.");
+    //}
 
     void ContinueOnPath()
     {
@@ -436,9 +451,20 @@ public class Enemy_PathHandler : MonoBehaviour
                     {
                         if (ResourceGrid.Grid.NodeFromWorldPoint(path[targetIndex]).isWalkable)
                         {
+                            // if the next node is a wall, change main target to the wall game obj
+                            TileData t = ResourceGrid.Grid.TileFromWorldPoint(path[targetIndex]);
+
+                            if (t != null && t.tileType == TileData.Types.wall)
+                            {
+                                SetAltTarget(ResourceGrid.Grid.GetTileGameObjFromIntCoords(t.posX, t.posY).transform);
+
+                                yield break;
+                            }
+
                             // the next node is walkable, keep going
                             currWayPoint = path[targetIndex];
 
+                      
                         }
                         else
                         {
@@ -462,9 +488,10 @@ public class Enemy_PathHandler : MonoBehaviour
         }
         else
         {
-            Debug.Log("ENEMY: Path is broke because it has 0 positions in it!");
+            //Debug.Log("ENEMY: Path is broke because it has 0 positions in it!");
+            FullStop();
             // Push towards the current target so we can get there!
-            BounceOffObstacle(target.transform.position, true);
+            // BounceOffObstacle(target.transform.position, true);
             yield break;
         }
 
@@ -576,13 +603,13 @@ public class Enemy_PathHandler : MonoBehaviour
  
     //}
 
-    void OnCollisionExit2D(Collision2D coll)
-    {
-        if (coll.gameObject.CompareTag("Rock"))
-        {
-            // Go back to getting a path
-            SwitchTargetBackToMain();
+    //void OnCollisionExit2D(Collision2D coll)
+    //{
+    //    if (coll.gameObject.CompareTag("Rock"))
+    //    {
+    //        // Go back to getting a path
+    //        SwitchTargetBackToMain();
 
-        }
-    }
+    //    }
+    //}
 }

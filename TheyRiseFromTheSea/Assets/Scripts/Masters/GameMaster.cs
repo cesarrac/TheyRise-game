@@ -314,7 +314,7 @@ public class GameMaster : MonoBehaviour {
             // Then set the rest of the necessary values
             Hero.GetComponent<Player_MoveHandler>().resourceGrid = resourceGrid;
             hero_attkHandler.objPool = objPool;
-            Hero.GetComponent<Player_PickUpItems>().objPool = objPool;
+            //Hero.GetComponent<Player_PickUpItems>().objPool = objPool;
             resourceGrid.cameraHolder.gameObject.GetComponent<PixelPerfectCam>().followTarget = Hero;
             return Hero;
         }

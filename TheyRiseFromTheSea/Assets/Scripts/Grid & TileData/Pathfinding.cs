@@ -47,7 +47,8 @@ public class Pathfinding : MonoBehaviour
         Node startNode = grid.NodeFromWorldPoint(startPos);
         Node targetNode = grid.NodeFromWorldPoint(targetPos);
 
-        if (startNode.isWalkable && targetNode.isWalkable)
+                    // NOTE: Right now this will generate a path even if the target/destination node is an UNWAKABLE node!
+        if (startNode.isWalkable)
         {
             Heap<Node> openSet = new Heap<Node>(grid.MaxSize);
             HashSet<Node> closedSet = new HashSet<Node>();

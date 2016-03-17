@@ -85,10 +85,10 @@ public class Enemy_Spawner : MonoBehaviour {
                     }
 
                     // Assign the unit's Path/Movement stats
-                    if (e.GetComponent<Enemy_PathHandler>() != null)
+                    if (e.GetComponent<UnitPathHandler>() != null)
                     {
-                        Enemy_PathHandler ePathHandler = e.GetComponent<Enemy_PathHandler>();
-                        ePathHandler.mStats = new Enemy_PathHandler.MovementStats();
+                        UnitPathHandler ePathHandler = e.GetComponent<UnitPathHandler>();
+                        ePathHandler.mStats = new UnitPathHandler.MovementStats();
                         ePathHandler.mStats.InitStartingMoveStats(curr_Enemy_toSpwn.MovementStats.startMoveSpeed, curr_Enemy_toSpwn.MovementStats.startChaseSpeed);
                         ePathHandler.mStats.InitMoveStats();
 
@@ -104,9 +104,9 @@ public class Enemy_Spawner : MonoBehaviour {
                         //}
 
                         if (GetTargetCB != null)
-                            ePathHandler.RegisterGetTargetCB(GetTargetCB);
+                            ePathHandler.RegisterGetTargetFunc(GetTargetCB);
 
-                        ePathHandler.InitTarget();
+                        ePathHandler.AssignTarget();
                     }
                 }
           

@@ -761,12 +761,12 @@ public class ResourceGrid : MonoBehaviour{
 
     public void RemoveTowerBuiltForEnemyMaster(Transform towerTransform)
     {
-        if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(transform.position).tileName) == BuildingType.UTILITY)
+        if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(towerTransform.position).tileName) == BuildingType.UTILITY)
         {
             if (UtilityTowerRemoveCB != null)
                 UtilityTowerRemoveCB(towerTransform);
         }
-        else if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(transform.position).tileName) == BuildingType.BATTLE)
+        else if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(towerTransform.position).tileName) == BuildingType.BATTLE)
         {
             if (BattleTowerRemoveCB != null)
                 BattleTowerRemoveCB(towerTransform);
@@ -886,6 +886,13 @@ public class ResourceGrid : MonoBehaviour{
                         tiles[x, y] = new TileData(x, y, "Terraformer", newType, 0, 10000, tileStats.HP, tileStats.Defense, tileStats.Attack, tileStats.Shield, nanoBotCost);
 
                     terraformer_built = true;
+                    break;
+
+                case TileData.Types.wall:
+                    if (spriteWidth > 0 && spriteHeight > 0)
+                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Plastic Wall", newType, 0, 10000, 20, 1, 0, 0, nanoBotCost);
+                    else
+                        tiles[x, y] = new TileData(x, y, "Plastic Wall", newType, 0, 10000, 20, 1, 0, 0, nanoBotCost);
                     break;
 
                 case TileData.Types.building:
