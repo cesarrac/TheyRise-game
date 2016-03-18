@@ -31,6 +31,7 @@ public class UnitPathHandler : MonoBehaviour {
     public MovementStats mStats = new MovementStats(); // Movement stats initialized by the component spawning this Unit
 
     public Transform target;
+    Vector3 curTargetPosition;
 
     Vector3[] path; // Path filled by PathRequest manager once a path is requested
     int curPathIndex;
@@ -40,6 +41,8 @@ public class UnitPathHandler : MonoBehaviour {
     Action TargetReachedActionCB; // Action that is called when this unit reaches its target destination
 
     Action<Transform> AssignTargetToHandlerCB; // Action called to assign target to an external component such as an Attack Handler
+
+    public bool avoidsPiling = true;
 
 
     // What's my target?
@@ -54,7 +57,7 @@ public class UnitPathHandler : MonoBehaviour {
             AssignTargetToHandlerCB(target);
 
         // Do I have a valid path to the target?
-        StartCoroutine("RequestPath");
+        GetANewPath();
     }
 
     public void RegisterAssignTargetToHandlerCB(Action<Transform> cb)
@@ -72,12 +75,18 @@ public class UnitPathHandler : MonoBehaviour {
         TargetReachedActionCB += cb;
     }
 
+    public void GetANewPath()
+    {
+        StopCoroutine("RequestPath");
+        StartCoroutine("RequestPath");
+    }
+
     IEnumerator RequestPath()
     {
         while (true)
         {
 
-            yield return new WaitForSeconds(0.7f);
+            yield return new WaitForSeconds(0.2f);
 
 
             PathRequestManager.RequestPath(transform.position, target.position, gameObject, OnPathFound);
@@ -94,12 +103,36 @@ public class UnitPathHandler : MonoBehaviour {
             // Stop requesting a path
             StopCoroutine("RequestPath");
 
+            // Stop following path in case this unit was following one
+            StopCoroutine("FollowPath");
+
             // Assign path and reset path index
             path = newPath;
             curPathIndex = 0;
 
+            // Record the target's current position to make sure it does not move
+            curTargetPosition = target.position;
+            StartCoroutine("VerifyTargetPosition");
+
             if (path != null)
                 StartCoroutine("FollowPath");
+        }
+    }
+
+    IEnumerator VerifyTargetPosition()
+    {
+        while (true)
+        {
+            // Track the position of my target to make sure it has not changed...
+            if (curTargetPosition != target.position)
+            {
+                // ... if target has moved, break out get a new Path
+                Debug.Log("Target has moved, requesting a new path!");
+                GetANewPath();
+                yield break;
+            }
+
+            yield return new WaitForSeconds(2f);
         }
     }
 
@@ -110,6 +143,8 @@ public class UnitPathHandler : MonoBehaviour {
             Vector3 currWayPoint = path[0];
             while (true)
             {
+
+                // Advance path index when my position is equal to the current node
                 if (transform.position == currWayPoint)
                 {
                     curPathIndex++;
@@ -117,9 +152,23 @@ public class UnitPathHandler : MonoBehaviour {
                     // Have I arrived at my destination? If so...
                     if (curPathIndex >= path.Length)
                     {
-                        // What do I do when I arrive?
-                        if (TargetReachedActionCB != null)
-                            TargetReachedActionCB();
+                        // NOTE: A unit that avoids Piling will offset its final position after it has reached the end
+                        // of its current path. It should NOT attack until it has arrived at its final offset position.
+
+                        // Stop verifying the target's position because we are already there.
+                        StopCoroutine("VerifyTargetPosition");
+
+                        // This will begin a coRoutine that pushes the unit to a final "offset" position to avoid
+                        // units piling on top of each other.
+                        if (avoidsPiling)
+                            StartCoroutine("OffsetDestination");
+                        else
+                        {
+                            if (TargetReachedActionCB != null)
+                                TargetReachedActionCB();
+                        }
+
+
 
                         curPathIndex = 0;
                         path = null;
@@ -153,13 +202,58 @@ public class UnitPathHandler : MonoBehaviour {
         }
     }
 
-    // TODO:
-    // How do I handle moving targets? 
-    // Check every frame to make sure target is in the same position? and if not, stop follow path routine and start request path again?
-    // What if destination has been reached and THEN target moves? Do I continue to check for target's updated position after reaching destination?
-    // I would have to make sure the target is still alive and its gameobj is active. But I would also need to stop the action that is being
-    // executed when I reached destination (like attacking) before I can start on a new path.
 
+    IEnumerator OffsetDestination()
+    {
+        float offset = 0.5f;
+        float offsetX = UnityEngine.Random.Range(transform.position.x - offset, transform.position.x + offset);
+        float offsetY = UnityEngine.Random.Range(transform.position.y - offset, transform.position.y + offset);
+        Vector3 offsetPos = new Vector3(offsetX, offsetY, 0);
+
+        while (true)
+        {
+            if (transform.position != offsetPos)
+            {
+                transform.position = Vector2.MoveTowards(transform.position, offsetPos, 4 * Time.deltaTime);
+
+                yield return null;
+            }
+            else
+            {
+                // What do I do when I arrive?
+                if (TargetReachedActionCB != null)
+                    TargetReachedActionCB();
+
+                yield break;
+            }
+        }
+    }
+
+    // TODO:
+    // What have I covered so far?
+    // Getting a target and requesting a path
+    // Tracking a moving target and following a path to it
+    // Reaching a destination and calling an action
+    // Ofsetting the final position to avoid piling units on top of each other
+    // Issues:
+    // Some units spawn and for some reason don't get a succesful path when other units right beside them do. 
+    // Yet when they are waiting and I move the Player they suddenly are able to get a path. 
+    // This might be that the target and path have been defined but for some reason the Follow Path coroutine is not kicking in.
+    // What is probably making them eventually move is the Verify Target subroutine, that kicks off GetPath and FollowPath. (Bug or feature?)
+
+    // Since units avoid piling they take a little longer to begin their attack, since they are getting into offset position.
+    // This might make them too easy to kill and looks very strange when they get to the target then back off to move to their off set pos.
+    // I can consider:
+    // forcing the direction of the offset to match the heading the unit was on
+    // *** Giving them a higher speed when doing the offset does the trick quite nicely
+
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    //                               SPEED CHANGE CODE ( for any external factors that might manipulate this unit's speed stat)
+    //
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void ChangeSpeed(float newSpeed, float effectTime)
     {

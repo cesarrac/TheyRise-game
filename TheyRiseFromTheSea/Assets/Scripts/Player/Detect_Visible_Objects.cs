@@ -14,6 +14,8 @@ public class Detect_Visible_Objects : MonoBehaviour {
             // Change layer to Enemies layer
             coll.gameObject.layer = enemiesLayerID;
 
+            coll.transform.GetChild(0).gameObject.layer = 5;
+
             // As soon as an enemy becomes visible, stop showing the Incoming indicator if there is one active
             //UI_Manager.Instance.StopDisplayingEnemyIndicator();
       
@@ -28,23 +30,23 @@ public class Detect_Visible_Objects : MonoBehaviour {
     }
 
 
-    void OnTriggerExit2D(Collider2D coll)
-    {
-        if (coll.gameObject.CompareTag("Enemy"))
-        {
-            // Change layer to Not Visible layer
-            coll.gameObject.layer = notVisibleLayerID;
-        }
+    //void OnTriggerExit2D(Collider2D coll)
+    //{
+    //    if (coll.gameObject.CompareTag("Enemy"))
+    //    {
+    //        // Change layer to Not Visible layer
+    //        coll.gameObject.layer = notVisibleLayerID;
+    //    }
 
-        /*
-            Once you discover a rock, it stays rendered
-        if (coll.gameObject.CompareTag("Rock"))
-        {
+    //    /*
+    //        Once you discover a rock, it stays rendered
+    //    if (coll.gameObject.CompareTag("Rock"))
+    //    {
 
            
-            coll.gameObject.layer = notVisibleLayerID;
-        }
-        */
-    }
+    //        coll.gameObject.layer = notVisibleLayerID;
+    //    }
+    //    */
+    //}
 
 }

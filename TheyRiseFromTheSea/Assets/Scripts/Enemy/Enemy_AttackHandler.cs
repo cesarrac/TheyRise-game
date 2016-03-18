@@ -22,7 +22,7 @@ public class Enemy_AttackHandler : Unit_Base {
     public Transform mainTarget { get; protected set; } // < ---- always the same as my path's original target.
     TileData targetAsTile;
 
-    float attackRange = 5.0f; // < ------- threshold target's can't pass without being attacked by this unit
+    float attackRange = 8f; // < ------- threshold target's can't pass without being attacked by this unit
     public float AttackRange { get { return attackRange; } set { attackRange = Mathf.Clamp(value, 2.0f, 8.0f); } }
 
     public bool isAttacking { get; protected set; }
@@ -109,6 +109,42 @@ public class Enemy_AttackHandler : Unit_Base {
         }
     }
 
+    void IsMainTargetInRange()
+    {
+        if (RangeCheck() == true)
+        {
+            AttackMainTarget();
+        }
+        else
+        {
+            // If the main target is not in range, request a new path...
+            if (mainTarget != null && mainTarget.gameObject.activeSelf == true)
+            {
+                Debug.Log("ENEMY: Target NOT in range, requesting a new path to target!");
+                pathHandler.GetANewPath();
+            }
+            else
+            {
+                //... or a whole new target if it's dead or inactive
+                pathHandler.AssignTarget();
+            }
+        }
+    }
+
+    bool RangeCheck()
+    {
+        var heading = mainTarget.position - transform.position;
+
+        if (heading.sqrMagnitude <= attackRange * attackRange)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     void AttackMainTarget()
     {
         if (currTargetIsTile)
@@ -143,7 +179,7 @@ public class Enemy_AttackHandler : Unit_Base {
         while (true)
         {
            
-            if (mainTarget != null) 
+            if (mainTarget != null && RangeCheck() == true) 
             {
                // Debug.Log("ENEMY: Attacking the tower!");
 
@@ -161,6 +197,10 @@ public class Enemy_AttackHandler : Unit_Base {
             {
                
                 isAttacking = false;
+
+                // Call to check range again and set target or new path
+                IsMainTargetInRange();
+
                 yield break;
             }
 
@@ -172,8 +212,7 @@ public class Enemy_AttackHandler : Unit_Base {
     {
         while (true)
         {
-
-            if (playerUnit != null)
+            if (playerUnit != null && RangeCheck() == true)
             {
                 //Debug.Log("ENEMY: Attacking the player!");
 
@@ -188,6 +227,10 @@ public class Enemy_AttackHandler : Unit_Base {
             else
             {
                 isAttacking = false;
+
+                // Call to check range again and set target or new path
+                IsMainTargetInRange();
+
                 yield break;
             }
             yield return new WaitForSeconds(stats.curRateOfAttk);

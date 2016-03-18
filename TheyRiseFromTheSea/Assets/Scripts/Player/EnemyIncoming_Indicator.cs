@@ -24,8 +24,6 @@ public class EnemyIncoming_Indicator : MonoBehaviour {
     // At first this is tracking the spawn position... 
     public void InitSpawnPos(Vector3 pos)
     {
-        Debug.Log("INDICATOR: Spawn position is being tracked!");
-
         enemyToTrack = null;
 
         indicator = GetComponent<RectTransform>();
@@ -39,7 +37,6 @@ public class EnemyIncoming_Indicator : MonoBehaviour {
 
     public void InitEnemyToTrack(Transform enemy)
     {
-        Debug.Log("INDICATOR: Enemy position is being tracked!");
         if (indicator == null)
             indicator = GetComponent<RectTransform>();
 
@@ -72,7 +69,6 @@ public class EnemyIncoming_Indicator : MonoBehaviour {
 
         if (v3Screen.x > -0.01f && v3Screen.x < 1.01f && v3Screen.y > -0.01f && v3Screen.y < 1.01f && enemyHasSpawned)
         {
-            Debug.Log("INDICATOR: Enemy position is on screen! Pooling indicator...");
             // if the Enemy is ON screen, pool this indicator
             ObjectPool.instance.PoolObject(this.gameObject);
         }
