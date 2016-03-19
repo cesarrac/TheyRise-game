@@ -188,15 +188,19 @@ public class Building_PositionHandler : MonoBehaviour {
 				}
 
 			}else{ // not an extractor or desalt pump or generator
-				if (CheckForEmptySides (posX, posY)) {
-						// we are on a legal building position
-					sr.color = trueColor;
-					canBuild = true;
-				} else {// we DO NOT have an empty tile on our sides or beneath
-					sr.color = invalidPosColor;
-					canBuild = false;
-				}
-			}
+
+                // we are on a legal building position
+                sr.color = trueColor;
+                canBuild = true;
+                //if (CheckForEmptySides (posX, posY)) {
+                //		// we are on a legal building position
+                //	sr.color = trueColor;
+                //	canBuild = true;
+                //} else {// we DO NOT have an empty tile on our sides or beneath
+                //	sr.color = invalidPosColor;
+                //	canBuild = false;
+                //}
+            }
 		} else {				// NOT ON EMPTY
 			sr.color = invalidPosColor;
 			canBuild = false;

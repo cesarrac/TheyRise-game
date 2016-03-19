@@ -22,7 +22,7 @@ public class Enemy_AttackHandler : Unit_Base {
     public Transform mainTarget { get; protected set; } // < ---- always the same as my path's original target.
     TileData targetAsTile;
 
-    float attackRange = 8f; // < ------- threshold target's can't pass without being attacked by this unit
+    float attackRange = 2f; // < ------- threshold target's can't pass without being attacked by this unit
     public float AttackRange { get { return attackRange; } set { attackRange = Mathf.Clamp(value, 2.0f, 8.0f); } }
 
     public bool isAttacking { get; protected set; }
