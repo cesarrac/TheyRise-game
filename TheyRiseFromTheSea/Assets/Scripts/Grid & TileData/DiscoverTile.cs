@@ -162,165 +162,40 @@ public class DiscoverTile : MonoBehaviour {
         rock_handler.InitRock(rockType, rockSize);
         rock_handler.res_sprite_handler = r_sprite_handler;
 
-        // Rock newRock = new Rock(Rock.RockType.sharp, Rock.RockSize.medium);
-
-        //if (rockType == Rock.RockType.sharp)
-        //{
-
-        //    // Is this a single, tiny, small, medium, large or larger rock?
-        //    int randomRocksize = UnityEngine.Random.Range(0, 6);
-
-        //    switch (randomRocksize)
-        //    {
-        //        case 0:
-        //            newRock = new Rock(Rock.RockType.sharp, Rock.RockSize.single);
-        //            //Rock singleRock = new Rock(Rock.RockType.sharp, Rock.RockSize.single);
-        //            //sr.sprite = r_sprite_handler.GetRockSprite(singleRock._rockType, singleRock._rockSize);
-        //            //// Initialize this rock from its Rock_Handler script
-        //            //rock_handler.InitRock(singleRock._rockType, singleRock._rockSize);
-        //            //rock_handler.res_sprite_handler = r_sprite_handler;
-        //            break;
-        //        case 1:
-        //            newRock = new Rock(Rock.RockType.sharp, Rock.RockSize.tiny);
-        //            //Rock tinyRock = new Rock(Rock.RockType.sharp, Rock.RockSize.tiny);
-        //            //sr.sprite = r_sprite_handler.GetRockSprite(tinyRock._rockType, tinyRock._rockSize);
-        //            //// Initialize this rock from its Rock_Handler script
-        //            //rock_handler.InitRock(tinyRock._rockType, tinyRock._rockSize);
-        //            //rock_handler.res_sprite_handler = r_sprite_handler;
-        //            break;
-
-        //        case 2:
-        //            newRock = new Rock(Rock.RockType.sharp, Rock.RockSize.small);
-        //            ////Rock smallRock = new Rock(Rock.RockType.sharp, Rock.RockSize.small);
-        //            //sr.sprite = r_sprite_handler.GetRockSprite(smallRock._rockType, smallRock._rockSize);
-        //            //rock_handler.InitRock(smallRock._rockType, smallRock._rockSize);
-        //            //rock_handler.res_sprite_handler = r_sprite_handler;
-        //            break;
-
-        //        case 3:
-        //            newRock = new Rock(Rock.RockType.sharp, Rock.RockSize.medium);
-        //            //Rock medRock = new Rock(Rock.RockType.sharp, Rock.RockSize.medium);
-        //            //sr.sprite = r_sprite_handler.GetRockSprite(medRock._rockType, medRock._rockSize);
-        //            //rock_handler.InitRock(medRock._rockType, medRock._rockSize);
-        //            //rock_handler.res_sprite_handler = r_sprite_handler;
-        //            break;
-
-        //        case 4:
-        //            newRock = new Rock(Rock.RockType.sharp, Rock.RockSize.large);
-        //            //Rock largeRock = new Rock(Rock.RockType.sharp, Rock.RockSize.large);
-        //            //sr.sprite = r_sprite_handler.GetRockSprite(largeRock._rockType, largeRock._rockSize);
-        //            //rock_handler.res_sprite_handler = r_sprite_handler;
-        //            //rock_handler.InitRock(largeRock._rockType, largeRock._rockSize);
-
-        //            break;
-
-        //        case 5:
-        //            newRock = new Rock(Rock.RockType.rock, Rock.RockSize.larger);
-        //            //Rock largerRock = new Rock(Rock.RockType.rock, Rock.RockSize.larger);
-        //            // sr.sprite = r_sprite_handler.GetRockSprite(largerRock._rockType, largerRock._rockSize);               
-        //            //rock_handler.res_sprite_handler = r_sprite_handler;
-        //            //rock_handler.InitRock(largerRock._rockType, largerRock._rockSize);
-
-        //            break;
-        //        default:
-        //            break;
-
-        //    }
-
-
-        //}
-        //else if (rockType == Rock.RockType.hex)
-        //{
-        //    // Is this a single, tiny, small, medium, large or larger mineral?
-        //    int randomRocksize = UnityEngine.Random.Range(0, 6);
-        //    switch (randomRocksize)
-        //    {
-        //        case 0:
-        //            newRock = new Rock(Rock.RockType.hex, Rock.RockSize.single);
-        //            //Rock singleRock = new Rock(Rock.RockType.hex, Rock.RockSize.single);
-        //            //sr.sprite = r_sprite_handler.GetRockSprite(singleRock._rockType, singleRock._rockSize);
-        //            //rock_handler.InitRock(singleRock._rockType, singleRock._rockSize);
-        //            //rock_handler.res_sprite_handler = r_sprite_handler;
-        //            break;
-        //        case 1:
-        //            newRock = new Rock(Rock.RockType.hex, Rock.RockSize.tiny);
-        //            //Rock tinyRock = new Rock(Rock.RockType.hex, Rock.RockSize.tiny);
-        //            //sr.sprite = r_sprite_handler.GetRockSprite(tinyRock._rockType, tinyRock._rockSize);
-        //            //rock_handler.InitRock(tinyRock._rockType, tinyRock._rockSize);
-        //            //rock_handler.res_sprite_handler = r_sprite_handler;
-        //            break;
-
-        //        case 2:
-        //            newRock = new Rock(Rock.RockType.hex, Rock.RockSize.small);
-        //            //Rock smallRock = new Rock(Rock.RockType.hex, Rock.RockSize.small);
-        //            //sr.sprite = r_sprite_handler.GetRockSprite(smallRock._rockType, smallRock._rockSize);
-        //            //rock_handler.InitRock(smallRock._rockType, smallRock._rockSize);
-        //            //rock_handler.res_sprite_handler = r_sprite_handler;
-        //            break;
-
-        //        case 3:
-        //            newRock = new Rock(Rock.RockType.hex, Rock.RockSize.medium);
-        //            //Rock medRock = new Rock(Rock.RockType.hex, Rock.RockSize.medium);
-        //            //sr.sprite = r_sprite_handler.GetRockSprite(medRock._rockType, medRock._rockSize);
-        //            //rock_handler.InitRock(medRock._rockType, medRock._rockSize);
-        //            //rock_handler.res_sprite_handler = r_sprite_handler;
-        //            break;
-
-        //        case 4:
-        //            newRock = new Rock(Rock.RockType.hex, Rock.RockSize.large);
-        //            //Rock largeRock = new Rock(Rock.RockType.hex, Rock.RockSize.large);
-        //            //sr.sprite = r_sprite_handler.GetRockSprite(largeRock._rockType, largeRock._rockSize);
-        //            //rock_handler.InitRock(largeRock._rockType, largeRock._rockSize);
-        //            //rock_handler.res_sprite_handler = r_sprite_handler;
-        //            break;
-
-        //        case 5:
-        //            newRock = new Rock(Rock.RockType.hex, Rock.RockSize.larger);
-        //            //Rock largerRock = new Rock(Rock.RockType.hex, Rock.RockSize.larger);
-        //            //sr.sprite = r_sprite_handler.GetRockSprite(largerRock._rockType, largerRock._rockSize);
-        //            //rock_handler.InitRock(largerRock._rockType, largerRock._rockSize);
-        //            //rock_handler.res_sprite_handler = r_sprite_handler;
-        //            break;
-        //        default:
-        //            break;
-
-        //    }
-        //}
-        //else if (rockType == Rock.RockType.tube)
-        //{
-        //    newRock = new Rock(rockType, GetRockSize());
-        //}
-
-
     }
 
     Rock.RockSize GetRockSize()
     {
         int randomRocksize = UnityEngine.Random.Range(0, 6);
+
+        Rock.RockSize rockSize = Rock.RockSize.single;
+
         switch (randomRocksize)
         {
             case 0:
-                return Rock.RockSize.single;
+                rockSize = Rock.RockSize.single;
                 break;
             case 1:
-                return Rock.RockSize.tiny;
+                rockSize = Rock.RockSize.tiny;
                 break;
             case 2:
-                return Rock.RockSize.small;
+                rockSize = Rock.RockSize.small;
                 break;
             case 3:
-                return Rock.RockSize.medium;
+                rockSize = Rock.RockSize.medium;
                 break;
             case 4:
-                return Rock.RockSize.large;
+                rockSize = Rock.RockSize.large;
                 break;
             case 5:
-                return Rock.RockSize.larger;
+                rockSize = Rock.RockSize.larger;
                 break;
             default:
-                return Rock.RockSize.single;
+                rockSize = Rock.RockSize.single;
                 break;
         }
+
+        return rockSize;
 
     }
 }

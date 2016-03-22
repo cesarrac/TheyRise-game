@@ -44,6 +44,11 @@ public class UnitPathHandler : MonoBehaviour {
 
     public bool avoidsPiling = true;
 
+    private float pathDistanceToTravel;
+
+    bool isCorrectingPath = false;
+
+    float startTime;
 
     // What's my target?
     // NOTE: calling AssignTarget from the component that spawns this unit
@@ -55,6 +60,14 @@ public class UnitPathHandler : MonoBehaviour {
         // Do I have to assign the target to a child/partner component (like an Attack Handler)?
         if (AssignTargetToHandlerCB != null)
             AssignTargetToHandlerCB(target);
+
+        pathDistanceToTravel = Vector3.Distance(transform.position, target.position);
+
+        Debug.Log("PATH distance to travel = " + pathDistanceToTravel);
+
+        isCorrectingPath = false;
+
+        startTime = Time.time;
 
         // Do I have a valid path to the target?
         GetANewPath();
@@ -85,14 +98,47 @@ public class UnitPathHandler : MonoBehaviour {
     {
         while (true)
         {
-
             yield return new WaitForSeconds(0.2f);
 
-
             PathRequestManager.RequestPath(transform.position, target.position, gameObject, OnPathFound);
+        }
+    }
 
+    // TODO: Have a function that will guarantee this unit has a path!
+    void Update()
+    {
+        if (isCorrectingPath)
+        {
+            GuaranteeLegalPath();
+        }
+    }
+    void GuaranteeLegalPath()
+    {
+        float fracJourney = ((Time.time - startTime) * 2f) / pathDistanceToTravel;
+        Vector3 nextPos = Vector3.Lerp(target.position, transform.position, fracJourney);
+
+        Vector3 correctedTargetPos = ResourceGrid.Grid.NodeFromWorldPoint(nextPos).worldPosition;
+
+        if (ResourceGrid.Grid.NodeFromWorldPoint(correctedTargetPos).isWalkable)
+        {
+           
+            Debug.Log("PATH CORRECTION: nextPos = " + nextPos + " correctTargetPos = " + correctedTargetPos +
+                " from starting pos " + transform.position + " to target +  " + target.position);
+
+            PathRequestManager.RequestPath(transform.position, correctedTargetPos, gameObject, OnPathFound);
+
+            isCorrectingPath = false;
         }
 
+        // In case nothing was found...
+        if (nextPos == transform.position)
+        {
+            Debug.LogError("PATH Correction was unable to find a legal path. Is curr node Walkable? "
+                + ResourceGrid.Grid.NodeFromWorldPoint(transform.position).isWalkable
+                + " is target node Walkable? " + ResourceGrid.Grid.NodeFromWorldPoint(target.position).isWalkable);
+
+            isCorrectingPath = false;
+        }
     }
 
     public void OnPathFound(Vector3[] newPath, bool pathSuccesful)
@@ -116,6 +162,21 @@ public class UnitPathHandler : MonoBehaviour {
 
             if (path != null)
                 StartCoroutine("FollowPath");
+        }
+        else
+        {
+            //Debug.LogError("PATH: " + gameObject.name + " cannot find path to target " + target.gameObject.name + 
+            //    " at position: " + target.position + " Current Node walkability is: + " + ResourceGrid.Grid.NodeFromWorldPoint(transform.position).isWalkable);
+
+            // Stop requesting a path
+            StopCoroutine("RequestPath");
+
+            // Stop following path in case this unit was following one
+            StopCoroutine("FollowPath");
+
+            Debug.Log("PATH: Could not find a path, requesting correction...");
+            //StartCoroutine("GuaranteeLegalPath");
+            isCorrectingPath = true;
         }
     }
 

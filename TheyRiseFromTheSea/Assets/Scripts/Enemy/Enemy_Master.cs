@@ -65,7 +65,7 @@ public class Enemy_Master : MonoBehaviour {
     Transform nearestUtilityTower, nearestBattleTower;
 
     // Spawn Points: currency the Enemy Master uses to buy/spawn units
-    int maxSpawnPoints = 200;
+    int maxSpawnPoints = 100;
     int spawnPoints;
     public int SpawnPoints { get { return spawnPoints; } set { spawnPoints = Mathf.Clamp(value, 0, 1000); } }
 
@@ -204,9 +204,10 @@ public class Enemy_Master : MonoBehaviour {
 
     void StartDecisionMakingProcess()
     {
-       // Debug.Log("Starting to make a decision!");
         timeAtStartofDecision = Time.time;
         CalcModifiers();
+        SortTasks();
+        SelectStrategy();
 
     }
 
@@ -293,7 +294,7 @@ public class Enemy_Master : MonoBehaviour {
             tasks[2].CalcAssignment(battleModifier, 3, 100f);
         }
 
-        SortTasks();
+       // SortTasks();
     }
 
     void SortTasks()
@@ -305,10 +306,12 @@ public class Enemy_Master : MonoBehaviour {
         orderedTasks.OrderByDescending(x => x.AssignmentScore);
 
         // Set the active task
-        activeTask = orderedTasks[0];
+        //activeTask = orderedTasks[0];
 
         // NOTE: Forcing a specific active task below for Testing
-        //activeTask = new EnemyTask(EnemyTaskType.BATTLE, 1);
+        activeTask = new EnemyTask(EnemyTaskType.BATTLE, 1);
+
+        Debug.Log("ENEMY MASTER: the Active Task is of type " + activeTask.taskType.ToString());
 
         //Debug.Log("ENEMY MASTER Assignment scores: ");
         //for (int i = 0; i < tasks.Length; i++)
@@ -318,7 +321,7 @@ public class Enemy_Master : MonoBehaviour {
 
         //Debug.Log("ENEMY MASTER: Active task is " + activeTask.taskType.ToString());
 
-        SelectStrategy();
+        //SelectStrategy();
     }
 
     // Tasks now sorted and active task set, now decide what wave to spawn
