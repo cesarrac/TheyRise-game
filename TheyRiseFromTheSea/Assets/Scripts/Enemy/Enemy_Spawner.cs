@@ -13,7 +13,7 @@ public class Enemy_Spawner : MonoBehaviour {
 
     public bool isSpawning { get; protected set; }
 
-    Func<Transform> GetTargetCB;
+    Func<Vector3, Transform> GetTargetCB;
 
     EnemyIncoming_Indicator curIndicator;
 
@@ -27,7 +27,7 @@ public class Enemy_Spawner : MonoBehaviour {
         totalToSpawn = 0;
     }
 
-    public void RegisterGetTargetCB(Func<Transform> cb)
+    public void RegisterGetTargetCB(Func<Vector3, Transform> cb)
     {
         GetTargetCB = cb;
     }

@@ -36,7 +36,7 @@ public class UnitPathHandler : MonoBehaviour {
     Vector3[] path; // Path filled by PathRequest manager once a path is requested
     int curPathIndex;
 
-    Func<Transform> GetTargetFunc; // This Function will return a target's transform when called. It must be assigned by another component.
+    Func<Vector3, Transform> GetTargetFunc; // This Function will return a target's transform when called. It must be assigned by another component.
 
     Action TargetReachedActionCB; // Action that is called when this unit reaches its target destination
 
@@ -50,12 +50,19 @@ public class UnitPathHandler : MonoBehaviour {
 
     float startTime;
 
+    Vector3 correctedTargetPos, offsetPos;
+    public Vector3 currWayPoint { get; protected set; }
+
+    void OnEnable()
+    {
+        startTime = Time.time;
+    }
+
     // What's my target?
     // NOTE: calling AssignTarget from the component that spawns this unit
-
     public void AssignTarget()
     {
-        target = GetTargetFunc();
+        target = GetTargetFunc(transform.position);
 
         // Do I have to assign the target to a child/partner component (like an Attack Handler)?
         if (AssignTargetToHandlerCB != null)
@@ -63,11 +70,7 @@ public class UnitPathHandler : MonoBehaviour {
 
         pathDistanceToTravel = Vector3.Distance(transform.position, target.position);
 
-        Debug.Log("PATH distance to travel = " + pathDistanceToTravel);
-
         isCorrectingPath = false;
-
-        startTime = Time.time;
 
         // Do I have a valid path to the target?
         GetANewPath();
@@ -78,7 +81,7 @@ public class UnitPathHandler : MonoBehaviour {
         AssignTargetToHandlerCB += cb;
     }
 
-    public void RegisterGetTargetFunc(Func<Transform> foo)
+    public void RegisterGetTargetFunc(Func<Vector3, Transform> foo)
     {
         GetTargetFunc += foo;
     }
@@ -100,45 +103,63 @@ public class UnitPathHandler : MonoBehaviour {
         {
             yield return new WaitForSeconds(0.2f);
 
-            PathRequestManager.RequestPath(transform.position, target.position, gameObject, OnPathFound);
+            if (!isCorrectingPath)
+            {
+                PathRequestManager.RequestPath(transform.position, target.position, gameObject, OnPathFound);
+            }
+            else
+            {
+                isCorrectingPath = false;
+                PathRequestManager.RequestPath(transform.position, correctedTargetPos, gameObject, OnPathFound);
+            }
+            yield break;
         }
     }
 
-    // TODO: Have a function that will guarantee this unit has a path!
-    void Update()
+
+    // Guarantee this unit has a path! This is called if the path request was unsuccesful.
+    IEnumerator GuaranteeLegalPath()
     {
-        if (isCorrectingPath)
+        while (true)
         {
-            GuaranteeLegalPath();
+            // Start a Lerp between the target and this unit's transform (as if it was using it to move by Time * speed)
+            float fracJourney = ((Time.time - startTime) * 2f) / pathDistanceToTravel;
+
+            // Record the return Vector3 as a potential position...
+            Vector3 nextPos = Vector3.Lerp(target.position, transform.position, fracJourney);
+
+            // ... turn it into a valid pathfinding grid position...
+            correctedTargetPos = ResourceGrid.Grid.NodeFromWorldPoint(nextPos).worldPosition;
+
+            // ... and Check if that Node is Walkable
+            if (ResourceGrid.Grid.NodeFromWorldPoint(correctedTargetPos).isWalkable)
+            {
+
+                //Debug.Log("PATH CORRECTION: nextPos = " + nextPos + " correctTargetPos = " + correctedTargetPos +
+                //    " from starting pos " + transform.position + " to target +  " + target.position);
+
+                isCorrectingPath = true;
+
+                GetANewPath();
+                //PathRequestManager.RequestPath(transform.position, correctedTargetPos, gameObject, OnPathFound);
+
+                yield break;
+            }
+
+            // In case nothing was found (the Lerp function has gone all the way back to the starting position)...
+            if (nextPos == transform.position)
+            {
+                Debug.LogError("PATH Correction was unable to find a legal path. Is curr node Walkable? "
+                    + ResourceGrid.Grid.NodeFromWorldPoint(transform.position).isWalkable
+                    + " is target node Walkable? " + ResourceGrid.Grid.NodeFromWorldPoint(target.position).isWalkable);
+
+                // Stop trying to correct a path
+                yield break;
+            }
+
+            yield return null;
         }
-    }
-    void GuaranteeLegalPath()
-    {
-        float fracJourney = ((Time.time - startTime) * 2f) / pathDistanceToTravel;
-        Vector3 nextPos = Vector3.Lerp(target.position, transform.position, fracJourney);
 
-        Vector3 correctedTargetPos = ResourceGrid.Grid.NodeFromWorldPoint(nextPos).worldPosition;
-
-        if (ResourceGrid.Grid.NodeFromWorldPoint(correctedTargetPos).isWalkable)
-        {
-           
-            Debug.Log("PATH CORRECTION: nextPos = " + nextPos + " correctTargetPos = " + correctedTargetPos +
-                " from starting pos " + transform.position + " to target +  " + target.position);
-
-            PathRequestManager.RequestPath(transform.position, correctedTargetPos, gameObject, OnPathFound);
-
-            isCorrectingPath = false;
-        }
-
-        // In case nothing was found...
-        if (nextPos == transform.position)
-        {
-            Debug.LogError("PATH Correction was unable to find a legal path. Is curr node Walkable? "
-                + ResourceGrid.Grid.NodeFromWorldPoint(transform.position).isWalkable
-                + " is target node Walkable? " + ResourceGrid.Grid.NodeFromWorldPoint(target.position).isWalkable);
-
-            isCorrectingPath = false;
-        }
     }
 
     public void OnPathFound(Vector3[] newPath, bool pathSuccesful)
@@ -165,18 +186,19 @@ public class UnitPathHandler : MonoBehaviour {
         }
         else
         {
-            //Debug.LogError("PATH: " + gameObject.name + " cannot find path to target " + target.gameObject.name + 
-            //    " at position: " + target.position + " Current Node walkability is: + " + ResourceGrid.Grid.NodeFromWorldPoint(transform.position).isWalkable);
-
             // Stop requesting a path
             StopCoroutine("RequestPath");
 
             // Stop following path in case this unit was following one
             StopCoroutine("FollowPath");
 
-            Debug.Log("PATH: Could not find a path, requesting correction...");
-            //StartCoroutine("GuaranteeLegalPath");
-            isCorrectingPath = true;
+            // Stop verifying target
+            StopCoroutine("VerifyTargetPosition");
+
+            StopCoroutine("GuaranteeLegalPath");
+            StartCoroutine("GuaranteeLegalPath");
+
+            startTime = Time.time;
         }
     }
 
@@ -188,11 +210,9 @@ public class UnitPathHandler : MonoBehaviour {
             if (curTargetPosition != target.position)
             {
                 // ... if target has moved, break out get a new Path
-                Debug.Log("Target has moved, requesting a new path!");
                 GetANewPath();
                 yield break;
             }
-
             yield return new WaitForSeconds(2f);
         }
     }
@@ -201,10 +221,9 @@ public class UnitPathHandler : MonoBehaviour {
     {
         if (path.Length > 0)
         {
-            Vector3 currWayPoint = path[0];
+            currWayPoint = path[0];
             while (true)
             {
-
                 // Advance path index when my position is equal to the current node
                 if (transform.position == currWayPoint)
                 {
@@ -222,14 +241,12 @@ public class UnitPathHandler : MonoBehaviour {
                         // This will begin a coRoutine that pushes the unit to a final "offset" position to avoid
                         // units piling on top of each other.
                         if (avoidsPiling)
-                            StartCoroutine("OffsetDestination");
+                            OffsetLastPosition();
                         else
                         {
                             if (TargetReachedActionCB != null)
                                 TargetReachedActionCB();
                         }
-
-
 
                         curPathIndex = 0;
                         path = null;
@@ -263,21 +280,34 @@ public class UnitPathHandler : MonoBehaviour {
         }
     }
 
+    public void StopFollowingPathAndAttack(Transform newTarget)
+    {
+        StopCoroutine("VerifyTargetPosition");
+        StopCoroutine("FollowPath");
 
-    IEnumerator OffsetDestination()
+        if (AssignTargetToHandlerCB != null)
+            AssignTargetToHandlerCB(newTarget);
+
+        OffsetLastPosition();
+    }
+
+    void OffsetLastPosition()
     {
         float offset = 0.5f;
         float offsetX = UnityEngine.Random.Range(transform.position.x - offset, transform.position.x + offset);
         float offsetY = UnityEngine.Random.Range(transform.position.y - offset, transform.position.y + offset);
-        Vector3 offsetPos = new Vector3(offsetX, offsetY, 0);
+        offsetPos = new Vector3(offsetX, offsetY, 0);
+        StartCoroutine("OffsetDestination");
+    }
 
+    IEnumerator OffsetDestination()
+    {
         while (true)
         {
             if (transform.position != offsetPos)
             {
                 transform.position = Vector2.MoveTowards(transform.position, offsetPos, 4 * Time.deltaTime);
 
-                yield return null;
             }
             else
             {
@@ -287,6 +317,9 @@ public class UnitPathHandler : MonoBehaviour {
 
                 yield break;
             }
+
+
+            yield return null;
         }
     }
 
@@ -302,11 +335,7 @@ public class UnitPathHandler : MonoBehaviour {
     // This might be that the target and path have been defined but for some reason the Follow Path coroutine is not kicking in.
     // What is probably making them eventually move is the Verify Target subroutine, that kicks off GetPath and FollowPath. (Bug or feature?)
 
-    // Since units avoid piling they take a little longer to begin their attack, since they are getting into offset position.
-    // This might make them too easy to kill and looks very strange when they get to the target then back off to move to their off set pos.
-    // I can consider:
-    // forcing the direction of the offset to match the heading the unit was on
-    // *** Giving them a higher speed when doing the offset does the trick quite nicely
+
 
 
 

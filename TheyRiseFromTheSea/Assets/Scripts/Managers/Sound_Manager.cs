@@ -12,6 +12,9 @@ public class Sound_Manager : MonoBehaviour {
 
     Dictionary<string, AudioClip> soundMap = new Dictionary<string, AudioClip>();
 
+    [Range(0, 1)]
+    public float soundVolume = 0.6f;
+
     void OnEnable()
     {
         if (Instance == null)
@@ -54,7 +57,9 @@ public class Sound_Manager : MonoBehaviour {
             if (soundCooldown > 0)
                 return;
 
-            AudioSource.PlayClipAtPoint(soundMap[id], Camera.main.transform.position);
+            
+
+            AudioSource.PlayClipAtPoint(soundMap[id], Camera.main.transform.position, soundVolume);
             soundCooldown = -0.2f;
         }
    

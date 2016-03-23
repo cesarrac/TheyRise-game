@@ -9,6 +9,7 @@ public class PlanktonMine : MonoBehaviour {
     float poisonDamage = 5f;
     float damageTime = 5f;
     bool isDamaging;
+    float timeElapsed;
 
     public void SetTarget(Vector3 pos)
     {
@@ -31,16 +32,16 @@ public class PlanktonMine : MonoBehaviour {
         {
             target = coll.gameObject.GetComponent<Unit_Base>();
 
-            StartCoroutine("Damage");
-
+            if (!isDamaging)
+            {
+                isDamaging = true;
+                timeElapsed = 0;
+            }
         }
     }
 
     IEnumerator Damage()
     {
-        isDamaging = true;
-        float timeElapsed = 0;
-
         while (true)
         {
 
@@ -50,7 +51,7 @@ public class PlanktonMine : MonoBehaviour {
 
             timeElapsed += 1;
 
-            if (timeElapsed >= damageTime || target != null)
+            if (timeElapsed >= damageTime || target == null || !target.gameObject.activeSelf)
             {
                 isDamaging = false;
                 target = null;
@@ -64,7 +65,5 @@ public class PlanktonMine : MonoBehaviour {
     {
         if (target != null)
             target.TakeDamage(poisonDamage);
-
-        Debug.Log("PLANKTON MINE: Damaging Hero for " + poisonDamage);
     }
 }

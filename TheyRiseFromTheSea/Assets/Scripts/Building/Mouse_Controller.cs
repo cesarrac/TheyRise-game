@@ -38,11 +38,11 @@ public class Mouse_Controller:MonoBehaviour
 
         // FOR DEBUGGING PURPOSES:
         // Tile Under Mouse Tool: print to console the tile type and position of the tile under mouse
-        //if (!Build_MainController.Instance.currentlyBuilding)
-        //{
-        //    DebugTileUnderMouse();
-        //    DebugGraphicTile();
-        //}
+        if (!Build_MainController.Instance.currentlyBuilding)
+        {
+            DebugTileUnderMouse();
+            //DebugGraphicTile();
+        }
 
 
         ListenForRightClick();
@@ -142,6 +142,10 @@ public class Mouse_Controller:MonoBehaviour
         if (Input.GetMouseButtonDown(1))
         {
             TileData tile = GetTileUnderMouse();
+
+            if (tile == null)
+                return;
+
             print("Tile under mouse is of type: " + tile.tileType + " tile Position: " + tile.posX + " " + tile.posY);
 
             print("ACCORDING TO THE GRID: This tile points to this gameobject: " + ResourceGrid.Grid.spawnedTiles[tile.posX, tile.posY]);

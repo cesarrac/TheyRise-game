@@ -747,13 +747,11 @@ public class ResourceGrid : MonoBehaviour{
 
         if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(towerTransform.position).tileName) == BuildingType.UTILITY)
         {
-            Debug.Log("GRID: Registering utility tower built!");
             if (UtilityTowerBuiltCB != null)
                 UtilityTowerBuiltCB(towerTransform);
         }
         else if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(towerTransform.position).tileName) == BuildingType.BATTLE)
         {
-            Debug.Log("GRID: Registering battle tower built!");
             if (BattleTowerBuiltCB != null)
                 BattleTowerBuiltCB(towerTransform);
         }
@@ -790,10 +788,6 @@ public class ResourceGrid : MonoBehaviour{
 		// MAKE SURE THIS IS NOT A SPAWNED TILE ALREADY!!! 
 		// So we don't change the grid tile data where we don't want to!
 		if (spawnedTiles [x, y] == null) {
-            // If spawnedTiles[x, y] is null it means that this tile is an EMPTY land tile,
-            // so in ALL cases below it will be turning the EMPTY walkable tile into a BUILDING unwalkable tile
-            // SO.. update the Node Grid here as well:
-            grid[x, y].isWalkable = false;
 
             // sprite size X represents how many tiles will be needed for its width, y for the height
             // round them down to ints
@@ -905,17 +899,6 @@ public class ResourceGrid : MonoBehaviour{
 
             // Discover the tile to display it
             DiscoverTile(x, y, true, spriteWidth, spriteHeight);
-
-            //if (BlueprintDatabase.Instance.GetTowerType(bpName) == BuildingType.BATTLE)
-            //{
-            //    if (BattleTowerBuiltCB != null)
-            //        BattleTowerBuiltCB(spawnedTiles[x, y].transform);
-            //}
-            //else if (BlueprintDatabase.Instance.GetTowerType(bpName) == BuildingType.UTILITY)
-            //{
-            //    if (UtilityTowerBuiltCB != null)
-            //        UtilityTowerBuiltCB(spawnedTiles[x, y].transform);
-            //}
 
         }
         else {
@@ -1040,9 +1023,12 @@ public class ResourceGrid : MonoBehaviour{
                 // ******** MAKE SURE we are not changing tiles that are NOT empty
                 if(tiles[x + w, y + h].tileType == TileData.Types.empty)
                 {
-                    tiles[x + w, y + h] = new TileData(x + w, y + h, name, newType, quantity, moveCost, hp, defence, attack, shield, nanoBotCost);
+                    tiles[x + w, y + h] = new TileData(x + w, y + h, name, newType, quantity, 1000, hp, defence, attack, shield, nanoBotCost);
 
-                    grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable;
+                    // grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable;
+
+                    // NOTE: As a test I'm going to set all building tiles to walkable and give them a really high movement cost
+                    grid[x + w, y + h].isWalkable = true;
                 }
               
 
@@ -1066,7 +1052,7 @@ public class ResourceGrid : MonoBehaviour{
     {
         // Store the current tiletype to check against
         TileData.Types formerType = tiles[x, y].tileType;
-        Debug.Log("Defining multiple empty tiles of " + formerType);
+       // Debug.Log("Defining multiple empty tiles of " + formerType);
         for (int w = -(spriteWidth - 1); w < spriteWidth; w++)
         {
             for (int h = 0; h < spriteHeight; h++)
@@ -1127,7 +1113,7 @@ public class ResourceGrid : MonoBehaviour{
 			if (trueIfSwapping){
 				// since we know this tile has already been spawned we need to destroy the old one,
 				// before adding the new one
-				Destroy (spawnedTiles [x, y].gameObject);
+				//Destroy (spawnedTiles [x, y].gameObject);
 				SpawnDiscoverTile (tiles [x, y].tileName, new Vector3 (x, y, 0.0f), tiles [x, y].tileType, spriteWidth, spriteHeight);
             }
 		}

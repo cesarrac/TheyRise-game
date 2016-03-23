@@ -52,9 +52,9 @@ public class EnemyAttackHandler_Belcher : Enemy_AttackHandler
     {
 
         Vector2 jumpDirection = targetPosition - transform.root.position;
-        rigid_body.AddForce(jumpDirection * 1200);
+        rigid_body.AddForce(jumpDirection * 500);
         yield return new WaitForSeconds(0.1f);
-        rigid_body.AddForce(-jumpDirection * 1200);
+        rigid_body.AddForce(-jumpDirection * 500);
         yield break;
 
     }

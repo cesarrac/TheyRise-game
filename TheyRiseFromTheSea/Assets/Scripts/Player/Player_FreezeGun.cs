@@ -41,12 +41,12 @@ public class Player_FreezeGun : Player_GunBaseClass {
         if (targetHit != null)
         {
 
-            // Tell the enemy unit I'm hitting it
-            if (targetHit.GetComponent<Enemy_AttackHandler>().playerUnit == null)
-            {
+            //// Tell the enemy unit I'm hitting it
+            //if (targetHit.GetComponent<Enemy_AttackHandler>().playerUnit == null)
+            //{
 
-                targetHit.GetComponent<Enemy_AttackHandler>().playerUnit = transform.parent.gameObject;
-            }
+            //    targetHit.GetComponent<Enemy_AttackHandler>().playerUnit = transform.parent.gameObject;
+            //}
             // Do Gun Effect
             FreezeEnemy();
 

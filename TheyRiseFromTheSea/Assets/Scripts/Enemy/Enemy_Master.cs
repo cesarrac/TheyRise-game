@@ -114,7 +114,6 @@ public class Enemy_Master : MonoBehaviour {
     {
         if (!battleTowersBuilt.Contains(towerTransform))
         {
-            Debug.Log("MASTER : Adding battle tower! ");
             battleTowersBuilt.Add(towerTransform);
         }
           
@@ -124,15 +123,12 @@ public class Enemy_Master : MonoBehaviour {
     {
         if (battleTowersBuilt.Contains(towerTransform))
             battleTowersBuilt.Remove(towerTransform);
-
-        Debug.Log("MASTER : Removing battle tower! ");
     }
 
     void AddUtilityTowerBuilt(Transform towerTransform)
     {
         if (!utilityTowersBuilt.Contains(towerTransform))
         {
-            Debug.Log("MASTER : Adding utility tower! ");
             utilityTowersBuilt.Add(towerTransform);
         }
          
@@ -142,9 +138,6 @@ public class Enemy_Master : MonoBehaviour {
     {
         if (utilityTowersBuilt.Contains(towerTransform))
             utilityTowersBuilt.Remove(towerTransform);
-
-        Debug.Log("MASTER : Removing utility tower! ");
-
     }
 
 
@@ -306,12 +299,10 @@ public class Enemy_Master : MonoBehaviour {
         orderedTasks.OrderByDescending(x => x.AssignmentScore);
 
         // Set the active task
-        //activeTask = orderedTasks[0];
+        activeTask = orderedTasks[0];
 
         // NOTE: Forcing a specific active task below for Testing
-        activeTask = new EnemyTask(EnemyTaskType.BATTLE, 1);
-
-        Debug.Log("ENEMY MASTER: the Active Task is of type " + activeTask.taskType.ToString());
+        //activeTask = new EnemyTask(EnemyTaskType.BATTLE, 1);
 
         //Debug.Log("ENEMY MASTER Assignment scores: ");
         //for (int i = 0; i < tasks.Length; i++)
@@ -543,7 +534,7 @@ public class Enemy_Master : MonoBehaviour {
     }
 
     // This is a callback for each unit to get its target from the active task
-    Transform GetCurrentTarget()
+    Transform GetCurrentTarget(Vector3 unitPosition)
     {
         if (activeTask.taskType == EnemyTaskType.PLAYER)
         {
@@ -551,24 +542,23 @@ public class Enemy_Master : MonoBehaviour {
         }
         else if (activeTask.taskType == EnemyTaskType.BATTLE)
         {
+
+            nearestBattleTower = GetNearestTower(battleTowersBuilt.ToArray(), unitPosition);
             if (nearestBattleTower != null)
-            {
                 return nearestBattleTower;
-            }
         }
         else if (activeTask.taskType == EnemyTaskType.UTILITY)
         {
+            nearestUtilityTower = GetNearestTower(utilityTowersBuilt.ToArray(), unitPosition);
             if (nearestUtilityTower != null)
-            {
                 return nearestUtilityTower;
-            }
         }
 
         // If nothing has returned try returning the player
         return ResourceGrid.Grid.Hero.transform; 
     }
 
-    Transform GetNearestTower(Transform[] towers, Vector3 spawnPos)
+    Transform GetNearestTower(Transform[] towers, Vector3 startPosition)
     {
         float nearestDistance = 0;
         Transform t = null;
@@ -577,20 +567,24 @@ public class Enemy_Master : MonoBehaviour {
         if (towers.Length == 1)
             return towers[0];
 
-        // Loop through the array and find the one with the nearest distance to the spawn position
-        foreach (Transform trans in towers)
+        if (towers.Length > 0)
         {
-            float newDistance = (trans.position - spawnPos).magnitude;
-            if (nearestDistance == 0)
+            // Loop through the array and find the one with the nearest distance to the spawn position
+            foreach (Transform trans in towers)
             {
-                nearestDistance = newDistance;
-            }
-            else if (newDistance < nearestDistance)
-            {
-                nearestDistance = newDistance;
-                t = trans;
+                float newDistance = (trans.position - startPosition).magnitude;
+                if (nearestDistance == 0)
+                {
+                    nearestDistance = newDistance;
+                }
+                else if (newDistance < nearestDistance)
+                {
+                    nearestDistance = newDistance;
+                    t = trans;
+                }
             }
         }
+     
 
         return t;
     }

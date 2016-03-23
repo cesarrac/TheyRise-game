@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class Building_PositionHandler : MonoBehaviour {
 
@@ -53,6 +53,10 @@ public class Building_PositionHandler : MonoBehaviour {
     // Blueprint name
     public string bpName { get; protected set; }
 
+    List<TileData> build_tilePositions = new List<TileData>();
+
+    Vector3 startingBuildPosition;
+
 	void Awake()
 	{
         // Get the Sprite Renderer to be able to change the Sprite's color depending on position
@@ -97,7 +101,7 @@ public class Building_PositionHandler : MonoBehaviour {
         posX = Mathf.RoundToInt(transform.position.x);
         posY = Mathf.RoundToInt(transform.position.y);
 
-        if (CheckEmptyBeneath (posX, posY) && !onEneposY) {
+        if (CheckEmptyBeneath (transform.position) && !onEneposY) {
 			
 			if (tileType == TileData.Types.extractor) {
 				if (CheckForResource (posX, posY + 1, "ore")) { // top
@@ -192,14 +196,6 @@ public class Building_PositionHandler : MonoBehaviour {
                 // we are on a legal building position
                 sr.color = trueColor;
                 canBuild = true;
-                //if (CheckForEmptySides (posX, posY)) {
-                //		// we are on a legal building position
-                //	sr.color = trueColor;
-                //	canBuild = true;
-                //} else {// we DO NOT have an empty tile on our sides or beneath
-                //	sr.color = invalidPosColor;
-                //	canBuild = false;
-                //}
             }
 		} else {				// NOT ON EMPTY
 			sr.color = invalidPosColor;
@@ -207,36 +203,29 @@ public class Building_PositionHandler : MonoBehaviour {
 		}
 
 
-			// MAKE SURE WE HAVE ENOUGH ORE TO BUILD!
-		//if (resourceManager.ore >= currOreCost ) {
-		//	canAfford = true;
-		//}
-		// At this point we KNOW the mouse is NOT over a building or a rock, we have found rocks if extractor AND we are not on eneposY
-		if (Input.GetMouseButtonDown (0) && canBuild && !onEneposY) {			// So LEFT CLICK to BUILD!! 
+        if (Input.GetMouseButtonDown(0) && canBuild && !onEneposY)
+        {
+            startingBuildPosition = transform.position;
 
-			// Subtract the cost
-//			resourceManager.ChargeOreorWater("Ore", -currOreCost);
-			//resourceManager.ChangeResource("Ore", -currOreCost);
+            build_tilePositions.Add(mouse_controller.GetTileUnderMouse());
+        }
 
-            // Right BEFORE pooling this object we tell Building UI that we are NOT currently building anymore
-            build_controller.SetCurrentlyBuildingBool(false);
+        if (Input.GetMouseButton(0) && transform.position != startingBuildPosition && canBuild && !onEneposY)
+        {
+            if (mouse_controller.GetTileUnderMouse() != null)
+            {
+                if (!build_tilePositions.Contains(mouse_controller.GetTileUnderMouse()))
+                {
+                    build_tilePositions.Add(mouse_controller.GetTileUnderMouse());
+                }
+            }
+          
+        }
 
-            // stop following and tell grid to swap this tile to this new building
-            //mapPosX = posX;
-            //mapPosY = posY;
-
-            TileData currTile = mouse_controller.GetTileUnderMouse();
-
-			resourceGrid.SwapTileType (currTile.posX, currTile.posY, tileType, bpName,currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
-			followMouse = false;
-            
-			// Pool this object
-			PoolObject (gameObject); // Pool this because resourceGrid just discovered the tile/building for us
-
-		}
-		if (Input.GetMouseButtonDown (1)) {
-			// CANCEL THE BUILD
-			PoolObject(gameObject);
+        if (Input.GetMouseButtonDown(1))
+        {
+            // CANCEL THE BUILD
+            PoolObject(gameObject);
             build_controller.SetCurrentlyBuildingBool(false);
 
             //// give back the nanobots spent on this building
@@ -245,8 +234,40 @@ public class Building_PositionHandler : MonoBehaviour {
             // give back the resources spent on this building because build was Cancelled
             nanoBuild_handler.ReturnBuildResources(tileType);
 
-           
+            build_tilePositions.Clear();
         }
+
+
+        // At this point we KNOW the mouse is NOT over a building or a rock, we have found rocks if extractor AND we are not on eneposY
+        if (Input.GetMouseButtonUp (0) && canBuild && !onEneposY) {			// So LEFT CLICK to BUILD!! 
+
+            // Right BEFORE pooling this object we tell Building UI that we are NOT currently building anymore
+            build_controller.SetCurrentlyBuildingBool(false);
+
+            //TileData currTile = mouse_controller.GetTileUnderMouse();
+
+            if (build_tilePositions.Count > 1)
+            {
+                for (int i = 0; i < build_tilePositions.Count; i++)
+                {
+                    resourceGrid.SwapTileType(build_tilePositions[i].posX, build_tilePositions[i].posY, tileType, bpName, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
+                }
+            }
+            else
+            {
+                resourceGrid.SwapTileType(build_tilePositions[0].posX, build_tilePositions[0].posY, tileType, bpName, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
+            }
+			
+
+            followMouse = false;
+
+            build_tilePositions.Clear();
+
+            // Pool this object
+            PoolObject (gameObject); // Pool this because resourceGrid just discovered the tile/building for us
+
+		}
+	
 	}
 
 	void PoolObject(GameObject objToPool){
@@ -330,6 +351,14 @@ public class Building_PositionHandler : MonoBehaviour {
 			return false;
 		}
 	}
+
+    bool CheckEmptyBeneath(Vector3 pos)
+    {
+        if (resourceGrid.TileFromWorldPoint(pos) != null && resourceGrid.TileFromWorldPoint(pos).tileType == TileData.Types.empty)
+            return true;
+        else
+            return false;
+    }
 
 	// Avoid building right near where an eneposY unit is walking
 	void OnTriggerEnter2D(Collider2D coll){

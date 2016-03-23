@@ -7,7 +7,7 @@ public class Enemy_AttackHandler : Unit_Base {
 
     public UnitPathHandler pathHandler;
 
-    public GameObject playerUnit;
+    public Unit_Base playerUnit;
 
     public enum State { MOVING, ATTACK_TILE, ATTACK_UNIT, ATTACKING, POOLING_TARGET };
 
@@ -22,7 +22,7 @@ public class Enemy_AttackHandler : Unit_Base {
     public Transform mainTarget { get; protected set; } // < ---- always the same as my path's original target.
     TileData targetAsTile;
 
-    float attackRange = 2f; // < ------- threshold target's can't pass without being attacked by this unit
+    float attackRange = 2.5f; // < ------- threshold target's can't pass without being attacked by this unit
     public float AttackRange { get { return attackRange; } set { attackRange = Mathf.Clamp(value, 2.0f, 8.0f); } }
 
     public bool isAttacking { get; protected set; }
@@ -51,7 +51,7 @@ public class Enemy_AttackHandler : Unit_Base {
 
     public void ResetFlagsandTargets()
     {
-        isAttacking = false;
+        StopAttackCoRoutines();
         currTargetIsTile = true;
 
         playerUnit = null;
@@ -67,7 +67,7 @@ public class Enemy_AttackHandler : Unit_Base {
             // If this unit is NO-Aggro to buildings we can go ahead and set playerUnit here so it attacks the player as soon as it is in range
             if (!isAggroToBuildings)
             {
-                playerUnit = mainTarget.gameObject;
+                playerUnit = mainTarget.gameObject.GetComponent<Unit_Base>();
                 currTargetIsTile = false;
             }
 
@@ -94,11 +94,6 @@ public class Enemy_AttackHandler : Unit_Base {
 
     }
 
-    void Update()
-    {
-
-    }
-
     void LateUpdate()
     {
 
@@ -111,24 +106,32 @@ public class Enemy_AttackHandler : Unit_Base {
 
     void IsMainTargetInRange()
     {
-        if (RangeCheck() == true)
+        StopAttackCoRoutines();
+        // If the main target is not null, check range...
+        if (mainTarget != null && mainTarget.gameObject.activeSelf == true)
         {
-            AttackMainTarget();
-        }
-        else
-        {
-            // If the main target is not in range, request a new path...
-            if (mainTarget != null && mainTarget.gameObject.activeSelf == true)
+
+            if (RangeCheck() == false)
             {
                 Debug.Log("ENEMY: Target NOT in range, requesting a new path to target!");
                 pathHandler.GetANewPath();
             }
             else
             {
-                //... or a whole new target if it's dead or inactive
-                pathHandler.AssignTarget();
+                AttackMainTarget();
             }
+       
         }
+        else
+        {
+            //... or a whole new target if it's dead or inactive
+            RequestNewTarget();
+        }
+    }
+
+    void RequestNewTarget()
+    {
+        pathHandler.AssignTarget();
     }
 
     bool RangeCheck()
@@ -147,18 +150,19 @@ public class Enemy_AttackHandler : Unit_Base {
 
     void AttackMainTarget()
     {
+        StopAttackCoRoutines();
+
         if (currTargetIsTile)
         {
             if (mainTarget != null && mainTarget.gameObject.activeSelf == true)
             {
-                StopAttackCoRoutines();
                 StartCoroutine("TowerisMainTargetAttack");
                 isAttacking = true;
             }
             else
             {
                 // Get a new target because the Main Target has been downed
-                pathHandler.AssignTarget();
+                RequestNewTarget();
                 isAttacking = false;
             }
         }
@@ -179,7 +183,7 @@ public class Enemy_AttackHandler : Unit_Base {
         while (true)
         {
            
-            if (mainTarget != null && RangeCheck() == true) 
+            if (mainTarget != null && mainTarget.gameObject.activeSelf && RangeCheck() && isAttacking) 
             {
                // Debug.Log("ENEMY: Attacking the tower!");
 
@@ -195,11 +199,13 @@ public class Enemy_AttackHandler : Unit_Base {
             }
             else
             {
-               
+                // Need to tell the path handler to assign a new target because this one is dead or out of range
+                RequestNewTarget();
+
                 isAttacking = false;
 
-                // Call to check range again and set target or new path
-                IsMainTargetInRange();
+                //// Call to check range again and set target or new path
+                //IsMainTargetInRange();
 
                 yield break;
             }
@@ -212,15 +218,16 @@ public class Enemy_AttackHandler : Unit_Base {
     {
         while (true)
         {
-            if (playerUnit != null && RangeCheck() == true)
+            if (mainTarget != null && mainTarget.gameObject.activeSelf && RangeCheck() && isAttacking)
             {
                 //Debug.Log("ENEMY: Attacking the player!");
+
 
                 // Play attack sound
                 Sound_Manager.Instance.PlaySound("Slimer Attack");
 
                 //StartCoroutine(JumpAttack(playerUnit.transform.position));
-                AttackActionCB(playerUnit.transform.position);
+                AttackActionCB(mainTarget.position);
 
                 HandleDamageToUnit();
             }
@@ -239,28 +246,19 @@ public class Enemy_AttackHandler : Unit_Base {
 
     void StopAttackCoRoutines()
     {
-        isAttacking = false;
         StopCoroutine("PlayerAttack");
         StopCoroutine("TowerisMainTargetAttack");
     }
 
     void HandleDamage_ToMainTargetTile()
     {
-        if (pathHandler != null)
+        if (targetAsTile == null || !AttackTile(targetAsTile))
         {
-            if (!AttackTile(targetAsTile))
-            {
-                // Set state back to moving
-                _state = State.MOVING;
+            // Set state back to moving
+            _state = State.MOVING;
 
-                // Set attacking flag to false to stop attacking
-                isAttacking = false;
-
-                Debug.Log("ENEMY: Stopped damaging tower!");
-
-                // Stop Tower Attack coroutine
-                StopAttackCoRoutines();
-            }
+            // Set attacking flag to false to stop attacking
+            isAttacking = false;
 
         }
     }
@@ -268,8 +266,8 @@ public class Enemy_AttackHandler : Unit_Base {
 
     void HandleDamageToUnit()
     {
-
-        if (!AttackUnit(playerUnit.GetComponent<Unit_Base>()))
+       
+        if (playerUnit == null || !AttackUnit(playerUnit))
         {
 
             // Set state back to moving
@@ -277,10 +275,6 @@ public class Enemy_AttackHandler : Unit_Base {
 
             // Set attacking flag to false to stop attacking
             isAttacking = false;
-
-           // playerUnit = null;
-
-            StopAttackCoRoutines();
 
         }
 
