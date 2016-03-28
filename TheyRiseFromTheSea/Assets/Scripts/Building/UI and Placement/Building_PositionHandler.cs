@@ -28,8 +28,8 @@ public class Building_PositionHandler : MonoBehaviour {
    
 
 	Vector3 m, lastM;
-	int posX;
-	int posY;
+	int roundedPosX;
+	int roundedPosY;
 
 	bool canBuild, canAfford; // turns true when building is in proper position
 
@@ -57,9 +57,11 @@ public class Building_PositionHandler : MonoBehaviour {
 
     Vector3 startingBuildPosition;
 
-    List<GameObject> position_indicator = new List<GameObject>();
+    Dictionary<Vector3, GameObject> position_indicator = new Dictionary<Vector3, GameObject>();
 
     GameObject posIndicator = null;
+
+    Vector3 newPos;
 
     void Awake()
 	{
@@ -91,18 +93,6 @@ public class Building_PositionHandler : MonoBehaviour {
     }
 
 
-    // Needs:
-    /*
-
-            - Perform a check for empty tile under the mouse position
-            - The position of the gameobject always is the same as the mouse position
-            - If this is an extraction type building: Perform a check to verify adjacent tiles of the correct resource type
-            - If all criteria are met, call to swap the empty tile for this new tile/building
-            - Display if the position is a correct one or not by changing the "ghost" sprite to red / green color
-
-
-    */
-
 	void Update () {
         //if (followMouse) {
         //	FollowMouse();
@@ -116,7 +106,12 @@ public class Building_PositionHandler : MonoBehaviour {
 	
     void FollowTheMouse()
     {
-        transform.position = mouse_controller.currMouseP;
+        roundedPosX = Mathf.RoundToInt(mouse_controller.currMouseP.x);
+        roundedPosY = Mathf.RoundToInt(mouse_controller.currMouseP.y);
+
+        transform.position = new Vector3(roundedPosX, roundedPosY, 0);
+
+  
 
         if (CheckPositionToBuild())
         {
@@ -143,6 +138,36 @@ public class Building_PositionHandler : MonoBehaviour {
             EndBuild();
         }
 
+        if (Input.GetMouseButton(0))
+        {
+            MarkBuildSpots();
+        }
+    }
+
+    void MarkBuildSpots()
+    {
+        if (position_indicator.Count > 0)
+        {
+            if (transform.position != startingBuildPosition)
+            {
+                TileData curTile = resourceGrid.TileFromWorldPoint(new Vector3(roundedPosX, roundedPosY, 0));
+                if (curTile != null && CheckPositionToBuild(transform.position))
+                {
+                    newPos = new Vector3(curTile.posX, curTile.posY, 0);
+                    if (!position_indicator.ContainsKey(newPos))
+                    {
+                        if (CheckCost(position_indicator.Count + 1))
+                        {
+                            posIndicator = objPool.GetObjectForType("Selection Circle", true, newPos);
+                            // Add the pos indicator to its dictionary to easily remove it later
+                            position_indicator.Add(newPos, posIndicator);
+                        }
+ 
+                    }
+                }
+            }
+         
+        }
     }
 
     void BeginBuild()
@@ -153,38 +178,50 @@ public class Building_PositionHandler : MonoBehaviour {
             // Record the starting position of this build
             startingBuildPosition = mouse_controller.currMouseP;
         }
-  
-
 
         // Set the tile under the mouse to the dictionary that will hold all this build's tiles
         // build_tilePositions.Add(mouse_controller.GetTileUnderMouse());
         // Spawn a position indicator to indicate where the building will be built
-        //posIndicator = objPool.GetObjectForType("Selection Circle", true, transform.position);
-        // Add the pos indicator to its dictionary to easily remove it later
-        //position_indicator.Add(posIndicator);
+        TileData curTile = resourceGrid.TileFromWorldPoint(new Vector3(roundedPosX, roundedPosY, 0));
+
+        if (curTile != null && CheckPositionToBuild())
+        {
+            newPos = new Vector3(curTile.posX, curTile.posY, 0);
+            if (!position_indicator.ContainsKey(newPos))
+            {
+                posIndicator = objPool.GetObjectForType("Selection Circle", true, newPos);
+                // Add the pos indicator to its dictionary to easily remove it later
+                position_indicator.Add(newPos, posIndicator);
+            }
+        }
     }
 
     void EndBuild()
     {
         Vector3 endBuildPosition = mouse_controller.currMouseP;
-        if (endBuildPosition.x < startingBuildPosition.x)
+        int startX = Mathf.RoundToInt(startingBuildPosition.x);
+        int endX = Mathf.RoundToInt(endBuildPosition.x);
+        if (endX < startX)
         {
-            float tmpX = endBuildPosition.x;
-            endBuildPosition.x = startingBuildPosition.x;
-            startingBuildPosition.x = tmpX;
+            int tmpX = endX;
+            endX = startX;
+            startX = tmpX;
         }
-        if (endBuildPosition.y < startingBuildPosition.y)
+
+        int startY = Mathf.RoundToInt(startingBuildPosition.y);
+        int endY = Mathf.RoundToInt(endBuildPosition.y);
+        if (endY < startY)
         {
-            float tmpY = endBuildPosition.y;
-            endBuildPosition.y = startingBuildPosition.y;
-            startingBuildPosition.y = tmpY;
+            int tmpy = endY;
+            endY = startY;
+            startY = tmpy;
         }
 
         int multi = 0;
 
-        for (int x = (int)startingBuildPosition.x; x <= endBuildPosition.x; x++)
-        {
-            for (int y = (int)startingBuildPosition.y; y <= endBuildPosition.y; y++)
+        for (int x = startX; x <= endX; x++)
+        {   
+            for (int y = startY; y <= endY; y++)
             {
                 TileData curTile = resourceGrid.TileFromWorldPoint(new Vector3(x, y, 0));
                 if (curTile != null && CheckPositionToBuild(new Vector3(x, y, 0)))
@@ -192,7 +229,10 @@ public class Building_PositionHandler : MonoBehaviour {
                     multi++;
                     if (CheckCost(multi))
                     {
-                        resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
+                        // NOTE: I am currently hardcoding a sprite size of 0 so that only the one center tile gets defined.
+                        // This will be problematic later on! FIX THIS!!
+
+                        resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, currNanoBotCost, 0, 0);
                     }
                 }
             }
@@ -200,6 +240,8 @@ public class Building_PositionHandler : MonoBehaviour {
 
         // Set currently building to false
         build_controller.SetCurrentlyBuildingBool(false);
+
+        PoolIndicators();
         // Pool this gameobj
         PoolObject(gameObject);
     }
@@ -217,16 +259,7 @@ public class Building_PositionHandler : MonoBehaviour {
 
             build_tilePositions.Clear();
 
-            // Pool all pos indicators
-            if (position_indicator.Count > 0)
-            {
-                for (int i = 0; i < position_indicator.Count; i++)
-                {
-                    PoolObject(position_indicator[i]);
-                }
-
-                position_indicator.Clear();
-            }
+            PoolIndicators();
 
             PoolObject(gameObject);
         }
@@ -261,229 +294,63 @@ public class Building_PositionHandler : MonoBehaviour {
     }
 
 
-    void Build()
-    {
-        // Right BEFORE pooling this object we tell Building UI that we are NOT currently building anymore
-        build_controller.SetCurrentlyBuildingBool(false);
+    //void Build()
+    //{
+    //    // Right BEFORE pooling this object we tell Building UI that we are NOT currently building anymore
+    //    build_controller.SetCurrentlyBuildingBool(false);
 
-        //TileData currTile = mouse_controller.GetTileUnderMouse();
+    //    //TileData currTile = mouse_controller.GetTileUnderMouse();
 
-        if (build_tilePositions.Count > 1)
-        {
-            for (int i = 0; i < build_tilePositions.Count; i++)
-            {
-                if (build_tilePositions[i] != null)
-                    resourceGrid.SwapTileType(build_tilePositions[i].posX, build_tilePositions[i].posY, tileType, bpName, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
-            }
-        }
-        else
-        {
-            resourceGrid.SwapTileType(build_tilePositions[0].posX, build_tilePositions[0].posY, tileType, bpName, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
-        }
+    //    if (build_tilePositions.Count > 1)
+    //    {
+    //        for (int i = 0; i < build_tilePositions.Count; i++)
+    //        {
+    //            if (build_tilePositions[i] != null)
+    //                resourceGrid.SwapTileType(build_tilePositions[i].posX, build_tilePositions[i].posY, tileType, bpName, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        resourceGrid.SwapTileType(build_tilePositions[0].posX, build_tilePositions[0].posY, tileType, bpName, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
+    //    }
 
-        build_tilePositions.Clear();
+    //    build_tilePositions.Clear();
 
-        // Pool all pos indicators
-        if (position_indicator.Count > 0)
-        {
-            for (int i = 0; i < position_indicator.Count; i++)
-            {
-                PoolObject(position_indicator[i]);
-            }
+    //    PoolIndicators();
 
-            position_indicator.Clear();
-        }
-
-        // Pool this object
-        PoolObject(gameObject); // Pool this because resourceGrid just discovered the tile/building for us
-    }
+    //    // Pool this object
+    //    PoolObject(gameObject); // Pool this because resourceGrid just discovered the tile/building for us
+    //}
 
     bool CheckCost(int multiplier = 1)
     {
         return nanoBuild_handler.CheckBuildCost(nanoBuild_handler.GetAvailableBlueprint(tileType), multiplier);
     }
 
-	//void FollowMouse(){
 
+    void PoolIndicators()
+    {
+        // Pool all pos indicators
+        if (position_indicator.Count > 0)
+        {
 
- //       // Move building with the mouse
-	//	transform.position = mouse_controller.currMouseP;
- //       posX = Mathf.RoundToInt(transform.position.x);
- //       posY = Mathf.RoundToInt(transform.position.y);
+            foreach (Vector3 pos in position_indicator.Keys)
+            {
+                if (position_indicator[pos] != null && position_indicator[pos].activeSelf)
+                {
+                    PoolObject(position_indicator[pos]);
+                }
+            }
 
- //       if (CheckEmptyBeneath (transform.position) && !onEneposY) {
-			
-	//		if (tileType == TileData.Types.extractor) {
-	//			if (CheckForResource (posX, posY + 1, "ore")) { // top
-	//				sr.color = trueColor;
-	//				canBuild = true;
-	//			} else if (CheckForResource (posX, posY - 1,  "ore")) { // bottom
-	//				sr.color = trueColor;
-	//				canBuild = true;
-	//			} else if (CheckForResource (posX - 1, posY,  "ore")) { // left
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX + 1, posY,  "ore")) { // right
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX - 1, posY + 1,  "ore")) { // top left
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX + 1, posY + 1,  "ore")) { // top right
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX - 1, posY - 1,  "ore")) { // bottom left
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX + 1, posY - 1,  "ore")) { // bottom right
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else {				// NOT ON ROCK
-	//				sr.color = invalidPosColor;
-	//				canBuild = false;
-	//			}
-	//		} else if (tileType == TileData.Types.desalt_s) { // THIS building is a Water Pump so it needs to detect WATER
-	//			if (CheckForResource (posX, posY + 1, "water")) { // top
-	//				sr.color = trueColor;
-	//				canBuild = true;
-	//			} else if (CheckForResource (posX, posY - 1, "water")) { // bottom
-	//				sr.color = trueColor;
-	//				canBuild = true;
-	//			} else if (CheckForResource (posX - 1, posY, "water")) { // left
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX + 1, posY, "water")) { // right
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX - 1, posY + 1, "water")) { // top left
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX + 1, posY + 1, "water")) { // top right
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX - 1, posY - 1, "water")) { // bottom left
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX + 1, posY - 1, "water")) { // bottom right
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else {				// NOT ON Water
-	//				sr.color = invalidPosColor;
-	//				canBuild = false;
-	//			}
-	//		}else if (tileType == TileData.Types.generator){ // Energy generators seek for Minerals
-	//			if (CheckForResource (posX, posY + 1, "mineral")) { // top
-	//				sr.color = trueColor;
-	//				canBuild = true;
-	//			} else if (CheckForResource (posX, posY - 1, "mineral")) { // bottom
-	//				sr.color = trueColor;
-	//				canBuild = true;
-	//			} else if (CheckForResource (posX - 1, posY, "mineral")) { // left
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX + 1, posY, "mineral")) { // right
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX - 1, posY + 1, "mineral")) { // top left
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX + 1, posY + 1, "mineral")) { // top right
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX - 1, posY - 1, "mineral")) { // bottom left
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else if (CheckForResource (posX + 1, posY - 1, "mineral")) { // bottom right
-	//				canBuild = true;
-	//				sr.color = trueColor;
-	//			} else {				// NOT ON Mineral
-	//				sr.color = invalidPosColor;
-	//				canBuild = false;
-	//			}
+            position_indicator.Clear();
+        }
+    }
 
-	//		}else{ // not an extractor or desalt pump or generator
-
- //               // we are on a legal building position
- //               sr.color = trueColor;
- //               canBuild = true;
- //           }
-	//	} else {				// NOT ON EMPTY
-	//		sr.color = invalidPosColor;
-	//		canBuild = false;
-	//	}
-
-
- //       if (Input.GetMouseButtonDown(0) && canBuild && !onEneposY)
- //       {
- //           startingBuildPosition = transform.position;
-
- //           build_tilePositions.Add(mouse_controller.GetTileUnderMouse());
- //       }
-
- //       if (Input.GetMouseButton(0) && transform.position != startingBuildPosition && canBuild && !onEneposY)
- //       {
- //           if (mouse_controller.GetTileUnderMouse() != null)
- //           {
- //               if (!build_tilePositions.Contains(mouse_controller.GetTileUnderMouse()))
- //               {
- //                   build_tilePositions.Add(mouse_controller.GetTileUnderMouse());
- //               }
- //           }
-          
- //       }
-
- //       if (Input.GetMouseButtonDown(1))
- //       {
- //           // CANCEL THE BUILD
- //           PoolObject(gameObject);
- //           build_controller.SetCurrentlyBuildingBool(false);
-
- //           //// give back the nanobots spent on this building
- //           //nanoBuild_handler.nanoBots += currNanoBotCost;
-
- //           // give back the resources spent on this building because build was Cancelled
- //           nanoBuild_handler.ReturnBuildResources(tileType);
-
- //           build_tilePositions.Clear();
- //       }
-
-
- //       // At this point we KNOW the mouse is NOT over a building or a rock, we have found rocks if extractor AND we are not on eneposY
- //       if (Input.GetMouseButtonUp (0) && canBuild && !onEneposY) {			// So LEFT CLICK to BUILD!! 
-
- //           // Right BEFORE pooling this object we tell Building UI that we are NOT currently building anymore
- //           build_controller.SetCurrentlyBuildingBool(false);
-
- //           //TileData currTile = mouse_controller.GetTileUnderMouse();
-
- //           if (build_tilePositions.Count > 1)
- //           {
- //               for (int i = 0; i < build_tilePositions.Count; i++)
- //               {
- //                   resourceGrid.SwapTileType(build_tilePositions[i].posX, build_tilePositions[i].posY, tileType, bpName, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
- //               }
- //           }
- //           else
- //           {
- //               resourceGrid.SwapTileType(build_tilePositions[0].posX, build_tilePositions[0].posY, tileType, bpName, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
- //           }
-			
-
- //           followMouse = false;
-
- //           build_tilePositions.Clear();
-
- //           // Pool this object
- //           PoolObject (gameObject); // Pool this because resourceGrid just discovered the tile/building for us
-
-	//	}
-	
-	//}
-
-	void PoolObject(GameObject objToPool){
+    void PoolObject(GameObject objToPool){
        
 		objPool.PoolObject (objToPool);
 	}
+
 
     bool CheckForResource(Vector3 position, TileData.Types bType)
     {
@@ -569,83 +436,6 @@ public class Building_PositionHandler : MonoBehaviour {
 
         return rCheck;
     }
-
- //   bool CheckForResource(int x, int y, string id){
-	//	if (id == "ore") {
-	//		if (resourceGrid.tiles [x, y].tileType == TileData.Types.rock) {
-	//			return true;
-	//		} else {
-	//			return false;
-	//		}
-	//	} else if (id == "water") {
-	//		if (resourceGrid.tiles [x, y].tileType == TileData.Types.water) {
-	//			return true;
-	//		} else {
-	//			return false;
-	//		}
-	//	} else {
-	//		if (resourceGrid.tiles [x, y].tileType == TileData.Types.mineral) {
-	//			return true;
-	//		} else {
-	//			return false;
-	//		}
-	//	}
-	//}
-
-
-	//bool CheckForEmptySides(int x, int y){
-	//	int top1 = y +1;
-	//	//int top2 = y +2;
-	//	int bottom1 = y - 1;
-	//	//int bottom2 = y - 2;
-	//	int left1 = x - 1;
-	//	//int left2 = x - 2;
-	//	int right1 = x + 1;
-	//	//int right2 = x + 2;
-
-	//	if (resourceGrid.tiles [x, top1].tileType == TileData.Types.empty && // top
-	//		resourceGrid.tiles [left1, top1].tileType == TileData.Types.empty && // top Left
-	//		resourceGrid.tiles [right1, top1].tileType == TileData.Types.empty && // top Right
-	//		resourceGrid.tiles [x, bottom1].tileType == TileData.Types.empty && // bottom
-	//		resourceGrid.tiles [left1, bottom1].tileType == TileData.Types.empty && // bottom left
-	//		resourceGrid.tiles [right1, bottom1].tileType == TileData.Types.empty && // bottom right
-	//		resourceGrid.tiles [left1, y].tileType == TileData.Types.empty && // left
-	//		resourceGrid.tiles [right1, y].tileType == TileData.Types.empty) {  // right
-	//		return true;
-	//	} else {
-	//		return false;
-	//	}
-	//	/*
-	//	if (resourceGrid.tiles [x, top1].tileType == TileData.Types.empty && // top
-	//	    resourceGrid.tiles [x, top2].tileType == TileData.Types.empty &&
-	//	    resourceGrid.tiles [left1, top1].tileType == TileData.Types.empty && // top Left
-	//	    resourceGrid.tiles [left2, top2].tileType == TileData.Types.empty &&
-	//	    resourceGrid.tiles [right1, top1].tileType == TileData.Types.empty && // top Right
-	//	    resourceGrid.tiles [right2, top2].tileType == TileData.Types.empty &&
-	//	    resourceGrid.tiles [x, bottom1].tileType == TileData.Types.empty && // bottom
-	//	    resourceGrid.tiles [x, bottom2].tileType == TileData.Types.empty &&
-	//	    resourceGrid.tiles [left1, bottom1].tileType == TileData.Types.empty && // bottom left
-	//	    resourceGrid.tiles [left2, bottom2].tileType == TileData.Types.empty &&
-	//	    resourceGrid.tiles [right1, bottom1].tileType == TileData.Types.empty && // bottom right
-	//	    resourceGrid.tiles [right2, bottom2].tileType == TileData.Types.empty &&
-	//	    resourceGrid.tiles [left1, y].tileType == TileData.Types.empty && // left
-	//	    resourceGrid.tiles [left2, y].tileType == TileData.Types.empty &&
-	//	    resourceGrid.tiles [right1, y].tileType == TileData.Types.empty && // right
-	//	    resourceGrid.tiles [right2, y].tileType == TileData.Types.empty) {
-	//		return true;
-	//	} else {
-	//		return false;
-	//	}
-	//	*/
-	//}
-
-	//bool CheckEmptyBeneath(int x, int y){
-	//	if (resourceGrid.tiles [x, y].tileType == TileData.Types.empty) {
-	//		return true;
-	//	} else {
-	//		return false;
-	//	}
-	//}
 
     bool CheckEmptyBeneath(Vector3 pos)
     {
