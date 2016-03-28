@@ -118,29 +118,10 @@ public class Building_PositionHandler : MonoBehaviour {
     {
         transform.position = mouse_controller.currMouseP;
 
-        ListenForCancelBuild();
-
         if (CheckPositionToBuild())
         {
             sr.color = trueColor;
             canBuild = true;
-
-            if (Input.GetMouseButtonDown(0))
-            {
-                Debug.Log("Clicked mouse button!");
-
-                if (CheckCost())
-                {
-                    startingBuildPosition = transform.position;
-
-                    build_tilePositions.Add(mouse_controller.GetTileUnderMouse());
-
-                    posIndicator = objPool.GetObjectForType("Selection Circle", true, transform.position);
-
-                    position_indicator.Add(posIndicator);
-                }
-            }
-            ListenForMouseClick();
         }
         else
         {
@@ -148,6 +129,79 @@ public class Building_PositionHandler : MonoBehaviour {
             canBuild = false;
         }
 
+        ListenForCancelBuild();
+        
+        // Begin build
+        if (Input.GetMouseButtonDown(0))
+        {
+            BeginBuild();
+        }
+
+        // End build
+        if (Input.GetMouseButtonUp(0))
+        {
+            EndBuild();
+        }
+
+    }
+
+    void BeginBuild()
+    {
+        if (canBuild)
+        {
+            build_controller.SetCurrentlyBuildingBool(true);
+            // Record the starting position of this build
+            startingBuildPosition = mouse_controller.currMouseP;
+        }
+  
+
+
+        // Set the tile under the mouse to the dictionary that will hold all this build's tiles
+        // build_tilePositions.Add(mouse_controller.GetTileUnderMouse());
+        // Spawn a position indicator to indicate where the building will be built
+        //posIndicator = objPool.GetObjectForType("Selection Circle", true, transform.position);
+        // Add the pos indicator to its dictionary to easily remove it later
+        //position_indicator.Add(posIndicator);
+    }
+
+    void EndBuild()
+    {
+        Vector3 endBuildPosition = mouse_controller.currMouseP;
+        if (endBuildPosition.x < startingBuildPosition.x)
+        {
+            float tmpX = endBuildPosition.x;
+            endBuildPosition.x = startingBuildPosition.x;
+            startingBuildPosition.x = tmpX;
+        }
+        if (endBuildPosition.y < startingBuildPosition.y)
+        {
+            float tmpY = endBuildPosition.y;
+            endBuildPosition.y = startingBuildPosition.y;
+            startingBuildPosition.y = tmpY;
+        }
+
+        int multi = 0;
+
+        for (int x = (int)startingBuildPosition.x; x <= endBuildPosition.x; x++)
+        {
+            for (int y = (int)startingBuildPosition.y; y <= endBuildPosition.y; y++)
+            {
+                TileData curTile = resourceGrid.TileFromWorldPoint(new Vector3(x, y, 0));
+                if (curTile != null && CheckPositionToBuild(new Vector3(x, y, 0)))
+                {
+                    multi++;
+                    if (CheckCost(multi))
+                    {
+                        resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, currNanoBotCost, sr.sprite.bounds.size.x, sr.sprite.bounds.size.y);
+                    }
+                }
+            }
+        }
+
+        // Set currently building to false
+        build_controller.SetCurrentlyBuildingBool(false);
+        // Pool this gameobj
+        PoolObject(gameObject);
     }
 
     void ListenForCancelBuild()
@@ -158,11 +212,8 @@ public class Building_PositionHandler : MonoBehaviour {
 
             build_controller.SetCurrentlyBuildingBool(false);
 
-            //// give back the nanobots spent on this building
-            //nanoBuild_handler.nanoBots += currNanoBotCost;
-
             // give back the resources spent on this building because build was Cancelled
-            nanoBuild_handler.ReturnBuildResources(tileType);
+            nanoBuild_handler.ReturnBuildResources(tileType); // TODO: Return resources used in build with a multiplier in case of drag build
 
             build_tilePositions.Clear();
 
@@ -195,45 +246,20 @@ public class Building_PositionHandler : MonoBehaviour {
 
     }
 
-    void ListenForMouseClick()
+    // same check but with a position as parameter
+    bool CheckPositionToBuild(Vector3 pos)
     {
-
-        if (Input.GetMouseButton(0) && transform.position != startingBuildPosition && canBuild && !onEneposY)
+        if (!CheckEmptyBeneath(pos))
+            return false;
+        else if (!CheckForResource(pos, tileType))
+            return false;
+        else
         {
-            Debug.Log("Holding mouse button!");
-            if (mouse_controller.GetTileUnderMouse() != null)
-            {
-                if (!build_tilePositions.Contains(mouse_controller.GetTileUnderMouse()))
-                {
-                    // Each time we check cost add +1 to the count because the element hasn't been added to the list yet
-                    // This will serve as a multiplier for checking costs. So any resource ammnt * multiplier will be checked
-                    // i.e. when trying to build a second unit it checks Cost * (count + 1) = Cost * (1 + 1) = Cost * 2, 
-                    // on the third it's Cost * (2 + 1), etc...
-                    if (CheckCost(build_tilePositions.Count + 1))
-                    {
-                        build_tilePositions.Add(mouse_controller.GetTileUnderMouse());
-
-                        posIndicator = objPool.GetObjectForType("Selection Circle", true, new Vector3(mouse_controller.GetTileUnderMouse().posX, mouse_controller.GetTileUnderMouse().posY, 0));
-
-                        position_indicator.Add(posIndicator);
-                    }
-
-                }
-            }
-
-        }
-
-
-
-
-        // At this point we KNOW the mouse is NOT over a building or a rock, we have found rocks if extractor AND we are not on eneposY
-        if (Input.GetMouseButtonUp(0))
-        {           // So LEFT CLICK to BUILD!! 
-            Debug.Log("Let go of mouse button!");
-            Build();
+            return true;
         }
 
     }
+
 
     void Build()
     {

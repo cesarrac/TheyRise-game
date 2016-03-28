@@ -314,7 +314,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
         }
     }
 
-    public void ReturnBuildResources(TileData.Types bpTileType)
+    public void ReturnBuildResources(TileData.Types bpTileType, int multiplier = 1)
     {
         if (GetAvailableBlueprint(bpTileType) != null)
         {
@@ -322,7 +322,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
             foreach (TileData.Types resource in bp.buildReq.reqResourcesMap.Keys)
             {
-                Ship_Inventory.Instance.ReceiveTemporaryResources(resource, bp.buildReq.reqResourcesMap[resource]);
+                Ship_Inventory.Instance.ReceiveTemporaryResources(resource, bp.buildReq.reqResourcesMap[resource] * multiplier);
             }
         }
     }
