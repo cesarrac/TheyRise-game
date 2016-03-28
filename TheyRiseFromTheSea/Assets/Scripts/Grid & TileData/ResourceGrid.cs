@@ -883,10 +883,11 @@ public class ResourceGrid : MonoBehaviour{
                     break;
 
                 case TileData.Types.wall:
-                    if (spriteWidth > 0 && spriteHeight > 0)
-                        DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Plastic Wall", newType, 0, 10000, 20, 1, 0, 0, nanoBotCost);
-                    else
-                        tiles[x, y] = new TileData(x, y, "Plastic Wall", newType, 0, 10000, 20, 1, 0, 0, nanoBotCost);
+                    tiles[x, y] = new TileData(x, y, "Plastic Wall", newType, 0, 10000, 20, 1, 0, 0, nanoBotCost);
+                    //if (spriteWidth > 0 && spriteHeight > 0)
+                    //    DefineMultipleTiles(x, y, spriteWidth, spriteHeight, "Plastic Wall", newType, 0, 10000, 20, 1, 0, 0, nanoBotCost);
+                    //else
+                    //    tiles[x, y] = new TileData(x, y, "Plastic Wall", newType, 0, 10000, 20, 1, 0, 0, nanoBotCost);
                     break;
 
                 case TileData.Types.building:

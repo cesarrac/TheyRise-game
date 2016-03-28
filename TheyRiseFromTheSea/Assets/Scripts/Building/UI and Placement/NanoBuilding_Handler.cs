@@ -291,12 +291,12 @@ public class NanoBuilding_Handler : MonoBehaviour {
            
     }
 
-    bool CheckBuildCost(Blueprint bp)
+    public bool CheckBuildCost(Blueprint bp, int multiplier = 1)
     {
         // Check cost from the blueprint's required resources
         foreach (TileData.Types resource in bp.buildReq.reqResourcesMap.Keys)
         {
-            if (Ship_Inventory.Instance.CheckForResourceByAmmnt(resource, bp.buildReq.reqResourcesMap[resource]) == false)
+            if (Ship_Inventory.Instance.CheckForResourceByAmmnt(resource, bp.buildReq.reqResourcesMap[resource] * multiplier) == false)
             {
                 UI_Manager.Instance.DisplayBuildWarning(resource);
                 return false;
@@ -356,7 +356,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
             b_Handler.BreakBuilding(bp.nanoBotCost);
     }
 
-    Blueprint GetAvailableBlueprint(TileData.Types _type)
+    public Blueprint GetAvailableBlueprint(TileData.Types _type)
     {
         if (NanoBuilder.CheckForBlueprint(_type))
         {
