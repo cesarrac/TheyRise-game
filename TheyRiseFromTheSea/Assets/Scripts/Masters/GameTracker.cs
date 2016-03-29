@@ -144,6 +144,10 @@ public class GameTracker : MonoBehaviour {
                                             gameData.savedHeroData.Attack,
                                             gameData.savedNanoBuilder);
 
+            // TODO: Here we would also load all the Employees currently in our Workforce roster
+            // the same way we do for the Hero, by creating them from scratch. THEN they would each get
+            // added (with a loop) to a Roster handler/component with an array or list.
+
             // Load the Trade Orders
             TradeOrder_Manager.Instance.LoadOrders(gameData.availableOrders, gameData.activeOrders, gameData.completedOrders);
 
