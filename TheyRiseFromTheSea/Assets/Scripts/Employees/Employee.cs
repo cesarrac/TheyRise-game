@@ -21,13 +21,16 @@ public class Employee {
     EmployeeSpecialty specialty;
     public EmployeeSpecialty Specialty { get { return specialty; } }
 
+    Sprite mySprite;
+    public Sprite MySprite { get { return mySprite; } }
+
     // TODO: Figure out if I want to include their specialty actions here as part of the constructor.
     // This constructor is probably going to be used when first generating the employee and
     // when loading from a save file.
 
     public Employee() { }
 
-    public Employee (string _name, EmployeeSpecialty spec, Armor _armor, float maxHP, float curHP, float attk)
+    public Employee (string _name, EmployeeSpecialty spec, Armor _armor, float maxHP, float curHP, float attk, Sprite _sprite)
     {
         name = _name;
 
@@ -42,10 +45,14 @@ public class Employee {
         // a specific list of actions.
         specialty = spec;
 
+        mySprite = _sprite;
+
         // TODO: Employee Level? 
         // I can also pair that action logic with some sort of level that the 
         // Player upgrades. Then when re-loading an employee it would get the actions/abilities
         // of their specialty, upgraded with bonuses according to their level.
+
+
     }
 
 

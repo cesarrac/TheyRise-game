@@ -19,6 +19,11 @@ public class Employee_Generator : MonoBehaviour {
     // Array of Employees that are currently active on a mission.
     Employee[] active_employees;
 
+    // Array of string keys for any employee marked to die -- always limited to the max Employees on mission
+    List<string> markedAsDead;
+
+    public Sprite[] employeeSprites;
+
     void Awake()
     {
         if (Instance == null)
@@ -56,15 +61,15 @@ public class Employee_Generator : MonoBehaviour {
 
             if (select == 0)
             {
-                emp = new Employee("Operator", EmployeeSpecialty.OPERATOR, basicJumpSuit, 24, 24, 2);
+                emp = new Employee("Operator", EmployeeSpecialty.OPERATOR, basicJumpSuit, 24, 24, 2, employeeSprites[0]);
             }
             else if (select == 1)
             {
-                emp = new Employee("Medic", EmployeeSpecialty.MEDIC, basicJumpSuit, 24, 24, 2);
+                emp = new Employee("Medic", EmployeeSpecialty.MEDIC, basicJumpSuit, 24, 24, 2, employeeSprites[1]);
             }
             else
             {
-                emp = new Employee("Scientist", EmployeeSpecialty.SCIENTIST, basicJumpSuit, 24, 24, 2);
+                emp = new Employee("Scientist", EmployeeSpecialty.SCIENTIST, basicJumpSuit, 24, 24, 2, employeeSprites[2]);
             }
 
             if (!new_employees.ContainsKey(emp.Name) && emp != null)
@@ -94,7 +99,7 @@ public class Employee_Generator : MonoBehaviour {
         }
     }
 
-    // Method to remove from New Employees list
+    // Remove from New Employees list
     void RemoveFromNewEmployees(string name)
     {
         if (new_employees.ContainsKey(name))
@@ -103,7 +108,7 @@ public class Employee_Generator : MonoBehaviour {
         }
     }
 
-    // Method to Fire an Employee
+    // Fire an Employee
     void FireEmployee(string name)
     {
         if (employee_roster.ContainsKey(name))
@@ -112,4 +117,43 @@ public class Employee_Generator : MonoBehaviour {
         }
     }
 
+    // Spawn employees as gameobjects in a level
+    public void SpawnActiveEmployees(Vector3 spawnPosition)
+    {
+        float offset = 0;
+        foreach(Employee emp in active_employees)
+        {
+            Vector3 pos = new Vector3(spawnPosition.x + offset, spawnPosition.y, 0);
+            GameObject employee = ObjectPool.instance.GetObjectForType("Employee", true, pos);
+
+            offset++;
+        }
+
+        // Initialize employeess marked for death array using the length active employees
+        markedAsDead = new List<string>();
+    }
+
+    // Mark an Employee for death so they get removed when loading back to the ship
+    public void MarkAsDead(string name)
+    {
+        if (!markedAsDead.Contains(name))
+            markedAsDead.Add(name);
+    }
+
+    // Remove an Employee that has died during a level, this is called when loading Ship after a planet level
+    public void RemoveDeadEmployees()
+    {
+        if (markedAsDead != null && markedAsDead.Count > 0)
+        {
+            foreach (string name in markedAsDead)
+            {
+                if (employee_roster.ContainsKey(name))
+                {
+                    employee_roster.Remove(name);
+
+                    // TODO: Remove it visually from the UI graphics representing the roster
+                }
+            }
+        }
+    }
 }
