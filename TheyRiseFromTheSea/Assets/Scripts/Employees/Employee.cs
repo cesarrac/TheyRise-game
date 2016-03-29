@@ -25,6 +25,8 @@ public class Employee {
     // This constructor is probably going to be used when first generating the employee and
     // when loading from a save file.
 
+    public Employee() { }
+
     public Employee (string _name, EmployeeSpecialty spec, Armor _armor, float maxHP, float curHP, float attk)
     {
         name = _name;

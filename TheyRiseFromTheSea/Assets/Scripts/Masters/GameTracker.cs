@@ -276,8 +276,8 @@ public class GameData
 
     public void CopyMissions(Dictionary<string, Mission> available)
     {
-        savedMissions = new Dictionary<string, Mission>();
+        savedMissions = new Dictionary<string, Mission>(available);
 
-        savedMissions = available;
+       // savedMissions = available;
     }
 }
