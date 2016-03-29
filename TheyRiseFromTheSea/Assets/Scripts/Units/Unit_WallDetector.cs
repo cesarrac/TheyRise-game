@@ -3,7 +3,8 @@ using System.Collections;
 
 public class Unit_WallDetector: MonoBehaviour {
 
-    // Detects walls in a path.
+    // Detects walls in a path by checking the next waypoint in the path everytime it changes
+    // during the path handler's Follow Path coRoutine
 
     public bool attacksWalls = false;
 

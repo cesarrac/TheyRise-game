@@ -22,7 +22,7 @@ public class Enemy_AttackHandler : Unit_Base {
     public Transform mainTarget { get; protected set; } // < ---- always the same as my path's original target.
     TileData targetAsTile;
 
-    float attackRange = 2.5f; // < ------- threshold target's can't pass without being attacked by this unit
+    float attackRange = 2f; // < ------- threshold target's can't pass without being attacked by this unit
     public float AttackRange { get { return attackRange; } set { attackRange = Mathf.Clamp(value, 2.0f, 8.0f); } }
 
     public bool isAttacking { get; protected set; }
@@ -114,6 +114,7 @@ public class Enemy_AttackHandler : Unit_Base {
             if (RangeCheck() == false)
             {
                 Debug.Log("ENEMY: Target NOT in range, requesting a new path to target!");
+                isAttacking = false;
                 pathHandler.GetANewPath();
             }
             else
@@ -125,6 +126,7 @@ public class Enemy_AttackHandler : Unit_Base {
         else
         {
             //... or a whole new target if it's dead or inactive
+            isAttacking = false;
             RequestNewTarget();
         }
     }
@@ -156,14 +158,15 @@ public class Enemy_AttackHandler : Unit_Base {
         {
             if (mainTarget != null && mainTarget.gameObject.activeSelf == true)
             {
-                StartCoroutine("TowerisMainTargetAttack");
                 isAttacking = true;
+                StartCoroutine("TowerisMainTargetAttack");
             }
             else
             {
                 // Get a new target because the Main Target has been downed
-                RequestNewTarget();
                 isAttacking = false;
+                RequestNewTarget();
+
             }
         }
         else
@@ -171,8 +174,9 @@ public class Enemy_AttackHandler : Unit_Base {
             if (playerUnit != null)
             {
                 //Debug.Log("ENEMY: Starting player attack...");
-                StartCoroutine("PlayerAttack");
                 isAttacking = true;
+                StartCoroutine("PlayerAttack");
+           
             }
 
         }
@@ -204,9 +208,6 @@ public class Enemy_AttackHandler : Unit_Base {
 
                 isAttacking = false;
 
-                //// Call to check range again and set target or new path
-                //IsMainTargetInRange();
-
                 yield break;
             }
 
@@ -220,13 +221,10 @@ public class Enemy_AttackHandler : Unit_Base {
         {
             if (mainTarget != null && mainTarget.gameObject.activeSelf && RangeCheck() && isAttacking)
             {
-                //Debug.Log("ENEMY: Attacking the player!");
-
-
+               
                 // Play attack sound
                 Sound_Manager.Instance.PlaySound("Slimer Attack");
 
-                //StartCoroutine(JumpAttack(playerUnit.transform.position));
                 AttackActionCB(mainTarget.position);
 
                 HandleDamageToUnit();

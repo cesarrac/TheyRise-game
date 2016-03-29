@@ -58,6 +58,16 @@ class Build_MainController:MonoBehaviour
         bPosHand.tileType = building.tileType;
         bPosHand.currNanoBotCost = building.nanoBotCost;
         bPosHand.nanoBuild_handler = nanoBuild_handler;
+
+        // FIX THIS: For now I'm going to hardcode the canDragBuild parameter so that only walls can be drag built
+        if (building.buildingName == "Plastic Wall")
+        {
+            bPosHand.canDragBuild = true;
+        }
+        else
+        {
+            bPosHand.canDragBuild = false;
+        }
        
     }
 

@@ -297,6 +297,7 @@ public class UnitPathHandler : MonoBehaviour {
         float offsetX = UnityEngine.Random.Range(transform.position.x - offset, transform.position.x + offset);
         float offsetY = UnityEngine.Random.Range(transform.position.y - offset, transform.position.y + offset);
         offsetPos = new Vector3(offsetX, offsetY, 0);
+
         StartCoroutine("OffsetDestination");
     }
 

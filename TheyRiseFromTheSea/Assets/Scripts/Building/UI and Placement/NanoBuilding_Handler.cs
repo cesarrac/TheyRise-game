@@ -306,7 +306,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
         return true;
     }
 
-    void ChargeBuildResources(Blueprint bp)
+    public void ChargeBuildResources(Blueprint bp)
     {
         foreach (TileData.Types resource in bp.buildReq.reqResourcesMap.Keys)
         {

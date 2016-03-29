@@ -63,6 +63,8 @@ public class Building_PositionHandler : MonoBehaviour {
 
     Vector3 newPos;
 
+    public bool canDragBuild = false;
+
     void Awake()
 	{
         // Get the Sprite Renderer to be able to change the Sprite's color depending on position
@@ -138,10 +140,14 @@ public class Building_PositionHandler : MonoBehaviour {
             EndBuild();
         }
 
-        if (Input.GetMouseButton(0))
+        if (canDragBuild)
         {
-            MarkBuildSpots();
+            if (Input.GetMouseButton(0))
+            {
+                MarkBuildSpots();
+            }
         }
+ 
     }
 
     void MarkBuildSpots()
@@ -161,6 +167,9 @@ public class Building_PositionHandler : MonoBehaviour {
                             posIndicator = objPool.GetObjectForType("Selection Circle", true, newPos);
                             // Add the pos indicator to its dictionary to easily remove it later
                             position_indicator.Add(newPos, posIndicator);
+
+                            // Charge the cost of resources after adding a potential build spot
+                            nanoBuild_handler.ChargeBuildResources(nanoBuild_handler.GetAvailableBlueprint(tileType));
                         }
  
                     }
@@ -198,7 +207,8 @@ public class Building_PositionHandler : MonoBehaviour {
 
     void EndBuild()
     {
-        Vector3 endBuildPosition = mouse_controller.currMouseP;
+        Vector3 endBuildPosition = (canDragBuild == true) ? mouse_controller.currMouseP : startingBuildPosition;
+
         int startX = Mathf.RoundToInt(startingBuildPosition.x);
         int endX = Mathf.RoundToInt(endBuildPosition.x);
         if (endX < startX)
@@ -229,10 +239,10 @@ public class Building_PositionHandler : MonoBehaviour {
                     multi++;
                     if (CheckCost(multi))
                     {
-                        // NOTE: I am currently hardcoding a sprite size of 0 so that only the one center tile gets defined.
-                        // This will be problematic later on! FIX THIS!!
-
-                        resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, currNanoBotCost, 0, 0);
+                        if (canDragBuild)
+                            resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, currNanoBotCost, 0, 0);
+                        else
+                            resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, currNanoBotCost, sr.bounds.size.x, sr.bounds.size.y);
                     }
                 }
             }
@@ -255,7 +265,19 @@ public class Building_PositionHandler : MonoBehaviour {
             build_controller.SetCurrentlyBuildingBool(false);
 
             // give back the resources spent on this building because build was Cancelled
-            nanoBuild_handler.ReturnBuildResources(tileType); // TODO: Return resources used in build with a multiplier in case of drag build
+
+            // We can find out if this was a drag build and how many potential builds need to be cancelled
+            // by getting the total position Indicators created
+            if (canDragBuild && position_indicator.Count > 1)
+            {
+                nanoBuild_handler.ReturnBuildResources(tileType, position_indicator.Count);
+            }
+            else
+            {
+                nanoBuild_handler.ReturnBuildResources(tileType);
+            }
+
+
 
             build_tilePositions.Clear();
 
