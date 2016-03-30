@@ -1187,7 +1187,24 @@ public class ResourceGrid : MonoBehaviour{
             for (int y = 0; y < mapSizeY; y++)
             {
                 Vector3 worldPoint = worldBottomLeft + Vector3.right * x + Vector3.up * y;
-                //print("World Point: " + worldPoint);
+
+                // NOTE: Checking the neighbors of each empty tile for water, these empty tiles
+                // will have an extra move cost so units will avoid walking on shores!
+                if (tiles[x, y].tileType == TileData.Types.empty)
+                {
+                    if (CheckForResource(x, y + 1, TileData.Types.water) ||
+                        CheckForResource(x + 1, y + 1, TileData.Types.water) ||
+                        CheckForResource(x + 1, y, TileData.Types.water) ||
+                        CheckForResource(x + 1, y - 1, TileData.Types.water) ||
+                        CheckForResource(x, y - 1, TileData.Types.water) ||
+                        CheckForResource(x - 1, y - 1, TileData.Types.water) ||
+                        CheckForResource(x - 1, y, TileData.Types.water) ||
+                        CheckForResource(x - 1, y + 1, TileData.Types.water))
+                    {
+                        tiles[x, y].movementCost = 100;
+                    }
+                }
+
                 bool walkable = tiles[x, y].isWalkable;
                 grid[x, y] = new Node(walkable, worldPoint, x, y, tiles[x, y].movementCost);
             }
