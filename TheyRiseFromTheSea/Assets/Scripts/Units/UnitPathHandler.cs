@@ -64,6 +64,9 @@ public class UnitPathHandler : MonoBehaviour {
     {
         target = GetTargetFunc(transform.position);
 
+        if (target == null)
+            return;
+
         // Do I have to assign the target to a child/partner component (like an Attack Handler)?
         if (AssignTargetToHandlerCB != null)
             AssignTargetToHandlerCB(target);

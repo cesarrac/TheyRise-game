@@ -109,8 +109,19 @@ public class UnitStats
     //    curReloadSpeed = startReloadSpd;
     //}
 
+    // Copy Constructor
+    public UnitStats (UnitStats stats)
+    {
+        maxHP = stats.maxHP;
+        startDefence = stats.startDefence;
+        startAttack = stats.startAttack;
+        startShield = stats.startShield;
+        startRate = stats.startRate;
+        startDamage = stats.startDamage;
 
+        Init();
 
+    }
 
 
 }
@@ -270,42 +281,59 @@ public class Unit_Base : MonoBehaviour {
         }
     }
 
+    public bool HealTile(TileData tile, float heal)
+    {
+        if (tile.tileStats.HP > 0 && tile.tileStats.HP <= tile.tileStats.StartHP)
+        {
+            tile.tileStats.HP += heal;
+
+            return true;
+
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+
+
     // ********************** WARNING! This is the old Attack Unit method that really does not work as well!! ******************************
- //   public void AttackOtherUnit(Unit_Base unit){
-	//	Debug.Log ("UNIT: target unit hp at " + unit.stats.curHP);
-	//	Debug.Log ("UNIT: My damage is " + stats.curDamage + " and my HP is " + stats.curHP);
+    //   public void AttackOtherUnit(Unit_Base unit){
+    //	Debug.Log ("UNIT: target unit hp at " + unit.stats.curHP);
+    //	Debug.Log ("UNIT: My damage is " + stats.curDamage + " and my HP is " + stats.curHP);
 
-	//	if (unit.stats.curHP > 0) {
+    //	if (unit.stats.curHP > 0) {
 
-	//		float def = (unit.stats.curDefence + unit.stats.curShield);
+    //		float def = (unit.stats.curDefence + unit.stats.curShield);
 
-	//		if (stats.curAttack > def){
-	//			Debug.Log("UNIT: Attacking " + unit.name + " DEF: " + def + " ATTK: " + stats.curAttack);
+    //		if (stats.curAttack > def){
+    //			Debug.Log("UNIT: Attacking " + unit.name + " DEF: " + def + " ATTK: " + stats.curAttack);
 
-	//			// Apply full damage
-	//			TakeDamage(unit, stats.curDamage);
+    //			// Apply full damage
+    //			TakeDamage(unit, stats.curDamage);
 
-	//		}else{
-	//			// hit for difference between def and attack
-	//			float calc = stats.curAttack - def;
-	//			float damageCalc = stats.curDamage - calc;
+    //		}else{
+    //			// hit for difference between def and attack
+    //			float calc = stats.curAttack - def;
+    //			float damageCalc = stats.curDamage - calc;
 
-	//			// always do MINIMUM 1 pt of damage
-	//			float clampedDamage = Mathf.Clamp(damageCalc, 1f, stats.curDamage);
+    //			// always do MINIMUM 1 pt of damage
+    //			float clampedDamage = Mathf.Clamp(damageCalc, 1f, stats.curDamage);
 
-	//			Debug.Log("UNIT: Can't beat " + unit.name + "'s Defence, so I hit for " + clampedDamage);
+    //			Debug.Log("UNIT: Can't beat " + unit.name + "'s Defence, so I hit for " + clampedDamage);
 
-	//			TakeDamage (unit, clampedDamage);
+    //			TakeDamage (unit, clampedDamage);
 
-	//		}
-	//	} else {
-	//		// target is dead by now
-	//		Debug.Log("UNIT: Target Dead!");
-	//		Die (unit.gameObject);
-		
-	//	}
-	
-	//}
+    //		}
+    //	} else {
+    //		// target is dead by now
+    //		Debug.Log("UNIT: Target Dead!");
+    //		Die (unit.gameObject);
+
+    //	}
+
+    //}
     // *************************************************************************
 
 

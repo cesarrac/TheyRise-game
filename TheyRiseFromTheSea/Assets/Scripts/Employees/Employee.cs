@@ -4,9 +4,9 @@ using System.Collections;
 
 public enum EmployeeSpecialty
 {
-    OPERATOR,
-    MEDIC,
-    SCIENTIST
+    Operator,
+    Medic,
+    Scientist
 }
 
 

@@ -15,6 +15,10 @@ public class Mouse_Controller:MonoBehaviour
     float maxDashThreshold = 20f;
     public float dashDistance { get; protected set; }
 
+    public Employee_Handler selected_Employee { get; protected set; }
+
+    public LayerMask unitSelectionMask, tileSelectionMask;
+
     void OnEnable()
     {
         MouseController = this;
@@ -30,22 +34,30 @@ public class Mouse_Controller:MonoBehaviour
             currMouseP = mouseP;
         }
 
-        if (ResourceGrid.Grid.transporter_built)
-        {
-            ZoomWithMouseWheel();
-        }
+        //if (ResourceGrid.Grid.transporter_built)
+        //{
+        //    ZoomWithMouseWheel();
+        //}
 
 
         // FOR DEBUGGING PURPOSES:
         // Tile Under Mouse Tool: print to console the tile type and position of the tile under mouse
-        if (!Build_MainController.Instance.currentlyBuilding)
+        //if (!Build_MainController.Instance.currentlyBuilding)
+        //{
+        //    DebugTileUnderMouse();
+        //    //DebugGraphicTile();
+
+        //    SelectUnit();
+        //}
+        Select();
+        DeSelectUnit();
+
+        if (selected_Employee != null)
         {
-            DebugTileUnderMouse();
-            //DebugGraphicTile();
+            Debug.Log("Selected employee is set");
         }
 
-
-        ListenForRightClick();
+        //ListenForRightClick();
 
     }
 
@@ -174,7 +186,49 @@ public class Mouse_Controller:MonoBehaviour
     }
 
 
+    void Select()
+    {
+        // Select Unit
+        if (Input.GetMouseButtonDown(0))
+        {
+            RaycastHit2D hit = Physics2D.Raycast(currMouseP, Vector2.zero, 100f, unitSelectionMask.value);
 
+            if (hit.collider != null)
+            {
+                GameObject unit = hit.collider.transform.root.gameObject;
+
+                if (unit.GetComponent<Employee_Handler>() != null)
+                {
+                    selected_Employee = unit.GetComponent<Employee_Handler>();
+
+                    selected_Employee.SelectEmployee();
+                }
+
+            }
+        }
+
+        // Select Tile for Unit to interact with
+        if (Input.GetMouseButtonDown(1))
+        {
+            TileData tile = GetTileUnderMouse();
+            if (tile != null)
+            {
+                if (selected_Employee != null)
+                {
+                    selected_Employee.DoAction(tile.tileType, ResourceGrid.Grid.GetTileGameObjFromIntCoords(GetTileUnderMouse().posX, GetTileUnderMouse().posY).transform);
+                }
+            }
+        }
+
+    }
+
+    void DeSelectUnit()
+    {
+        if (Input.GetMouseButtonDown(1) && selected_Employee != null)
+        {
+            selected_Employee = null;
+        }
+    }
   
 
 

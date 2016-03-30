@@ -1,0 +1,89 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System;
+
+public class Employee_Actions : MonoBehaviour {
+
+    public static Employee_Actions Instance { get; protected set; }
+
+    Dictionary<TileData.Types, Action<GameObject, Transform>> operatorActions;
+    Dictionary<TileData.Types, Action<Transform>> medicActions;
+    Dictionary<TileData.Types, Action<Transform>> scienceActions;
+
+    void Awake()
+    {
+        Instance = this;
+    }
+
+    public void DefineActions(EmployeeSpecialty spec)
+    {
+        switch (spec)
+        {
+            case EmployeeSpecialty.Operator:
+                operatorActions = new Dictionary<TileData.Types, Action<GameObject, Transform>>();
+                operatorActions.Add(TileData.Types.rock, ExtractFromTile);
+                operatorActions.Add(TileData.Types.machine_gun, RepairBuilding);
+                break;
+            //case EmployeeSpecialty.MEDIC:
+            //    medicActions = new Dictionary<TileData.Types, Action<Transform>>();
+            //    medicActions.Add(TileData.Types.rock, RockJob);
+            //    break;
+            //case EmployeeSpecialty.SCIENTIST:
+            //    scienceActions = new Dictionary<TileData.Types, Action<Transform>>();
+            //    scienceActions.Add(TileData.Types.rock, RockJob);
+            //    break;
+            default:
+                operatorActions = new Dictionary<TileData.Types, Action<GameObject, Transform>>();
+                operatorActions.Add(TileData.Types.rock, ExtractFromTile);
+                break;
+
+        }
+    }
+
+    public Action<GameObject, Transform> GetAction(TileData.Types tile, EmployeeSpecialty spec)
+    {
+        if (tile == TileData.Types.empty)
+            return null;
+        
+        if (spec == EmployeeSpecialty.Operator)
+        {
+            if (operatorActions.ContainsKey(tile))
+            {
+                return operatorActions[tile];
+            }
+        }
+
+        return null;
+    }
+
+    void ExtractFromTile(GameObject gObj, Transform t)
+    {
+        if (gObj.GetComponent<Employee_Extract>() != null)
+        {
+            gObj.GetComponent<Employee_Extract>().SetExtractionTarget(t);
+        }
+        else
+        {
+            InvalidAction(t);
+        }
+    }
+
+    void RepairBuilding(GameObject gObj, Transform t)
+    {
+        if (gObj.GetComponent<Employee_Repair>() != null)
+        {
+            gObj.GetComponent<Employee_Repair>().RepairTile(t);
+        }
+        else
+        {
+            InvalidAction(t);
+        }
+    }
+
+    void InvalidAction(Transform t)
+    {
+        Debug.LogError("This employee does not contain the component required to work a " + t.gameObject.name);
+    }
+
+}

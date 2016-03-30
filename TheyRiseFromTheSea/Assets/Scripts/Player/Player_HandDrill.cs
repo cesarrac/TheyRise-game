@@ -245,10 +245,6 @@ public class Player_HandDrill : MonoBehaviour {
         {
             Debug.Log("Extracting " + resourceGrid.ExtractFromTile(x, y, mineAmmnt) + " out of " + resourceGrid.tiles[x,y].maxResourceQuantity);
         }
-       
-       
-
-       
     }
 
     

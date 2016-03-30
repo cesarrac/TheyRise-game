@@ -4,9 +4,11 @@ using System.Collections;
 [System.Serializable]
 public class TileStats
 {
-    float _hp, _shield, _defense, _attack;
+    float _hp, startingHP, _shield, _defense, _attack;
     int _nanoBotCost;
-    public float HP { get { return _hp; } set { _hp = Mathf.Clamp(value, 0, 50000); } }
+
+    public float StartHP { get { return startingHP; } }
+    public float HP { get { return _hp; } set { _hp = Mathf.Clamp(value, 0, startingHP); } }
     public float Shield { get { return _shield; } set { _shield = Mathf.Clamp(value, 0, 50000); } }
     public float Defense { get { return _defense; } set { _defense = Mathf.Clamp(value, 0, 50000); } }
     public float Attack { get { return _attack; } set { _attack = Mathf.Clamp(value, 0, 50000); } }
@@ -14,7 +16,10 @@ public class TileStats
 
     public TileStats(float hp, float def, float attk, float shield, int nCost)
     {
+        startingHP = hp;
+
         HP = hp;
+  
         Shield = shield;
         Defense = def;
         Attack = attk;
