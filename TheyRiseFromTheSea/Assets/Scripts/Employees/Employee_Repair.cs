@@ -3,7 +3,6 @@ using System.Collections;
 
 public class Employee_Repair : MonoBehaviour {
 
-    int posX, posY;
     Transform mainTarget;
     TileData targetAsTile;
 
@@ -29,14 +28,36 @@ public class Employee_Repair : MonoBehaviour {
     }
 
 
-    public void RepairTile(Transform target)
+    public void SetRepairTarget(Transform target)
     {
         mainTarget = target;
 
+        // Get the target as Tile data
         targetAsTile = ResourceGrid.Grid.TileFromWorldPoint(target.position);
 
+        if (RangeCheck(target.position))
+        {
+            StartCoroutine("Repair");
+        }
+        else
+        {
+            MoveToTarget();
+        }
+    }
 
-        StartCoroutine("Repair");
+    void RepairTile()
+    {
+        if (mainTarget != null && RangeCheck(mainTarget.position))
+        {
+            // Get the target as Tile data
+            targetAsTile = ResourceGrid.Grid.TileFromWorldPoint(mainTarget.position);
+
+            StartCoroutine("Repair");
+        }
+        else
+        {
+            MoveToTarget();
+        }
     }
 
     IEnumerator Repair()
@@ -45,6 +66,7 @@ public class Employee_Repair : MonoBehaviour {
         {
             if (targetAsTile == null || !RangeCheck(mainTarget.position))
             {
+                MoveToTarget();
                 yield break;
             }
            
@@ -63,5 +85,20 @@ public class Employee_Repair : MonoBehaviour {
 
             yield return new WaitForSeconds(1);
         }
+    }
+
+    Transform GetTarget(Vector3 pos)
+    {
+        // Find the nearest rock and return its transform
+        return mainTarget;
+    }
+
+
+    void MoveToTarget()
+    {
+        UnitPathHandler path_Handler = GetComponent<UnitPathHandler>();
+        path_Handler.RegisterDestinationReachedCB(RepairTile);
+        path_Handler.RegisterGetTargetFunc(GetTarget);
+        path_Handler.AssignTarget();
     }
 }

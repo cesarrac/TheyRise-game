@@ -73,12 +73,23 @@ public class Employee_Actions : MonoBehaviour {
     {
         if (gObj.GetComponent<Employee_Repair>() != null)
         {
-            gObj.GetComponent<Employee_Repair>().RepairTile(t);
+            gObj.GetComponent<Employee_Repair>().SetRepairTarget(t);
         }
         else
         {
             InvalidAction(t);
         }
+    }
+
+    void OperateMachine(GameObject gObj, Transform t)
+    {
+        // This would cause the employee to walk up to the machine and operate it
+        // so we'll need to hook this up to a component on the machine that tells it
+        // it can start operating 
+        // (probably the Building Handler, set its state to READY ... how would that work?)
+        // The building handler sets its state to READY when it finishes constructing, maybe with buildings
+        // that need operators they can build and set their state to WAITING until an 
+        // Operator can be there to make it work.
     }
 
     void InvalidAction(Transform t)

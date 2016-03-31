@@ -34,30 +34,30 @@ public class Mouse_Controller:MonoBehaviour
             currMouseP = mouseP;
         }
 
-        //if (ResourceGrid.Grid.transporter_built)
-        //{
-        //    ZoomWithMouseWheel();
-        //}
+        if (ResourceGrid.Grid.transporter_built)
+        {
+            ZoomWithMouseWheel();
+        }
 
 
         // FOR DEBUGGING PURPOSES:
         // Tile Under Mouse Tool: print to console the tile type and position of the tile under mouse
-        //if (!Build_MainController.Instance.currentlyBuilding)
-        //{
-        //    DebugTileUnderMouse();
-        //    //DebugGraphicTile();
+        if (!Build_MainController.Instance.currentlyBuilding)
+        {
+            DebugTileUnderMouse();
+            //DebugGraphicTile();
 
-        //    SelectUnit();
-        //}
-        Select();
-        DeSelectUnit();
+            Select();
+            DeSelectUnit();
+        }
+
 
         if (selected_Employee != null)
         {
             Debug.Log("Selected employee is set");
         }
 
-        //ListenForRightClick();
+        ListenForRightClick();
 
     }
 

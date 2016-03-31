@@ -44,13 +44,6 @@ public class Employee_Extract : MonoBehaviour {
         }
     }
 
-
-    Transform GetTarget(Vector3 pos)
-    {
-        // Find the nearest rock and return its transform
-        return mainTarget;
-    }
-
     void Extract()
     {
         if (mainTarget != null && RangeCheck(mainTarget.position))
@@ -64,14 +57,6 @@ public class Employee_Extract : MonoBehaviour {
         {
             MoveToTarget();
         }
-    }
-
-    void MoveToTarget()
-    {
-        UnitPathHandler path_Handler = GetComponent<UnitPathHandler>();
-        path_Handler.RegisterDestinationReachedCB(Extract);
-        path_Handler.RegisterGetTargetFunc(GetTarget);
-        path_Handler.AssignTarget();
     }
 
     IEnumerator Extraction()
@@ -100,6 +85,22 @@ public class Employee_Extract : MonoBehaviour {
 
             yield return new WaitForSeconds(1);
         }
+    }
+
+
+    Transform GetTarget(Vector3 pos)
+    {
+        // Find the nearest rock and return its transform
+        return mainTarget;
+    }
+
+
+    void MoveToTarget()
+    {
+        UnitPathHandler path_Handler = GetComponent<UnitPathHandler>();
+        path_Handler.RegisterDestinationReachedCB(Extract);
+        path_Handler.RegisterGetTargetFunc(GetTarget);
+        path_Handler.AssignTarget();
     }
 
 }
