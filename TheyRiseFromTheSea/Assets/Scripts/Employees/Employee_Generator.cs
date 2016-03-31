@@ -157,7 +157,7 @@ public class Employee_Generator : MonoBehaviour {
     {
         Employee emp = new Employee("Operator", EmployeeSpecialty.Operator, new Armor("Basic Jumpsuit", 2, 0), 24, 24, 2, employeeSprites[0]);
 
-        Vector3 pos = new Vector3(10, 10, 0);
+        Vector3 pos = ResourceGrid.Grid.Hero != null ? ResourceGrid.Grid.Hero.transform.position + Vector3.up : new Vector3(10, 10, 0);
 
         Employee_Actions.Instance.DefineActions(emp.Specialty);
 

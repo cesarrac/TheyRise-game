@@ -13,25 +13,11 @@ public class Employee_Extract : MonoBehaviour {
         emp_handler = GetComponent<Employee_Handler>();
     }
 
-    bool RangeCheck(Vector3 targetPos)
-    {
-        var heading = targetPos - transform.position;
-
-        if (heading.sqrMagnitude <= 2 * 2)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
     // Set by mouse click
     public void SetExtractionTarget(Transform target)
     {
         mainTarget = target;
-        if (RangeCheck(target.position))
+        if (Employee_Actions.Instance.RangeCheck(target.position, transform.position))
         {
             posX = Mathf.RoundToInt(target.position.x);
             posY = Mathf.RoundToInt(target.position.y);
@@ -40,13 +26,13 @@ public class Employee_Extract : MonoBehaviour {
         }
         else
         {
-            MoveToTarget();
+            Employee_Actions.Instance.MoveToTarget(gameObject, Extract, GetTarget);
         }
     }
 
     void Extract()
     {
-        if (mainTarget != null && RangeCheck(mainTarget.position))
+        if (mainTarget != null && Employee_Actions.Instance.RangeCheck(mainTarget.position, transform.position))
         {
             posX = Mathf.RoundToInt(mainTarget.position.x);
             posY = Mathf.RoundToInt(mainTarget.position.y);
@@ -55,7 +41,7 @@ public class Employee_Extract : MonoBehaviour {
         }
         else
         {
-            MoveToTarget();
+            Employee_Actions.Instance.MoveToTarget(gameObject, Extract, GetTarget);
         }
     }
 
@@ -63,9 +49,9 @@ public class Employee_Extract : MonoBehaviour {
     {
         while (true)
         {
-            if (mainTarget == null || !RangeCheck(mainTarget.position))
+            if (mainTarget == null || !Employee_Actions.Instance.RangeCheck(mainTarget.position, transform.position))
             {
-                MoveToTarget();
+                Employee_Actions.Instance.MoveToTarget(gameObject, Extract, GetTarget);
                 yield break;
             }
                 
@@ -92,15 +78,6 @@ public class Employee_Extract : MonoBehaviour {
     {
         // Find the nearest rock and return its transform
         return mainTarget;
-    }
-
-
-    void MoveToTarget()
-    {
-        UnitPathHandler path_Handler = GetComponent<UnitPathHandler>();
-        path_Handler.RegisterDestinationReachedCB(Extract);
-        path_Handler.RegisterGetTargetFunc(GetTarget);
-        path_Handler.AssignTarget();
     }
 
 }

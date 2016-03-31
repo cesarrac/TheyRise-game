@@ -13,21 +13,6 @@ public class Employee_Repair : MonoBehaviour {
         emp_handler = GetComponent<Employee_Handler>();
     }
 
-    bool RangeCheck(Vector3 targetPos)
-    {
-        var heading = targetPos - transform.position;
-
-        if (heading.sqrMagnitude <= 2 * 2)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-
     public void SetRepairTarget(Transform target)
     {
         mainTarget = target;
@@ -35,19 +20,19 @@ public class Employee_Repair : MonoBehaviour {
         // Get the target as Tile data
         targetAsTile = ResourceGrid.Grid.TileFromWorldPoint(target.position);
 
-        if (RangeCheck(target.position))
+        if (Employee_Actions.Instance.RangeCheck(mainTarget.position, transform.position))
         {
             StartCoroutine("Repair");
         }
         else
         {
-            MoveToTarget();
+            Employee_Actions.Instance.MoveToTarget(gameObject, RepairTile, GetTarget);
         }
     }
 
     void RepairTile()
     {
-        if (mainTarget != null && RangeCheck(mainTarget.position))
+        if (mainTarget != null && Employee_Actions.Instance.RangeCheck(mainTarget.position, transform.position))
         {
             // Get the target as Tile data
             targetAsTile = ResourceGrid.Grid.TileFromWorldPoint(mainTarget.position);
@@ -56,7 +41,7 @@ public class Employee_Repair : MonoBehaviour {
         }
         else
         {
-            MoveToTarget();
+            Employee_Actions.Instance.MoveToTarget(gameObject, RepairTile, GetTarget);
         }
     }
 
@@ -64,9 +49,9 @@ public class Employee_Repair : MonoBehaviour {
     {
         while (true)
         {
-            if (targetAsTile == null || !RangeCheck(mainTarget.position))
+            if (targetAsTile == null || !Employee_Actions.Instance.RangeCheck(mainTarget.position, transform.position))
             {
-                MoveToTarget();
+                Employee_Actions.Instance.MoveToTarget(gameObject, RepairTile, GetTarget);
                 yield break;
             }
            
@@ -93,12 +78,4 @@ public class Employee_Repair : MonoBehaviour {
         return mainTarget;
     }
 
-
-    void MoveToTarget()
-    {
-        UnitPathHandler path_Handler = GetComponent<UnitPathHandler>();
-        path_Handler.RegisterDestinationReachedCB(RepairTile);
-        path_Handler.RegisterGetTargetFunc(GetTarget);
-        path_Handler.AssignTarget();
-    }
 }
