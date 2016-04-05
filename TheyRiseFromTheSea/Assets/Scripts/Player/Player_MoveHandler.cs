@@ -192,7 +192,8 @@ public class Player_MoveHandler : MonoBehaviour {
         equip_wpn.CheckCurrentRigTransform(move_vector.x, move_vector.y);
 
 		// Moving using Rigidbody 2D
-		rBody.MovePosition(rBody.position + move_vector * _curSpeed * Time.deltaTime);
+		//rBody.MovePosition(rBody.position + move_vector * _curSpeed * Time.deltaTime);
+        transform.position = Vector2.MoveTowards(transform.position, (Vector2)transform.position + move_vector, _curSpeed * Time.deltaTime);
 
 
 		// Control animation & return to Idling

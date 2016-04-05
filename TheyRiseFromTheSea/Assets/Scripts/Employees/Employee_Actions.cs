@@ -20,6 +20,7 @@ public class Employee_Actions : MonoBehaviour {
         employeeActions = new Dictionary<TileData.Types, Action<GameObject, Transform>>();
         employeeActions.Add(TileData.Types.rock, ExtractFromTile);
         employeeActions.Add(TileData.Types.machine_gun, AssembleMachine);
+        employeeActions.Add(TileData.Types.extractor, OperateBuilding);
     }
 
 
@@ -81,6 +82,20 @@ public class Employee_Actions : MonoBehaviour {
         if (gObj.GetComponent<Employee_Mechanics>() != null)
         {
             gObj.GetComponent<Employee_Mechanics>().SetAssembleTarget(t);
+        }
+        else
+        {
+            InvalidAction(t);
+        }
+    }
+
+    void OperateBuilding (GameObject gObj, Transform t)
+    {
+        // This would allow the Employee to walk up to a machine and boost its
+        // productivity, its fire rate and/or damage (like energize works!)
+        if (gObj.GetComponent<Employee_Mechanics>() != null)
+        {
+            gObj.GetComponent<Employee_Mechanics>().SetOperateTarget(t);
         }
         else
         {

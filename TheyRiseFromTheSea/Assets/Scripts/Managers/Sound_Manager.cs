@@ -12,6 +12,8 @@ public class Sound_Manager : MonoBehaviour {
 
     Dictionary<string, AudioClip> soundMap = new Dictionary<string, AudioClip>();
 
+    AudioSource aSource;
+
     [Range(0, 1)]
     public float soundVolume = 0.6f;
 
@@ -26,6 +28,8 @@ public class Sound_Manager : MonoBehaviour {
         {
             DestroyImmediate(gameObject);
         }
+
+        aSource = GetComponent<AudioSource>();
     }
 
     void Start()
@@ -63,6 +67,19 @@ public class Sound_Manager : MonoBehaviour {
             soundCooldown = -0.2f;
         }
    
+    }
+
+    public void PlayContinous(string id)
+    {
+        if (soundMap.ContainsKey(id))
+        {
+            aSource.PlayOneShot(soundMap[id], 0.6f);
+        }
+    }
+
+    public void StopSound()
+    {
+        aSource.Stop();
     }
 
 

@@ -141,10 +141,9 @@ public class Energizer_Controller : MonoBehaviour {
     {
         // Calculate boosted Rate and Power...
         var power = boost * extractor.extractorStats.extractPower;
-        var rate = boost * extractor.extractorStats.extractRate;
 
         // ... and Energize the Extractor's stats.
-        extractor.extractorStats.Energize(rate, power);
+        extractor.extractorStats.Energize(power);
 
         // Now start counting down to De Energize
         extractor.CountDownToDeEnergize(DeEnergizeExtractor, BoostDuration);

@@ -79,10 +79,10 @@ public class Building_Handler : MonoBehaviour {
         //FadeIn();
 
         //// Assemble
-        //_state = State.ASSEMBLING;
+        _state = State.ASSEMBLING;
 
         // Start Waiting to be Assembled
-        _state = State.WAITING;
+        //_state = State.WAITING;
 
         // reset timer variables
         isDissasembling = false;

@@ -18,9 +18,13 @@ public class Employee_Handler : MonoBehaviour {
 
     public bool isWorking { get; protected set; }
 
-    void Awake()
+    public enum Work_State { Idling, Mining, OnMachine };
+    public Work_State workState { get; protected set; }
+
+    void OnEnable()
     {
         employee_stats = GetComponent<Employee_Attack>();
+        workState = Work_State.Idling;
     }
 
     public void DefineEmployee(Employee emp)
@@ -52,10 +56,23 @@ public class Employee_Handler : MonoBehaviour {
         if ( act != null)
         {
             isWorking = false;
+
+            if (tile == TileData.Types.rock)
+            {
+                workState = Work_State.Mining;
+            }
+            else if (tile != TileData.Types.empty)
+            {
+                workState = Work_State.OnMachine;
+            }
+
             act(gameObject, target);
+
+
         }
         else
         {
+            workState = Work_State.Idling;
             Debug.Log("Could not find " + myEmployee.Specialty.ToString() +  " Action for " + tile.ToString());
         }
     }

@@ -200,6 +200,15 @@ public class Unit_Base : MonoBehaviour {
         }
     }
 
+    public void DeEnergize()
+    {
+        // Set stats back to starting values
+        stats.curAttack = stats.startAttack;
+        stats.curRateOfAttk = stats.startRate;
+        stats.curDamage = stats.startDamage;
+        stats.curReloadSpeed = stats.startReloadSpd;
+    }
+
 
     public bool AttackTile(TileData tile)
     {

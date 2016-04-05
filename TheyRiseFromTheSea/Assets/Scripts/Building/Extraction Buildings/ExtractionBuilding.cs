@@ -57,16 +57,16 @@ public class ExtractorStats
         _extractRate = newRate;
     }
 
-    public void Energize(float rateBoosted, float powerBoosted)
+    public void Energize(float powerBoosted)
     {
+        Debug.Log("EXTRACTOR - Original Power = " + _extractPower);
         _extractPower = powerBoosted;
-        _extractRate = rateBoosted;
+        Debug.Log("EXTRACTOR - Boosted Power = " + _extractPower);
     }
 
     public void DeEnergize()
     {
         _extractPower = startPower;
-        _extractRate = startRate;
     }
 }
 
@@ -333,11 +333,12 @@ public class ExtractionBuilding : MonoBehaviour {
 
     }
 
-    void SetExtractRate(float currExtractRate, float power, float hardness)
+    float SetExtractRate(float currExtractRate, float power, float hardness)
     {
-        extractorStats.SetCurrentRate((hardness / power) + currExtractRate);
+
         //Debug.Log("EXTRACTOR: Current Power is " + power + " and the Tile Hardness is " + hardness);
-        //Debug.Log("EXTRACTOR: Setting Extraction Rate to: " + extractorStats.extractRate);
+
+        return (hardness / power) + currExtractRate;
     }
 
     public IEnumerator ExtractResource()
@@ -345,10 +346,11 @@ public class ExtractionBuilding : MonoBehaviour {
         // while true, extract, wait extract rate, check if there's ore left: if no break out and  change state to searching
         while (true)
         {
+            float curExtractRate = SetExtractRate(extractorStats.extractRate, extractorStats.extractPower, targetTile.hardness);
+            Debug.Log("EXTRACTOR: Setting Extraction Rate to: " + curExtractRate);
+
             // Calculate and Set the true extraction rate considering the current target resource tile
-            SetExtractRate(extractorStats.extractRate, extractorStats.extractPower, targetTile.hardness);
-           
-            yield return new WaitForSeconds(extractorStats.extractRate);
+            yield return new WaitForSeconds(curExtractRate);
 
             if (!productionHalt)
             {

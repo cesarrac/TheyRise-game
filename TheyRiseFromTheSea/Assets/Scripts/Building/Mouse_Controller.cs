@@ -20,6 +20,9 @@ public class Mouse_Controller:MonoBehaviour
 
     public LayerMask unitSelectionMask, tileSelectionMask;
 
+    public GameObject unitSelectionBox;
+    GameObject spawned_selectBox;
+
     void OnEnable()
     {
         Instance = this;
@@ -211,6 +214,9 @@ public class Mouse_Controller:MonoBehaviour
                 {
                     selected_Employee = unit.GetComponent<Employee_Handler>();
 
+                    // Place a selection box to mark the unit
+                    spawned_selectBox = Instantiate(unitSelectionBox, hit.transform.position, Quaternion.identity) as GameObject;
+
                     selected_Employee.SelectEmployee();
                 }
 
@@ -238,6 +244,8 @@ public class Mouse_Controller:MonoBehaviour
         if (selected_Employee != null)
         {
             selected_Employee = null;
+            if (spawned_selectBox != null)
+                Destroy(spawned_selectBox);
         }
     }
   

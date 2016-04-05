@@ -159,7 +159,7 @@ public class BlueprintDatabase : MonoBehaviour {
     void InitExtractors()
     {
         extractorsMap = new Dictionary<string, Blueprint_Extraction>();
-        extractorsMap.Add("Extractor", new Blueprint_Extraction(15, 25, 1, 50));
+        extractorsMap.Add("Extractor", new Blueprint_Extraction(10, 25, 1, 50));
         extractorsMap.Add("Desalination Pump", new Blueprint_Extraction(10, 25, 1, 50));
     }
 

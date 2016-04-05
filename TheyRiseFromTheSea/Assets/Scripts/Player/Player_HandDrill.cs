@@ -203,6 +203,8 @@ public class Player_HandDrill : MonoBehaviour {
                     lineR.SetPosition(1, rayEnd);
                     // Mine
                     Mine();
+
+                    Sound_Manager.Instance.PlayContinous("Beam");
                 }
         
            }
@@ -235,6 +237,7 @@ public class Player_HandDrill : MonoBehaviour {
             yield return null;
         }
 
+        Sound_Manager.Instance.StopSound();
         lineR.enabled = false;
         yield break;
     }

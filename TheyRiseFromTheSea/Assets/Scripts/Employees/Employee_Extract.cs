@@ -8,8 +8,6 @@ public class Employee_Extract : MonoBehaviour {
 
     Employee_Handler emp_handler;
 
-    int extractAmmount = 1;
-
     void Awake()
     {
         emp_handler = GetComponent<Employee_Handler>();
@@ -62,7 +60,7 @@ public class Employee_Extract : MonoBehaviour {
     {
         while (true)
         {
-            if (emp_handler.isWorking == false)
+            if (emp_handler.isWorking == false || emp_handler.workState != Employee_Handler.Work_State.Mining)
                 yield break;
 
             if (mainTarget == null || !Employee_Actions.Instance.RangeCheck(mainTarget.position, transform.position))
@@ -71,10 +69,11 @@ public class Employee_Extract : MonoBehaviour {
                 yield break;
             }
                 
+           
 
-            if (ResourceGrid.Grid.ExtractFromTile(posX, posY, extractAmmount, true) > 0)
+            if (ResourceGrid.Grid.ExtractFromTile(posX, posY, 1, true) > 0)
             {
-                Debug.Log("Extracting " + ResourceGrid.Grid.ExtractFromTile(posX, posY, 10) + " out of " + ResourceGrid.Grid.tiles[posX, posY].maxResourceQuantity);
+                Debug.Log("Extracting 1 out of " + ResourceGrid.Grid.tiles[posX, posY].maxResourceQuantity);
             }
             else
             {
@@ -85,10 +84,9 @@ public class Employee_Extract : MonoBehaviour {
             }
 
             //(hardness / power) + currExtractRate
-            float hardness = ResourceGrid.Grid.tiles[posX, posY].hardness;
-            float power = emp_handler.MyEmployee.emp_stats.Extraction;
-            float rate = emp_handler.MyEmployee.emp_stats.WorkRate;
-            float currExtractionRate = (hardness / power) + rate;
+            float currExtractionRate = (ResourceGrid.Grid.tiles[posX, posY].hardness 
+                                        / emp_handler.MyEmployee.emp_stats.Extraction) 
+                                        + emp_handler.MyEmployee.emp_stats.WorkRate;
             Debug.Log("Current Rate of Extraction = " + currExtractionRate);
 
             yield return new WaitForSeconds(currExtractionRate);
