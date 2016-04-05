@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 
 public class OrePatch
 {
@@ -92,7 +92,7 @@ public class Rock_Generator : MonoBehaviour {
 
     int distanceToWater = 5;
 
-    
+    List<Vector2> rockTilePositions = new List<Vector2>();
 
     void Awake()
     {
@@ -162,6 +162,9 @@ public class Rock_Generator : MonoBehaviour {
 
             // If the attempt SUCCEDED a new Ore Patch will be set, using this new position
             SetNewOrePatch((int)pos.x, (int) pos.y, GetRockTypeFromLandType(pos));
+
+            // This List of Vector 2 will store the position of the lead rock in every Ore Patch ( to be used to find rocks in the world)
+            rockTilePositions.Add(pos);
         }
     }
 
@@ -284,5 +287,32 @@ public class Rock_Generator : MonoBehaviour {
     }
 
     
+    public Vector2 FindNearestRockFromPosition(Vector2 position)
+    {
+        Vector2[] rocks = rockTilePositions.ToArray();
 
+        float nearestDistance = 0;
+        Vector2 nearestPos = new Vector2();
+
+        for (int i = 0; i < rocks.Length; i++)
+        {
+            if (nearestPos == null || nearestPos == Vector2.zero)
+            {
+                nearestPos = rocks[i];
+                nearestDistance = (rocks[i] - position).magnitude;
+            }
+              
+            else
+            {
+                float newDistance = (rocks[i] - position).magnitude;
+                if (newDistance < nearestDistance)
+                {
+                    nearestDistance = newDistance;
+                    nearestPos = rocks[i];
+                }
+            }
+        }
+
+        return nearestPos;
+    }
 }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+
 public class Player_AssaultRifle : Player_GunBaseClass {
 
 	float explosiveDamage = 2f; 
@@ -57,17 +58,11 @@ public class Player_AssaultRifle : Player_GunBaseClass {
 			DamageEnemy();
 
 		}
-//		
-//
-		CheckForShoot ();
-	
 
-		//FollowMouse ();
-	}
+        CheckForShoot();
+        //FollowMouse ();
+    }
 
-	
-
-	
 	// The GUN EFFECT:
 	void DamageEnemy()
 	{

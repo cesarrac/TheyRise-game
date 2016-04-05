@@ -235,11 +235,11 @@ public class Player_MoveHandler : MonoBehaviour {
 
     void ListenForMouseDash()
     {
-        if (Mouse_Controller.MouseController.isRightClickingForDash)
+        if (Mouse_Controller.Instance.isRightClickingForDash)
         {
             currPos = transform.position;
 
-            dashTarget = Mouse_Controller.MouseController.currMouseP;
+            dashTarget = Mouse_Controller.Instance.currMouseP;
 
             dashCountdown = timeDashing;
 

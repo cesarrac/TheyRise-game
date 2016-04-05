@@ -50,7 +50,7 @@ public class Building_Handler : MonoBehaviour {
 
 	private bool playerIsNear = false;// Only turns true if the player walks up to the building
 
-	public enum State { ASSEMBLING, READY, DISSASEMBLING, RECYCLE_NANOBOTS, CREATING, DISSASEMBLED}
+	public enum State { WAITING, ASSEMBLING, READY, DISSASEMBLING, RECYCLE_NANOBOTS, CREATING, DISSASEMBLED}
 	private State _state;
 	public State state { get { return _state; } set { _state = value; } }
     public State debugState;
@@ -78,35 +78,46 @@ public class Building_Handler : MonoBehaviour {
 
         //FadeIn();
 
-        // Assemble
-        _state = State.ASSEMBLING;
+        //// Assemble
+        //_state = State.ASSEMBLING;
+
+        // Start Waiting to be Assembled
+        _state = State.WAITING;
 
         // reset timer variables
         isDissasembling = false;
 		isFading = false;
-
 
         // set cost
         //nanoBotsNeeded = nanoBotCost / 10;
         nanoBotsCreated = 0;
 
         onePercentConstructionDuration = constructionDuration / 100f;
-        //constructionCountDown = constructionDuration;
+        if (buildingStatusIndicator != null)
+        {
+            buildingStatusIndicator.ShowConstructionPercent(0);
+        }
 
     }
 	void Awake()
 	{
         //dissasemblyCountDown = dissasemblyTime;
 
-        _state = State.ASSEMBLING;
+        //_state = State.ASSEMBLING;
         s_renderer = GetComponent<SpriteRenderer>();
         s_renderer.color = B;
-        FadeIn();
+        //FadeIn();
          
 
         buildMainController = Build_MainController.Instance;
         objPool = ObjectPool.instance;
         resourceGrid = ResourceGrid.Grid;
+    }
+
+    public void StartAssembling()
+    {
+        if (_state != State.READY)
+            _state = State.ASSEMBLING;
     }
 
 	void FadeIn()

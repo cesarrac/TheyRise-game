@@ -81,17 +81,17 @@ public class UnitPathHandler : MonoBehaviour {
 
     public void RegisterAssignTargetToHandlerCB(Action<Transform> cb)
     {
-        AssignTargetToHandlerCB += cb;
+        AssignTargetToHandlerCB = cb;
     }
 
     public void RegisterGetTargetFunc(Func<Vector3, Transform> foo)
     {
-        GetTargetFunc += foo;
+        GetTargetFunc = foo;
     }
 
     public void RegisterDestinationReachedCB(Action cb)
     {
-        TargetReachedActionCB += cb;
+        TargetReachedActionCB = cb;
     }
 
     public void GetANewPath()

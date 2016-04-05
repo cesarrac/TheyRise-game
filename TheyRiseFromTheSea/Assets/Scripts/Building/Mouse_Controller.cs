@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 public class Mouse_Controller:MonoBehaviour
 {
-    public static Mouse_Controller MouseController { get; protected set; }
+    public static Mouse_Controller Instance { get; protected set; }
   
 
     public Vector3 currMouseP { get; protected set; }
@@ -21,11 +22,24 @@ public class Mouse_Controller:MonoBehaviour
 
     void OnEnable()
     {
-        MouseController = this;
+        Instance = this;
         dashDistance = 0;
     }
 
     void Update()
+    {
+        UpdateMousePosition();
+
+        if (ResourceGrid.Grid.transporter_built)
+        {
+            ZoomWithMouseWheel();
+        }
+
+        MouseClickInteraction();
+
+    }
+
+    void UpdateMousePosition()
     {
         Vector3 mouseP = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseP.z = 0;
@@ -33,32 +47,29 @@ public class Mouse_Controller:MonoBehaviour
         {
             currMouseP = mouseP;
         }
+    }
 
-        if (ResourceGrid.Grid.transporter_built)
+    void MouseClickInteraction()
+    {
+        // If the mouse is over any UI element it will stop listening for clicks
+        if (EventSystem.current.IsPointerOverGameObject())
         {
-            ZoomWithMouseWheel();
+            return;
         }
 
-
-        // FOR DEBUGGING PURPOSES:
-        // Tile Under Mouse Tool: print to console the tile type and position of the tile under mouse
         if (!Build_MainController.Instance.currentlyBuilding)
         {
+            // FOR DEBUGGING PURPOSES:
             DebugTileUnderMouse();
             //DebugGraphicTile();
 
             Select();
-            DeSelectUnit();
+           // DeSelectUnit();
         }
 
-
-        if (selected_Employee != null)
-        {
-            Debug.Log("Selected employee is set");
-        }
-
-        ListenForRightClick();
-
+        // Build - Right Click!
+        if (selected_Employee == null)
+            ListenForRightClick();
     }
 
 
@@ -94,6 +105,9 @@ public class Mouse_Controller:MonoBehaviour
                 // When you let go of the right mouse button...
                 else if (Input.GetMouseButtonUp(1))
                 {
+                    if (GetTileUnderMouse() == null)
+                        return;
+
                     // .. IF the mouse is NOT over a Water tile...
                     if (GetTileUnderMouse().tileType != TileData.Types.water)
                     {
@@ -125,10 +139,6 @@ public class Mouse_Controller:MonoBehaviour
         }
 
         // Not holding down Left Shift & not Right Clicking
-   
-       
-
-
     }
 
 
@@ -148,7 +158,7 @@ public class Mouse_Controller:MonoBehaviour
 
 
     // DEBUGGING TOOLS:
-
+    // Tile Under Mouse Tool: print to console the tile type and position of the tile under mouse
     void DebugTileUnderMouse()
     {
         if (Input.GetMouseButtonDown(1))
@@ -216,6 +226,7 @@ public class Mouse_Controller:MonoBehaviour
                 if (selected_Employee != null)
                 {
                     selected_Employee.DoAction(tile.tileType, ResourceGrid.Grid.GetTileGameObjFromIntCoords(GetTileUnderMouse().posX, GetTileUnderMouse().posY).transform);
+                    DeSelectUnit();
                 }
             }
         }
@@ -224,7 +235,7 @@ public class Mouse_Controller:MonoBehaviour
 
     void DeSelectUnit()
     {
-        if (Input.GetMouseButtonDown(1) && selected_Employee != null)
+        if (selected_Employee != null)
         {
             selected_Employee = null;
         }

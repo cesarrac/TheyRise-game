@@ -12,11 +12,11 @@ public class Employee_Handler : MonoBehaviour {
     Employee myEmployee;
     public Employee MyEmployee { get { return myEmployee; } }
 
-    UnitPathHandler path_handler;
-
     Transform mainTarget;
 
     public Employee_Attack employee_stats { get; protected set; }
+
+    public bool isWorking { get; protected set; }
 
     void Awake()
     {
@@ -33,6 +33,10 @@ public class Employee_Handler : MonoBehaviour {
         Debug.Log("Employee selected.");
     }
 
+    public void SetIsWorking(bool i)
+    {
+        isWorking = i;
+    }
 
     public void DoAction(TileData.Types tile, Transform target)
     {
@@ -40,11 +44,14 @@ public class Employee_Handler : MonoBehaviour {
         Debug.Log("Employee going to work on " + tile.ToString());
         mainTarget = target;
 
+
+
         // Check if this employee has an action for this type of tile
-        Action<GameObject, Transform> act = Employee_Actions.Instance.GetAction(tile, myEmployee.Specialty);
+        Action<GameObject, Transform> act = Employee_Actions.Instance.GetAction(tile);
         // If it does, call it and pass it the main target
         if ( act != null)
         {
+            isWorking = false;
             act(gameObject, target);
         }
         else

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 public class Player_GunBaseClass : MonoBehaviour {
 
@@ -88,6 +89,12 @@ public class Player_GunBaseClass : MonoBehaviour {
 
     public void CheckForShoot()
 	{
+        // If mouse is over a UI element - DONT SHOOT!
+        if (EventSystem.current.IsPointerOverGameObject())
+            return;
+        // If mouse is over an Employee unit - DONT SHOOT!
+        if (Mouse_Controller.Instance.selected_Employee != null)
+            return;
 
 		if (gunStats.curChamberAmmo > 0)
         {
@@ -141,7 +148,7 @@ public class Player_GunBaseClass : MonoBehaviour {
         if (!Build_MainController.Instance.currentlyBuilding)
         {
             // Fire an Raycast towards the mouse to check for a hit
-            targetInSight = RaycastToGetTarget();
+           // targetInSight = RaycastToGetTarget();
 
             // Actually shoot the bullet
             VisualProjectileShoot();
@@ -166,26 +173,26 @@ public class Player_GunBaseClass : MonoBehaviour {
 
 
 	
-	GameObject RaycastToGetTarget()
-	{
-		Debug.DrawLine (transform.position, sightEnd.position, Color.cyan);
+	//GameObject RaycastToGetTarget()
+	//{
+	//	Debug.DrawLine (transform.position, sightEnd.position, Color.cyan);
 
-		RaycastHit2D hit = Physics2D.Linecast (sightStart.position, sightEnd.position, mask.value);
-		if (hit.collider != null) {
+	//	RaycastHit2D hit = Physics2D.Linecast (sightStart.position, sightEnd.position, mask.value);
+	//	if (hit.collider != null) {
 
-			if (hit.collider.CompareTag ("Enemy")) {
-               // Debug.Log("GUN DETECTED ENEMY!");
-				// Linecast HIT an enemy, so store the enemy unit as the target
-				return hit.collider.gameObject;
+	//		if (hit.collider.CompareTag ("Enemy")) {
+ //              // Debug.Log("GUN DETECTED ENEMY!");
+	//			// Linecast HIT an enemy, so store the enemy unit as the target
+	//			return hit.collider.gameObject;
 
-			} else {
-				return null;
-			}
-		} else {
-			return null;
-		}
+	//		} else {
+	//			return null;
+	//		}
+	//	} else {
+	//		return null;
+	//	}
 		
-	}
+	//}
 
 	void VisualProjectileShoot()
 	{

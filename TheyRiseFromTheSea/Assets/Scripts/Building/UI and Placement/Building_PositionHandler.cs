@@ -86,7 +86,7 @@ public class Building_PositionHandler : MonoBehaviour {
         objPool = ObjectPool.instance;
         build_controller = Build_MainController.Instance;
 
-        mouse_controller = Mouse_Controller.MouseController;
+        mouse_controller = Mouse_Controller.Instance;
     }
 
     public void SetCurrentBlueprintID(string id)

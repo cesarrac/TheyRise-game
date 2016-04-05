@@ -7,52 +7,40 @@ public class Employee_Actions : MonoBehaviour {
 
     public static Employee_Actions Instance { get; protected set; }
 
-    Dictionary<TileData.Types, Action<GameObject, Transform>> operatorActions;
-    Dictionary<TileData.Types, Action<Transform>> medicActions;
-    Dictionary<TileData.Types, Action<Transform>> scienceActions;
+    Dictionary<TileData.Types, Action<GameObject, Transform>> employeeActions;
 
     void Awake()
     {
         Instance = this;
+        DefineActions();
     }
 
-    public void DefineActions(EmployeeSpecialty spec)
+    public void DefineActions()
     {
-        switch (spec)
-        {
-            case EmployeeSpecialty.Operator:
-                operatorActions = new Dictionary<TileData.Types, Action<GameObject, Transform>>();
-                operatorActions.Add(TileData.Types.rock, ExtractFromTile);
-                operatorActions.Add(TileData.Types.machine_gun, RepairBuilding);
-                break;
-            //case EmployeeSpecialty.MEDIC:
-            //    medicActions = new Dictionary<TileData.Types, Action<Transform>>();
-            //    medicActions.Add(TileData.Types.rock, RockJob);
-            //    break;
-            //case EmployeeSpecialty.SCIENTIST:
-            //    scienceActions = new Dictionary<TileData.Types, Action<Transform>>();
-            //    scienceActions.Add(TileData.Types.rock, RockJob);
-            //    break;
-            default:
-                operatorActions = new Dictionary<TileData.Types, Action<GameObject, Transform>>();
-                operatorActions.Add(TileData.Types.rock, ExtractFromTile);
-                break;
-
-        }
+        employeeActions = new Dictionary<TileData.Types, Action<GameObject, Transform>>();
+        employeeActions.Add(TileData.Types.rock, ExtractFromTile);
+        employeeActions.Add(TileData.Types.machine_gun, AssembleMachine);
     }
 
-    public Action<GameObject, Transform> GetAction(TileData.Types tile, EmployeeSpecialty spec)
+
+    public Action<GameObject, Transform> GetAction(TileData.Types tile)
     {
         if (tile == TileData.Types.empty)
             return null;
-        
-        if (spec == EmployeeSpecialty.Operator)
-        {
-            if (operatorActions.ContainsKey(tile))
-            {
-                return operatorActions[tile];
-            }
-        }
+
+        //if (spec == EmployeeSpecialty.Operator)
+        //{
+        //    if (operatorActions.ContainsKey(tile))
+        //    {
+        //        return operatorActions[tile];
+        //    }
+        //}
+
+        // NOTE: Instead of finding an action based on the Employee's specialty, ALL employess will be capable of finding an action
+        // but the will fail to accomplish the task (or probably not be able to do it at all!) if they have less than 1 point in the relevant Employee Stat
+
+        if (employeeActions.ContainsKey(tile))
+            return employeeActions[tile];
 
         return null;
     }
@@ -71,9 +59,9 @@ public class Employee_Actions : MonoBehaviour {
 
     void RepairBuilding(GameObject gObj, Transform t)
     {
-        if (gObj.GetComponent<Employee_Repair>() != null)
+        if (gObj.GetComponent<Employee_Mechanics>() != null)
         {
-            gObj.GetComponent<Employee_Repair>().SetRepairTarget(t);
+            gObj.GetComponent<Employee_Mechanics>().SetRepairTarget(t);
         }
         else
         {
@@ -81,7 +69,7 @@ public class Employee_Actions : MonoBehaviour {
         }
     }
 
-    void OperateMachine(GameObject gObj, Transform t)
+    void AssembleMachine(GameObject gObj, Transform t)
     {
         // This would cause the employee to walk up to the machine and operate it
         // so we'll need to hook this up to a component on the machine that tells it
@@ -90,6 +78,14 @@ public class Employee_Actions : MonoBehaviour {
         // The building handler sets its state to READY when it finishes constructing, maybe with buildings
         // that need operators they can build and set their state to WAITING until an 
         // Operator can be there to make it work.
+        if (gObj.GetComponent<Employee_Mechanics>() != null)
+        {
+            gObj.GetComponent<Employee_Mechanics>().SetAssembleTarget(t);
+        }
+        else
+        {
+            InvalidAction(t);
+        }
     }
 
     // Action to return when no proper action was found. 

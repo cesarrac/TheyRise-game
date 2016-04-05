@@ -62,14 +62,17 @@ public class Employee_Generator : MonoBehaviour {
             if (select == 0)
             {
                 emp = new Employee("Operator", EmployeeSpecialty.Operator, basicJumpSuit, 24, 24, 2, employeeSprites[0]);
+                emp.SetEmployeeStats(5, 5, 5, 2, 5, 2);
             }
             else if (select == 1)
             {
                 emp = new Employee("Medic", EmployeeSpecialty.Medic, basicJumpSuit, 24, 24, 2, employeeSprites[1]);
+                emp.SetEmployeeStats(5, 5, 5, 2, 5, 2);
             }
             else
             {
                 emp = new Employee("Scientist", EmployeeSpecialty.Scientist, basicJumpSuit, 24, 24, 2, employeeSprites[2]);
+                emp.SetEmployeeStats(5, 5, 5, 2, 5, 2);
             }
 
             if (!new_employees.ContainsKey(emp.Name) && emp != null)
@@ -156,10 +159,11 @@ public class Employee_Generator : MonoBehaviour {
     public void TestSpawnEmployee()
     {
         Employee emp = new Employee("Operator", EmployeeSpecialty.Operator, new Armor("Basic Jumpsuit", 2, 0), 24, 24, 2, employeeSprites[0]);
+        emp.SetEmployeeStats(5, 5, 5, 2, 5, 2);
 
         Vector3 pos = ResourceGrid.Grid.Hero != null ? ResourceGrid.Grid.Hero.transform.position + Vector3.up : new Vector3(10, 10, 0);
 
-        Employee_Actions.Instance.DefineActions(emp.Specialty);
+        //Employee_Actions.Instance.DefineActions(emp.Specialty);
 
         // Grab the correct prefab by passing in this employees specialty (Prefabs are named by specialty so they contain the correct components to work)
         GameObject employee = ObjectPool.instance.GetObjectForType(emp.Specialty.ToString(), true, pos);
@@ -168,11 +172,28 @@ public class Employee_Generator : MonoBehaviour {
         {
             // TODO: Also set the employees correct sprite here!
             employee.GetComponentInChildren<SpriteRenderer>().sprite = emp.MySprite;
-
+            Employee_Handler emp_handler = employee.GetComponent<Employee_Handler>();
             // Set the employee class of the Employee Handler
-            if (employee.GetComponent<Employee_Handler>() != null)
+            if (emp_handler != null)
             {
-                employee.GetComponent<Employee_Handler>().DefineEmployee(emp);
+                emp_handler.DefineEmployee(emp);
+
+                // Add components for the 3 stats used to perform actions
+                if (emp_handler.MyEmployee.emp_stats.Extraction > 0)
+                {
+                    AddEmployeeComponent<Employee_Extract>(employee);
+                }
+                if (emp_handler.MyEmployee.emp_stats.Mechanics > 0)
+                {
+                    AddEmployeeComponent<Employee_Mechanics>(employee);
+                }
+                // TODO: Add a Healing action
+                //if (emp_handler.MyEmployee.emp_stats.Healing > 0)
+                //{
+                //    AddEmployeeComponent<Employee_Extract>(employee);
+                //}
+
+
             }
             // Copy the employee's unit stats to the unit stats referenced in its base class
             if (employee.GetComponent<Employee_Attack>() != null)
@@ -186,6 +207,16 @@ public class Employee_Generator : MonoBehaviour {
                 employee.GetComponent<UnitPathHandler>().mStats.InitStartingMoveStats(2, 2);
                 employee.GetComponent<UnitPathHandler>().mStats.InitMoveStats();
             }
+
+            
+        }
+    }
+
+    void AddEmployeeComponent<T>(GameObject empGObj) where T : Component
+    {
+        if (empGObj.GetComponent<T>() == null)
+        {
+            empGObj.AddComponent<T>();
         }
     }
 

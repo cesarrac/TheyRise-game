@@ -17,7 +17,7 @@ public class UI_Manager : MonoBehaviour
 
     Dictionary<string, GameObject> loadedBlueprints = new Dictionary<string, GameObject>();
 
-    public GameObject victoryPanel;
+    public GameObject victoryPanel, abilityButton;
 
     public Text ore_total, water_total, food_total, organics_total;
     public Text ore_new, water_new, food_new, organics_new;

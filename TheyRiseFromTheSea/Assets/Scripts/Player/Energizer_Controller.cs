@@ -43,7 +43,7 @@ public class Energizer_Controller : MonoBehaviour {
             // From the moment the Player hits the Left Mouse while the Energizer is on...
             // ... we check if the tile under mouse is not empty...
 
-            tile = Mouse_Controller.MouseController.GetTileUnderMouse();
+            tile = Mouse_Controller.Instance.GetTileUnderMouse();
             if (tile != null)
             {
                 if (tile.tileType != TileData.Types.empty)

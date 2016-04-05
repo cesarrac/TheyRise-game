@@ -508,7 +508,7 @@ public class ExtractionBuilding : MonoBehaviour {
 
     IEnumerator WaitToConnect()
     {
-        Mouse_Controller mouse_control = Mouse_Controller.MouseController;
+        Mouse_Controller mouse_control = Mouse_Controller.Instance;
 
         while (true)
         {

@@ -9,7 +9,37 @@ public enum EmployeeSpecialty
     Scientist
 }
 
+public class EmployeeStats
+{
+    float workRate;
+    public float WorkRate { get { return workRate; } }
+    float extraction;
+    public float Extraction { get { return extraction; } }
+    float mechanics; // Could work as a Construction & Repair ability?
+    public float Mechanics { get { return mechanics; } }
+    float healing;
+    public float Healing { get { return healing; } }
+    float moveSpeed;
+    public float MoveSpeed { get { return moveSpeed; } }
 
+    float stressResistance; // This is the value all resistance stress checks are made against
+    public float StressResistance { get { return stressResistance; } }
+
+    float stress { get { return stress; } set { Mathf.Clamp(value, 0, 10); } }
+    public float Stress { get { return stress; } }
+
+
+    public EmployeeStats (float rate, float _extraction, float _mechanics, float _healing, float _speed, float _resitance, float _stress = 0)
+    {
+        workRate = rate;
+        extraction = _extraction;
+        mechanics = _mechanics;
+        healing = _healing;
+        moveSpeed = _speed;
+        stressResistance = _resitance;
+        stress = _stress;
+    }
+}
 public class Employee {
 
 
@@ -24,9 +54,7 @@ public class Employee {
     Sprite mySprite;
     public Sprite MySprite { get { return mySprite; } }
 
-    // TODO: Figure out if I want to include their specialty actions here as part of the constructor.
-    // This constructor is probably going to be used when first generating the employee and
-    // when loading from a save file.
+    public EmployeeStats emp_stats { get; protected set; }
 
     public Employee() { }
 
@@ -47,12 +75,19 @@ public class Employee {
 
         mySprite = _sprite;
 
+        //emp_stats = new EmployeeStats(rate);
+
         // TODO: Employee Level? 
         // I can also pair that action logic with some sort of level that the 
         // Player upgrades. Then when re-loading an employee it would get the actions/abilities
         // of their specialty, upgraded with bonuses according to their level.
 
 
+    }
+
+    public void SetEmployeeStats(float extract, float mech, float heal, float speed, float stressResist, float rate = 2f, float stress = 0)
+    {
+        emp_stats = new EmployeeStats(rate, extract, mech, heal, speed, stressResist, stress);
     }
 
 
