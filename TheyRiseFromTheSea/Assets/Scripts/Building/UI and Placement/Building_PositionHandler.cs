@@ -37,7 +37,7 @@ public class Building_PositionHandler : MonoBehaviour {
 
 	public Player_ResourceManager resourceManager;
     //public int currOreCost; // this will charge the resources manager with the cost sent from UI handler
-    public int currNanoBotCost;
+    //public int currNanoBotCost;
 
 	public ObjectPool objPool;
 
@@ -240,9 +240,9 @@ public class Building_PositionHandler : MonoBehaviour {
                     if (CheckCost(multi))
                     {
                         if (canDragBuild)
-                            resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, currNanoBotCost, 0, 0);
+                            resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, 0, 0);
                         else
-                            resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, currNanoBotCost, sr.bounds.size.x, sr.bounds.size.y);
+                            resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, sr.bounds.size.x, sr.bounds.size.y);
                     }
                 }
             }

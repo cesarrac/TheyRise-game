@@ -23,8 +23,8 @@ public class Rock {
 
 	public enum RockProductionType
 	{
-		common,
-		enriched
+		steel,
+		vit
 	}
 
 
@@ -43,11 +43,11 @@ public class Rock {
 	{
         if (_type == RockType.sharp)
         {
-            return RockProductionType.common;
+            return RockProductionType.steel;
         }
         else
         {
-            return RockProductionType.enriched;
+            return RockProductionType.vit;
         }
 	}
 }

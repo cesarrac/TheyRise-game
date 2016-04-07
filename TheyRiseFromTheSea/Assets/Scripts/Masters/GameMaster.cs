@@ -344,7 +344,7 @@ public class GameMaster : MonoBehaviour {
                 break;
             case MissionType.SURVIVAL:
                 // Register Survival checks callback to the Ship Inventory...
-                Ship_Inventory.Instance.RegisterCompleteMissionCallback(Mission_Manager.Instance.CheckSurvivalMissionCompleted);
+               // Ship_Inventory.Instance.RegisterCompleteMissionCallback(Mission_Manager.Instance.CheckSurvivalMissionCompleted);
 
                 // ... then spawn a regular enemy master
                 SpawnEnemyMaster();
@@ -364,14 +364,14 @@ public class GameMaster : MonoBehaviour {
 
     void SpawnEnemyMaster()
     {
-        //GameObject em = ObjectPool.instance.GetObjectForType("Default Enemy Master", true, Vector3.zero);
+        GameObject em = ObjectPool.instance.GetObjectForType("Default Enemy Master", true, Vector3.zero);
 
-        //if (em != null)
-        //{
-        //    Enemy_Master master = em.GetComponent<Enemy_Master>();
-        //    if (master != null)
-        //        master.Initialize();
-        //}
+        if (em != null)
+        {
+            Enemy_Master master = em.GetComponent<Enemy_Master>();
+            if (master != null)
+                master.Initialize(Mission_Manager.Instance.ActiveMission.ObjectiveAmnt);
+        }
 
     }
 
@@ -407,7 +407,7 @@ public class GameMaster : MonoBehaviour {
     public void LaunchToPlanet()
     {
         // Before Launching make sure that the Hero's nanobuilder contains the active mission's required blueprint!
-        BlueprintDatabase.Instance.InitRequiredBlueprint();
+        //BlueprintDatabase.Instance.InitRequiredBlueprint();
 
         SceneManager.LoadScene("Level_Planet");
     }
@@ -487,8 +487,14 @@ public class GameMaster : MonoBehaviour {
 
     public void LoadLauncherScene()
     {
-        SceneManager.LoadScene("Level_Launch");
-
+        // NOTE: Only allowing to go to the Launch scene IF
+        // the current active mission is not null and is not flagged as completed
+        if (Mission_Manager.Instance.ActiveMission != null && Mission_Manager.Instance.ActiveMission.IsCompleted == false)
+            SceneManager.LoadScene("Level_Launch");
+        else
+        {
+            UI_Manager.Instance.DisplayWarningMessage("Need a Mission first!");
+        }
     }
     // DURING A LEVEL:
 

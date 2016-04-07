@@ -17,7 +17,7 @@ public class BlueprintDatabase : MonoBehaviour {
     // FIX THIS! 
     // public int maxBPAllowed = 3;
 
-    // List<Blueprint> selectedBlueprints = new List<Blueprint>();
+    List<Blueprint> reserchedBlueprints;
 
     public int shipLvlIndex = 0, planetLvlIndex = 1, inventoryLvlIndex = 2;
 
@@ -40,23 +40,27 @@ public class BlueprintDatabase : MonoBehaviour {
             DestroyImmediate(gameObject);
         }
 
-
+        // If this is a New Game, the blueprints need to be initialized
         if (blueprintsMap == null)
         {
             Init();
             InitExtractors();
             InitBattleTowers();
         }
-
-
     }
 
+    // NOTE: Start only gets called the first time we enter the Center Level
     void Start()
     {
         hero_nanoBuilder = GameMaster.Instance.theHero.nanoBuilder;
 
+        // If this is a New Game, initialize the Nano Builder with the starting blueprints
+        if (hero_nanoBuilder.blueprintsMap.Count == 0)
+        {
+            AddStartingBlueprints();
+        }
 
-        //// Check if this is the firs time we load the Blueprint screen. If it is we need to load the Terraformer unto the Hero's blueprints map.
+        //// Check if this is the first time we load the Blueprint screen. If it is we need to load the Terraformer unto the Hero's blueprints map.
         //if (!hero_nanoBuilder.CheckForBlueprint(TileData.Types.terraformer))
         //{
         //    // As soon as we have access to the Hero, the first blueprint to load into it would be the Terraformer (this assumes BP database has been Initialized)
@@ -64,7 +68,7 @@ public class BlueprintDatabase : MonoBehaviour {
         //    Debug.Log("Hero added blueprint for " + blueprintsMap["Terraformer"].buildingName);
         //}
 
-        InitRequiredBlueprint();
+        //InitRequiredBlueprint();
 
         // If we are on the Inventory/Blueprint Loader scene, we should display the memory count on the Hero's nanobuilder
         //if (SceneManager.GetActiveScene().name == "Level_CENTRAL")
@@ -72,60 +76,63 @@ public class BlueprintDatabase : MonoBehaviour {
         //    LoadAllBlueprints();
         //    //DisplayBuilderMemory();
         //}
-    }
 
+    }
 
 
     // The required Blueprint is dependant on the current active mission
-    public void InitRequiredBlueprint()
-    {
-        LoadAllBlueprints();
+    //public void InitRequiredBlueprint()
+    //{
+    //    LoadAllBlueprints();
 
-        //if (Mission_Manager.Instance.ActiveMission != null)
-        //{
-        //    // Check if a previous mission had added a Required Blueprint
-        //    if (lastRequired != null)
-        //    {
-        //        // ... Check if the new required Blueprint is NOT of the same type as the old ...
-        //        if (lastRequired.tileType != Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType)
-        //        {
-        //            // ... If it's NOT of the same type, the last one needs to be removed from data...
-        //            hero_nanoBuilder.RemoveBlueprint(lastRequired.tileType);
-        //            // ... and from UI...
-        //            UI_Manager.Instance.RemoveBlueprintTextFromBuilder(lastRequired.buildingName);
+    //    //if (Mission_Manager.Instance.ActiveMission != null)
+    //    //{
+    //    //    // Check if a previous mission had added a Required Blueprint
+    //    //    if (lastRequired != null)
+    //    //    {
+    //    //        // ... Check if the new required Blueprint is NOT of the same type as the old ...
+    //    //        if (lastRequired.tileType != Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType)
+    //    //        {
+    //    //            // ... If it's NOT of the same type, the last one needs to be removed from data...
+    //    //            hero_nanoBuilder.RemoveBlueprint(lastRequired.tileType);
+    //    //            // ... and from UI...
+    //    //            UI_Manager.Instance.RemoveBlueprintTextFromBuilder(lastRequired.buildingName);
 
-        //            // ... and the new one ADDED.
-        //            if (!hero_nanoBuilder.CheckForBlueprint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType))
-        //            {
-        //                hero_nanoBuilder.AddBluePrint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType,
-        //                                             blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.buildingName]);
+    //    //            // ... and the new one ADDED.
+    //    //            if (!hero_nanoBuilder.CheckForBlueprint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType))
+    //    //            {
+    //    //                hero_nanoBuilder.AddBluePrint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType,
+    //    //                                             blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.buildingName]);
 
-        //                // ... and set it as the last required for next time.
-        //                lastRequired = Mission_Manager.Instance.ActiveMission.RequiredBlueprint;
-        //            }
-        //        }
+    //    //                // ... and set it as the last required for next time.
+    //    //                lastRequired = Mission_Manager.Instance.ActiveMission.RequiredBlueprint;
+    //    //            }
+    //    //        }
 
-        //        // ... If they ARE of the same type then nothing remains to be done because the BP is already loaded.
-        //    }
-        //    else
-        //    {
-        //        // In the case of last required being null (no previous missions have loaded anything yet!), add bp as normal...
-        //        if (!hero_nanoBuilder.CheckForBlueprint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType))
-        //        {
-        //            hero_nanoBuilder.AddBluePrint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType,
-        //                                         blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.buildingName]);
+    //    //        // ... If they ARE of the same type then nothing remains to be done because the BP is already loaded.
+    //    //    }
+    //    //    else
+    //    //    {
+    //    //        // In the case of last required being null (no previous missions have loaded anything yet!), add bp as normal...
+    //    //        if (!hero_nanoBuilder.CheckForBlueprint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType))
+    //    //        {
+    //    //            hero_nanoBuilder.AddBluePrint(Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType,
+    //    //                                         blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.buildingName]);
 
-        //            // ... and set it as the last required for next time.
-        //            lastRequired = Mission_Manager.Instance.ActiveMission.RequiredBlueprint;
-        //        }
-        //    }
-     
-
-        //    Debug.Log("BP Database: Initialized the required Blueprint for the active mission!");
-        //}
-    }
+    //    //            // ... and set it as the last required for next time.
+    //    //            lastRequired = Mission_Manager.Instance.ActiveMission.RequiredBlueprint;
+    //    //        }
+    //    //    }
 
 
+    //    //    Debug.Log("BP Database: Initialized the required Blueprint for the active mission!");
+    //    //}
+    //}
+
+    // *********************************************************************************************
+    //                      INITIALIZE BLUEPRINTS
+    // *********************************************************************************************
+    // Initializes all Blueprints in the game
     public void Init()
     {
         blueprintsMap = new Dictionary<string, Blueprint>
@@ -140,7 +147,8 @@ public class BlueprintDatabase : MonoBehaviour {
             {"Seaweed Farm",  new Blueprint("Seaweed Farm", 3, 10, TileData.Types.farm_s, BuildingType.UTILITY, new BuildRequirement(TileData.Types.rock, 20),"Plant seed, harvest food!")},
             {"Storage", new Blueprint("Storage", 3, 10, TileData.Types.storage, BuildingType.UTILITY, new BuildRequirement(TileData.Types.rock, 20),"Store things and send them to ship automatically!") },
             {"Machine Gun", new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun, BuildingType.BATTLE, new BuildRequirement(TileData.Types.rock, 10),"Short distance, fast firing rate, single target acquisition.") },
-            {"Plastic Wall", new Blueprint("Plastic Wall", 3, 10, TileData.Types.wall, BuildingType.BATTLE, new BuildRequirement(TileData.Types.rock, 10), "A little better than a child's toy fort.") }
+            {"Plastic Wall", new Blueprint("Plastic Wall", 3, 10, TileData.Types.wall, BuildingType.BATTLE, new BuildRequirement(TileData.Types.rock, 10), "A little better than a child's toy fort.") },
+            {"Extractor MkII",  new Blueprint("Extractor MkII", 3, 10, TileData.Types.extractor,BuildingType.UTILITY, new BuildRequirement(TileData.Types.rock, 20),"Dig and Mine ore and Dirt with this wonderful piece of machinery.") },
         };
 
         InitExtractors();
@@ -171,6 +179,9 @@ public class BlueprintDatabase : MonoBehaviour {
         battleTowersMap.Add("Terraformer", new Blueprint_Battle(0, 0, 0, 0, 2500, 0, 2, 0));
         battleTowersMap.Add("Plastic Wall", new Blueprint_Battle(0, 0, 0, 0, 20, 0, 1, 0));
     }
+    // *********************************************************************************************
+    //                              ACCESSORS FOR BLUEPRINT STATS
+    // *********************************************************************************************
 
     public void GetExtractorStats(string id, Transform objTransform, ExtractionBuilding extractor, TileData.Types resourceType)
     {
@@ -224,7 +235,57 @@ public class BlueprintDatabase : MonoBehaviour {
             return BuildingType.NONE;
     }
 
-    // LOADER
+    // *********************************************************************************************
+    //                              HERO NANOBUILDER (LOADING BP'S & RESEARCH)
+    // *********************************************************************************************
+    // Adds the Starting Blueprints for a New Game
+    void AddStartingBlueprints()
+    {
+        // Initialize Researched blueprints with starting bp's 
+        reserchedBlueprints = new List<Blueprint>();
+        reserchedBlueprints.Add(blueprintsMap["Machine Gun"]);
+        reserchedBlueprints.Add(blueprintsMap["Extractor"]);
+
+        if (hero_nanoBuilder != null)
+        {
+            hero_nanoBuilder.AddBluePrint(reserchedBlueprints[0].tileType, reserchedBlueprints[0]);
+            hero_nanoBuilder.AddBluePrint(reserchedBlueprints[1].tileType, reserchedBlueprints[1]);
+        }
+    }
+    void LoadAllBlueprints()
+    {
+        foreach (Blueprint bp in reserchedBlueprints)
+        {
+            hero_nanoBuilder.AddBluePrint(bp.tileType, bp);
+        }
+    }
+    void AddLoadedBlueprintToNanoBuilder()
+    {
+        if (hero_nanoBuilder.CheckForBlueprint(curSelectedBP.tileType))
+        {
+            Debug.LogError("Nanobuilder already contains a blueprint for: " + curSelectedBP.buildingName);
+            return;
+        }
+        // Spawn a Text prefab, fill its text with the correct blueprint name, and parent it to the Builder's panel
+        UI_Manager.Instance.AddBlueprintToBuilder(curSelectedBP.buildingName);
+
+        // Actually load it to the Hero's nanobuilder
+        hero_nanoBuilder.AddBluePrint(curSelectedBP.tileType, curSelectedBP);
+
+        DisplayBuilderMemory();
+
+        // Debug.Log("Hero loaded blueprint for: " + curSelectedBP.buildingName);
+
+    }
+    public void ResetNanoBuilder()
+    {
+        hero_nanoBuilder.RemoveAllLoadedBlueprints();
+        UI_Manager.Instance.RemoveAllBlueprintsText();
+    }
+
+    // *********************************************************************************************
+    //                              METHODS FOR BLUEPRINT UI SYSTEM
+    // *********************************************************************************************
 
     // This will Display the Selected Blueprint's info and store it's info in case the Player decides to Load it to the Builder
     public void SelectBlueprint(string bpType)
@@ -245,14 +306,6 @@ public class BlueprintDatabase : MonoBehaviour {
         UI_Manager.Instance.DisplayBPInfo(curSelectedBP.buildingName, curSelectedBP.description);
     }
 
-    void LoadAllBlueprints()
-    {
-        foreach (Blueprint bp in blueprintsMap.Values)
-        {
-            hero_nanoBuilder.AddBluePrint(bp.tileType, bp);
-        }
-    }
-
     // Player presses the Load button
     public void LoadBlueprint()
     {
@@ -265,39 +318,8 @@ public class BlueprintDatabase : MonoBehaviour {
                 AddLoadedBlueprintToNanoBuilder();
             }
         }
-        //if (curSelectedBP != null && selectedBlueprints.Count < maxBPAllowed)
-        //{
-        //    if (!selectedBlueprints.Contains(curSelectedBP))
-        //    {
-        //        Debug.Log("Adding this blueprint.");
-        //        selectedBlueprints.Add(curSelectedBP);
-
-        //        // Add to Builder
-       
-        //    }
-         
-        //}
     }
-
-    void AddLoadedBlueprintToNanoBuilder()
-    {
-        if (hero_nanoBuilder.CheckForBlueprint(curSelectedBP.tileType))
-        {
-            Debug.LogError("Nanobuilder already contains a blueprint for: " + curSelectedBP.buildingName);
-            return;
-        }
-        // Spawn a Text prefab, fill its text with the correct blueprint name, and parent it to the Builder's panel
-        UI_Manager.Instance.AddBlueprintToBuilder(curSelectedBP.buildingName);
-
-        // Actually load it to the Hero's nanobuilder
-        hero_nanoBuilder.AddBluePrint(curSelectedBP.tileType, curSelectedBP);
-
-        DisplayBuilderMemory();
-
-       // Debug.Log("Hero loaded blueprint for: " + curSelectedBP.buildingName);
-
-    }
-
+    // Central Level scene is Loaded and UI needs to re-display the Loaded Blueprints
     public void ReloadPreviousLoaded()
     {
         if (hero_nanoBuilder != null)
@@ -305,25 +327,18 @@ public class BlueprintDatabase : MonoBehaviour {
             if (hero_nanoBuilder.blueprintsMap.Count > 0)
             {
                 // The Hero already has Blueprints loaded unto their Builder, so those need to be displayed by the UI Manager
-                ReloadOnNanoBuilder();
+                ReloadFromNanoBuilder();
             }
         }
 
     }
 
-    void ReloadOnNanoBuilder()
+    void ReloadFromNanoBuilder()
     {
-       // Debug.Log("Reloading Hero Bluerprints...");
         if (hero_nanoBuilder.blueprintsMap.Count > 0)
         {
             foreach(TileData.Types btype in hero_nanoBuilder.bpTypes)
             {
-                //// Do not load the Terraformer since it is a Blueprint that is loaded by default
-                //if (btype == TileData.Types.terraformer)
-                //{
-                //    continue;
-                //}
-
                 UI_Manager.Instance.AddBlueprintToBuilder(hero_nanoBuilder.blueprintsMap[btype].buildingName);
             }
 
@@ -363,27 +378,15 @@ public class BlueprintDatabase : MonoBehaviour {
         DisplayBuilderMemory();
     }
 
-    public void ResetNanoBuilder()
-    {
-        // Removes all currently loaded blueprints, except the one REQUIRED by the current mission
-        //foreach(Blueprint bp in hero_nanoBuilder.blueprintsMap.Values)
-        //{
-        //    if (bp != Mission_Manager.Instance.ActiveMission.RequiredBlueprint)
-        //    {
-        //        hero_nanoBuilder.RemoveBlueprint(bp.tileType);
-        //    }
-        //}
-        hero_nanoBuilder.RemoveAllLoadedBlueprints();
-        UI_Manager.Instance.RemoveAllBlueprintsText();
-    }
-
     void DisplayBuilderMemory()
     {
         // Display the memory count on the Hero's nanobuilder
         UI_Manager.Instance.DisplayNanoBuilderMemory(hero_nanoBuilder.cur_memory, hero_nanoBuilder.memoryBank);
     }
 
-    // UPGRADES:
+    // *********************************************************************************************
+    //                              BLUEPRINT RESEARCH & UPGRADES
+    // *********************************************************************************************
 
     public void UpgradeBattleBPAmmo(string id, int newAmmo)
     {

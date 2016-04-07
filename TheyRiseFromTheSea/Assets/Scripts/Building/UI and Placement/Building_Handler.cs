@@ -56,7 +56,7 @@ public class Building_Handler : MonoBehaviour {
     public State debugState;
 
 	NanoBuilding_Handler nano_builder; // this will allow the building to give back the nanobots when sold, getting it from resourceGrid
-    public int nanoBotCost;
+   // public int nanoBotCost;
 	int nanoBotsCreated = 0;
 	int nanoBotsNeeded = 10; // CHANGE THIS TO COST !!
 
@@ -310,7 +310,7 @@ public class Building_Handler : MonoBehaviour {
         // Unregister the tower for the Enemy master
         ResourceGrid.Grid.RemoveTowerBuiltForEnemyMaster(transform);
 
-        ResourceGrid.Grid.SwapTileType(myTile.posX, myTile.posY, TileData.Types.empty, "Empty", myTile.tileStats.NanoBotCost);
+        ResourceGrid.Grid.SwapTileType(myTile.posX, myTile.posY, TileData.Types.empty, "Empty");
 
         Sound_Manager.Instance.PlaySound("Build Break");
 
@@ -416,9 +416,9 @@ public class Building_Handler : MonoBehaviour {
 	}
 
 
-    public void BreakBuilding(int _nanoBotCost)
+    public void BreakBuilding()
     {
-        nanoBotCost = _nanoBotCost;
+        //nanoBotCost = _nanoBotCost;
         // nanoBotsNeeded = nanoBotCost / 10;
 
         if (_state == State.READY)

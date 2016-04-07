@@ -28,7 +28,7 @@ public class MeshRendererSortingLayersEditor : Editor
         SerializedProperty sortingLayerID = serializedObject.FindProperty("m_SortingLayerID");
         SerializedProperty sortingOrder = serializedObject.FindProperty("m_SortingOrder");
 
-        MeshRenderer renderer = target as MeshRenderer;
+        //MeshRenderer renderer = target as MeshRenderer;
 
         Rect firstHoriz = EditorGUILayout.BeginHorizontal();
 

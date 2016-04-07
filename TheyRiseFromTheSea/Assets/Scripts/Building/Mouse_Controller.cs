@@ -218,6 +218,8 @@ public class Mouse_Controller:MonoBehaviour
                     spawned_selectBox = Instantiate(unitSelectionBox, hit.transform.position, Quaternion.identity) as GameObject;
 
                     selected_Employee.SelectEmployee();
+
+                    Sound_Manager.Instance.PlaySound("Select");
                 }
 
             }

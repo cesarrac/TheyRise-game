@@ -108,7 +108,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
         // Since this is the last step in initializing the Blueprints, set this here
 
         //selectedBluePrint = availableBlueprints[TileData.Types.terraformer];
-        selectedBluePrint = NanoBuilder.blueprintsMap[Mission_Manager.Instance.ActiveMission.RequiredBlueprint.tileType];
+        selectedBluePrint = NanoBuilder.blueprintsMap[TileData.Types.machine_gun];
 
         if (selectedBluePrint == null)
         {
@@ -322,7 +322,17 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
             foreach (TileData.Types resource in bp.buildReq.reqResourcesMap.Keys)
             {
-                Ship_Inventory.Instance.ReceiveTemporaryResources(resource, bp.buildReq.reqResourcesMap[resource] * multiplier);
+                if (bp.buildReq.reqResourcesMap[resource] <= 0)
+                    continue;
+
+                if (resource == TileData.Types.rock)
+                {
+                    Ship_Inventory.Instance.ReceiveTempRock(bp.buildReq.reqResourcesMap[resource] * multiplier, Rock.RockProductionType.steel);
+                }
+                else
+                {
+                    Ship_Inventory.Instance.ReceiveTemporaryResources(resource, bp.buildReq.reqResourcesMap[resource] * multiplier);
+                }
             }
         }
     }
@@ -353,7 +363,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
         Blueprint bp = GetAvailableBlueprint(_type);
         Building_Handler b_Handler = building.GetComponent<Building_Handler>();
         if (bp != null)
-            b_Handler.BreakBuilding(bp.nanoBotCost);
+            b_Handler.BreakBuilding();
     }
 
     public Blueprint GetAvailableBlueprint(TileData.Types _type)

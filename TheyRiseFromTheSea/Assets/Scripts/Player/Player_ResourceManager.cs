@@ -764,7 +764,7 @@ public class Player_ResourceManager : MonoBehaviour {
 	{
 		Rock.RockProductionType rockPType = rock._rockProductionType;
 		switch (rockPType) {
-		case Rock.RockProductionType.enriched:
+		case Rock.RockProductionType.vit:
 			// Add ammount to list of enriched
 			for (int e = 0; e <= ammount; e++)
 			{
@@ -773,7 +773,7 @@ public class Player_ResourceManager : MonoBehaviour {
 			// add ammount to total Ore
 			ore += ammount;
 			break;
-		case Rock.RockProductionType.common:
+		case Rock.RockProductionType.steel:
 			// Add ammount to list of common
 			for (int e = 0; e <= ammount; e++)
 			{

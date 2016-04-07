@@ -28,7 +28,7 @@ public class LineRendererSortingLayerEditor : Editor
         SerializedProperty sortingLayerID = serializedObject.FindProperty("m_SortingLayerID");
         SerializedProperty sortingOrder = serializedObject.FindProperty("m_SortingOrder");
 
-        LineRenderer renderer = target as LineRenderer;
+        //LineRenderer renderer = target as LineRenderer;
 
         Rect firstHoriz = EditorGUILayout.BeginHorizontal();
 

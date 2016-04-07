@@ -7,21 +7,45 @@ public class Mission_Database  {
     public List<Mission> scienceMissions = new List<Mission>();
     public List<Mission> encounterMissions = new List<Mission>();
 
+    public List<string> nameStarts;
+    public List<string> nameEnds;
+
     public Mission_Database() { }
 
     public void InitMissions()
     {
         survivalMissions = new List<Mission>()
         {
-            new Mission("Food Run", MissionType.SURVIVAL, new Blueprint("Seaweed Farm", TileData.Types.farm_s, BuildingType.UTILITY)),
-            new Mission("Water Run", MissionType.SURVIVAL, new Blueprint("Desalination Pump", TileData.Types.desalt_s, BuildingType.UTILITY), TileData.Types.water, 200),
-            new Mission("Collect Rock Samples", MissionType.SURVIVAL, new Blueprint("Extractor", TileData.Types.extractor, BuildingType.UTILITY), TileData.Types.rock, 500)
+            new Mission("I sea", MissionType.SURVIVAL, 4),
+            new Mission("Oh el Capitan, mi Capitan", MissionType.SURVIVAL, 6),
+            new Mission("Fin-ito", MissionType.SURVIVAL, 10),
+            new Mission("Don't feed the fish", MissionType.SURVIVAL, 10),
+            new Mission("Brake for algae", MissionType.SURVIVAL, 10),
+            new Mission("Reefur Madness", MissionType.SURVIVAL, 10),
+            new Mission("Aquatwister", MissionType.SURVIVAL, 10),
+            new Mission("That's no shark", MissionType.SURVIVAL, 10),
+            new Mission("Oh My, Fishsticks", MissionType.SURVIVAL, 10),
+            new Mission("Deeper Horizons", MissionType.SURVIVAL, 10),
+            new Mission("Mauve Submarine", MissionType.SURVIVAL, 10),
+            new Mission("School of Bubbles", MissionType.SURVIVAL, 10)
         };
 
         scienceMissions = new List<Mission>()
         {
-            new Mission("Scan Bio Samples", MissionType.SCIENCE, new Blueprint("Sea-Witch Crag", TileData.Types.desalt_s, BuildingType.UTILITY)),
-            new Mission("Reshape the Environment", MissionType.SCIENCE, new Blueprint("Terraformer", TileData.Types.terraformer, BuildingType.UTILITY), 3)
+            new Mission("Scan My Samples", MissionType.SCIENCE, 4),
+            new Mission("Regretful Waters", MissionType.SCIENCE, 10),
+            new Mission("Calm Waters", MissionType.SCIENCE, 10),
+            new Mission("Chase Waterfalls", MissionType.SCIENCE, 10),
+            new Mission("Don't forget the tartar", MissionType.SCIENCE, 10),
+            new Mission("Squidz 4 Life", MissionType.SCIENCE, 10),
+            new Mission("Human sea-sources", MissionType.SCIENCE, 10),
+            new Mission("Gone with the Fishes", MissionType.SCIENCE, 10),
+            new Mission("Lovely Isn't it?", MissionType.SCIENCE, 10),
+            new Mission("Choppy, Choppy", MissionType.SCIENCE, 10),
+            new Mission("Row, row, row", MissionType.SCIENCE, 10),
+            new Mission("Hold your breath", MissionType.SCIENCE, 10),
+            new Mission("Fishing for an insult", MissionType.SCIENCE, 10),
+            new Mission("Swimming Downstream", MissionType.SCIENCE, 10)
         };
 
         encounterMissions = new List<Mission>()
@@ -29,21 +53,92 @@ public class Mission_Database  {
             new Mission("Boss Fight!", MissionType.ENCOUNTER, new Blueprint("Machine Gun", TileData.Types.machine_gun, BuildingType.BATTLE))
         };
 
+        InitNameLists();
     }
 
-    public Mission GetMission(MissionType mType)
+    public Mission GetMission(MissionType mType, string lastMissionName = "none")
     {
+        // TODO: Check what the Last returned mission was (if any) and try to return a mission that 
+        // does NOT have the same name. 
+        
+
         if (mType == MissionType.SCIENCE)
         {
-           return scienceMissions[Random.Range(0, scienceMissions.Count)];
+            int select = Random.Range(0, scienceMissions.Count);
+            if (lastMissionName != "none")
+            {
+                if (scienceMissions[select].MissionName == lastMissionName)
+                {
+                    scienceMissions[select].ChangeName(NameGenerator());
+                    return scienceMissions[select];
+                }
+                else
+                    return scienceMissions[select];
+            }
+            else
+            {
+                return scienceMissions[select];
+            }
+    
         }
         else if (mType == MissionType.SURVIVAL)
         {
-            return survivalMissions[Random.Range(0, survivalMissions.Count)];
+            int select = Random.Range(0, survivalMissions.Count);
+            if (lastMissionName != "none")
+            {
+                if (survivalMissions[select].MissionName == lastMissionName)
+                {
+                    survivalMissions[select].ChangeName(NameGenerator());
+                    return survivalMissions[select];
+                }
+                else
+                    return survivalMissions[select];
+            }
+            else
+                return survivalMissions[select];
         }
         else
         {
             return encounterMissions[Random.Range(0, encounterMissions.Count)];
         }
     }
-}
+
+
+    void InitNameLists()
+    {
+        nameStarts = new List<string>()
+        {
+            "Zalda",
+            "Crystalline",
+            "Stey Treewhan",
+            "Plifrah Geoffromy",
+            "Kin",
+            "Ondreon",
+            "Blene"
+        };
+
+        nameEnds = new List<string>()
+        {
+            "Nah Uquo",
+            "Ime Shent",
+            "Torf Eppie",
+            "Thest Essexia",
+            "Ulo Ell",
+            "Ondreon"
+        };
+    }
+
+    string NameGenerator()
+    {
+        int selectOne = Random.Range(0, nameStarts.Count);
+        int selectTwo = Random.Range(0, nameEnds.Count);
+
+        return nameStarts[selectOne] + " " + nameEnds[selectTwo];
+    }
+    
+
+
+
+
+}   
+

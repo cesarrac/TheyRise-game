@@ -35,22 +35,45 @@ public class Mission{
     TileData.Types objectiveResource;
     public TileData.Types ObjectiveResource { get { return objectiveResource; } }
 
+    // The # of waves you have to survive during this mission (unless its an ENCOUNTER)
     int objectiveAmnt;
     public int ObjectiveAmnt { get { return objectiveAmnt; } }
 
+    // NOTE: Am I going to leave this stages option here? This allows us to create missions where you have to defend
+    // a machine (i.e. the Terraformer) while it completes stages of production. -- ????
     int objectiveStages;
     public int ObjectiveStages { get { return objectiveStages; } }
 
+    // This is to know what unit(s) to spawn for the encounter
     string encounterID;
     public string EncounterID { get { return encounterID; } }
 
     // Callback to register a completed mission
     private Action<Mission> completeMissionCB;
 
-    // Callback for Survival Missions:
-    // Called to check if the resource gathering objective has been completed
 
     public Mission() { }
+
+    // Copy Constructor
+    public Mission (Mission otherMission)
+    {
+        missionName = otherMission.missionName;
+        missionType = otherMission.missionType;
+        description = otherMission.description;
+        objectiveAmnt = otherMission.objectiveAmnt;
+
+    }
+
+    // MAIN MISSION CONSTRUCTOR (total num of waves determines Completion)
+    public Mission(string name, MissionType mType, int numOfWaves, string desc = "Survive!")
+    {
+        missionName = name;
+        missionType = mType;
+
+        description = desc;
+
+        objectiveAmnt = numOfWaves;
+    }
 
     public Mission(string name, MissionType mType, Blueprint requiredBP, string desc = "Unknown Signal")
     {
@@ -59,6 +82,7 @@ public class Mission{
         requiredBlueprint = requiredBP;
         description = desc;
     }
+
 
     // Survival Mission:
     public Mission(string name, MissionType mType, Blueprint requiredBP, TileData.Types reqResource, int reqAmnt, string desc = "Unknown Signal")
@@ -102,6 +126,11 @@ public class Mission{
     public void UnRegisterMissionCompleteCallback()
     {
         completeMissionCB = null;
+    }
+
+    public void ChangeName(string newName)
+    {
+        missionName = newName;
     }
 }
 

@@ -44,7 +44,7 @@ public class Blueprint_Battle : Blueprint {
         unitStats = new UnitStats();
         unitStats.InitStartingStats(hp, defense, attk, shield, rate, damage, 0);
         unitStats.Init();
-        tileStats = new TileStats(hp, defense, attk, shield, nanoBotCost);
+        tileStats = new TileStats(hp, defense, attk, shield);
     }
 
     public void UpgradeAmmo(int newAmmo)

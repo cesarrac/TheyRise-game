@@ -9,7 +9,7 @@ public class Ship_Inventory : MonoBehaviour {
 	public static Ship_Inventory Instance { get; protected set; }
 
     public int waterStored { get; protected set; }
-    public int oreStored { get; protected set; }
+    public int steelStored { get; protected set; }
     public int foodStored { get; protected set; }
     public int organicsStored { get; protected set; }
 
@@ -21,15 +21,12 @@ public class Ship_Inventory : MonoBehaviour {
 
     public int storageTotal { get; protected set; }
 
-    public int commonOreStored { get; protected set; }
-    public int enrichedOreStored { get; protected set; }
 
     // ## Use this to create a temporary inventory that gets added to ship inventory only once Player launches (succeeds in Terraforming)
     public int tempWater { get; protected set; }
-    public int tempOre { get; protected set; }
     public int tempFood { get; protected set; }
-    public int tempCommorOre { get; protected set; }
-    public int tempEnrichedOre { get; protected set; }
+    public int tempSteel { get; protected set; }
+    public int tempVit { get; protected set; }
     public int tempOrganics { get; protected set; }
 
 
@@ -46,6 +43,8 @@ public class Ship_Inventory : MonoBehaviour {
 
     Action missionCompletedCB;
     Action dailyChargeFailCB, dailyChargeSuccessCB;
+
+    public int vitCrystalsSold { get; protected set; }
 
     void Awake()
     {
@@ -100,11 +99,6 @@ public class Ship_Inventory : MonoBehaviour {
                 if (ammnt != 0)
                     Player_UIHandler.instance.DisplayTransporterStorage(rType, tempWater);
                 break;
-            case TileData.Types.rock:
-                tempOre += ammnt;
-                if (ammnt != 0)
-                    Player_UIHandler.instance.DisplayTransporterStorage(rType, tempOre);
-                break;
             case TileData.Types.food:
                 tempFood += ammnt;
                 if (ammnt != 0)
@@ -124,6 +118,19 @@ public class Ship_Inventory : MonoBehaviour {
         }
     }
 
+    public void ReceiveTempRock(int ammnt, Rock.RockProductionType rockType)
+    {
+        if (rockType == Rock.RockProductionType.steel)
+        {
+            tempSteel += ammnt;
+            Player_UIHandler.instance.DisplayTransporterStorage(TileData.Types.rock, tempSteel);
+        }
+        else if (rockType == Rock.RockProductionType.vit)
+        {
+            tempVit += ammnt;
+        }
+    }
+
     public void StoreItems(TileData.Types rType, int ammnt)
     {
         if (rawResourcesMap.ContainsKey(rType))
@@ -139,12 +146,12 @@ public class Ship_Inventory : MonoBehaviour {
         storageTotal += ammnt;
     }
 
-    public void SplitOre(int common, int enriched)
-    {
-        commonOreStored += common;
-        enrichedOreStored += enriched;
-       // Debug.Log("Ore has been split! Common = " + commonOreStored + " Enriched = " + enrichedOreStored);
-    }
+    //public void SplitOre(int common, int enriched)
+    //{
+    //    tempSteelStored += common;
+    //    tempVitStored += enriched;
+    //    Debug.Log("Ore has been split! Common = " + commonOreStored + " Enriched = " + enrichedOreStored);
+    //}
 
     public int CheckForSpecificResource(TileData.Types resource, bool checkTemp = false)
     {
@@ -165,7 +172,7 @@ public class Ship_Inventory : MonoBehaviour {
                     ammnt = tempWater;
                     break;
                 case TileData.Types.rock:
-                    ammnt = tempOre;
+                    ammnt = tempSteel;
                     break;
                 case TileData.Types.food:
                     ammnt = tempFood;
@@ -194,7 +201,7 @@ public class Ship_Inventory : MonoBehaviour {
                     }
                     break;
                 case TileData.Types.rock:
-                    if (tempOre >= ammnt)
+                    if (tempSteel >= ammnt)
                     {
                         containsResource = true;
                     }
@@ -234,20 +241,32 @@ public class Ship_Inventory : MonoBehaviour {
     {
         waterStored += tempWater;
 
-        oreStored += tempOre;
+        AutoSellVitCrystals();
+
+        steelStored += tempSteel;
 
         foodStored += tempFood;
 
         StoreItems(TileData.Types.water, tempWater);
-        StoreItems(TileData.Types.rock, tempOre);
+        StoreItems(TileData.Types.rock, tempSteel);
         StoreItems(TileData.Types.food, tempFood);
 
-        commonOreStored += tempCommorOre;
-        enrichedOreStored += tempEnrichedOre;
 
-        UnRegisterCompleteMissionCallback();
+        //UnRegisterCompleteMissionCallback();
     }
 
+    void AutoSellVitCrystals()
+    {
+        vitCrystalsSold = tempVit;
+        Debug.Log("Selling " + tempVit + " VIT Crystals!");
+        tempVit = 0;
+       
+    }
+
+    public void ConfirmVitCrystalsSold()
+    {
+        vitCrystalsSold = 0;
+    }
 
 
     public int DisplayResourceAmount(TileData.Types key)
@@ -268,7 +287,7 @@ public class Ship_Inventory : MonoBehaviour {
 
         if (SceneManager.GetActiveScene().name == "Level_Planet")
         {
-            Player_UIHandler.instance.InitTransporterTempInventory(tempFood, tempWater, tempOre);
+            Player_UIHandler.instance.InitTransporterTempInventory(tempFood, tempWater, tempSteel);
         }
 
     }
@@ -277,10 +296,10 @@ public class Ship_Inventory : MonoBehaviour {
     {
 
         tempWater = 0;
-        tempOre = 0;
         tempFood = 0;
-        tempCommorOre = 0;
-        tempEnrichedOre = 0;
+        tempSteel = 0;
+        tempVit = 0;
+        vitCrystalsSold = 0;
     }
 
 
@@ -335,8 +354,8 @@ public class Ship_Inventory : MonoBehaviour {
                 Player_UIHandler.instance.DisplayTransporterStorage(resource, tempWater);
                 break;
             case TileData.Types.rock:
-                tempOre -= ammnt;
-                Player_UIHandler.instance.DisplayTransporterStorage(resource, tempOre);
+                tempSteel -= ammnt;
+                Player_UIHandler.instance.DisplayTransporterStorage(resource, tempSteel);
                 break;
             case TileData.Types.food:
                 tempFood -= ammnt;

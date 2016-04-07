@@ -79,6 +79,9 @@ public class Enemy_Master : MonoBehaviour {
 
     public float waitTime = 30f;
 
+    int totalWavesThisLevel = 1; // each wave has a total of max units cap (This is set by the GM)
+    int curWavesTotal = 0;
+
     void Awake()
     {
         utilityModifier = Mathf.Clamp(utilityModifier, 0, 4);
@@ -155,8 +158,10 @@ public class Enemy_Master : MonoBehaviour {
     // To sort tasks by score they each need to be applied to this formula:
     // Assignment Priority Score = (4 - (general score + modifier)) / distance to target
 
-    public void Initialize()
+    public void Initialize(int totalWaves)
     {
+        totalWavesThisLevel = totalWaves;
+
         // At init wait 5 seconds before starting to indicate first enemies
         StartCoroutine(WaitToAct(waitTime, true));
     }
@@ -182,6 +187,11 @@ public class Enemy_Master : MonoBehaviour {
         while (true)
         {
             yield return new WaitForSeconds(time);
+
+            // Stop making decisions if all waves necessary for this level have been spawned
+            if (curWavesTotal >= totalWavesThisLevel)
+                yield break;
+
             if (!first)
             {
                 StartDecisionMakingProcess();
@@ -454,6 +464,8 @@ public class Enemy_Master : MonoBehaviour {
             }
         }
 
+        AddWaveSpawned();
+
         StartWaitToAct();
     }
 
@@ -494,6 +506,8 @@ public class Enemy_Master : MonoBehaviour {
             }
         }
 
+        AddWaveSpawned();
+
         StartWaitToAct();
     }
 
@@ -515,8 +529,16 @@ public class Enemy_Master : MonoBehaviour {
             IssueSpawnCommand(spawnPoints / weakCost, "Slimer_Weak_noAggro");
         }
 
+
+        AddWaveSpawned();
+
         StartWaitToAct();
 
+    }
+
+    void AddWaveSpawned()
+    {
+        curWavesTotal++;
     }
 
     IEnumerator WaitForSecondSpawnCommand(int total, string id)
@@ -817,10 +839,16 @@ public class Enemy_Master : MonoBehaviour {
     {
         CurrUnitsOnField--;
 
+        // Check if this level has been completed
+        if (CurrUnitsOnField <= 0)
+            Mission_Manager.Instance.CheckWavesSurvived(curWavesTotal);
+
         if (killer != target_killer)
         {
             target_killer = killer;
         }
+
+
 
         Debug.Log("ENEMY MASTER: Registered death from " + killer.name);
     }

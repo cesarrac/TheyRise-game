@@ -12,9 +12,9 @@ public class TileStats
     public float Shield { get { return _shield; } set { _shield = Mathf.Clamp(value, 0, 50000); } }
     public float Defense { get { return _defense; } set { _defense = Mathf.Clamp(value, 0, 50000); } }
     public float Attack { get { return _attack; } set { _attack = Mathf.Clamp(value, 0, 50000); } }
-    public int NanoBotCost { get { return _nanoBotCost; } set { _nanoBotCost = Mathf.Clamp(value, 0, 100); } }
+    //public int NanoBotCost { get { return _nanoBotCost; } set { _nanoBotCost = Mathf.Clamp(value, 0, 100); } }
 
-    public TileStats(float hp, float def, float attk, float shield, int nCost)
+    public TileStats(float hp, float def, float attk, float shield)
     {
         startingHP = hp;
 
@@ -23,7 +23,7 @@ public class TileStats
         Shield = shield;
         Defense = def;
         Attack = attk;
-        NanoBotCost = nCost;
+        //NanoBotCost = nCost;
     }
 
     public TileStats()
@@ -87,7 +87,7 @@ public class TileData  {
     public int posX { get; protected set; }
     public int posY { get; protected set; }
 
-	public TileData(int x, int y, string name, Types type, int resourceQuantity, int moveCost, float _hp, float _defence, float _attk, float _shield, int nCost){
+	public TileData(int x, int y, string name, Types type, int resourceQuantity, int moveCost, float _hp, float _defence, float _attk, float _shield){
         tileName = name;
 
         posX = x;
@@ -103,7 +103,7 @@ public class TileData  {
 			isWalkable = false;
 		}
 
-        tileStats = new TileStats(_hp, _defence, _attk, _shield, nCost);
+        tileStats = new TileStats(_hp, _defence, _attk, _shield);
         
 		//hp = _hp;
 		//def = _defence;

@@ -141,7 +141,7 @@ public class Blueprint
     public int memoryCost { get; protected set; }
 
     // Nanobot cost of this building
-    public int nanoBotCost { get; protected set; }
+    //public int nanoBotCost { get; protected set; }
 
     // Name of the Building
     public string buildingName { get; protected set; }
@@ -155,13 +155,16 @@ public class Blueprint
     //public Dictionary<TileData.Types, int> reqResources { get; protected set; }
     public BuildRequirement buildReq { get; protected set; }
 
+    float researchTime; // Time it takes (in days) to research/make available this blueprint
+    public float ResearchTime { get { return researchTime; } }
+
     public Blueprint() { }
 
     public Blueprint (string Name, int PUCost, int NanoBotCost, TileData.Types _Ttype, BuildingType tType, BuildRequirement bReq, string desc)
     {
         buildingName = Name;
         memoryCost = PUCost;
-        nanoBotCost = NanoBotCost;
+        //nanoBotCost = NanoBotCost;
         tileType = _Ttype;
         description = desc;
 
@@ -185,7 +188,6 @@ public class Blueprint
     {
         buildingName = Name;
         memoryCost = 0;
-        nanoBotCost = 0;
         tileType = _type;
         description = " ";
 
@@ -199,10 +201,6 @@ public class Blueprint
         memoryCost += change;
     }
 
-    public void ChangeNanoCost(int change)
-    {
-        nanoBotCost += change;
-    }
 
     public void ChangeName(string newName)
     {

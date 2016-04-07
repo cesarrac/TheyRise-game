@@ -46,9 +46,9 @@ public class Extractor : ExtractionBuilding {
 
         BlueprintDatabase.Instance.GetExtractorStats("Extractor", myTransform, this, TileData.Types.rock);
 
-        inventoryTypeCallback = SplitRockByType;
+        inventoryTypeCallback = SendToShipByRockType;
 
-        splitShipInventoryCallback = DefineEnrichedAndCommonOre;
+       // splitShipInventoryCallback = DefineEnrichedAndCommonOre;
 
     }
 
@@ -247,12 +247,12 @@ public class Extractor : ExtractionBuilding {
     {
         if (currRock != null)
         {
-            if (currRock._rockProductionType == Rock.RockProductionType.common)
+            if (currRock._rockProductionType == Rock.RockProductionType.steel)
             {
                 print("Adding Common ore!");
                 commonOreCount += quantity;
             }
-            else if (currRock._rockProductionType == Rock.RockProductionType.enriched)
+            else if (currRock._rockProductionType == Rock.RockProductionType.vit)
             {
                 print("Adding Enriched ore!");
                 enrichedOreCount += quantity;
@@ -262,38 +262,10 @@ public class Extractor : ExtractionBuilding {
     }
 
 
-    void DefineEnrichedAndCommonOre(int currTotal)
+    void SendToShipByRockType(int currTotal)
     {
-        //if (enrichedOreCount + commonOreCount == currTotal)
-        //{
-        //    Ship_Inventory.Instance.SplitOre(commonOreCount, enrichedOreCount);
-        //    // Now make sure that both enriched and common count go back to 0 since this extractor is now empty
-        //    commonOreCount = 0;
-        //    enrichedOreCount = 0;
-        //}
-        //else
-        //{
-        //    Debug.Log("Total inventory = " + currResourceStored + " Common ore = " + commonOreCount + " Enriched = " + enrichedOreCount);
-        //    Debug.LogError("This EXTRACTOR's enriched and common count DO NOT equal its current inventory!");
-        //}
-        int commonOre = 0;
-        int enrichedOre = 0;
 
-        if (currRock != null)
-        {
-            if (currRock._rockProductionType == Rock.RockProductionType.common)
-            {
-              //  print("Adding Common ore!");
-                commonOre = currTotal;
-            }
-            else if (currRock._rockProductionType == Rock.RockProductionType.enriched)
-            {
-              //  print("Adding Enriched ore!");
-                enrichedOre = currTotal;
-            }
-        }
-
-        Ship_Inventory.Instance.SplitOre(commonOre, enrichedOre);
+        Ship_Inventory.Instance.ReceiveTempRock(currTotal, currRock._rockProductionType);
 
     }
 

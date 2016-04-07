@@ -166,7 +166,17 @@ public class ResourceDrop : MonoBehaviour {
         }
         else
         {
-            Ship_Inventory.Instance.ReceiveTemporaryResources(resourceType, totalAmmntOfResource);
+    
+            
+            if (resourceType == TileData.Types.rock)
+            {
+                Ship_Inventory.Instance.ReceiveTempRock(totalAmmntOfResource, rockProdType);
+            }
+            else
+            {
+                Ship_Inventory.Instance.ReceiveTemporaryResources(resourceType, totalAmmntOfResource);
+            }
+           
 
             StopCoroutine("Wave");
 

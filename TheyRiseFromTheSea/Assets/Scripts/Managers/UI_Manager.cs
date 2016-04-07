@@ -33,8 +33,9 @@ public class UI_Manager : MonoBehaviour
     public GameObject mainMenuPanel, charCreationPanel;
 
     // (CENTRAL LEVEL) MAIN UI PANELS
-    public GameObject characterPanel, ordersPanel, resoucesPanel, bpPanel, missionsPanel;
+    public GameObject characterPanel, ordersPanel, resoucesPanel, bpPanel, missionsPanel, marketPanel, warningPanel;
     GameObject currActivePanel;
+    public Text market_VitCrystalSold, warningText;
 
     // Hero Character Info
     public Text heroName;
@@ -61,7 +62,15 @@ public class UI_Manager : MonoBehaviour
         {
             DisplayDaysPassed();
 
-            DisplayCharacterPanel();
+            if (Ship_Inventory.Instance.vitCrystalsSold > 0)
+            {
+                DisplayMarketPanel();
+            }
+            else
+            {
+                DisplayCharacterPanel();
+            }
+
         }
     }
 
@@ -73,6 +82,7 @@ public class UI_Manager : MonoBehaviour
     public void EndDay()
     {
         GameMaster.Instance.EndDay();
+        DisplayDaysPassed();
     }
 
     // *****************************************                             RESOURCES:
@@ -80,7 +90,7 @@ public class UI_Manager : MonoBehaviour
     public void DisplayTotalResources()
     {
         ore_total.text = Ship_Inventory.Instance.DisplayResourceAmount(TileData.Types.rock).ToString();
-        ore_new.text = Ship_Inventory.Instance.tempOre.ToString();
+        ore_new.text = Ship_Inventory.Instance.tempSteel.ToString();
 
         water_total.text = Ship_Inventory.Instance.DisplayResourceAmount(TileData.Types.water).ToString();
         water_new.text = Ship_Inventory.Instance.tempWater.ToString();
@@ -386,6 +396,25 @@ public class UI_Manager : MonoBehaviour
 
     // *****************************************                             PANEL CONTROLS:
 
+    public void DisplayMarketPanel()
+    {
+        if (marketPanel.activeSelf == false && Ship_Inventory.Instance.vitCrystalsSold > 0)
+        {
+            marketPanel.SetActive(true);
+            market_VitCrystalSold.text = Ship_Inventory.Instance.vitCrystalsSold.ToString();
+        }
+    }
+
+    public void CloseMarketPanel()
+    {
+        if (marketPanel.activeSelf == true)
+            marketPanel.SetActive(false);
+
+        // Reset the ship inventory's vit crystals sold
+        Ship_Inventory.Instance.ConfirmVitCrystalsSold();
+
+        DisplayCharacterPanel();
+    }
     public void DisplayCharacterPanel()
     {
         if (characterPanel.activeSelf == false)
@@ -529,6 +558,23 @@ public class UI_Manager : MonoBehaviour
             currActivePanel.SetActive(false);
         }
             
+    }
+
+    public void DisplayWarningMessage(string message)
+    {
+        if (warningPanel.activeSelf == false)
+        {
+            warningPanel.SetActive(true);
+            warningText.text = message;
+        }
+    }
+
+    public void CloseWarningPanel()
+    {
+        if (warningPanel.activeSelf == true)
+        {
+            warningPanel.SetActive(false);
+        }
     }
 
     //public void DisplayEnemyIndicator(Vector3 enemyPos)

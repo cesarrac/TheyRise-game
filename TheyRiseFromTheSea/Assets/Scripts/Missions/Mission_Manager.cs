@@ -102,7 +102,11 @@ public class Mission_Manager : MonoBehaviour {
         // Here, generate 5 new missions from the Mission Database
         for (int i = 0; i < 5; i++)
         {
-            availableMissions.Add(MissionGenerator());
+            if (i > 0)
+                availableMissions.Add(MissionGenerator(availableMissions[i-1]));
+            else
+                availableMissions.Add(MissionGenerator());
+            Debug.Log("Added mission -- " + availableMissions[i].MissionName + " at index " + i);
         }
         // After generating them the set would be sent to UI Manager to display on map
 
@@ -113,7 +117,7 @@ public class Mission_Manager : MonoBehaviour {
 
     }
 
-    Mission MissionGenerator()
+    Mission MissionGenerator(Mission lastMission = null)
     {
         Mission newMission = new Mission();
 
@@ -122,12 +126,18 @@ public class Mission_Manager : MonoBehaviour {
         if (select == 0 || select == 2)
         {
             // Grab a Science mission from the database
-            newMission = mission_database.GetMission(MissionType.SCIENCE);
+            if (lastMission != null)
+                newMission = new Mission(mission_database.GetMission(MissionType.SCIENCE, lastMission.MissionName));
+            else
+                newMission = new Mission(mission_database.GetMission(MissionType.SCIENCE));
         }
         else
         {
             // Get a Survival mission from the database
-            newMission = mission_database.GetMission(MissionType.SURVIVAL);
+            if (lastMission != null)
+                newMission = new Mission(mission_database.GetMission(MissionType.SURVIVAL, lastMission.MissionName));
+            else
+                newMission = new Mission(mission_database.GetMission(MissionType.SURVIVAL));
         }
 
         //// *** FOR TESTING I AM FORCING MISSIONS!
@@ -153,13 +163,20 @@ public class Mission_Manager : MonoBehaviour {
                 activeMission = availableMissions[missionIndex];
 
                 // Load the required Blueprint for this mission
-                BlueprintDatabase.Instance.InitRequiredBlueprint();
+                //BlueprintDatabase.Instance.InitRequiredBlueprint();
 
                 Debug.Log("ACTIVE MISSION IS: " + activeMission.MissionName);
             }
         }
             
     }
+
+    // **************************************************
+    // NOTE:  The code below it for completing missions. The logic is that each mission would have
+    //        a different completed condition (i.e. Collect 200 rock). 
+    //      I'm going to replace that locic with something simpler, all missions are either ENCOUNTERS, where you have
+    //      to kill a specific unit to complete it, and EVERYTHING ELSE, where you have to survive X amount of waves of enemies to complete.
+    // **************************************************
 
     // Checks to verify if Mission has been completed:
     public void CheckSurvivalMissionCompleted()
@@ -189,6 +206,26 @@ public class Mission_Manager : MonoBehaviour {
     {
         stage_handler.MaxStages = activeMission.ObjectiveStages;
     }
+
+    // **************************************************
+
+    // ********
+    //      This code below is the NEW version of Checking for mission Completed.
+    //      It will be called by the Enemy Master after a wave has been killed. 
+    //      This simply checks if the number of waves survived => the objective
+    //      ammount of this active mission.
+    // ********
+    public void CheckWavesSurvived (int wavesSurvived)
+    {
+        if (wavesSurvived >= activeMission.ObjectiveAmnt)
+        {
+            activeMission.FlagAsCompleted();
+
+            // Display objective completed message
+            UI_Manager.Instance.DisplayVictoryPanel();
+        }
+    }
+    // ********
 
     // Function called by GM when Launching back to ship from the Planet to complete the mission
     public void CompleteActiveMission()

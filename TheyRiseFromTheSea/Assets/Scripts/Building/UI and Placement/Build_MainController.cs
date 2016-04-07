@@ -56,7 +56,7 @@ class Build_MainController:MonoBehaviour
         bPosHand.spawnPos = spawnPos;
         bPosHand.followMouse = true;
         bPosHand.tileType = building.tileType;
-        bPosHand.currNanoBotCost = building.nanoBotCost;
+       // bPosHand.currNanoBotCost = building.nanoBotCost;
         bPosHand.nanoBuild_handler = nanoBuild_handler;
 
         // FIX THIS: For now I'm going to hardcode the canDragBuild parameter so that only walls can be drag built

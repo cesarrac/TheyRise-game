@@ -126,7 +126,7 @@ public class ExtractionBuilding : MonoBehaviour {
     // Another callback method used by rock extractors and such to split the extracted ammount by its type
     public Action<int> inventoryTypeCallback;
 
-    public Action<int> splitShipInventoryCallback;
+   // public Action<int> splitShipInventoryCallback;
 
     public Vector3 resourceWorldPos { get; protected set; }
 
@@ -652,10 +652,10 @@ public class ExtractionBuilding : MonoBehaviour {
         Ship_Inventory.Instance.ReceiveTemporaryResources(resourceType, currResourceStored);
 
         // This will split the current resources before sending them to ship (for example split between common ore and enriched ore)
-        if (splitShipInventoryCallback != null)
-        {
-            splitShipInventoryCallback(currResourceStored);
-        }
+        //if (splitShipInventoryCallback != null)
+        //{
+        //    splitShipInventoryCallback(currResourceStored);
+        //}
 
         currResourceStored = 0;
         if (storageIsFull)
@@ -667,14 +667,15 @@ public class ExtractionBuilding : MonoBehaviour {
     {
         // This method on Ship Inventory Receives Items and stores them Temporarily. They will actually become part of the inventory once the Player
         // launches from the Transporter.
-        Ship_Inventory.Instance.ReceiveTemporaryResources(resourceType, total);
-
-        // This will split the current resources before sending them to ship (for example split between common ore and enriched ore)
-        if (splitShipInventoryCallback != null)
+        if (resourceType == TileData.Types.rock)
         {
-            splitShipInventoryCallback(total);
+            if (inventoryTypeCallback != null)
+                inventoryTypeCallback(total);
         }
-
+        else
+        {
+            Ship_Inventory.Instance.ReceiveTemporaryResources(resourceType, total);
+        }
 
     }
 
