@@ -21,7 +21,6 @@ public class ResourceGrid : MonoBehaviour{
     // Variable used to access the Resource Grid (THERE SHOULD ONLY BE ONE INSTANCE OF THE GRID!)
     public static ResourceGrid Grid { get; protected set; }
 
-//	public TileType[] tileTypes;
 	public TileData[,] tiles;
 
 //	TileType.Types tTypes;
@@ -98,6 +97,8 @@ public class ResourceGrid : MonoBehaviour{
     public System.Random pseudoRandom { get; set; }
 
     Action<Transform> BattleTowerBuiltCB, UtilityTowerBuiltCB, BattleTowerRemoveCB, UtilityTowerRemoveCB;
+
+    public Transform ripple_holder;
 
     public int MaxSize
     {

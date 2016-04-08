@@ -45,4 +45,10 @@ public class Path_Draw : MonoBehaviour {
 
     }
 
+    public void DisablePath()
+    {
+        if (lr.enabled == true)
+            lr.enabled = false;
+    }
+
 }

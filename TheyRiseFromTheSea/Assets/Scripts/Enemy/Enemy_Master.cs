@@ -176,6 +176,13 @@ public class Enemy_Master : MonoBehaviour {
         {
             // Notify the incoming indicator of the position the enemy will be coming from
             Enemy_Spawner.instance.CreateIndicator(spawnPosition);
+
+            // Draw path to target from the spawn position to indicate the potential enemy path
+            if (GetComponentInChildren<Path_Draw>() != null)
+            {
+               
+               PathRequestManager.RequestPath(spawnPosition, GetCurrentTarget(spawnPosition).position, gameObject, DrawPath);
+            }
         }
 
 
@@ -202,6 +209,14 @@ public class Enemy_Master : MonoBehaviour {
             }
     
             yield break;
+        }
+    }
+
+    void DrawPath(Vector3[] path, bool isSuccesful)
+    {
+        if (isSuccesful == true)
+        {
+            GetComponentInChildren<Path_Draw>().DrawPath(path);
         }
     }
 
@@ -398,14 +413,9 @@ public class Enemy_Master : MonoBehaviour {
         Debug.Log("MASTER: Implementing Economic Strategy!");
         SpawnPoints += spawnPointRegenRate;
 
-        // Check if any indicators were created so we can pool them here
-        //if (enemy_indicator != null)
-        //{
-        //    if (enemy_indicator.gameObject.activeSelf == true)
-        //    {
-        //        ObjectPool.instance.PoolObject(enemy_indicator.gameObject);
-        //    }
-        //}
+        // TODO: Get rid of any spawn indicators if there are any visible, since we are NOT spawning
+        // Get rid of any visible paths
+        GetComponentInChildren<Path_Draw>().DisablePath();
 
         StartWaitToAct();
     }
@@ -558,6 +568,9 @@ public class Enemy_Master : MonoBehaviour {
     // This is a callback for each unit to get its target from the active task
     Transform GetCurrentTarget(Vector3 unitPosition)
     {
+        if (activeTask == null)
+            return ResourceGrid.Grid.Hero.transform;
+
         if (activeTask.taskType == EnemyTaskType.PLAYER)
         {
             return ResourceGrid.Grid.Hero.transform;

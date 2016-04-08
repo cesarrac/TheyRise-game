@@ -51,6 +51,7 @@ public class ShoreRipple_Generator : MonoBehaviour {
         {
             float zRot = CheckPositions(spawnPosition);
             ripple.transform.rotation = Quaternion.Euler(0, 0, zRot);
+            ripple.transform.SetParent(ResourceGrid.Grid.ripple_holder);
         }
       
     }

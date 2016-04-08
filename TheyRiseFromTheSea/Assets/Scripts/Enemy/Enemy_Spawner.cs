@@ -64,9 +64,12 @@ public class Enemy_Spawner : MonoBehaviour {
                     if (curSpawnCount == 0 && curIndicator != null)
                     {
                         curIndicator.InitEnemyToTrack(e.transform);
+
                         // This FIRST unit will have the ability to draw its path to a target
-                        GameObject pathDrawer = ObjectPool.instance.GetObjectForType("Path_Drawer", true, spawnPosition);
-                        pathDrawer.transform.SetParent(e.transform);
+                        //GameObject pathDrawer = ObjectPool.instance.GetObjectForType("Path_Drawer", true, spawnPosition);
+                        //pathDrawer.transform.SetParent(e.transform);
+
+                   
                     }
 
 
