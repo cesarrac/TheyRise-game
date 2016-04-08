@@ -170,6 +170,10 @@ public class UnitPathHandler : MonoBehaviour {
         // If path was succesfuly generated, go through it until you reach the target
         if (pathSuccesful)
         {
+            // Draw the Path
+            if (GetComponentInChildren<Path_Draw>() != null)
+                GetComponentInChildren<Path_Draw>().DrawPath(newPath);
+
             // Stop requesting a path
             StopCoroutine("RequestPath");
 
@@ -230,6 +234,10 @@ public class UnitPathHandler : MonoBehaviour {
                 // Advance path index when my position is equal to the current node
                 if (transform.position == currWayPoint)
                 {
+                    // Update the path draw
+                    if (GetComponentInChildren<Path_Draw>() != null)
+                        GetComponentInChildren<Path_Draw>().UpdatePath(path, curPathIndex);
+
                     curPathIndex++;
 
                     // Have I arrived at my destination? If so...
