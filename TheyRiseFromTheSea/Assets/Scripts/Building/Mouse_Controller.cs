@@ -231,11 +231,16 @@ public class Mouse_Controller:MonoBehaviour
             TileData tile = GetTileUnderMouse();
             if (tile != null)
             {
-                if (selected_Employee != null)
-                {
-                    selected_Employee.DoAction(tile.tileType, ResourceGrid.Grid.GetTileGameObjFromIntCoords(GetTileUnderMouse().posX, GetTileUnderMouse().posY).transform);
-                    DeSelectUnit();
-                }
+                if (tile.tileType == TileData.Types.empty)
+                    return;
+
+                Job_Manager.Instance.AddJob(tile.tileType, 
+                    ResourceGrid.Grid.GetTileGameObjFromIntCoords(tile.posX, tile.posY).transform);
+                //if (selected_Employee != null)
+                //{
+                //    selected_Employee.DoAction(tile.tileType, ResourceGrid.Grid.GetTileGameObjFromIntCoords(GetTileUnderMouse().posX, GetTileUnderMouse().posY).transform);
+                //    DeSelectUnit();
+                //}
             }
         }
 

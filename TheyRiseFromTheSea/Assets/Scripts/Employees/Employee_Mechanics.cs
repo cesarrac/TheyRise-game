@@ -35,12 +35,33 @@ public class Employee_Mechanics : MonoBehaviour {
             {
                 emp_handler.SetIsWorking(true);
                 mainTarget.GetComponent<Building_Handler>().StartAssembling();
+                StartCoroutine("WaitToFinishAssembling");
             }
             else
             {
                 Employee_Actions.Instance.MoveToTarget(gameObject, AssembleTarget, GetTarget);
             }
        
+        }
+    }
+
+    IEnumerator WaitToFinishAssembling()
+    {
+        while (true)
+        {
+            if (mainTarget.GetComponent<Building_Handler>() != null)
+            {
+                if (mainTarget.GetComponent<Building_Handler>().state == Building_Handler.State.READY)
+                {
+                    emp_handler.FinishedJob();
+                    yield break;
+                }
+            }
+            else
+                yield break;
+
+
+            yield return null;
         }
     }
 
@@ -106,7 +127,7 @@ public class Employee_Mechanics : MonoBehaviour {
             else
             {
                 if (emp_handler != null)
-                    emp_handler.FinishedAction();
+                    emp_handler.FinishedJob();
 
                 yield break;
             }

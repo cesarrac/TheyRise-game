@@ -78,7 +78,7 @@ public class Employee_Extract : MonoBehaviour {
             else
             {
                 if (emp_handler != null)
-                    emp_handler.FinishedAction();
+                    emp_handler.FinishedJob();
 
                 yield break;
             }

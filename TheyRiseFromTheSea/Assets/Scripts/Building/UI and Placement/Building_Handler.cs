@@ -73,16 +73,15 @@ public class Building_Handler : MonoBehaviour {
         if (gameObject.name == "Transporter")
         {
             constructionDuration = 2f;
+            _state = State.ASSEMBLING;
+        }
+        else
+        {
+            // Start Waiting to be Assembled
+            _state = State.WAITING;
         }
 
-
         //FadeIn();
-
-        //// Assemble
-        _state = State.ASSEMBLING;
-
-        // Start Waiting to be Assembled
-        //_state = State.WAITING;
 
         // reset timer variables
         isDissasembling = false;
