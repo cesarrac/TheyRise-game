@@ -28,8 +28,8 @@ public class Building_PositionHandler : MonoBehaviour {
    
 
 	Vector3 m, lastM;
-	int roundedPosX;
-	int roundedPosY;
+	//int roundedPosX;
+	//int roundedPosY;
 
 	bool canBuild, canAfford; // turns true when building is in proper position
 
@@ -108,10 +108,10 @@ public class Building_PositionHandler : MonoBehaviour {
 	
     void FollowTheMouse()
     {
-        roundedPosX = Mathf.RoundToInt(mouse_controller.currMouseP.x);
-        roundedPosY = Mathf.RoundToInt(mouse_controller.currMouseP.y);
+        //roundedPosX = Mathf.RoundToInt(mouse_controller.currMouseP.x);
+        //roundedPosY = Mathf.RoundToInt(mouse_controller.currMouseP.y);
 
-        transform.position = new Vector3(roundedPosX, roundedPosY, 0);
+        transform.position = ResourceGrid.Grid.WorldPosToTilePos(Mouse_Controller.Instance.currMouseP);
 
   
 
@@ -156,7 +156,9 @@ public class Building_PositionHandler : MonoBehaviour {
         {
             if (transform.position != startingBuildPosition)
             {
-                TileData curTile = resourceGrid.TileFromWorldPoint(new Vector3(roundedPosX, roundedPosY, 0));
+                // TileData curTile = resourceGrid.GetTileFromWorldPos(new Vector3(roundedPosX, roundedPosY, 0));
+                TileData curTile = Mouse_Controller.Instance.GetTileUnderMouse();
+
                 if (curTile != null && CheckPositionToBuild(transform.position))
                 {
                     newPos = new Vector3(curTile.posX, curTile.posY, 0);
@@ -185,13 +187,17 @@ public class Building_PositionHandler : MonoBehaviour {
         {
             build_controller.SetCurrentlyBuildingBool(true);
             // Record the starting position of this build
-            startingBuildPosition = mouse_controller.currMouseP;
+           // startingBuildPosition = Mouse_Controller.Instance.currMouseP;
+            startingBuildPosition = ResourceGrid.Grid.WorldPosToTilePos(Mouse_Controller.Instance.currMouseP);
         }
 
         // Set the tile under the mouse to the dictionary that will hold all this build's tiles
         // build_tilePositions.Add(mouse_controller.GetTileUnderMouse());
         // Spawn a position indicator to indicate where the building will be built
-        TileData curTile = resourceGrid.TileFromWorldPoint(new Vector3(roundedPosX, roundedPosY, 0));
+
+        //TileData curTile = resourceGrid.GetTileFromWorldPos(new Vector3(roundedPosX, roundedPosY, 0));
+        TileData curTile = Mouse_Controller.Instance.GetTileUnderMouse();
+
 
         if (curTile != null && CheckPositionToBuild())
         {
@@ -207,10 +213,11 @@ public class Building_PositionHandler : MonoBehaviour {
 
     void EndBuild()
     {
-        Vector3 endBuildPosition = (canDragBuild == true) ? mouse_controller.currMouseP : startingBuildPosition;
+        Vector3 endBuildPosition = (canDragBuild == true) ? ResourceGrid.Grid.WorldPosToTilePos(Mouse_Controller.Instance.currMouseP) 
+                                                            : startingBuildPosition;
 
-        int startX = Mathf.RoundToInt(startingBuildPosition.x);
-        int endX = Mathf.RoundToInt(endBuildPosition.x);
+        int startX = Mathf.FloorToInt(startingBuildPosition.x);
+        int endX = Mathf.FloorToInt(endBuildPosition.x);
         if (endX < startX)
         {
             int tmpX = endX;
@@ -218,8 +225,8 @@ public class Building_PositionHandler : MonoBehaviour {
             startX = tmpX;
         }
 
-        int startY = Mathf.RoundToInt(startingBuildPosition.y);
-        int endY = Mathf.RoundToInt(endBuildPosition.y);
+        int startY = Mathf.FloorToInt(startingBuildPosition.y);
+        int endY = Mathf.FloorToInt(endBuildPosition.y);
         if (endY < startY)
         {
             int tmpy = endY;
@@ -233,16 +240,20 @@ public class Building_PositionHandler : MonoBehaviour {
         {   
             for (int y = startY; y <= endY; y++)
             {
-                TileData curTile = resourceGrid.TileFromWorldPoint(new Vector3(x, y, 0));
+                TileData curTile = resourceGrid.GetTileFromWorldPos(new Vector3(x, y, 0));
                 if (curTile != null && CheckPositionToBuild(new Vector3(x, y, 0)))
                 {
                     multi++;
                     if (CheckCost(multi))
                     {
                         if (canDragBuild)
+                        {
                             resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, 0, 0);
+                        }
                         else
+                        {
                             resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, sr.bounds.size.x, sr.bounds.size.y);
+                        }
                     }
                 }
             }
@@ -381,69 +392,69 @@ public class Building_PositionHandler : MonoBehaviour {
         switch (bType)
         {
             case TileData.Types.extractor:
-                if (resourceGrid.TileFromWorldPoint(position + Vector3.up).tileType == TileData.Types.rock)
+                if (resourceGrid.GetTileFromWorldPos(position + Vector3.up).tileType == TileData.Types.rock)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.up + Vector3.right)).tileType == TileData.Types.rock)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.up + Vector3.right)).tileType == TileData.Types.rock)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.right)).tileType == TileData.Types.rock)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.right)).tileType == TileData.Types.rock)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.down + Vector3.right)).tileType == TileData.Types.rock)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.down + Vector3.right)).tileType == TileData.Types.rock)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.down)).tileType == TileData.Types.rock)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.down)).tileType == TileData.Types.rock)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.down + Vector3.left)).tileType == TileData.Types.rock)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.down + Vector3.left)).tileType == TileData.Types.rock)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.left)).tileType == TileData.Types.rock)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.left)).tileType == TileData.Types.rock)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.up + Vector3.left)).tileType == TileData.Types.rock)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.up + Vector3.left)).tileType == TileData.Types.rock)
                 {
                     rCheck = true;
                 }
                 break;
             case TileData.Types.desalt_s:
-                if (resourceGrid.TileFromWorldPoint(position + Vector3.up).tileType == TileData.Types.water)
+                if (resourceGrid.GetTileFromWorldPos(position + Vector3.up).tileType == TileData.Types.water)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.up + Vector3.right)).tileType == TileData.Types.water)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.up + Vector3.right)).tileType == TileData.Types.water)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.right)).tileType == TileData.Types.water)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.right)).tileType == TileData.Types.water)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.down + Vector3.right)).tileType == TileData.Types.water)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.down + Vector3.right)).tileType == TileData.Types.water)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.down)).tileType == TileData.Types.water)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.down)).tileType == TileData.Types.water)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.down + Vector3.left)).tileType == TileData.Types.water)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.down + Vector3.left)).tileType == TileData.Types.water)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.left)).tileType == TileData.Types.water)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.left)).tileType == TileData.Types.water)
                 {
                     rCheck = true;
                 }
-                else if (resourceGrid.TileFromWorldPoint(position + (Vector3.up + Vector3.left)).tileType == TileData.Types.water)
+                else if (resourceGrid.GetTileFromWorldPos(position + (Vector3.up + Vector3.left)).tileType == TileData.Types.water)
                 {
                     rCheck = true;
                 }
@@ -461,7 +472,7 @@ public class Building_PositionHandler : MonoBehaviour {
 
     bool CheckEmptyBeneath(Vector3 pos)
     {
-        if (resourceGrid.TileFromWorldPoint(pos) != null && resourceGrid.TileFromWorldPoint(pos).tileType == TileData.Types.empty)
+        if (resourceGrid.GetTileFromWorldPos(pos) != null && resourceGrid.GetTileFromWorldPos(pos).tileType == TileData.Types.empty)
             return true;
         else
             return false;

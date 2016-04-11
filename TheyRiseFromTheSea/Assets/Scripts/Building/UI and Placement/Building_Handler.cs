@@ -48,7 +48,7 @@ public class Building_Handler : MonoBehaviour {
     float onePercentConstructionDuration = 0;
     float percentConstructionCompleted = 0;
 
-	private bool playerIsNear = false;// Only turns true if the player walks up to the building
+	private bool citizenIsNear = false;
 
 	public enum State { WAITING, ASSEMBLING, READY, DISSASEMBLING, RECYCLE_NANOBOTS, CREATING, DISSASEMBLED}
 	private State _state;
@@ -62,13 +62,12 @@ public class Building_Handler : MonoBehaviour {
 
     TileData myTile;
 
-    Transform playerTransform; // < --------------- can get it when player collides with this building. if not it can just find it.
-
 
     void OnEnable()
 	{
-		// Make sure to reset the color
-		s_renderer = GetComponent<SpriteRenderer> ();
+        // Make sure to reset the color
+        s_renderer = GetComponent<SpriteRenderer>();
+        s_renderer.color = B;
 
         if (gameObject.name == "Transporter")
         {
@@ -98,25 +97,19 @@ public class Building_Handler : MonoBehaviour {
         }
 
     }
-	void Awake()
-	{
-        //dissasemblyCountDown = dissasemblyTime;
-
-        //_state = State.ASSEMBLING;
-        s_renderer = GetComponent<SpriteRenderer>();
-        s_renderer.color = B;
-        //FadeIn();
-         
-
-        buildMainController = Build_MainController.Instance;
-        objPool = ObjectPool.instance;
-        resourceGrid = ResourceGrid.Grid;
-    }
 
     public void StartAssembling()
     {
         if (_state != State.READY)
             _state = State.ASSEMBLING;
+        Debug.Log("Building assembly started!");
+    }
+
+    public void StopAssembling()
+    {
+        if (_state == State.ASSEMBLING)
+            _state = State.WAITING;
+        Debug.Log("Building assembly stopped!");
     }
 
 	void FadeIn()
@@ -161,9 +154,13 @@ public class Building_Handler : MonoBehaviour {
 
 	void Start () {
 
+        buildMainController = Build_MainController.Instance;
+        objPool = ObjectPool.instance;
+        resourceGrid = ResourceGrid.Grid;
+
         // get my tiletype
         //Debug.Log("CLICK HANDLER: pos = " + transform.position);
-        myTileType = resourceGrid.TileFromWorldPoint(transform.position).tileType;
+        myTileType = resourceGrid.GetTileFromWorldPos(transform.position).tileType;
 
 
         if (myTileType != TileData.Types.capital)
@@ -213,7 +210,7 @@ public class Building_Handler : MonoBehaviour {
 
                 if (myTileType != TileData.Types.terraformer)
                 {
-                    if (Input.GetButtonDown("Interact") && playerIsNear)
+                    if (Input.GetButtonDown("Interact") && citizenIsNear)
                     {
                         if (!buildMainController.currentlyBuilding)
                         {
@@ -231,7 +228,7 @@ public class Building_Handler : MonoBehaviour {
                     }
                 }
 
-                if (Input.GetButtonDown("Beam") && playerIsNear)
+                if (Input.GetButtonDown("Beam") && citizenIsNear)
                 {
                     if (GetComponent<ExtractionBuilding>() != null)
                     {
@@ -304,7 +301,7 @@ public class Building_Handler : MonoBehaviour {
 	public void SwapBuildingTile()
     {
         // Define the tile again in case this was a pooled object and for some reason it didn't re-define its tile. This might make it unnecessary to do it on start.
-        myTile = ResourceGrid.Grid.TileFromWorldPoint(transform.position);
+        myTile = ResourceGrid.Grid.GetTileFromWorldPos(transform.position);
 
         // Unregister the tower for the Enemy master
         ResourceGrid.Grid.RemoveTowerBuiltForEnemyMaster(transform);
@@ -331,10 +328,7 @@ public class Building_Handler : MonoBehaviour {
 		// TODO: Change the hardcoded value of nanobots to the building nanobot cost
 		GameObject nanobot = objPool.GetObjectForType("NanoBot", true, transform.position);
 		if (nanobot){
-            if (playerTransform != null)
-                nanobot.GetComponent<NanoBot_MoveHandler>().player = playerTransform;
-            else
-                nanobot.GetComponent<NanoBot_MoveHandler>().player = resourceGrid.Hero.transform;
+            nanobot.GetComponent<NanoBot_MoveHandler>().player = resourceGrid.Hero.transform;
         }
 
 	}
@@ -398,19 +392,17 @@ public class Building_Handler : MonoBehaviour {
 
 	void OnTriggerEnter2D(Collider2D coll)
 	{
-		if (coll.gameObject.CompareTag ("Citizen") && !playerIsNear) {
+		if (coll.gameObject.CompareTag ("Citizen") && !citizenIsNear) {
            
-            playerIsNear = true;
+            citizenIsNear = true;
 
-            if (playerTransform == null)
-                playerTransform = coll.transform;
 		}
 	}
 	
 	void OnTriggerExit2D(Collider2D coll)
 	{
-		if (coll.gameObject.CompareTag ("Citizen") && playerIsNear) {
-			playerIsNear = false;
+		if (coll.gameObject.CompareTag ("Citizen") && citizenIsNear) {
+			citizenIsNear = false;
 		}
 	}
 

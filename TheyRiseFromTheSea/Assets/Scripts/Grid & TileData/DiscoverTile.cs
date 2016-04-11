@@ -74,6 +74,7 @@ public class DiscoverTile : MonoBehaviour {
         if (resourceGrid == null)
             resourceGrid = ResourceGrid.Grid;
 
+        // SPAWN A TILE AS A GAMEOBJECT:
         tileToSpawn = objPool.GetObjectForType (newTileName, false, Vector3.zero);
 
 		if (tileToSpawn != null) {
@@ -86,13 +87,18 @@ public class DiscoverTile : MonoBehaviour {
 			// so it will have a Building Click Handler that needs its pos X and pos Y
 			if (tileType != TileData.Types.empty && tileType != TileData.Types.rock)
             {
-				Building_Handler bClickHandler = tileToSpawn.GetComponent<Building_Handler> ();
-                if (bClickHandler)
+				Building_Handler build_handler = tileToSpawn.GetComponent<Building_Handler> ();
+                if (build_handler)
                 {
-                    bClickHandler.mapPosX = mapPosX;
-                    bClickHandler.mapPosY = mapPosY;
-                    //bClickHandler.resourceGrid = resourceGrid;
-                    //bClickHandler.objPool = objPool;
+                    build_handler.mapPosX = mapPosX;
+                    build_handler.mapPosY = mapPosY;
+
+                    if (tileType != TileData.Types.capital)
+                    {
+                        // Since we are SURE this is a building we can add a JOB for its construction here:
+                        Job_Manager.Instance.AddJob(tileType, tileToSpawn.transform);
+                    }
+  
                 }
 			
 

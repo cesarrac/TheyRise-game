@@ -227,7 +227,7 @@ public class ExtractionBuilding : MonoBehaviour {
         // Get my origin tile
         if (originTile == null)
         {
-            originTile = resource_grid.TileFromWorldPoint(myTransform.position);
+            originTile = resource_grid.GetTileFromWorldPos(myTransform.position);
             Debug.Log("EXTRACTOR origin tile is at: " + originTile.posX + " " + originTile.posY);
         }
 
@@ -245,7 +245,7 @@ public class ExtractionBuilding : MonoBehaviour {
             }
             else
             {
-                circlePos = resource_grid.GetTileWorldPos(targetTile.posX, targetTile.posY);
+                circlePos = resource_grid.GetWorldPosFromTile(targetTile.posX, targetTile.posY);
             }
 
             // Make sure before placing that this Building doesn't already have any circle Selections

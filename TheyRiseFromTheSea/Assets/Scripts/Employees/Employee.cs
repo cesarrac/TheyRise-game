@@ -28,8 +28,10 @@ public class EmployeeStats
     float stress { get { return stress; } set { Mathf.Clamp(value, 0, 10); } }
     public float Stress { get { return stress; } }
 
+    float toolPower;
+    public float ToolPower { get { return toolPower; } }
 
-    public EmployeeStats (float rate, float _extraction, float _mechanics, float _healing, float _speed, float _resitance, float _stress = 0)
+    public EmployeeStats (float rate, float _extraction, float _mechanics, float _healing, float _speed, float _resitance, float _stress = 0, float power = 5)
     {
         workRate = rate;
         extraction = _extraction;
@@ -38,6 +40,7 @@ public class EmployeeStats
         moveSpeed = _speed;
         stressResistance = _resitance;
         stress = _stress;
+        toolPower = power;
     }
 }
 public class Employee {

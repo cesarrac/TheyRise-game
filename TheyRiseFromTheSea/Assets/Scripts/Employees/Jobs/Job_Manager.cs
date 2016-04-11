@@ -16,7 +16,14 @@ public class Job_Manager : MonoBehaviour {
 
     public void AddJob(TileData.Types tileType, Transform target)
     {
-        jobs_available.Add(new Job(tileType, target));
+        // Make the job's hardness less than the default 0.5 for jobs like construction/assembly
+        if (tileType != TileData.Types.rock)
+            jobs_available.Add(new Job(tileType, target, 0.1f));
+        else
+        {
+            jobs_available.Add(new Job(tileType, target));
+        }
+
         Debug.Log("Job Added for " + tileType.ToString());
     }
 

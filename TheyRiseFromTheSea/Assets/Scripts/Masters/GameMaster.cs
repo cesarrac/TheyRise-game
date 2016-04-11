@@ -11,16 +11,16 @@ public class GameMaster : MonoBehaviour {
 	public int curCredits { get { return _storedCredits; }set{ _storedCredits = Mathf.Clamp (value, 0, 100000000); }}
 	
 	ResourceGrid resourceGrid;
-    Build_MainController build_mainController;
+  
 	public Player_GunBaseClass player_weapon;
 
     ObjectPool objPool;
 
 	public bool _canFireWeapon;
 
-	bool levelInitialized;
+	//bool levelInitialized;
 
-    int levelCount; // using this in a CRUDE way to count how many times the player has been to the surface.
+   // int levelCount; // using this in a CRUDE way to count how many times the player has been to the surface.
 
     public Hero theHero { get; protected set; }
     public bool isHeroCreated { get; protected set; }
@@ -340,14 +340,14 @@ public class GameMaster : MonoBehaviour {
                  on its Start to have the callbacks set. */
 
                 // ... then spawn a regular enemy master
-              //  SpawnEnemyMaster();
+                SpawnEnemyMaster();
                 break;
             case MissionType.SURVIVAL:
                 // Register Survival checks callback to the Ship Inventory...
                // Ship_Inventory.Instance.RegisterCompleteMissionCallback(Mission_Manager.Instance.CheckSurvivalMissionCompleted);
 
                 // ... then spawn a regular enemy master
-               // SpawnEnemyMaster();
+                SpawnEnemyMaster();
                 break;
             case MissionType.ENCOUNTER:
                 // Spawn a boss enemy master using the active mission's encounter id
@@ -378,6 +378,14 @@ public class GameMaster : MonoBehaviour {
     void SpawnBossEnemyMaster(string id)
     {
         ObjectPool.instance.GetObjectForType(id, true, Vector3.zero);
+    }
+
+    public void SetUpEmployees()
+    {
+        if (Employee_Generator.Instance.active_employees.Count > 0)
+        {
+            Employee_Generator.Instance.SpawnActiveEmployees(ResourceGrid.Grid.Hero.transform.position + Vector3.up);
+        }
     }
 
 

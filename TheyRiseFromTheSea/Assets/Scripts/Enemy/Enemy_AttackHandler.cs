@@ -75,7 +75,7 @@ public class Enemy_AttackHandler : Unit_Base {
         else
         {
             // Get the target as a Tile
-            targetAsTile = ResourceGrid.Grid.TileFromWorldPoint(target.position);
+            targetAsTile = ResourceGrid.Grid.GetTileFromWorldPos(target.position);
             currTargetIsTile = true;
         }
     }

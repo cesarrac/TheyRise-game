@@ -452,7 +452,7 @@ public class Enemy_PathHandler : MonoBehaviour
                         if (ResourceGrid.Grid.NodeFromWorldPoint(path[targetIndex]).isWalkable)
                         {
                             // if the next node is a wall, change main target to the wall game obj
-                            TileData t = ResourceGrid.Grid.TileFromWorldPoint(path[targetIndex]);
+                            TileData t = ResourceGrid.Grid.GetTileFromWorldPos(path[targetIndex]);
 
                             if (t != null && t.tileType == TileData.Types.wall)
                             {
@@ -500,7 +500,7 @@ public class Enemy_PathHandler : MonoBehaviour
 
     void GetBlockingTile(Vector3 position)
     {
-        blockingTile = ResourceGrid.Grid.TileFromWorldPoint(position);
+        blockingTile = ResourceGrid.Grid.GetTileFromWorldPos(position);
     }
 
     bool CheckIfPathIsBlocked(Node nextNode)

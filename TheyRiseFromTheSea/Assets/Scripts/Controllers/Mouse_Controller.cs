@@ -40,6 +40,8 @@ public class Mouse_Controller:MonoBehaviour
 
         MouseClickInteraction();
 
+        // FOR DEBUGGING PURPOSES:
+        DebugTileUnderMouse();
     }
 
     void UpdateMousePosition()
@@ -62,11 +64,10 @@ public class Mouse_Controller:MonoBehaviour
 
         if (!Build_MainController.Instance.currentlyBuilding)
         {
-            // FOR DEBUGGING PURPOSES:
-            DebugTileUnderMouse();
+            
             //DebugGraphicTile();
 
-            Select();
+           // Select();
            // DeSelectUnit();
         }
 
@@ -155,7 +156,9 @@ public class Mouse_Controller:MonoBehaviour
 
     public TileData GetTileUnderMouse()
     {
-        return ResourceGrid.Grid.TileFromWorldPoint(currMouseP);
+        //return ResourceGrid.Grid.GetTileFromWorldPos(currMouseP);
+        //Vector3 trueTilePos = ResourceGrid.Grid.WorldPosToTilePos(currMouseP);
+        return ResourceGrid.Grid.GetTileFromWorldPos(currMouseP);
     }
 
 
@@ -164,22 +167,12 @@ public class Mouse_Controller:MonoBehaviour
     // Tile Under Mouse Tool: print to console the tile type and position of the tile under mouse
     void DebugTileUnderMouse()
     {
-        if (Input.GetMouseButtonDown(1))
-        {
-            TileData tile = GetTileUnderMouse();
+        TileData tile = GetTileUnderMouse();
 
-            if (tile == null)
-                return;
+        if (tile == null)
+            return;
 
-            print("Tile under mouse is of type: " + tile.tileType + " tile Position: " + tile.posX + " " + tile.posY);
-
-            print("ACCORDING TO THE GRID: This tile points to this gameobject: " + ResourceGrid.Grid.spawnedTiles[tile.posX, tile.posY]);
-
-            if (tile.tileType == TileData.Types.terraformer)
-            {
-                print("Tile HP: " + tile.tileStats.HP);
-            }
-        }
+        ToolTip_Manager.Instance.ViewTile(tile.posX, tile.posY, tile.tileType.ToString());
     }
 
     void DebugGraphicTile()

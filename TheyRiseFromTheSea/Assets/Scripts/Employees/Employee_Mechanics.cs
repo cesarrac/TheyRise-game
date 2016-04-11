@@ -49,6 +49,14 @@ public class Employee_Mechanics : MonoBehaviour {
     {
         while (true)
         {
+            if (emp_handler.workState != Employee_Handler.Work_State.Assembling)
+            {
+                mainTarget.GetComponent<Building_Handler>().StopAssembling();
+                Debug.Log(" Assembly stopped! work state is " + emp_handler.workState.ToString());
+                yield break;
+            }
+               
+
             if (mainTarget.GetComponent<Building_Handler>() != null)
             {
                 if (mainTarget.GetComponent<Building_Handler>().state == Building_Handler.State.READY)
@@ -70,7 +78,7 @@ public class Employee_Mechanics : MonoBehaviour {
         mainTarget = target;
 
         // Get the target as Tile data
-        targetAsTile = ResourceGrid.Grid.TileFromWorldPoint(target.position);
+        targetAsTile = ResourceGrid.Grid.GetTileFromWorldPos(target.position);
 
         if (Employee_Actions.Instance.RangeCheck(mainTarget.position, transform.position))
         {
@@ -92,7 +100,7 @@ public class Employee_Mechanics : MonoBehaviour {
         if (mainTarget != null && Employee_Actions.Instance.RangeCheck(mainTarget.position, transform.position))
         {
             // Get the target as Tile data
-            targetAsTile = ResourceGrid.Grid.TileFromWorldPoint(mainTarget.position);
+            targetAsTile = ResourceGrid.Grid.GetTileFromWorldPos(mainTarget.position);
 
             emp_handler.SetIsWorking(true);
 

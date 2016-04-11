@@ -35,7 +35,7 @@ public class Unit_WallDetector: MonoBehaviour {
 
     void CheckWaypointForWall()
     {
-        if (ResourceGrid.Grid.TileFromWorldPoint(path_waypoint).tileType == TileData.Types.wall)
+        if (ResourceGrid.Grid.GetTileFromWorldPos(path_waypoint).tileType == TileData.Types.wall)
         {
             Debug.Log("UNIT is at a wall! GameObj's name is " + ResourceGrid.Grid.GetTileGameObjFromWorldPos(path_waypoint).name);
 

@@ -77,8 +77,8 @@ public class Employee_Extract : MonoBehaviour {
             }
             else
             {
-                if (emp_handler != null)
-                    emp_handler.FinishedJob();
+                // Rock is depleted
+                emp_handler.FinishedJob();
 
                 yield break;
             }

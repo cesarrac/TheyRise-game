@@ -55,8 +55,8 @@ public class ResourceDrop : MonoBehaviour {
             if (extractionSource.resourceType == TileData.Types.water)
             {
                 // For water we always need to make sure to push away from the water
-                var origin = ResourceGrid.Grid.GetTileWorldPos(extractionSource.originTile.posX, extractionSource.originTile.posY);
-                var target = ResourceGrid.Grid.GetTileWorldPos(extractionSource.targetTile.posX, extractionSource.targetTile.posY);
+                var origin = ResourceGrid.Grid.GetWorldPosFromTile(extractionSource.originTile.posX, extractionSource.originTile.posY);
+                var target = ResourceGrid.Grid.GetWorldPosFromTile(extractionSource.targetTile.posX, extractionSource.targetTile.posY);
                 var heading = -(target - origin);
                 rb.AddForce(heading * forceAmmt, ForceMode2D.Impulse);
 
@@ -112,9 +112,9 @@ public class ResourceDrop : MonoBehaviour {
             //    GetComponent<Wave_Bobbing>().CanBob();
             //}
 
-            if (ResourceGrid.Grid.TileFromWorldPoint(transform.position) != null)
+            if (ResourceGrid.Grid.GetTileFromWorldPos(transform.position) != null)
             {
-                TileData tile = ResourceGrid.Grid.TileFromWorldPoint(transform.position);
+                TileData tile = ResourceGrid.Grid.GetTileFromWorldPos(transform.position);
 
                 for (int x = tile.posX - 1; x <= tile.posX + 1; x++)
                 {

@@ -16,8 +16,8 @@ public class Employee_Generator : MonoBehaviour {
     int maxEmployeesOnMission = 2; 
     public int MaxEmployeesOnMission { get { return maxEmployeesOnMission; } }
 
-    // Array of Employees that are currently active on a mission.
-    Employee[] active_employees;
+    // Employees that are currently active on a mission.
+    public List<Employee> active_employees { get; protected set; }
 
     // Array of string keys for any employee marked to die -- always limited to the max Employees on mission
     List<string> markedAsDead;
@@ -37,7 +37,7 @@ public class Employee_Generator : MonoBehaviour {
             DestroyImmediate(gameObject);
         }
 
-        active_employees = new Employee[maxEmployeesOnMission];
+        active_employees = new List<Employee>();
 
         if (new_employees.Count == 0)
         {
@@ -66,12 +66,12 @@ public class Employee_Generator : MonoBehaviour {
             }
             else if (select == 1)
             {
-                emp = new Employee("Medic", EmployeeSpecialty.Medic, basicJumpSuit, 24, 24, 2, employeeSprites[1]);
+                emp = new Employee("Medic", EmployeeSpecialty.Medic, basicJumpSuit, 24, 24, 2, employeeSprites[0]);
                 emp.SetEmployeeStats(5, 5, 5, 2, 5, 2);
             }
             else
             {
-                emp = new Employee("Scientist", EmployeeSpecialty.Scientist, basicJumpSuit, 24, 24, 2, employeeSprites[2]);
+                emp = new Employee("Scientist", EmployeeSpecialty.Scientist, basicJumpSuit, 24, 24, 2, employeeSprites[0]);
                 emp.SetEmployeeStats(5, 5, 5, 2, 5, 2);
             }
 
@@ -120,31 +120,76 @@ public class Employee_Generator : MonoBehaviour {
         }
     }
 
+    public void SelectAsActive(string name)
+    {
+        if (employee_roster.ContainsKey(name))
+        {
+            active_employees.Add(employee_roster[name]);
+        }
+    }
+
+    public void TestSelectAllAsActive()
+    {
+        Debug.Log(" Selecting all new employees as active!");
+        foreach(Employee e in new_employees.Values)
+        {
+            active_employees.Add(e);
+        }
+    }
+
     // Spawn employees as gameobjects in a level
     public void SpawnActiveEmployees(Vector3 spawnPosition)
     {
         float offset = 0;
-        foreach(Employee emp in active_employees)
+
+        Employee[] actives = active_employees.ToArray();
+
+        Debug.Log("Spawning active employees!");
+
+        for (int i = 0; i < actives.Length; i++)
         {
             Vector3 pos = new Vector3(spawnPosition.x + offset, spawnPosition.y, 0);
 
-            // Grab the correct prefab by passing in this employees specialty (Prefabs are named by specialty so they contain the correct components to work)
-            GameObject employee = ObjectPool.instance.GetObjectForType(emp.Specialty.ToString(), true, pos);
+            // ALL Employees share the same prefab, the Employee class stats will determine their added components
+            GameObject employee = ObjectPool.instance.GetObjectForType("Employee", true, pos);
             
             if (employee != null)
             {
                 // TODO: Also set the employees correct sprite here!
-                employee.GetComponentInChildren<SpriteRenderer>().sprite = emp.MySprite;
+                employee.GetComponentInChildren<SpriteRenderer>().sprite = actives[i].MySprite;
 
+                Employee_Handler emp_handler = employee.GetComponent<Employee_Handler>();
                 // Set the employee class of the Employee Handler
-                if (employee.GetComponent<Employee_Handler>() != null)
+                if (emp_handler != null)
                 {
-                    employee.GetComponent<Employee_Handler>().DefineEmployee(emp);
+                    emp_handler.DefineEmployee(actives[i]);
+
+                    // Add components for the 3 stats used to perform actions
+                    if (emp_handler.MyEmployee.emp_stats.Extraction > 0)
+                    {
+                        AddEmployeeComponent<Employee_Extract>(employee);
+                    }
+                    if (emp_handler.MyEmployee.emp_stats.Mechanics > 0)
+                    {
+                        AddEmployeeComponent<Employee_Mechanics>(employee);
+                    }
+                    // TODO: Add a Healing action
+                    //if (emp_handler.MyEmployee.emp_stats.Healing > 0)
+                    //{
+                    //    AddEmployeeComponent<Employee_Extract>(employee);
+                    //}
                 }
                 // Copy the employee's unit stats to the unit stats referenced in its base class
                 if (employee.GetComponent<Employee_Attack>() != null)
                 {
-                    employee.GetComponent<Employee_Attack>().stats = new UnitStats(emp.unitStats);
+                    employee.GetComponent<Employee_Attack>().stats = new UnitStats(actives[i].unitStats);
+                }
+
+                // Init its move stats
+                if (employee.GetComponent<UnitPathHandler>() != null)
+                {
+                    employee.GetComponent<UnitPathHandler>().mStats.InitStartingMoveStats(2, 2);
+                    employee.GetComponent<UnitPathHandler>().mStats.InitMoveStats();
                 }
 
                 offset++;

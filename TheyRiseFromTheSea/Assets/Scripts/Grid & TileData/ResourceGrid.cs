@@ -113,20 +113,15 @@ public class ResourceGrid : MonoBehaviour{
         worldGridInitialized = false;
     }
 
+    // ******************************************************************************
+    //                          Initialize
+    // ******************************************************************************
+
     void Awake()
 	{
         Grid = this;
 		if (!master_state)
 			master_state = GameObject.FindGameObjectWithTag ("GameController").GetComponent<MasterState_Manager> ();
-
-		//if (!map_generator) {
-		//	map_generator = GetComponent<Map_Generator> ();
-		//	mapSizeX = map_generator.width;
-		//	mapSizeY = map_generator.height;
-		//} else {
-		//	mapSizeX = map_generator.width;
-		//	mapSizeY = map_generator.height;
-		//}
 
 		if (!res_sprite_handler)
 			res_sprite_handler = GetComponent<Resource_Sprite_Handler> ();
@@ -150,7 +145,7 @@ public class ResourceGrid : MonoBehaviour{
 
         worldGridInitialized = true;
 
-        StartCoroutine("WaitForLandingSiteSelection");
+        BuildTheTransporter();
 
         // Give the waterTilePositions to Enemy_Spawner
         //Enemy_Spawner.instance.InitSpawnPositions(waterTilesArray);
@@ -158,57 +153,27 @@ public class ResourceGrid : MonoBehaviour{
     }
 
     // This will wait for the Player to select where to land on initial level load. Once they left click, this stops and never checks again.
-    IEnumerator WaitForLandingSiteSelection()
-    {
-        while (true)
-        {
-            if (!transporter_built && islandVisible)
-            {
-                BuildTheTransporter();
-                yield break;
-            }
-               
+    //IEnumerator WaitForLandingSiteSelection()
+    //{
+    //    while (true)
+    //    {
+    //        if (!transporter_built && islandVisible)
+    //        {
+    //            BuildTheTransporter();
+    //            yield break;
+    //        }
 
-            yield return null;
-        }
-    }
 
-    void Update()
+    //        yield return null;
+    //    }
+    //}
+
+    // ******************************************************************************
+    //                          BUILD TRANSPORTER
+    // ******************************************************************************
+
+    void BuildTheTransporter()
 	{
-
-        if (!islandVisible)
-        {
-            Vector3 camHolderPos = new Vector3(cameraHolder.position.x, cameraHolder.position.y, -10F);
-            //MoveTheIslandMapToFront(camHolderPos);
-            islandVisible = true;
-
-            //if (Input.GetMouseButtonDown(0))
-            //{
-            //    Vector3 camHolderPos = new Vector3(cameraHolder.position.x, cameraHolder.position.y, -10F);
-            //    //MoveTheIslandMapToFront(camHolderPos);
-            //    islandVisible = true;
-            //}
-        }
-
-	}
-
-	void BuildTheTransporter()
-	{
-        // This code allows the Player to see the entire island upon loading, and select a landing site with the mouse:
-
-        //Vector3 m = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        //int mX = Mathf.RoundToInt(m.x);
-        //int mY = Mathf.RoundToInt(m.y);
-
-        //if (mX < mapSizeX && mY < mapSizeY && mX > 0 && mY > 0){
-        //	if (Input.GetMouseButtonDown(0))
-        //          {
-        //              // Just in case the Wait for Player Landing select coroutine hasn't stopped 
-        //              StopCoroutine("WaitForLandingSiteSelection");
-        //		InitTransporter(mX, mY);
-        //	}
-        //}
-
         // This will grab an empty tile position, check its surrounding tiles and make sure there are no rocks in the way
         Vector2 t_pos = new Vector2();
 
@@ -360,74 +325,24 @@ public class ResourceGrid : MonoBehaviour{
         // Setup the Enemies and Missions
         game_master.SetUpMissionAndEnemies();
 
+        // Setup the Employees
+        game_master.SetUpEmployees();
+
         transportSpawnX = _terraPosX;
         transportSpawnY = _terraPosY;
 
         transporter_built = true;
 
-
-
-        // Turn on the Enemy Wave spawner
-        //enemy_waveSpawner.SetActive (true);
-
     }
 
-    //    void MoveTheIslandMapToFront(Vector3 camHolderPos)
-    //	{
-
-    //		islandVisible = true;
-    //		//TODO: Introduction to each level, the island RISES from the sea as the terraformer activates
-
-    ////		if (cameraHolder) {
-    ////			cameraHolder.position = Vector3.Lerp(cameraHolder.position, camHolderPos, 66 * Time.deltaTime);
-    ////			islandVisible = true;
-    ////		}
-    //	}
+    // ******************************************************************************
+    //                          GENERATE ROCKS
+    // ******************************************************************************
 
     public void InitializeRockandMinerals()
     {
         Rock_Generator.Instance.GenerateRocks();
-
-  
     }
-
-    //	bool CheckForWater (int x, int y)
-    //	{
-    //        int waterRange = 2;
-    //		bool hasWater = false;
-    //		// Make sure every position is still within map bounds
-    //		for (int bottomX = x- waterRange; bottomX < x + waterRange; bottomX++){
-    //			for (int bottomY = y- waterRange; bottomY < y + waterRange; bottomY++){
-    //				if (CheckIsInMapBounds(bottomX, bottomY)){
-    //					// It IS in map bounds, now check if it's water
-    //					if (tiles[bottomX, bottomY].tileType == TileData.Types.water){
-    //						hasWater = true;
-    //						break;
-    //					}
-    //				}else{
-    //					// It's NOT in map bounds so just return true because it's most likely water
-    //					hasWater = true;
-    //					break;
-    //				}
-    //			}
-
-    //		}
-
-    //		return hasWater;
-    //	}
-
-    public bool CheckIsInMapBounds(int x, int y)
-    {
-        if (x < mapSizeX && y < mapSizeY && x > 0 && y > 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
 
     public void PlaceOrePatch(OrePatch _patch, Rock.RockType rType)
 	{
@@ -453,7 +368,7 @@ public class ResourceGrid : MonoBehaviour{
                     SpawnRock("sharp rock", new Vector3(_patch.leadPositionX, _patch.leadPositionY, 0.0F), Rock.RockType.sharp);
                     break;
             }
-            CreateUnWalkableBorder(_patch.leadPositionX, _patch.leadPositionY);
+            //CreateUnWalkableBorder(_patch.leadPositionX, _patch.leadPositionY);
         }
    
 
@@ -486,7 +401,7 @@ public class ResourceGrid : MonoBehaviour{
                                 break;
                         }
 
-                        CreateUnWalkableBorder(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY);
+                       // CreateUnWalkableBorder(_patch.neighborOreTiles[i].posX, _patch.neighborOreTiles[i].posY);
                     }
                 
                 }
@@ -513,58 +428,41 @@ public class ResourceGrid : MonoBehaviour{
     }
 
 
+    void Update()
+    {
 
-    /// <summary>
-    /// Damages the tile.
-    /// </summary>
-    /// <param name="x">The x coordinate.</param>
-    /// <param name="y">The y coordinate.</param>
-    /// <param name="damage">Damage.</param>
-    public void DamageTile(TileData tile, float damage)
-	{
-		// make sure there IS a tile there
-		if (spawnedTiles [tile.posX, tile.posY] != null) {
+        if (!islandVisible)
+        {
+            Vector3 camHolderPos = new Vector3(cameraHolder.position.x, cameraHolder.position.y, -10F);
+            //MoveTheIslandMapToFront(camHolderPos);
+            islandVisible = true;
 
-			// If it has 0 or less HP left, kill tile
-			if (tile.tileStats.HP <= 0) {
-				if (tile.tileType == TileData.Types.capital){
-					// call mission failed
-					master_state.mState = MasterState_Manager.MasterState.MISSION_FAILED;
-		
-				}else{
-                    /*SwapTileType (tile.posX, tile.posY, TileData.Types.empty);*/    // to KILL TILE I just swap it to an empty! ;)
-                                                                                      // OR! call break this building from the Hero's nanobuilding_handler
-                    Hero.GetComponent<NanoBuilding_Handler>().BreakThisBuilding(tile.tileType, spawnedTiles[tile.posX, tile.posY]);
+            //if (Input.GetMouseButtonDown(0))
+            //{
+            //    Vector3 camHolderPos = new Vector3(cameraHolder.position.x, cameraHolder.position.y, -10F);
+            //    //MoveTheIslandMapToFront(camHolderPos);
+            //    islandVisible = true;
+            //}
+        }
 
-				}
-			}else{
-				tile.tileStats.HP -= damage;
-				//Debug.Log("Tile: " + tile.tileType + " damaged for " + damage);
-				//Debug.Log("It has " + tile.hp + " left!");
+    }
 
-                // Check again if it needs to be killed, hp <= 0
-                if (tile.tileStats.HP <= 0)
-                {
-                    if (tile.tileType == TileData.Types.capital)
-                    {
-                        // call mission failed
-                        master_state.mState = MasterState_Manager.MasterState.MISSION_FAILED;
 
-                    }
-                    else
-                    {
-                        spawnedTiles[tile.posX, tile.posY].GetComponent<Building_Handler>().BreakBuilding(); // Call Break Building from within the building's click handler
+    public bool CheckIsInMapBounds(int x, int y)
+    {
+        if (x < mapSizeX && y < mapSizeY && x > 0 && y > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
-                        //SwapTileType(tile.posX, tile.posY, TileData.Types.empty);   // to KILL TILE I just swap it to an empty! ;) < ----- NOPE! :P
-
-                    }
-                }
-            }
-
-		} else {
-			Debug.Log("GRID: Could NOT find tile to damage!");
-		}
-	}
+    // ******************************************************************************
+    //                          GET TILE / INTERACT WITH TILE
+    // ******************************************************************************
 
 	/// <summary>
 	/// Gets the type of the tile.
@@ -602,12 +500,106 @@ public class ResourceGrid : MonoBehaviour{
             return null;
     }
 
-    public Vector3 GetTileWorldPos(int x, int y)
+    public Vector3 GetWorldPosFromTile(int x, int y)
     {
         Vector3 worldBottomLeft = transform.position - Vector3.right * mapSizeX / 2 - Vector3.up * mapSizeY / 2;
         Vector3 worldPoint = worldBottomLeft + Vector3.right * x + Vector3.up * y;
 
         return worldPoint;
+    }
+
+
+    public TileData GetTileFromWorldPos(Vector3 worldPos)
+    {
+        //Vector3 worldBottomLeft = transform.position - Vector3.right * mapSizeX / 2 - Vector3.up * mapSizeY / 2;
+        //Vector3 worldPoint = worldBottomLeft + Vector3.right * worldPos.x + Vector3.up * worldPos.y;
+
+        int x = Mathf.FloorToInt(worldPos.x + 0.5f);
+        int y = Mathf.FloorToInt(worldPos.y + 0.5f);
+
+        if (CheckIsInMapBounds(x, y))
+        {
+            return tiles[x, y];
+        }
+        else
+            return null;
+    }
+
+    //public TileData GetTileFromTilePos(Vector3 tilePos)
+    //{
+    //    if (CheckIsInMapBounds((int)tilePos.x, (int)tilePos.y))
+    //    {
+    //        return tiles[(int)tilePos.x, (int)tilePos.y];
+    //    }
+    //    else
+    //        return null;
+
+    //}
+
+    public Vector3 WorldPosToTilePos(Vector3 pos)
+    {
+        int x = Mathf.FloorToInt(pos.x + 0.5f);
+        int y = Mathf.FloorToInt(pos.y + 0.5f);
+
+        return new Vector3((float)x, (float)y, 0.0f);
+    }
+
+    public void SwitchTileWalkability(int x, int y, bool trueIfWalkable)
+    {
+        tiles[x, y].isWalkable = trueIfWalkable;
+        grid[x, y].isWalkable = trueIfWalkable;
+    }
+
+    /// <summary>
+    /// Damages the tile.
+    /// </summary>
+    /// <param name="x">The x coordinate.</param>
+    /// <param name="y">The y coordinate.</param>
+    /// <param name="damage">Damage.</param>
+    public void DamageTile(TileData tile, float damage)
+    {
+        // make sure there IS a tile there
+        if (spawnedTiles[tile.posX, tile.posY] != null)
+        {
+            // If it has 0 or less HP left, kill tile
+            if (tile.tileStats.HP <= 0)
+            {
+                if (tile.tileType == TileData.Types.capital)
+                {
+                    // call mission failed
+                    master_state.mState = MasterState_Manager.MasterState.MISSION_FAILED;
+
+                }
+                else
+                {
+                    Hero.GetComponent<NanoBuilding_Handler>().BreakThisBuilding(tile.tileType, spawnedTiles[tile.posX, tile.posY]);
+                }
+            }
+            else
+            {
+                tile.tileStats.HP -= damage;
+
+                // Check again if it needs to be killed, hp <= 0
+                if (tile.tileStats.HP <= 0)
+                {
+                    if (tile.tileType == TileData.Types.capital)
+                    {
+                        // call mission failed
+                        master_state.mState = MasterState_Manager.MasterState.MISSION_FAILED;
+
+                    }
+                    else
+                    {
+                        spawnedTiles[tile.posX, tile.posY].GetComponent<Building_Handler>().BreakBuilding(); // Call Break Building from within the building's click handler
+                    }
+                }
+            }
+
+        }
+        else
+        {
+            Debug.Log("GRID: Could NOT find tile to damage!");
+        }
     }
 
     public int ExtractFromTile(int x, int y, int ammnt, bool isHandDrill = false)
@@ -723,7 +715,7 @@ public class ResourceGrid : MonoBehaviour{
     //                    chunk.tag = "Sharp Chunk";
     //                    break;
     //            }
-           
+
     //        }
 
     //        yield return new WaitForSeconds(0.05f);
@@ -733,6 +725,11 @@ public class ResourceGrid : MonoBehaviour{
     //    yield break;
 
     //}
+
+
+    // ******************************************************************************
+    //                          BUILDING / TILE GENERATION
+    // ******************************************************************************
 
     public void RegisterTowerBuildCB(Action<Transform> cbBattleAdd, Action<Transform> cbExtractionAdd, Action<Transform> cbBattleRemove, Action<Transform> cbUtilityRemove)
     {
@@ -746,12 +743,12 @@ public class ResourceGrid : MonoBehaviour{
     public void AddTowerBuiltForEnemyMaster(Transform towerTransform)
     {
 
-        if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(towerTransform.position).tileName) == BuildingType.UTILITY)
+        if (BlueprintDatabase.Instance.GetTowerType(GetTileFromWorldPos(towerTransform.position).tileName) == BuildingType.UTILITY)
         {
             if (UtilityTowerBuiltCB != null)
                 UtilityTowerBuiltCB(towerTransform);
         }
-        else if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(towerTransform.position).tileName) == BuildingType.BATTLE)
+        else if (BlueprintDatabase.Instance.GetTowerType(GetTileFromWorldPos(towerTransform.position).tileName) == BuildingType.BATTLE)
         {
             if (BattleTowerBuiltCB != null)
                 BattleTowerBuiltCB(towerTransform);
@@ -760,12 +757,12 @@ public class ResourceGrid : MonoBehaviour{
 
     public void RemoveTowerBuiltForEnemyMaster(Transform towerTransform)
     {
-        if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(towerTransform.position).tileName) == BuildingType.UTILITY)
+        if (BlueprintDatabase.Instance.GetTowerType(GetTileFromWorldPos(towerTransform.position).tileName) == BuildingType.UTILITY)
         {
             if (UtilityTowerRemoveCB != null)
                 UtilityTowerRemoveCB(towerTransform);
         }
-        else if (BlueprintDatabase.Instance.GetTowerType(TileFromWorldPoint(towerTransform.position).tileName) == BuildingType.BATTLE)
+        else if (BlueprintDatabase.Instance.GetTowerType(GetTileFromWorldPos(towerTransform.position).tileName) == BuildingType.BATTLE)
         {
             if (BattleTowerRemoveCB != null)
                 BattleTowerRemoveCB(towerTransform);
@@ -1039,16 +1036,6 @@ public class ResourceGrid : MonoBehaviour{
         }
     }
 
-    //void DefineMultipleTilesAsGameObjects(int x, int y, int spriteWidth, int spriteHeight, GameObject tileGameObj)
-    //{
-    //    for (int w = -(spriteWidth - 1); w < spriteWidth; w++)
-    //    {
-    //        for (int h = -1; h < spriteHeight; h++)
-    //        {
-    //            spawnedTiles[x + w, y + h] = tileGameObj;
-    //        }
-    //    }
-    //}
 
     void DefineMultipleEmptyTiles(int x, int y, int spriteWidth, int spriteHeight, GameObject oldGameObj)
     {
@@ -1074,28 +1061,6 @@ public class ResourceGrid : MonoBehaviour{
 
         }
     }
-
-    //void DefineResourceTiles(int x, int y, int areaWidth, int areaHeight, TileData.Types newType, int quantity)
-    //{
-    //    for (int w = 0; w < areaWidth; w++)
-    //    {
-    //        for (int h = 0; h < areaHeight; h++)
-    //        {
-    //            // ******** MAKE SURE we are not changing tiles that are NOT empty
-    //            if (tiles[x + w, y + h].tileType == TileData.Types.empty)
-    //            {
-    //                tiles[x + w, y + h] = new TileData(x, y, newType, quantity, 10000);
-
-    //               // grid[x + w, y + h].isWalkable = tiles[x + w, y + h].isWalkable; < ----------- NOT affecting the grid here because it will become unwalkable when Grid is initialized on Start()
-    //            }
-
-
-    //        }
-
-    //    }
-    //}
-
-
 
 	public void DiscoverTile(int x, int y, bool trueIfSwapping, int spriteWidth = 0, int spriteHeight = 0)
 	{
@@ -1174,7 +1139,10 @@ public class ResourceGrid : MonoBehaviour{
 
 
 
-    // ** PATHFINDING GRAPH
+
+    // ******************************************************************************
+    //                          PATHFINDING GRAPH
+    // ******************************************************************************
 
 
     public void InitPathFindingGrid()
@@ -1223,27 +1191,6 @@ public class ResourceGrid : MonoBehaviour{
         return grid[x, y];
     }
 
-    public TileData TileFromWorldPoint(Vector3 worldPos)
-    {
-        Vector3 worldBottomLeft = transform.position - Vector3.right * mapSizeX / 2 - Vector3.up * mapSizeY / 2;
-        Vector3 worldPoint = worldBottomLeft + Vector3.right * worldPos.x + Vector3.up * worldPos.y;
-
-        int x = Mathf.RoundToInt(worldPoint.x);
-        int y = Mathf.RoundToInt(worldPoint.y);
-
-        if (CheckIsInMapBounds(x, y))
-        {
-            return tiles[x, y];
-        }
-        else
-            return null;
-    }
-
-    public void SwitchTileWalkability (int x, int y, bool trueIfWalkable)
-    {
-        tiles[x, y].isWalkable = trueIfWalkable;
-        grid[x, y].isWalkable = trueIfWalkable;
-    }
 
     public List<Node> GetNeighbors(Node node)
     {
@@ -1326,12 +1273,13 @@ public class ResourceGrid : MonoBehaviour{
     //		}
     //	}
     //}
+
     //TODO: Properly check for the tile map coords against world coords, right now this only works b/c map is set to 0,0 in world space
-    public Vector2 TileCoordToWorldCoord(int x, int y){
+ //   public Vector2 TileCoordToWorldCoord(int x, int y){
 
-		return new Vector2 ((float)x, (float)y);
+	//	return new Vector2 ((float)x, (float)y);
 
-	}
+	//}
 
 	/// <summary>
 	/// Checks the tile move cost,
@@ -1355,117 +1303,5 @@ public class ResourceGrid : MonoBehaviour{
 	public bool UnitCanEnterTile(int x, int y){
 		return tiles[x,y].isWalkable;
 	}
-
-	/// <summary>
-	/// Generates the walk path for both player-controlled units and enemy AI.
-	/// </summary>
-	/// <param name="x">The x coordinate.</param>
-	/// <param name="y">The y coordinate.</param>
-	/// <param name="trueIfPlayerUnit">If set to <c>true</c> 
-	/// Only true if player unit so method can be shared while X and Y coordinates
-	/// are set properly.</param>
-	/// <param name="enemyX">Enemy x.
-	/// Use when enemy, else default is 0</param>
-	/// <param name="enemyY">Enemy y.
-	/// Same as x</param>
-//	public void GenerateWalkPath(int x, int y, bool trueIfPlayerUnit, int unitX = 0, int unitY = 0){
-//		int unitPosX;
-//		int unitPosY;
-//		// Clear out selected unit's old path
-//		if (trueIfPlayerUnit) {
-//			unitOnPath.GetComponent<SelectedUnit_MoveHandler> ().currentPath = null;
-//			unitPosX = unitX;
-//			unitPosY = unitY;
-//		} else {
-//			pathForEnemy = null;
-//			unitPosX = unitX;
-//			unitPosY = unitY;
-////			unitOnPath.GetComponent<Enemy_MoveHandler> ().currentPath = null;
-////			unitPosX = unitOnPath.GetComponent<Enemy_MoveHandler> ().posX;
-////			unitPosY = unitOnPath.GetComponent<Enemy_MoveHandler> ().posY;
-//		}
-
-//		// Every Node that hasn't been checked yet
-//		List<Node> unvisited = new List<Node> ();
-		
-//		Dictionary<Node, float> dist = new Dictionary<Node, float> ();
-//		Dictionary<Node, Node> prev = new Dictionary<Node, Node> ();
-
-//		Node source = graph [
-//		                     unitPosX, 
-//		                     unitPosY
-//		                     ];
-//		Node target = graph [
-//		                     x, 
-//		                     y
-//		                     ];	
-
-//		foreach (Node v in graph) {
-//			if(v != source){
-//				dist[v] = Mathf.Infinity;
-//				prev[v] = null;
-//			}else{
-//				dist [source] = 0; // distance
-//				prev [source] = null;
-//			}
-//			unvisited.Add(v); 
-//		}
-
-//		while (unvisited.Count > 0) {
-//			Node u = null;
-//			// I need to sort the list of unvisited every time a v is added
-//			// this loop gets me the unvisited node with shortest distance
-//			foreach(Node possibleU in unvisited){
-//				if (u== null || dist[possibleU] < dist[u]){
-//					u = possibleU;
-//				}
-//			}
-
-//			if (u == target){
-//				break;			// Here we found Target, EXIT while loop
-//			}
-
-//			unvisited.Remove(u);
-
-//			foreach(Node v in u.neighbors){
-////				float alt = dist[u] + u.DistanceTo(v); // distance to move
-////				float alt = dist[u] + CheckIfTileisWalkable(v.x, v.y); // distance to move
-//				float alt = dist[u] + CheckTileMoveCost(u.x, u.y, v.x, v.y); 
-//				if(alt < dist[v]){
-//					dist[v] = alt;
-//					prev[v] = u;
-//				}
-//			}
-//		}
-
-//		// Check if there is no route to our target
-//		if (prev [target] == null) {
-//			// no route from target to source!
-//			return;
-//		}
-
-//		// Here we have a route from source to target
-//		List<Node> currentPath = new List<Node> ();
-
-//		Node curr = target;
-
-//		while (curr != null) {
-//			currentPath.Add(curr);
-//			curr = prev[curr];
-//		}
-
-//		// This route is right now from our target to our source, so we need to invert it to move the Unit
-//		currentPath.Reverse ();
-
-//		// Give the unit it's NEW PATH!
-//		if (trueIfPlayerUnit) {
-//			unitOnPath.GetComponent<SelectedUnit_MoveHandler> ().currentPath = currentPath;
-//		} else {
-//			pathForEnemy = currentPath;
-////			unitOnPath.GetComponent<Enemy_MoveHandler> ().currentPath = currentPath;
-//		}
-
-//	}// end Movetarget
-
 
 }
