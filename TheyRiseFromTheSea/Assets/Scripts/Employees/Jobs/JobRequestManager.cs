@@ -18,9 +18,9 @@ public class JobRequestManager : MonoBehaviour {
         instance = this;
     }
 
-    public static void RequestJob(TileData.Types[] tileTypes, Action<Job, bool> cb)
+    public static void RequestJob(JobType[] jobTypes, Action<Job, bool> cb)
     {
-        JobRequest jobRequest = new JobRequest(tileTypes, cb);
+        JobRequest jobRequest = new JobRequest(jobTypes, cb);
 
         instance.jobQueue.Enqueue(jobRequest);
 
@@ -37,7 +37,7 @@ public class JobRequestManager : MonoBehaviour {
             curJobRequest = jobQueue.Dequeue();
             isHandlingJobRequest = true;
             Debug.Log("Finding job...");
-            Job_Manager.Instance.FindJobs(curJobRequest.jobTileTypes);
+            Job_Manager.Instance.FindJobs(curJobRequest.jobTypes);
         }
     }
 
@@ -62,12 +62,12 @@ public class JobRequestManager : MonoBehaviour {
 
 struct JobRequest
 {
-    public TileData.Types[] jobTileTypes;
+    public JobType[] jobTypes;
     public Action<Job, bool> callback;
 
-    public JobRequest(TileData.Types[] tileTypes, Action<Job, bool> cb)
+    public JobRequest(JobType[] jTypes, Action<Job, bool> cb)
     {
-        jobTileTypes = tileTypes;
+        jobTypes = jTypes;
         callback = cb;
     }
 

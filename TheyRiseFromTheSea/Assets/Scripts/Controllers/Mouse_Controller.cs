@@ -67,7 +67,7 @@ public class Mouse_Controller:MonoBehaviour
             
             //DebugGraphicTile();
 
-           // Select();
+            Select();
            // DeSelectUnit();
         }
 
@@ -172,7 +172,7 @@ public class Mouse_Controller:MonoBehaviour
         if (tile == null)
             return;
 
-        ToolTip_Manager.Instance.ViewTile(tile.posX, tile.posY, tile.tileType.ToString());
+        ToolTip_Manager.Instance.ViewTile(tile.posX, tile.posY, tile.tileType.ToString(), tile.isWalkable);
     }
 
     void DebugGraphicTile()
@@ -205,12 +205,19 @@ public class Mouse_Controller:MonoBehaviour
 
                 if (unit.GetComponent<Employee_Handler>() != null)
                 {
+                    if (selected_Employee != null)
+                    {
+                        DeSelectUnit();
+                    }
+
                     selected_Employee = unit.GetComponent<Employee_Handler>();
 
                     // Place a selection box to mark the unit
                     spawned_selectBox = Instantiate(unitSelectionBox, hit.transform.position, Quaternion.identity) as GameObject;
 
                     selected_Employee.SelectEmployee();
+
+                    Debug.Log("Employee selected. Their current work state is: " + selected_Employee.workState);
 
                     Sound_Manager.Instance.PlaySound("Select");
                 }
@@ -221,32 +228,31 @@ public class Mouse_Controller:MonoBehaviour
         // Select Tile for Unit to interact with
         if (Input.GetMouseButtonDown(1))
         {
+            if (selected_Employee != null)
+                DeSelectUnit();
+
             TileData tile = GetTileUnderMouse();
             if (tile != null)
             {
-                if (tile.tileType == TileData.Types.empty)
+                if (tile.tileType != TileData.Types.rock)
                     return;
-
-                Job_Manager.Instance.AddJob(tile.tileType, 
+                
+                // Add a mining job
+                Job_Manager.Instance.AddJob(JobType.Mine,tile.tileType, 
                     ResourceGrid.Grid.GetTileGameObjFromIntCoords(tile.posX, tile.posY).transform);
-                //if (selected_Employee != null)
-                //{
-                //    selected_Employee.DoAction(tile.tileType, ResourceGrid.Grid.GetTileGameObjFromIntCoords(GetTileUnderMouse().posX, GetTileUnderMouse().posY).transform);
-                //    DeSelectUnit();
-                //}
+
             }
+
+   
         }
 
     }
 
     void DeSelectUnit()
     {
-        if (selected_Employee != null)
-        {
-            selected_Employee = null;
-            if (spawned_selectBox != null)
-                Destroy(spawned_selectBox);
-        }
+        selected_Employee = null;
+        if (spawned_selectBox != null)
+            Destroy(spawned_selectBox);
     }
   
 

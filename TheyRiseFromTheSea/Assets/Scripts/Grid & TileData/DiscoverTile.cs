@@ -96,7 +96,7 @@ public class DiscoverTile : MonoBehaviour {
                     if (tileType != TileData.Types.capital)
                     {
                         // Since we are SURE this is a building we can add a JOB for its construction here:
-                        Job_Manager.Instance.AddJob(tileType, tileToSpawn.transform);
+                        Job_Manager.Instance.AddJob(JobType.Assemble, tileType, tileToSpawn.transform);
                     }
   
                 }

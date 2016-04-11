@@ -39,8 +39,8 @@ public class Building_Handler : MonoBehaviour {
     private bool isDissasembling = false, isFading = false;
     SpriteRenderer s_renderer;
 
-	Color A = Color.white;
-	Color B = Color.clear;
+	Color A = Color.white; 
+    Color B = new Color(0, 0, 0, 0.1f);
 	float constructionDuration = 12; // time in seconds the building takes to fade in / build
     float constructionCountDown = 0;
 	private float colorTime;

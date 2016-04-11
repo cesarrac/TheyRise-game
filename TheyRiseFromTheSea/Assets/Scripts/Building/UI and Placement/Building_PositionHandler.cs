@@ -170,8 +170,6 @@ public class Building_PositionHandler : MonoBehaviour {
                             // Add the pos indicator to its dictionary to easily remove it later
                             position_indicator.Add(newPos, posIndicator);
 
-                            // Charge the cost of resources after adding a potential build spot
-                            nanoBuild_handler.ChargeBuildResources(nanoBuild_handler.GetAvailableBlueprint(tileType));
                         }
  
                     }
@@ -246,6 +244,9 @@ public class Building_PositionHandler : MonoBehaviour {
                     multi++;
                     if (CheckCost(multi))
                     {
+                        // Charge the cost of resources after adding a potential build spot
+                       // nanoBuild_handler.ChargeBuildResources(nanoBuild_handler.GetAvailableBlueprint(tileType));
+
                         if (canDragBuild)
                         {
                             resourceGrid.SwapTileType(curTile.posX, curTile.posY, tileType, bpName, 0, 0);

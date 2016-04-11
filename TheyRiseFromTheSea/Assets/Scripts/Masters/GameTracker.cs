@@ -127,7 +127,7 @@ public class GameTracker : MonoBehaviour {
             // Load the Resources map
             foreach (TileData.Types resource in gameData.savedResourceMap.Keys)
             {
-                Ship_Inventory.Instance.StoreItems(resource, gameData.savedResourceMap[resource]);
+                Ship_Inventory.Instance.StoreResource(resource, gameData.savedResourceMap[resource]);
             }
 
             // Load the Days

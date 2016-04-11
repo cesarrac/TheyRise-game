@@ -265,7 +265,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
             {
                 // Can Build!
                 build_controller.BuildThis(bp);
-                ChargeBuildResources(bp);
+               // ChargeBuildResources(bp);
             }
 
             //// Check Nanobot cost

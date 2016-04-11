@@ -7,7 +7,7 @@ public class Employee_Actions : MonoBehaviour {
 
     public static Employee_Actions Instance { get; protected set; }
 
-    Dictionary<TileData.Types, Action<GameObject, Transform>> employeeActions;
+    Dictionary<JobType, Action<GameObject, Transform>> employee_Actions;
 
     void Awake()
     {
@@ -17,31 +17,17 @@ public class Employee_Actions : MonoBehaviour {
 
     public void DefineActions()
     {
-        employeeActions = new Dictionary<TileData.Types, Action<GameObject, Transform>>();
-        employeeActions.Add(TileData.Types.rock, ExtractFromTile);
-        employeeActions.Add(TileData.Types.machine_gun, AssembleMachine);
-        employeeActions.Add(TileData.Types.extractor, OperateBuilding);
+        employee_Actions = new Dictionary<JobType, Action<GameObject, Transform>>();
+        employee_Actions.Add(JobType.Mine, ExtractFromTile);
+        employee_Actions.Add(JobType.Assemble, AssembleMachine);
+        employee_Actions.Add(JobType.Operate, OperateBuilding);
     }
 
 
-    public Action<GameObject, Transform> GetAction(TileData.Types tile)
+    public Action<GameObject, Transform> GetAction(JobType jobType)
     {
-        if (tile == TileData.Types.empty)
-            return null;
-
-        //if (spec == EmployeeSpecialty.Operator)
-        //{
-        //    if (operatorActions.ContainsKey(tile))
-        //    {
-        //        return operatorActions[tile];
-        //    }
-        //}
-
-        // NOTE: Instead of finding an action based on the Employee's specialty, ALL employess will be capable of finding an action
-        // but the will fail to accomplish the task (or probably not be able to do it at all!) if they have less than 1 point in the relevant Employee Stat
-
-        if (employeeActions.ContainsKey(tile))
-            return employeeActions[tile];
+        if (employee_Actions.ContainsKey(jobType))
+            return employee_Actions[jobType];
 
         return null;
     }
@@ -88,6 +74,7 @@ public class Employee_Actions : MonoBehaviour {
             InvalidAction(t);
         }
     }
+
 
     void OperateBuilding (GameObject gObj, Transform t)
     {

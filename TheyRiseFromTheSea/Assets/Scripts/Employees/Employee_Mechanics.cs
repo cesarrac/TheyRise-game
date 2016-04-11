@@ -8,27 +8,79 @@ public class Employee_Mechanics : MonoBehaviour {
 
     Employee_Handler emp_handler;
 
+    NanoBuilding_Handler nanoBuild_handler;
+
     void Awake()
     {
         emp_handler = GetComponent<Employee_Handler>();
+    }
+
+    void Start()
+    {
+
+        nanoBuild_handler = ResourceGrid.Grid.Hero.GetComponent<NanoBuilding_Handler>();
     }
 
     public void SetAssembleTarget(Transform target)
     {
         mainTarget = target;
 
-        if (Employee_Actions.Instance.RangeCheck(mainTarget.position, transform.position))
+        // Main Target is the machine that needs to be assembled.
+        // First the Employee needs to get the construction materials from the transporter
+        if (Employee_Actions.Instance.RangeCheck(emp_handler.GetTransporterTransform(transform.position).position, transform.position))
         {
-            AssembleTarget();
+            GetSuppliesFromTransporter();
         }
         else
         {
-            Employee_Actions.Instance.MoveToTarget(gameObject, AssembleTarget, GetTarget);
+            Employee_Actions.Instance.MoveToTarget(gameObject, GetSuppliesFromTransporter, emp_handler.GetTransporterTransform);
         }
+  
+
+        //if (Employee_Actions.Instance.RangeCheck(mainTarget.position, transform.position))
+        //{
+        //    AssembleTarget();
+        //}
+        //else
+        //{
+        //    Employee_Actions.Instance.MoveToTarget(gameObject, AssembleTarget, GetTarget);
+        //}
+    }
+
+    void GetSuppliesFromTransporter()
+    {
+        // Wait to get the supplies needed...
+        // Then call AssembleTarget so it will move to the assembly taret when it detects it is out of range
+        Debug.Log("Getting supplies from Transporter!");
+        Blueprint curBP = nanoBuild_handler.GetAvailableBlueprint(emp_handler.curJob.Job_TileType);
+
+        if (emp_handler.curJob.HasBeenStarted == false)
+        {
+            if (nanoBuild_handler.CheckBuildCost(curBP))
+            {
+                // Charge the building cost to the ship's inventory
+                nanoBuild_handler.ChargeBuildResources(curBP);
+                Invoke("AssembleTarget", 3f);
+            }
+            else
+            {
+                // If we don't have enough resources to build this...
+                // Add the job again to the last position of the Job Queue and go get a new job!
+                emp_handler.CancelJob();
+            }
+        }
+        else
+        {
+            // This assembly job has already been started, so resources have already been charged.
+            // Employee can go to Assemble immediately.
+            AssembleTarget();
+        }
+   
     }
 
     void AssembleTarget()
     {
+        Debug.Log("Assembling!");
         if (mainTarget != null && mainTarget.GetComponent<Building_Handler>() != null)
         {
             if (Employee_Actions.Instance.RangeCheck(mainTarget.position, transform.position))

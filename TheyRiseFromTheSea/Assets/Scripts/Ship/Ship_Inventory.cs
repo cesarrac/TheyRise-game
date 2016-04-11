@@ -131,7 +131,7 @@ public class Ship_Inventory : MonoBehaviour {
         }
     }
 
-    public void StoreItems(TileData.Types rType, int ammnt)
+    public void StoreResource(TileData.Types rType, int ammnt)
     {
         if (rawResourcesMap.ContainsKey(rType))
         {
@@ -247,9 +247,9 @@ public class Ship_Inventory : MonoBehaviour {
 
         foodStored += tempFood;
 
-        StoreItems(TileData.Types.water, tempWater);
-        StoreItems(TileData.Types.rock, tempSteel);
-        StoreItems(TileData.Types.food, tempFood);
+        StoreResource(TileData.Types.water, tempWater);
+        StoreResource(TileData.Types.rock, tempSteel);
+        StoreResource(TileData.Types.food, tempFood);
 
 
         //UnRegisterCompleteMissionCallback();
@@ -375,6 +375,9 @@ public class Ship_Inventory : MonoBehaviour {
     // ... giving their client the required Fabricated Goods ... 
     public void TakeGoods(Item good, int ammnt)
     {
+        if (!fabricatedGoodsMap.ContainsKey(good))
+            return;
+
         fabricatedGoodsMap[good] -= ammnt;
 
         if (fabricatedGoodsMap[good] <= 0)
@@ -385,6 +388,9 @@ public class Ship_Inventory : MonoBehaviour {
     // ... or required Raw Resource.
     public void TakeResources(TileData.Types resource, int ammnt)
     {
+        if (!rawResourcesMap.ContainsKey(resource))
+            return;
+
         rawResourcesMap[resource] -= ammnt;
 
         if (rawResourcesMap[resource] <= 0)

@@ -13,7 +13,7 @@ public class Employee_Handler : MonoBehaviour {
     public Employee MyEmployee { get { return myEmployee; } }
     float curToolPower;
 
-    Job curJob;
+    public Job curJob { get; protected set; }
 
     Transform mainTarget;
 
@@ -28,7 +28,7 @@ public class Employee_Handler : MonoBehaviour {
 
     EmployeeAssignment assignment = EmployeeAssignment.Builder;
 
-    TileData.Types[] tilesIWorkOn;
+    JobType[] jobsIWork;
 
     void OnEnable()
     {
@@ -50,12 +50,12 @@ public class Employee_Handler : MonoBehaviour {
 
     void SetTasksBasedOnAssignment()
     {
-        tilesIWorkOn = new TileData.Types[3];
+        jobsIWork = new JobType[3];
         if (assignment == EmployeeAssignment.Builder)
         {
-            tilesIWorkOn[0] = TileData.Types.rock;
-            tilesIWorkOn[1] = TileData.Types.machine_gun;
-            tilesIWorkOn[2] = TileData.Types.extractor;
+            jobsIWork[0] = JobType.Assemble;
+            jobsIWork[1] = JobType.Mine;
+            jobsIWork[2] = JobType.Repair;
         }
     }
 
@@ -96,21 +96,22 @@ public class Employee_Handler : MonoBehaviour {
     {   
         workState = Work_State.RequestingJob;
         Debug.Log("Employee requesting job!");
-        JobRequestManager.RequestJob(tilesIWorkOn, DoAction);
+        JobRequestManager.RequestJob(jobsIWork, DoAction);
     }
 
     public void DoAction(Job job, bool success)
     {
        if (success && job != null)
        {
-            Debug.Log("Employee going to work on " + job.Job_TileType.ToString());
+            Debug.Log("Employee took a job of type: " + job.Job_Type);
+            Debug.Log("Going to work on " + job.Job_TileType.ToString());
 
             hasJob = true;
             curJob = new Job(job);
 
             mainTarget = job.Job_Target;
 
-            Action<GameObject, Transform> act = Employee_Actions.Instance.GetAction(job.Job_TileType);
+            Action<GameObject, Transform> act = Employee_Actions.Instance.GetAction(job.Job_Type);
             if (act != null)
             {
                 isWorking = false; // the action will set this to true once it begins actually working
@@ -231,28 +232,58 @@ public class Employee_Handler : MonoBehaviour {
         // and the same job needs to be added again because the request manager already got rid of it.
         if (curToolPower < myEmployee.emp_stats.ToolPower)
         {
+           // Add the old job back on the job queue
+            if (curJob != null)
+            {
+                if (curJob.IsCompleted == false)
+                {
+                    AddOldJobToQueue();
+                }
+            }
+
             // Go to recharge tool before finding another job
             workState = Work_State.Recharging;
-            Employee_Actions.Instance.MoveToTarget(gameObject, RechargeToolPower, GetRechargeStationTarget);
-            // Add job back into the list
-            Job_Manager.Instance.AddJob(curJob.Job_TileType, curJob.Job_Target);
-            curJob = null;
+            Employee_Actions.Instance.MoveToTarget(gameObject, RechargeToolPower, GetTransporterTransform);
         }
         else
         {
             workState = Work_State.Idling;
         }
+    }
 
+    void AddOldJobToQueue()
+    {
+        // Add job back into the list, telling the Job Manager that this job was already started by this employee or someone else
+        Job_Manager.Instance.AddJob(curJob.Job_Type, curJob.Job_TileType, curJob.Job_Target, hasStarted: true);
+
+        curJob = null;
+    }
+
+    public void CancelJob()
+    {
+        AddOldJobToQueue();
+        if (curToolPower < myEmployee.emp_stats.ToolPower)
+        {
+            OutOfPower();
+        }
+        else
+        {
+            workState = Work_State.Idling;
+            hasJob = false;
+            curJob = null;
+        }
     }
 
     public void FinishedJob()
     {
         Debug.Log("Employee finished action");
+        curJob.CompleteJob();
+
         workState = Work_State.Idling;
         hasJob = false;
     }
 
-    Transform GetRechargeStationTarget(Vector3 unitPosition)
+    public Transform GetTransporterTransform(Vector3 unitPosition)
     {
         return ResourceGrid.Grid.transporterGObj.transform;
     }
@@ -260,6 +291,7 @@ public class Employee_Handler : MonoBehaviour {
     void RechargeToolPower()
     {
         StartCoroutine("Recharge");
+
     }
 
     IEnumerator Recharge()
