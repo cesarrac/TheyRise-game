@@ -23,6 +23,8 @@ public class Mouse_Controller:MonoBehaviour
     public GameObject unitSelectionBox;
     GameObject spawned_selectBox;
 
+    public bool isAssigningTask { get; protected set; }
+
     void OnEnable()
     {
         Instance = this;
@@ -64,11 +66,17 @@ public class Mouse_Controller:MonoBehaviour
 
         if (!Build_MainController.Instance.currentlyBuilding)
         {
-            
-            Select();
+            if (!isAssigningTask)
+            {
+                SelectUnit();
 
-            if (selected_Employee == null)
-                ListenForDashRightClick();
+                if (selected_Employee == null)
+                    ListenForDashRightClick();
+            }
+            else
+            {
+                AssignTask();
+            }
         }
 
     }
@@ -168,8 +176,55 @@ public class Mouse_Controller:MonoBehaviour
       
     }
 
+    public void StartAssignTaskMode()
+    {
+        if (Build_MainController.Instance.currentlyBuilding)
+            return;
 
-    void Select()
+        isAssigningTask = true;
+    }
+
+    void AssignTask()
+    {
+        // Select Tile for Unit to interact with
+        if (Input.GetMouseButtonDown(1))
+        {
+            TileData tile = GetTileUnderMouse();
+
+
+            if (tile != null)
+            {
+                if (tile.tileType == TileData.Types.rock)
+                {
+                    // Add a mining job
+                    Job_Manager.Instance.AddJob(JobType.Mine, tile.tileType,
+                                                        ResourceGrid.Grid.GetTileGameObjFromIntCoords
+                                                        (tile.posX, tile.posY).transform);
+                }
+                else if (tile.tileType != TileData.Types.empty && tile.tileType != TileData.Types.water)
+                {
+                    // Verify that this tile is in fact a building, by checking for component Build_Handler
+                    if (ResourceGrid.Grid.              GetTileGameObjFromIntCoords(tile.posX, tile.posY).
+                                                        GetComponent<Building_Handler>() != null)
+                    {
+                        // Add Repair job
+                        Job_Manager.Instance.AddJob(JobType.Repair, tile.tileType,
+                                                  ResourceGrid.Grid.GetTileGameObjFromIntCoords
+                                                  (tile.posX, tile.posY).transform);
+                    }
+                }
+  
+                // Spawn a selection circle on the selected tile to indicate the task's / job's target
+                ObjectPool.instance.GetObjectForType("Selection Circle", true, 
+                                                    ResourceGrid.Grid.GetTileGameObjFromIntCoords
+                                                    (tile.posX, tile.posY).transform.position);
+            }
+
+            isAssigningTask = false;
+        }
+    }
+
+    void SelectUnit()
     {
         // Select Unit
         if (Input.GetMouseButtonDown(0))
@@ -202,27 +257,11 @@ public class Mouse_Controller:MonoBehaviour
             }
         }
 
-        // Select Tile for Unit to interact with
         if (Input.GetMouseButtonDown(1))
         {
             if (selected_Employee != null)
                 DeSelectUnit();
-
-            TileData tile = GetTileUnderMouse();
-            if (tile != null)
-            {
-                if (tile.tileType != TileData.Types.rock)
-                    return;
-                
-                // Add a mining job
-                Job_Manager.Instance.AddJob(JobType.Mine,tile.tileType, 
-                    ResourceGrid.Grid.GetTileGameObjFromIntCoords(tile.posX, tile.posY).transform);
-
-            }
-
-   
         }
-
     }
 
     void DeSelectUnit()

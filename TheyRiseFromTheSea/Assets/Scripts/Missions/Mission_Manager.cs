@@ -73,14 +73,16 @@ public class Mission_Manager : MonoBehaviour {
 
     public void LoadAvailableMissions(Mission newMission)
     {
-        newMission.RegisterMissionCompleteCallback(CompleteMission);
-        availableMissions.Add(newMission);
+        Mission M = new Mission(newMission);
+        M.RegisterMissionCompleteCallback(CompleteMission);
+        availableMissions.Add(M);
     }
 
     public void LoadActiveMission(Mission newMission)
     {
-        newMission.RegisterMissionCompleteCallback(CompleteMission);
-        activeMission = newMission;
+        Mission M = new Mission(newMission);
+        M.RegisterMissionCompleteCallback(CompleteMission);
+        activeMission = M;
         Debug.Log("MISSION MANAGER: current active mission is " + activeMission.MissionName);
     }
 
@@ -215,15 +217,25 @@ public class Mission_Manager : MonoBehaviour {
     //      This simply checks if the number of waves survived => the objective
     //      ammount of this active mission.
     // ********
-    public void CheckWavesSurvived (int wavesSurvived)
+    public bool AllWavesAreCompleted (int wavesSurvived)
     {
         if (wavesSurvived >= activeMission.ObjectiveAmnt)
         {
-            activeMission.FlagAsCompleted();
-
-            // Display objective completed message
-            UI_Manager.Instance.DisplayVictoryPanel();
+            return true;
         }
+        else
+            return false;
+
+    }
+    public void CompleteMissionEnemyWaves (int wavesSurvived)
+    {
+        if (AllWavesAreCompleted(wavesSurvived) == false)
+            return;
+
+        activeMission.FlagAsCompleted();
+
+        // Display objective completed message
+        UI_Manager.Instance.DisplayVictoryPanel();
     }
     // ********
 

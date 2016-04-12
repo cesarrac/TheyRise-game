@@ -148,7 +148,7 @@ public class ResourceDrop : MonoBehaviour {
 
     void ListenForTarget()
     {
-        if (Vector2.Distance(transform.position, targetPosition) <= 0.1f)
+        if (Vector2.Distance(transform.position, targetPosition) <= 0.3f)
         {
             PickUp();
         }

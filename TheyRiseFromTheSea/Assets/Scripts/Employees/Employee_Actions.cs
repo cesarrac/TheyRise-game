@@ -21,6 +21,7 @@ public class Employee_Actions : MonoBehaviour {
         employee_Actions.Add(JobType.Mine, ExtractFromTile);
         employee_Actions.Add(JobType.Assemble, AssembleMachine);
         employee_Actions.Add(JobType.Operate, OperateBuilding);
+        employee_Actions.Add(JobType.Repair, RepairBuilding);
     }
 
 

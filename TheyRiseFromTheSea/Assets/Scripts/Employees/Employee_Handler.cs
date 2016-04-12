@@ -21,7 +21,7 @@ public class Employee_Handler : MonoBehaviour {
 
     public bool isWorking { get; protected set; }
 
-    public enum Work_State { Idling, Recharging, RequestingJob, Mining, OnMachine, Assembling };
+    public enum Work_State { Idling, Recharging, RequestingJob, Mining, OnMachine, Assembling, Repairing };
     public Work_State workState { get; protected set; }
 
     bool hasJob = false;
@@ -116,13 +116,17 @@ public class Employee_Handler : MonoBehaviour {
             {
                 isWorking = false; // the action will set this to true once it begins actually working
 
-                if (job.Job_TileType == TileData.Types.rock)
+                if (job.Job_Type == JobType.Mine)
                 {
                     workState = Work_State.Mining;
                 }
-                else if (job.Job_TileType != TileData.Types.empty)
+                else if (job.Job_Type == JobType.Assemble)
                 {
                     workState = Work_State.Assembling;
+                }
+                else if (job.Job_Type == JobType.Repair)
+                {
+                    workState = Work_State.Repairing;
                 }
 
                 act(gameObject, job.Job_Target);
@@ -149,7 +153,7 @@ public class Employee_Handler : MonoBehaviour {
         }
         else
         {
-            Debug.Log("Could not find job!");
+           // Debug.Log("Could not find job!");
             if (curToolPower < myEmployee.emp_stats.ToolPower)
             {
                 OutOfPower();
@@ -226,7 +230,7 @@ public class Employee_Handler : MonoBehaviour {
 
     void OutOfPower()
     {
-        Debug.Log("Employee tool out of power!");
+       // Debug.Log("Employee tool out of power!");
         // Could not complete job because the employee ran out of power.
         // The Employee needs to go and recharge their tool...
         // and the same job needs to be added again because the request manager already got rid of it.

@@ -170,7 +170,7 @@ public class Employee_Mechanics : MonoBehaviour {
     {
         while (true)
         {
-            if (emp_handler.isWorking == false || emp_handler.workState != Employee_Handler.Work_State.OnMachine)
+            if (emp_handler.isWorking == false || emp_handler.workState != Employee_Handler.Work_State.Repairing)
                 yield break;
 
             if (targetAsTile == null || !Employee_Actions.Instance.RangeCheck(mainTarget.position, transform.position))

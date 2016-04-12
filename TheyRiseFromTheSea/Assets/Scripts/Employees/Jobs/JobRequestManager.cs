@@ -36,7 +36,6 @@ public class JobRequestManager : MonoBehaviour {
         {
             curJobRequest = jobQueue.Dequeue();
             isHandlingJobRequest = true;
-            Debug.Log("Finding job...");
             Job_Manager.Instance.FindJobs(curJobRequest.jobTypes);
         }
     }
@@ -45,8 +44,6 @@ public class JobRequestManager : MonoBehaviour {
     {
         if (aJob != null)
         {
-            Debug.Log("Job found, calling do action...");
-
             Job_Manager.Instance.RemoveJob(aJob);
             curJobRequest.callback(aJob, true);
             

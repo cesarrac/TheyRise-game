@@ -292,7 +292,7 @@ public class Unit_Base : MonoBehaviour {
 
     public bool HealTile(TileData tile, float heal)
     {
-        if (tile.tileStats.HP > 0 && tile.tileStats.HP <= tile.tileStats.StartHP)
+        if (tile.tileStats.HP < tile.tileStats.StartHP)
         {
             tile.tileStats.HP += heal;
 

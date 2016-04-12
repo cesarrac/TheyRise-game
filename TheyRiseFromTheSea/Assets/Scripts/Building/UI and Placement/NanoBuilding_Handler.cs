@@ -222,6 +222,11 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
     void BuildHalfTile(TileData.Types tileType)
     {
+        // Can't build while mouse is assigning task (like Mining)
+        if (Mouse_Controller.Instance.isAssigningTask)
+        {
+            return;
+        }
         if (NanoBuilder.blueprintsMap.ContainsKey(tileType))
         {
             if (CheckBuildCost(NanoBuilder.blueprintsMap[tileType]) == false)

@@ -68,14 +68,8 @@ public class Employee_Extract : MonoBehaviour {
                 Employee_Actions.Instance.MoveToTarget(gameObject, Extract, GetTarget);
                 yield break;
             }
-                
-           
 
-            if (ResourceGrid.Grid.ExtractFromTile(posX, posY, 1, true) > 0)
-            {
-                Debug.Log("Extracting 1 out of " + ResourceGrid.Grid.tiles[posX, posY].maxResourceQuantity);
-            }
-            else
+            if (ResourceGrid.Grid.ExtractFromTile(posX, posY, 1, true) <= 0)
             {
                 // Rock is depleted
                 emp_handler.FinishedJob();

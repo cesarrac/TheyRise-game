@@ -80,12 +80,9 @@ public class Employee_Generator : MonoBehaviour {
             if (!new_employees.ContainsKey(emp.Name) && emp != null)
             {
                 new_employees.Add(emp.Name, emp);
-                Debug.Log("Generated Employee!  Name: " + emp.Name + "     Specialty: " + emp.Specialty);
+                //Debug.Log("Generated Employee!  Name: " + emp.Name + "     Specialty: " + emp.Specialty);
             }
-            else
-            {
-                Debug.Log("Already have a " + emp.Name + " in my list!");
-            }
+
         }
     }
 

@@ -82,6 +82,8 @@ public class Enemy_Master : MonoBehaviour {
     int totalWavesThisLevel = 1; // each wave has a total of max units cap (This is set by the GM)
     int curWavesTotal = 0;
 
+    Action selectedStrategy;
+
     void Awake()
     {
         utilityModifier = Mathf.Clamp(utilityModifier, 0, 4);
@@ -162,17 +164,53 @@ public class Enemy_Master : MonoBehaviour {
     {
         totalWavesThisLevel = totalWaves;
 
-        // At init wait 5 seconds before starting to indicate first enemies
-        StartCoroutine(WaitToAct(waitTime, true));
+        // At init wait before starting to indicate first enemies
+        //StartCoroutine(WaitToAct(waitTime, true));
+        Invoke("DecideStrategyAndWaitToAct", waitTime);
     }
 
-    void StartWaitToAct()
+    //IEnumerator WaitToAct(float time, bool deciding = false)
+    //{
+    //    while (true)
+    //    {
+    //        yield return new WaitForSeconds(time);
+
+    //        Debug.Log("Waves left: " + (totalWavesThisLevel - curWavesTotal));
+    //        // Stop making decisions if all waves necessary for this level have been spawned
+    //        if (Mission_Manager.Instance.AllWavesAreCompleted(curWavesTotal))
+    //        {
+    //            Mission_Manager.Instance.CompleteMissionEnemyWaves(curWavesTotal);
+    //            yield break;
+    //        }
+
+               
+
+    //        if (deciding)
+    //        {
+    //            DecideStrategyAndWaitToAct();
+
+    //        }
+    //        else
+    //        {
+    //            ActOnStrategy();
+    //        }
+
+    //        yield break;
+    //    }
+    //}
+
+
+    void DecideStrategyAndWaitToAct()
     {
+        timeAtStartofDecision = Time.time;
         // Get a spawn position for this next wave
         spawnPosition = GetSpawnPosition();
 
-        // ONLY CREATE A SPAWN INDICATOR WHEN THERE ARE SOME SPAWN POINTS LEFT! (To avoid creating one when Economic Strategy will be implemented)
-        if (spawnPoints > 0)
+        CalcModifiers();
+        SortTasks();
+        SelectStrategy();
+
+        if (selectedStrategy != null && selectedStrategy != EconomicStrategy)
         {
             // Notify the incoming indicator of the position the enemy will be coming from
             Enemy_Spawner.instance.CreateIndicator(spawnPosition);
@@ -180,54 +218,43 @@ public class Enemy_Master : MonoBehaviour {
             // Draw path to target from the spawn position to indicate the potential enemy path
             if (GetComponentInChildren<Path_Draw>() != null)
             {
-               
-               PathRequestManager.RequestPath(spawnPosition, GetCurrentTarget(spawnPosition).position, gameObject, DrawPath);
+
+                PathRequestManager.RequestPath(spawnPosition, GetCurrentTarget(spawnPosition).position, gameObject, DrawPath);
             }
         }
 
-
-        StartCoroutine(WaitToAct(waitTime));
+        //StartCoroutine(WaitToAct(waitTime));
+        Invoke("ActOnStrategy", waitTime);
     }
 
-    IEnumerator WaitToAct(float time, bool first = false)
+
+    void ActOnStrategy()
     {
-        while (true)
+        // Get rid of any visible paths
+        GetComponentInChildren<Path_Draw>().DisablePath();
+
+        Debug.Log("Waves left: " + (totalWavesThisLevel - curWavesTotal));
+        // Stop making decisions if all waves necessary for this level have been spawned
+        if (Mission_Manager.Instance.AllWavesAreCompleted(curWavesTotal))
         {
-            yield return new WaitForSeconds(time);
-
-            // Stop making decisions if all waves necessary for this level have been spawned
-            if (curWavesTotal >= totalWavesThisLevel)
-                yield break;
-
-            if (!first)
-            {
-                StartDecisionMakingProcess();
-            }
-            else
-            {
-                StartWaitToAct();
-            }
-    
-            yield break;
+            Mission_Manager.Instance.CompleteMissionEnemyWaves(curWavesTotal);
+            return;
         }
-    }
 
-    void DrawPath(Vector3[] path, bool isSuccesful)
-    {
-        if (isSuccesful == true)
+        if (selectedStrategy != null)
         {
-            GetComponentInChildren<Path_Draw>().DrawPath(path);
+            if (selectedStrategy != EconomicStrategy)
+                UI_Manager.Instance.DisplayWaveIncoming(curWavesTotal + 1);
+            // Call the strategy
+            selectedStrategy();
+        }
+        else 
+        {
+            Debug.LogError("Enemy Master is trying to call a strategy -- but it hasn't selected one yet!");
         }
     }
 
-    void StartDecisionMakingProcess()
-    {
-        timeAtStartofDecision = Time.time;
-        CalcModifiers();
-        SortTasks();
-        SelectStrategy();
 
-    }
 
     // Before we can score each task we need to get a Spawn Position (where this next wave will be spawning from is a random water tile position)
     void CalcModifiers()
@@ -346,7 +373,7 @@ public class Enemy_Master : MonoBehaviour {
         // The Enemy Master uses Spawn Points as currency to purchase/spawn waves. If it currently has none, go straight to an Economic strategy
         if (spawnPoints <= 0)
         {
-            EconomicStrategy();
+            selectedStrategy = EconomicStrategy;
             //StartWaitToAct();
             return;
         }
@@ -367,27 +394,27 @@ public class Enemy_Master : MonoBehaviour {
                 if (spawnPoints >= (maxSpawnPoints / 2))
                 {
                     // Currently have half of max Spawn points or more, Rush Aggressively!
-                    RushAggressiveStrategy();
+                    selectedStrategy = RushAggressiveStrategy;
 
                 }
                 else if (spawnPoints > (maxSpawnPoints / 4))
                 {
                     // Currently have more than or equal 1/4th of max spawn points, Rush Conservatively!
-                    RushConservativeStrategy();
+                    selectedStrategy = RushConservativeStrategy;
                 }
                 else if (spawnPoints >= 20)
                 {
-                    ConservativeStrategy();
+                    selectedStrategy = ConservativeStrategy;
                 }
                 else
                 {
-                    EconomicStrategy();
+                    selectedStrategy = EconomicStrategy;
                 }
             }
             else
             {
                 // During the 1st minute, if Kill Player is active task, always go Conservative
-                ConservativeStrategy();
+                selectedStrategy = ConservativeStrategy;
             }
             //if (activeTask.taskType == EnemyTaskType.PLAYER)
             //{
@@ -413,11 +440,10 @@ public class Enemy_Master : MonoBehaviour {
         Debug.Log("MASTER: Implementing Economic Strategy!");
         SpawnPoints += spawnPointRegenRate;
 
-        // TODO: Get rid of any spawn indicators if there are any visible, since we are NOT spawning
         // Get rid of any visible paths
         GetComponentInChildren<Path_Draw>().DisablePath();
 
-        StartWaitToAct();
+        DecideStrategyAndWaitToAct();
     }
 
     void ConservativeStrategy()
@@ -427,7 +453,12 @@ public class Enemy_Master : MonoBehaviour {
         int midCost = Enemy_Database.Instance.GetEnemy("Slimer_Mid_noAggro").spawnCost;
         int weakCost = Enemy_Database.Instance.GetEnemy("Slimer_Weak_noAggro").spawnCost;
         if (spawnPoints < midCost && spawnPoints < weakCost)
+        {
+            EconomicStrategy();
+
             return;
+        }
+        
 
         if (spawnPoints > maxSpawnPoints / 2)
         {
@@ -476,7 +507,7 @@ public class Enemy_Master : MonoBehaviour {
 
         AddWaveSpawned();
 
-        StartWaitToAct();
+        DecideStrategyAndWaitToAct();
     }
 
     void RushAggressiveStrategy()
@@ -484,8 +515,14 @@ public class Enemy_Master : MonoBehaviour {
         Debug.Log("MASTER: Implementing RushAggressiveStrategy Strategy!");
         // Buy as many Heavy units as you can
         int heavyCost = Enemy_Database.Instance.GetEnemy("Slimer_Heavy_noAggro").spawnCost;
+
         if (spawnPoints < heavyCost)
+        {
+            EconomicStrategy();
+
             return;
+        }
+       
 
         if ((spawnPoints / heavyCost) > maxUnitsCap)
         {
@@ -500,6 +537,9 @@ public class Enemy_Master : MonoBehaviour {
         int midCost = Enemy_Database.Instance.GetEnemy("Slimer_Mid_noAggro").spawnCost;
         if (spawnPoints < midCost)
         {
+            AddWaveSpawned();
+
+            DecideStrategyAndWaitToAct();
             return;
         }
         else
@@ -518,7 +558,7 @@ public class Enemy_Master : MonoBehaviour {
 
         AddWaveSpawned();
 
-        StartWaitToAct();
+        DecideStrategyAndWaitToAct();
     }
 
     void RushConservativeStrategy()
@@ -528,7 +568,12 @@ public class Enemy_Master : MonoBehaviour {
         // Buy as many Weak units as you can
         int weakCost = Enemy_Database.Instance.GetEnemy("Slimer_Weak_noAggro").spawnCost;
         if (spawnPoints < weakCost)
+        {
+            EconomicStrategy();
+
             return;
+        }
+           
 
         if ((spawnPoints / weakCost) > maxUnitsCap)
         {
@@ -542,7 +587,7 @@ public class Enemy_Master : MonoBehaviour {
 
         AddWaveSpawned();
 
-        StartWaitToAct();
+        DecideStrategyAndWaitToAct();
 
     }
 
@@ -568,29 +613,30 @@ public class Enemy_Master : MonoBehaviour {
     // This is a callback for each unit to get its target from the active task
     Transform GetCurrentTarget(Vector3 unitPosition)
     {
-        if (activeTask == null)
-            return ResourceGrid.Grid.Hero.transform;
+        return ResourceGrid.Grid.transporterGObj.transform;
+        //if (activeTask == null)
+        //    return ResourceGrid.Grid.Hero.transform;
 
-        if (activeTask.taskType == EnemyTaskType.PLAYER)
-        {
-            return ResourceGrid.Grid.Hero.transform;
-        }
-        else if (activeTask.taskType == EnemyTaskType.BATTLE)
-        {
+        //if (activeTask.taskType == EnemyTaskType.PLAYER)
+        //{
+        //    return ResourceGrid.Grid.Hero.transform;
+        //}
+        //else if (activeTask.taskType == EnemyTaskType.BATTLE)
+        //{
 
-            nearestBattleTower = GetNearestTower(battleTowersBuilt.ToArray(), unitPosition);
-            if (nearestBattleTower != null)
-                return nearestBattleTower;
-        }
-        else if (activeTask.taskType == EnemyTaskType.UTILITY)
-        {
-            nearestUtilityTower = GetNearestTower(utilityTowersBuilt.ToArray(), unitPosition);
-            if (nearestUtilityTower != null)
-                return nearestUtilityTower;
-        }
+        //    nearestBattleTower = GetNearestTower(battleTowersBuilt.ToArray(), unitPosition);
+        //    if (nearestBattleTower != null)
+        //        return nearestBattleTower;
+        //}
+        //else if (activeTask.taskType == EnemyTaskType.UTILITY)
+        //{
+        //    nearestUtilityTower = GetNearestTower(utilityTowersBuilt.ToArray(), unitPosition);
+        //    if (nearestUtilityTower != null)
+        //        return nearestUtilityTower;
+        //}
 
-        // If nothing has returned try returning the player
-        return ResourceGrid.Grid.Hero.transform; 
+        //// If nothing has returned try returning the player
+        //return ResourceGrid.Grid.Hero.transform; 
     }
 
     Transform GetNearestTower(Transform[] towers, Vector3 startPosition)
@@ -848,21 +894,34 @@ public class Enemy_Master : MonoBehaviour {
 
     }
 
+    void DrawPath(Vector3[] path, bool isSuccesful)
+    {
+        if (isSuccesful == true)
+        {
+            GetComponentInChildren<Path_Draw>().DrawPath(path);
+        }
+    }
+
+
     public void RegisterDeath(Transform killer)
     {
         CurrUnitsOnField--;
 
         // Check if this level has been completed
         if (CurrUnitsOnField <= 0)
-            Mission_Manager.Instance.CheckWavesSurvived(curWavesTotal);
-
-        if (killer != target_killer)
         {
-            target_killer = killer;
+            if (Mission_Manager.Instance.AllWavesAreCompleted(curWavesTotal))
+            {
+                Mission_Manager.Instance.CompleteMissionEnemyWaves(curWavesTotal);
+            }
+        }
+        else
+        {
+            if (killer != target_killer)
+            {
+                target_killer = killer;
+            }
         }
 
-
-
-        Debug.Log("ENEMY MASTER: Registered death from " + killer.name);
     }
 }

@@ -340,14 +340,14 @@ public class GameMaster : MonoBehaviour {
                  on its Start to have the callbacks set. */
 
                 // ... then spawn a regular enemy master
-               // SpawnEnemyMaster();
+                 SpawnEnemyMaster();
                 break;
             case MissionType.SURVIVAL:
                 // Register Survival checks callback to the Ship Inventory...
                // Ship_Inventory.Instance.RegisterCompleteMissionCallback(Mission_Manager.Instance.CheckSurvivalMissionCompleted);
 
                 // ... then spawn a regular enemy master
-              //  SpawnEnemyMaster();
+                SpawnEnemyMaster();
                 break;
             case MissionType.ENCOUNTER:
                 // Spawn a boss enemy master using the active mission's encounter id

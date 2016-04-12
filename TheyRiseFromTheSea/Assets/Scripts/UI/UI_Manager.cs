@@ -34,7 +34,7 @@ public class UI_Manager : MonoBehaviour
     public GameObject mainMenuPanel, charCreationPanel;
 
     // (CENTRAL LEVEL) MAIN UI PANELS
-    public GameObject characterPanel, ordersPanel, resoucesPanel, bpPanel, missionsPanel, marketPanel, warningPanel;
+    public GameObject characterPanel, ordersPanel, resoucesPanel, bpPanel, missionsPanel, marketPanel;
     GameObject currActivePanel;
     public Text market_VitCrystalSold, warningText;
 
@@ -49,11 +49,12 @@ public class UI_Manager : MonoBehaviour
     public Text m4Name, m4Desc, m4Cost;
     public Text m5Name, m5Desc, m5Cost;
 
-    public GameObject buildWarningGObj;
-    public Text buildWarning;
-
     // BUILD BUTTONS:
     public GameObject buildButtons_Panel;
+
+    // WARNING / INDICATORS:
+    public GameObject warningPanel, waveIncomingPanel, buildWarningGObj;
+    public Text buildWarning, wavesIncoming;
 
 
     void Awake()
@@ -205,7 +206,8 @@ public class UI_Manager : MonoBehaviour
         victoryPanel.SetActive(false);
     }
 
-    //                              BUILD BUTTONS:
+    // *****************************************                             BUILD BUTTONS:
+
     public void CreateBuildButton(string name, TileData.Types tileType, Action<TileData.Types> cb)
     {
         GameObject build_button = ObjectPool.instance.GetObjectForType("Build Button", false, Vector3.zero);
@@ -229,6 +231,14 @@ public class UI_Manager : MonoBehaviour
     {
         buildButtons_Panel.GetComponent<AutoVerticalPanel>().AdjustPanelSize();
     }
+
+    // *****************************************                            TASK BUTTON:
+    
+    public void StartAssignTaskMode()
+    {
+        // TODO: pass in an ID for the type of task I'm assigning, for now I'm just assigning Mining jobs
+        Mouse_Controller.Instance.StartAssignTaskMode();
+    } 
 
 
     // *****************************************                            TRADE ORDERS:
@@ -589,6 +599,9 @@ public class UI_Manager : MonoBehaviour
             
     }
 
+
+    // *****************************************                             WARNINGS & INDICATORS:
+
     public void DisplayWarningMessage(string message)
     {
         if (warningPanel.activeSelf == false)
@@ -604,6 +617,22 @@ public class UI_Manager : MonoBehaviour
         {
             warningPanel.SetActive(false);
         }
+    }
+
+    public void DisplayWaveIncoming(int curWave)
+    {
+        if (waveIncomingPanel.activeSelf == false)
+            waveIncomingPanel.SetActive(true);
+
+        wavesIncoming.text = "Wave " + curWave.ToString();
+
+        Invoke("CloseWaveIncPanel", 5);
+    }
+
+    void CloseWaveIncPanel()
+    {
+        if (waveIncomingPanel.activeSelf == true)
+            waveIncomingPanel.SetActive(false);
     }
 
     //public void DisplayEnemyIndicator(Vector3 enemyPos)
