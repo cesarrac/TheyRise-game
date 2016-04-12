@@ -61,6 +61,7 @@ public class Mission{
         missionType = otherMission.missionType;
         description = otherMission.description;
         objectiveAmnt = otherMission.objectiveAmnt;
+        isCompleted = otherMission.isCompleted;
 
     }
 
