@@ -54,42 +54,9 @@ public class NanoBuilding_Handler : MonoBehaviour {
     }
 
 
-    //void InitBluePrints()
-    //{
-    //    availableBlueprintsTypes = new TileData.Types[10] {TileData.Types.terraformer, TileData.Types.sniper,  TileData.Types.cannons , TileData.Types.seaWitch,
-    //        TileData.Types.extractor, TileData.Types.desalt_s,TileData.Types.generator,TileData.Types.farm_s, TileData.Types.storage,TileData.Types.machine_gun};
-
-    //    availableBlueprints = new Dictionary<TileData.Types, Blueprint>
-    //    {
-    //        {TileData.Types.terraformer, new Blueprint("Terraformer", 0, 0, TileData.Types.terraformer) }, // < ---- Always include the Terraformer and no cost
-    //        {TileData.Types.sniper, new Blueprint("Sniper Gun", 3, 10, TileData.Types.sniper) },
-    //        { TileData.Types.cannons, new Blueprint("Cannons", 3, 10, TileData.Types.cannons)},
-    //        {TileData.Types.seaWitch, new Blueprint("Sea-Witch Crag", 3, 10, TileData.Types.seaWitch) },
-    //        {TileData.Types.extractor,  new Blueprint("Extractor", 3, 10, TileData.Types.extractor) },
-    //        {TileData.Types.desalt_s, new Blueprint("Desalination Pump", 3, 10, TileData.Types.desalt_s) },
-    //        {TileData.Types.generator, new Blueprint("Energy Generator", 3, 10, TileData.Types.generator) },
-    //        {TileData.Types.farm_s,  new Blueprint("Seaweed Farm", 3, 10, TileData.Types.farm_s)},
-    //        {TileData.Types.storage, new Blueprint("Storage", 3, 10, TileData.Types.storage) },
-    //        {TileData.Types.machine_gun, new Blueprint("Machine Gun", 3, 10, TileData.Types.machine_gun) }
-    //    };
-
-      
-    //                                                         // FIX THIS !!!!!! FOR NOW im forcing this blueprints array unto the sprite database from here
-    //    Buildings_SpriteDatabase.Instance.SetSprites(availableBlueprints);
-    //}
-
     public void InitBP()
     {
-        //availableBlueprintsTypes = new TileData.Types[totalBPavailable];
-        //availableBlueprints = new Dictionary<TileData.Types, Blueprint>();
-        //availableBlueprints = GameMaster.Instance.theHero.nanoBuilder.blueprintsMap;
-        //availableBlueprintsTypes = GameMaster.Instance.theHero.nanoBuilder.bpTypes.ToArray();
-
         availableBlueprintsTypes = NanoBuilder.bpTypes.ToArray();
-
-       // Debug.Log("NANO B: First BP in available blueprints types is " + availableBlueprintsTypes[0].ToString());
-       // Debug.Log("NANO B: The Hero's nanobuilder currently has " + NanoBuilder.blueprintsMap.Count + " blueprints loaded.");
-        
 
         SetBPSprites();
 
@@ -115,21 +82,46 @@ public class NanoBuilding_Handler : MonoBehaviour {
             Debug.LogError("NANO B: The Selected Blueprint is null! WTF?! Did the GM loose track of the Hero?!");
         }
 
-        DisplaySelectedBlueprintName(selectedBluePrint.buildingName);
+        // DisplaySelectedBlueprintName(selectedBluePrint.buildingName);
+
+        CreateBuildButtons();
     }
 
-    void DisplaySelectedBlueprintName(string bpName)
+    //// Display Blueprint name as a string on the bottom of the screen
+    //void DisplaySelectedBlueprintName(string bpName)
+    //{
+    //    Player_UIHandler.instance.DisplayBlueprint(bpName);
+    //}
+
+    void CreateBuildButtons()
     {
-        Player_UIHandler.instance.DisplayBlueprint(bpName);
+        foreach(TileData.Types tileType in availableBlueprintsTypes)
+        {
+            UI_Manager.Instance.CreateBuildButton(NanoBuilder.blueprintsMap[tileType].buildingName,
+                                                  tileType,
+                                                  BuildHalfTile);
+        }
+
+        // After creating all build buttons make sure to adjust the build button panel's size
+        UI_Manager.Instance.AdjustBuildPanelSize();
+    }
+
+    public void SelectBP(TileData.Types tileType)
+    {
+        foreach (TileData.Types ttype in availableBlueprintsTypes)
+        {
+            if (ttype == tileType)
+                selectedBluePrint = NanoBuilder.blueprintsMap[ttype];
+        }
     }
 
     void Update()
     {
-        // For Building:
-        if (!build_controller.currentlyBuilding)
-            ListenForRightClick();
         // For Swapping Current Blueprint for next one:
-        ListenForBPSwapButton();
+        //ListenForBPSwapButton();
+        //if (build_controller.currentlyBuilding)
+        //    Click_Build();
+
         // For Breaking a building back into Nanobots:
         ListenToBreakBuilding();
 
@@ -148,74 +140,52 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
     }
 
-    void ListenForRightClick()
-    {
-        
-        //if (Input.GetMouseButtonDown(1))
-        //{
-            
-        //    GetBuildingFromType(MouseBuilding_Controller.MouseController.GetTileUnderMouse().tileType);
+    //void ListenForBPSwapButton()
+    //{   // Press Swap button to cycle through the array of Blue Prints from the index currently selected or back to 0
+    //    if (Input.GetButtonDown("Swap"))
+    //    {
+    //        SwapSelectedBP();
+    //    }
 
-        //    // Play build sound
-        //    audio_source.PlayOneShot(buildSound, 0.5f);
-        //}
-        if (Mouse_Controller.Instance.isRightClickingForBuilding)
-        {
-            GetBuildingFromType(Mouse_Controller.Instance.GetTileUnderMouse().tileType);
+    //    //Debug.Log(selectedBluePrint);
+    //}
 
-            // Play build sound
-            // audio_source.PlayOneShot(buildSound, 0.5f);
-            Sound_Manager.Instance.PlaySound("Build");
-        }
-      
-    }
+    //void SwapSelectedBP()
+    //{
+    //    if (selectedBPIndex < availableBlueprintsTypes.Length)
+    //    {
+    //        if (NanoBuilder.CheckForBlueprint(availableBlueprintsTypes[selectedBPIndex]))
+    //        {
+    //            selectedBluePrint = NanoBuilder.blueprintsMap[availableBlueprintsTypes[selectedBPIndex]];
+    //        }
 
-    void ListenForBPSwapButton()
-    {   // Press Swap button to cycle through the array of Blue Prints from the index currently selected or back to 0
-        if (Input.GetButtonDown("Swap"))
-        {
-            SwapSelectedBP();
-        }
+    //        selectedBPIndex += 1;
+    //    }
+    //    else
+    //    {
+    //        if (NanoBuilder.CheckForBlueprint(availableBlueprintsTypes[0]))
+    //        {
+    //            selectedBluePrint = NanoBuilder.blueprintsMap[availableBlueprintsTypes[0]];
+    //            selectedBPIndex = 0;
+    //        }
+    //        else
+    //        {
+    //            selectedBluePrint = NanoBuilder.blueprintsMap[availableBlueprintsTypes[1]];
+    //            selectedBPIndex = 1;
+    //        }
 
-        //Debug.Log(selectedBluePrint);
-    }
+    //    }
 
-    void SwapSelectedBP()
-    {
-        if (selectedBPIndex < availableBlueprintsTypes.Length)
-        {
-            if (NanoBuilder.CheckForBlueprint(availableBlueprintsTypes[selectedBPIndex]))
-            {
-                selectedBluePrint = NanoBuilder.blueprintsMap[availableBlueprintsTypes[selectedBPIndex]];
-            }
-
-            selectedBPIndex += 1;
-        }
-        else
-        {
-            if (NanoBuilder.CheckForBlueprint(availableBlueprintsTypes[0]))
-            {
-                selectedBluePrint = NanoBuilder.blueprintsMap[availableBlueprintsTypes[0]];
-                selectedBPIndex = 0;
-            }
-            else
-            {
-                selectedBluePrint = NanoBuilder.blueprintsMap[availableBlueprintsTypes[1]];
-                selectedBPIndex = 1;
-            }
-
-        }
-
-        DisplaySelectedBlueprintName(selectedBluePrint.buildingName);
-       // Debug.Log("NANO Buid: Selected Blueprint name is " + selectedBluePrint.buildingName);
-    }
+    //   // DisplaySelectedBlueprintName(selectedBluePrint.buildingName);
+    //   // Debug.Log("NANO Buid: Selected Blueprint name is " + selectedBluePrint.buildingName);
+    //}
 
     /// <summary>
     /// Determines what type of building player wants to build
     /// by using the tile's type.
     /// </summary>
     /// <param name="_tileType"></param>
-    public void GetBuildingFromType(TileData.Types _tileType)
+    public void GetBuildingFromTileUnderMouse(TileData.Types _tileType)
     {
         // TODO: Subtract the nanobot cost of this blueprint
         //Building_UIHandler building_handler = Building_UIHandler.BuildingHandler;
@@ -250,6 +220,25 @@ public class NanoBuilding_Handler : MonoBehaviour {
        // Debug.Log("Nanobots left: " + nanoBots);
     }
 
+    void BuildHalfTile(TileData.Types tileType)
+    {
+        if (NanoBuilder.blueprintsMap.ContainsKey(tileType))
+        {
+            if (CheckBuildCost(NanoBuilder.blueprintsMap[tileType]) == false)
+            {
+                build_controller.SetCurrentlyBuildingBool(false);
+                Sound_Manager.Instance.PlaySound("Empty");
+                return;
+            }
+            else
+            {
+                // Can Build!
+                build_controller.SetCurrentlyBuildingBool(true);
+                build_controller.BuildThis(NanoBuilder.blueprintsMap[tileType]);
+            }
+        }
+    }
+
     void Build(Blueprint bp)
     {
         //if (bp != null && ResourceGrid.Grid.terraformer_built)
@@ -258,6 +247,7 @@ public class NanoBuilding_Handler : MonoBehaviour {
             //Debug.Log("BP requires " + bp.buildReq.reqResourcesMap.Count + " resources.");
             if (CheckBuildCost(bp) == false)
             {
+                build_controller.SetCurrentlyBuildingBool(false);
                 Sound_Manager.Instance.PlaySound("Empty");
                 return;
             }
@@ -267,21 +257,6 @@ public class NanoBuilding_Handler : MonoBehaviour {
                 build_controller.BuildThis(bp);
                // ChargeBuildResources(bp);
             }
-
-            //// Check Nanobot cost
-            //if (nanoBots >= bp.nanoBotCost)
-            //{
-            //    // Can Build!
-            //    build_controller.BuildThis(bp);
-            //    nanoBots -= bp.nanoBotCost;
-            //}
-            //else
-            //{
-            //    //status_indicator.CreateStatusMessage("Out of Bots!");
-            //    Sound_Manager.Instance.PlaySound("Empty");
-
-            //}
-
         }
         else
         {
@@ -385,6 +360,6 @@ public class NanoBuilding_Handler : MonoBehaviour {
         }
 
         selectedBPIndex += 1;
-        SwapSelectedBP();
+       // SwapSelectedBP();
     }
 }

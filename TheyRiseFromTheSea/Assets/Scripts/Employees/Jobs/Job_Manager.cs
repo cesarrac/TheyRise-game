@@ -16,6 +16,9 @@ public class Job_Manager : MonoBehaviour {
 
     public void AddJob(JobType jType, TileData.Types tileType, Transform target, bool hasStarted = false)
     {
+        if (IsDuplicateJob(jType, target) == true)
+            return;
+
         // Make the job's hardness less than the default 0.5 for jobs like construction/assembly
         if (tileType != TileData.Types.rock)
             jobs_available.Add(new Job(jType, tileType, target, hasStarted, 0.1f));
@@ -25,6 +28,22 @@ public class Job_Manager : MonoBehaviour {
         }
 
         Debug.Log("Job Added for " + tileType.ToString());
+    }
+
+    bool IsDuplicateJob(JobType jType, Transform target)
+    {
+        // Check that there isn't a job for this target with this same job type already,
+        // to avoid duplication of jobs!
+        foreach (Job j in jobs_available)
+        {
+            if (j.Job_Target == target)
+            {
+                if (j.Job_Type == jType)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     public void FindJobs(JobType[] jobTypes)

@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
+using System;
 
 
 public class UI_Manager : MonoBehaviour
@@ -50,6 +51,10 @@ public class UI_Manager : MonoBehaviour
 
     public GameObject buildWarningGObj;
     public Text buildWarning;
+
+    // BUILD BUTTONS:
+    public GameObject buildButtons_Panel;
+
 
     void Awake()
     {
@@ -200,6 +205,30 @@ public class UI_Manager : MonoBehaviour
         victoryPanel.SetActive(false);
     }
 
+    //                              BUILD BUTTONS:
+    public void CreateBuildButton(string name, TileData.Types tileType, Action<TileData.Types> cb)
+    {
+        GameObject build_button = ObjectPool.instance.GetObjectForType("Build Button", false, Vector3.zero);
+        if (build_button != null)
+        {
+            // Set its parent to the build buttons panel...
+            build_button.transform.SetParent(buildButtons_Panel.transform);
+
+            // ... set Text to match name...
+            build_button.GetComponentInChildren<Text>().text = name;
+
+            // ... add OnClickListener to call when this button is clicked...
+            build_button.GetComponent<Button>().onClick.AddListener(() => { cb(tileType); });
+
+            // ... add second OnClickListener to tell the Build Controller we are building!
+          //  build_button.GetComponent<Button>().onClick.AddListener(() => { Build_MainController.Instance.SetCurrentlyBuildingBool(true); });
+        }
+    }
+
+    public void AdjustBuildPanelSize()
+    {
+        buildButtons_Panel.GetComponent<AutoVerticalPanel>().AdjustPanelSize();
+    }
 
 
     // *****************************************                            TRADE ORDERS:

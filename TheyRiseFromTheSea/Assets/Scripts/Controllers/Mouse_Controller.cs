@@ -65,84 +65,61 @@ public class Mouse_Controller:MonoBehaviour
         if (!Build_MainController.Instance.currentlyBuilding)
         {
             
-            //DebugGraphicTile();
-
             Select();
-           // DeSelectUnit();
+
+            if (selected_Employee == null)
+                ListenForDashRightClick();
         }
 
-        // Build - Right Click!
-        if (selected_Employee == null)
-            ListenForRightClick();
     }
 
-
-    void ListenForRightClick()
+    void ListenForDashRightClick()
     {
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButtonDown(1))
+        // DASH CONTROL:
+        if (Input.GetMouseButton(1))
         {
-           // BUILDING CONTROL:
+            // DASHING:
 
-                // Holding Down Left Shift and press Right click
-                isRightClickingForBuilding = true;
-      
+            // While holding down the right mouse button calculate distance between player and mouse...
+
+            // ... record the distance.
+            distance = (ResourceGrid.Grid.Hero.transform.position - currMouseP).sqrMagnitude;
+
         }
-        else
+
+        // When you let go of the right mouse button...
+        else if (Input.GetMouseButtonUp(1))
         {
-            isRightClickingForBuilding = false;
+            if (GetTileUnderMouse() == null)
+                return;
 
-            // DASH CONTROL:
-
-            if (!Input.GetKey(KeyCode.LeftShift))
+            // .. IF the mouse is NOT over a Water tile...
+            if (GetTileUnderMouse().tileType != TileData.Types.water)
             {
-                if (Input.GetMouseButton(1))
+                // ... you will move to the furthest distance calculated within the threshold.
+
+                // If distance is within the threshold...
+                if (distance <= maxDashThreshold)
                 {
-                    // DASHING:
-
-                    // While holding down the right mouse button calculate distance between player and mouse...
-
-                    // ... record the distance.
-                    distance = (ResourceGrid.Grid.Hero.transform.position - currMouseP).sqrMagnitude;
-
-                }
-
-                // When you let go of the right mouse button...
-                else if (Input.GetMouseButtonUp(1))
-                {
-                    if (GetTileUnderMouse() == null)
-                        return;
-
-                    // .. IF the mouse is NOT over a Water tile...
-                    if (GetTileUnderMouse().tileType != TileData.Types.water)
-                    {
-                        // ... you will move to the furthest distance calculated within the threshold.
-
-                        // If distance is within the threshold...
-                        if (distance <= maxDashThreshold)
-                        {
-                            // ... return distance.
-                            dashDistance = distance;
-                        }
-                        else
-                        {
-                            // Else, return the maximum allowed distance.
-                            dashDistance = maxDashThreshold;
-                        }
-
-                        // Set flag to allow Player to dash.
-                        isRightClickingForDash = true;
-                    }
-              
+                    // ... return distance.
+                    dashDistance = distance;
                 }
                 else
                 {
-                    isRightClickingForDash = false;
+                    // Else, return the maximum allowed distance.
+                    dashDistance = maxDashThreshold;
                 }
+
+                // Set flag to allow Player to dash.
+                isRightClickingForDash = true;
             }
 
         }
+        else
+        {
+            isRightClickingForDash = false;
+        }
 
-        // Not holding down Left Shift & not Right Clicking
     }
 
 

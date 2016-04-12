@@ -59,19 +59,21 @@ public class Employee_Generator : MonoBehaviour {
 
             Armor basicJumpSuit = new Armor("Basic Jumpsuit", 2, 0);
 
+            Guid id = Guid.NewGuid();
+
             if (select == 0)
             {
-                emp = new Employee("Operator", EmployeeSpecialty.Operator, basicJumpSuit, 24, 24, 2, employeeSprites[0]);
+                emp = new Employee(id.ToString() , EmployeeSpecialty.Operator, basicJumpSuit, 24, 24, 2, employeeSprites[0]);
                 emp.SetEmployeeStats(5, 5, 5, 2, 5, 2);
             }
             else if (select == 1)
             {
-                emp = new Employee("Medic", EmployeeSpecialty.Medic, basicJumpSuit, 24, 24, 2, employeeSprites[0]);
+                emp = new Employee(id.ToString(), EmployeeSpecialty.Medic, basicJumpSuit, 24, 24, 2, employeeSprites[0]);
                 emp.SetEmployeeStats(5, 5, 5, 2, 5, 2);
             }
             else
             {
-                emp = new Employee("Scientist", EmployeeSpecialty.Scientist, basicJumpSuit, 24, 24, 2, employeeSprites[0]);
+                emp = new Employee(id.ToString(), EmployeeSpecialty.Scientist, basicJumpSuit, 24, 24, 2, employeeSprites[0]);
                 emp.SetEmployeeStats(5, 5, 5, 2, 5, 2);
             }
 
