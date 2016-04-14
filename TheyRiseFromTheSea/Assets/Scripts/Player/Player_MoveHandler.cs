@@ -102,7 +102,7 @@ public class Player_MoveHandler : MonoBehaviour {
 
 		MyStateMachine (_state);
 		// Store the axis Inputs in a Vector 2
-		move_vector = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw ("Vertical"));
+		move_vector = new Vector2 (Input.GetAxisRaw ("Horizontal"), Input.GetAxisRaw("Vertical"));
         
         if(_state == State.IDLING)
         {

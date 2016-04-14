@@ -416,6 +416,8 @@ public class GameMaster : MonoBehaviour {
     {
         // Before Launching make sure that the Hero's nanobuilder contains the active mission's required blueprint!
         //BlueprintDatabase.Instance.InitRequiredBlueprint();
+        // Reset the temporary inventory containing all resources that had been gathered during the level
+        Ship_Inventory.Instance.ResetTempInventory();
 
         SceneManager.LoadScene("Level_Planet");
     }
@@ -426,7 +428,7 @@ public class GameMaster : MonoBehaviour {
         Ship_Inventory.Instance.RegisterTempInventoryToShip();
 
         // Complete the current Active Mission
-        Mission_Manager.Instance.CompleteActiveMission();
+        //Mission_Manager.Instance.CompleteActiveMission();
 
         // load the ship level
         SceneManager.LoadScene("Level_CENTRAL");

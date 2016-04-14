@@ -74,16 +74,21 @@ public class Mission_Manager : MonoBehaviour {
     public void LoadAvailableMissions(Mission newMission)
     {
         Mission M = new Mission(newMission);
-        M.RegisterMissionCompleteCallback(CompleteMission);
+        M.RegisterMissionCompleteCallback(CompleteMissionCB);
         availableMissions.Add(M);
     }
 
     public void LoadActiveMission(Mission newMission)
     {
-        Mission M = new Mission(newMission);
-        M.RegisterMissionCompleteCallback(CompleteMission);
-        activeMission = M;
-        Debug.Log("MISSION MANAGER: current active mission is " + activeMission.MissionName);
+       foreach (Mission m in availableMissions)
+       {
+            if (m.MissionName == newMission.MissionName)
+            {
+                activeMission = m;
+                m.RegisterMissionCompleteCallback(CompleteMissionCB);
+                Debug.Log("MISSION MANAGER: current active mission is " + activeMission.MissionName);
+            }
+        }
     }
 
     public void CheckToGenerateNewMissions()
@@ -146,7 +151,7 @@ public class Mission_Manager : MonoBehaviour {
         //newMission = mission_database.GetMission(MissionType.SCIENCE);
 
         // Set its Complete Mission callback...
-        newMission.RegisterMissionCompleteCallback(CompleteMission);
+        newMission.RegisterMissionCompleteCallback(CompleteMissionCB);
 
         // ... before returning.
         return newMission;
@@ -232,7 +237,7 @@ public class Mission_Manager : MonoBehaviour {
         if (AllWavesAreCompleted(wavesSurvived) == false)
             return;
 
-        activeMission.FlagAsCompleted();
+        CompleteActiveMission();
 
         // Display objective completed message
         UI_Manager.Instance.DisplayVictoryPanel();
@@ -240,17 +245,18 @@ public class Mission_Manager : MonoBehaviour {
     // ********
 
     // Function called by GM when Launching back to ship from the Planet to complete the mission
-    public void CompleteActiveMission()
+    void CompleteActiveMission()
     {
+        activeMission.FlagAsCompleted();
         activeMission.CompleteMission();
     }
 
     // Function called as callback by the mission once it has been verified as completed
-    void CompleteMission(Mission completed)
+    void CompleteMissionCB(Mission completed)
     {
         if (availableMissions.Contains(completed))
         {
-            //   availableMissions.Remove(completed);
+            Debug.Log("Completing Mission callback...");
             missionsCompletedCount++;
         }
 

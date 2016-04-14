@@ -24,7 +24,10 @@ public class Mouse_Controller:MonoBehaviour
     GameObject spawned_selectBox;
 
     public bool isAssigningTask { get; protected set; }
+    public bool isCancellingTask { get; protected set; }
 
+    JobType curTaskModeType;
+    
     void OnEnable()
     {
         Instance = this;
@@ -66,17 +69,16 @@ public class Mouse_Controller:MonoBehaviour
 
         if (!Build_MainController.Instance.currentlyBuilding)
         {
-            if (!isAssigningTask)
-            {
-                SelectUnit();
+            SelectUnit();
+            // TODO: FIX Dash controls... right now the right click dash isn't working right. Might
+            // need to change the input to some other button or come up with a better implementation later.
+            // For now, I'm turning it OFF.
 
-                if (selected_Employee == null)
-                    ListenForDashRightClick();
-            }
-            else
-            {
-                AssignTask();
-            }
+            //if (selected_Employee == null)
+            //    ListenForDashRightClick();
+
+            TaskControls();
+
         }
 
     }
@@ -176,52 +178,46 @@ public class Mouse_Controller:MonoBehaviour
       
     }
 
-    public void StartAssignTaskMode()
+    public void StartAssignTaskMode(JobType jType)
     {
         if (Build_MainController.Instance.currentlyBuilding)
             return;
 
-        isAssigningTask = true;
+        curTaskModeType = jType;
+        Debug.Log("Starting Task Mode: " + curTaskModeType.ToString());
+
+        if (curTaskModeType == JobType.Cancel)
+        {
+            isCancellingTask = true;
+        }
+        else
+        {
+            isAssigningTask = true;
+        }
     }
 
-    void AssignTask()
+    void TaskControls()
     {
-        // Select Tile for Unit to interact with
+     
         if (Input.GetMouseButtonDown(1))
         {
             TileData tile = GetTileUnderMouse();
-
-
             if (tile != null)
             {
-                if (tile.tileType == TileData.Types.rock)
+                if (isAssigningTask == true)
                 {
-                    // Add a mining job
-                    Job_Manager.Instance.AddJob(JobType.Mine, tile.tileType,
-                                                        ResourceGrid.Grid.GetTileGameObjFromIntCoords
-                                                        (tile.posX, tile.posY).transform);
+                    Job_Manager.Instance.AddOrCancelTaskJob(tile, curTaskModeType);
                 }
-                else if (tile.tileType != TileData.Types.empty && tile.tileType != TileData.Types.water)
+                else if (isCancellingTask == true)
                 {
-                    // Verify that this tile is in fact a building, by checking for component Build_Handler
-                    if (ResourceGrid.Grid.              GetTileGameObjFromIntCoords(tile.posX, tile.posY).
-                                                        GetComponent<Building_Handler>() != null)
-                    {
-                        // Add Repair job
-                        Job_Manager.Instance.AddJob(JobType.Repair, tile.tileType,
-                                                  ResourceGrid.Grid.GetTileGameObjFromIntCoords
-                                                  (tile.posX, tile.posY).transform);
-                    }
+                    Job_Manager.Instance.AddOrCancelTaskJob(tile, curTaskModeType);
                 }
-  
-                // Spawn a selection circle on the selected tile to indicate the task's / job's target
-                ObjectPool.instance.GetObjectForType("Selection Circle", true, 
-                                                    ResourceGrid.Grid.GetTileGameObjFromIntCoords
-                                                    (tile.posX, tile.posY).transform.position);
             }
 
             isAssigningTask = false;
+            isCancellingTask = false;
         }
+
     }
 
     void SelectUnit()

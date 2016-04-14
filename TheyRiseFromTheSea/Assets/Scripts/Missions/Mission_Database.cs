@@ -18,34 +18,34 @@ public class Mission_Database  {
         {
             new Mission("I sea", MissionType.SURVIVAL, 4),
             new Mission("Oh el Capitan, mi Capitan", MissionType.SURVIVAL, 6),
-            new Mission("Fin-ito", MissionType.SURVIVAL, 10),
-            new Mission("Don't feed the fish", MissionType.SURVIVAL, 10),
-            new Mission("Brake for algae", MissionType.SURVIVAL, 10),
-            new Mission("Reefur Madness", MissionType.SURVIVAL, 10),
-            new Mission("Aquatwister", MissionType.SURVIVAL, 10),
-            new Mission("That's no shark", MissionType.SURVIVAL, 10),
-            new Mission("Oh My, Fishsticks", MissionType.SURVIVAL, 10),
-            new Mission("Deeper Horizons", MissionType.SURVIVAL, 10),
-            new Mission("Mauve Submarine", MissionType.SURVIVAL, 10),
-            new Mission("School of Bubbles", MissionType.SURVIVAL, 10)
+            new Mission("Fin-ito", MissionType.SURVIVAL, 6),
+            new Mission("Don't feed the fish", MissionType.SURVIVAL, 6),
+            new Mission("Brake for algae", MissionType.SURVIVAL, 6),
+            new Mission("Reefur Madness", MissionType.SURVIVAL, 6),
+            new Mission("Aquatwister", MissionType.SURVIVAL, 6),
+            new Mission("That's no shark", MissionType.SURVIVAL, 6),
+            new Mission("Oh My, Fishsticks", MissionType.SURVIVAL, 6),
+            new Mission("Deeper Horizons", MissionType.SURVIVAL, 6),
+            new Mission("Mauve Submarine", MissionType.SURVIVAL, 6),
+            new Mission("School of Bubbles", MissionType.SURVIVAL, 6)
         };
 
         scienceMissions = new List<Mission>()
         {
             new Mission("Scan My Samples", MissionType.SCIENCE, 4),
-            new Mission("Regretful Waters", MissionType.SCIENCE, 10),
-            new Mission("Calm Waters", MissionType.SCIENCE, 10),
-            new Mission("Chase Waterfalls", MissionType.SCIENCE, 10),
-            new Mission("Don't forget the tartar", MissionType.SCIENCE, 10),
-            new Mission("Squidz 4 Life", MissionType.SCIENCE, 10),
-            new Mission("Human sea-sources", MissionType.SCIENCE, 10),
-            new Mission("Gone with the Fishes", MissionType.SCIENCE, 10),
-            new Mission("Lovely Isn't it?", MissionType.SCIENCE, 10),
-            new Mission("Choppy, Choppy", MissionType.SCIENCE, 10),
-            new Mission("Row, row, row", MissionType.SCIENCE, 10),
-            new Mission("Hold your breath", MissionType.SCIENCE, 10),
-            new Mission("Fishing for an insult", MissionType.SCIENCE, 10),
-            new Mission("Swimming Downstream", MissionType.SCIENCE, 10)
+            new Mission("Regretful Waters", MissionType.SCIENCE, 6),
+            new Mission("Calm Waters", MissionType.SCIENCE, 6),
+            new Mission("Chase Waterfalls", MissionType.SCIENCE, 6),
+            new Mission("Don't forget the tartar", MissionType.SCIENCE, 6),
+            new Mission("Squidz 4 Life", MissionType.SCIENCE, 6),
+            new Mission("Human sea-sources", MissionType.SCIENCE, 6),
+            new Mission("Gone with the Fishes", MissionType.SCIENCE, 6),
+            new Mission("Lovely Isn't it?", MissionType.SCIENCE, 6),
+            new Mission("Choppy, Choppy", MissionType.SCIENCE, 6),
+            new Mission("Row, row, row", MissionType.SCIENCE, 6),
+            new Mission("Hold your breath", MissionType.SCIENCE, 6),
+            new Mission("Fishing for an insult", MissionType.SCIENCE, 6),
+            new Mission("Swimming Downstream", MissionType.SCIENCE, 6)
         };
 
         encounterMissions = new List<Mission>()

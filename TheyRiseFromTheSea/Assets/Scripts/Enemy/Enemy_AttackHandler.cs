@@ -289,9 +289,6 @@ public class Enemy_AttackHandler : Unit_Base {
             var dir = mainTarget.transform.position - transform.position;
             float bloodAngle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
             deadE.transform.eulerAngles = new Vector3(0, 0, bloodAngle);
-
-            // Register my death with Enemy master and tell them a Tower killed me
-            Enemy_Master.instance.RegisterDeath(mainTarget.transform);
         }
 
         // make sure we Pool any Damage Text that might be on this gameObject
@@ -300,6 +297,9 @@ public class Enemy_AttackHandler : Unit_Base {
             Text dmgTxt = GetComponentInChildren<Text>();
             objPool.PoolObject(dmgTxt.gameObject);
         }
+
+        // Register my death with Enemy master
+        Enemy_Master.instance.RegisterDeath();
 
         // Stop Attack and Path coroutines!
         StopAttackCoRoutines();

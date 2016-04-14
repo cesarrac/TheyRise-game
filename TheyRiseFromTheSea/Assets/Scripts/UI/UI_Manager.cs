@@ -52,6 +52,9 @@ public class UI_Manager : MonoBehaviour
     // BUILD BUTTONS:
     public GameObject buildButtons_Panel;
 
+    // TASK / JOB BUTTONS:
+    public GameObject tasksPanel;
+
     // WARNING / INDICATORS:
     public GameObject warningPanel, waveIncomingPanel, buildWarningGObj;
     public Text buildWarning, wavesIncoming;
@@ -232,13 +235,27 @@ public class UI_Manager : MonoBehaviour
         buildButtons_Panel.GetComponent<AutoVerticalPanel>().AdjustPanelSize();
     }
 
-    // *****************************************                            TASK BUTTON:
+    // *****************************************                            TASK BUTTONS:
     
-    public void StartAssignTaskMode()
+    public void CreateTaskJobButtons(JobType jType)
     {
-        // TODO: pass in an ID for the type of task I'm assigning, for now I'm just assigning Mining jobs
-        Mouse_Controller.Instance.StartAssignTaskMode();
-    } 
+        GameObject task_button = ObjectPool.instance.GetObjectForType("Task Button", false, Vector3.zero);
+        if (task_button != null)
+        {
+            // Set its parent to the build buttons panel...
+            task_button.transform.SetParent(tasksPanel.transform);
+
+            // ... set Text to match job type...
+            task_button.GetComponentInChildren<Text>().text = jType.ToString();
+
+            // ... add OnClickListener to call when this button is clicked...
+            task_button.GetComponent<Button>().onClick.AddListener(() => { Mouse_Controller.Instance.StartAssignTaskMode(jType); });
+
+            // ... make the CANCEL BUTTON color RED.
+            if (jType == JobType.Cancel)
+                task_button.GetComponent<Image>().color = Color.red;
+        }
+    }
 
 
     // *****************************************                            TRADE ORDERS:

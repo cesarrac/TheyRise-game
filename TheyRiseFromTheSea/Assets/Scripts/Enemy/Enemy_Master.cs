@@ -37,19 +37,18 @@ public class Enemy_Master : MonoBehaviour {
 
     Enemy_SquadSpawner enemy_Squad_Spawner;
 
-    bool canSpawn = false;
+   // bool canSpawn = false;
 
-    float timeToKeepSpawning = 10f; // this will later be set according to this level's difficulty. The longer this is the more time this script has to spawn more enemies.
+   // float timeToKeepSpawning = 10f; // this will later be set according to this level's difficulty. The longer this is the more time this script has to spawn more enemies.
 
     int _currUnitsOnField;
-    int CurrUnitsOnField { get { return _currUnitsOnField; } set { _currUnitsOnField = Mathf.Clamp(value, 0, 20); } }
+    int CurrUnitsOnField { get { return _currUnitsOnField; } set { _currUnitsOnField = Mathf.Clamp(value, 0, 50); } }
 
-    Transform target_killer; // a Transform containing the position of the most recent "killer" responsible for any enemy unit deaths (can be player or towers)
 
-    int decisionCount; // total decisions made by this instance
+    //int decisionCount; // total decisions made by this instance
 
     // Decision based on the Terraformer's current stage. The higher the stage number, the stronger the enemies should be.
-    int currentTerraformerStage;
+   // int currentTerraformerStage;
 
     // Towers the player has built so far. With these lists the enemy knows how many and where they are.
     List<Transform> battleTowersBuilt = new List<Transform>();
@@ -73,22 +72,22 @@ public class Enemy_Master : MonoBehaviour {
 
     Vector3 spawnPosition = new Vector3();
 
-    int maxUnitsCap = 3; // max units the Enemy Master can spawn on one action
+    int maxUnitsCap = 5; // max units the Enemy Master can spawn on one action
 
     int spawnPointRegenRate = 50;
 
     public float waitTime = 30f;
 
     int totalWavesThisLevel = 1; // each wave has a total of max units cap (This is set by the GM)
-    int curWavesTotal = 0;
+    int curWavesTotal = 1;
 
     Action selectedStrategy;
 
     void Awake()
     {
         utilityModifier = Mathf.Clamp(utilityModifier, 0, 4);
-        battleModifier =  Mathf.Clamp(utilityModifier, 0, 4);
-        playerModifier =  Mathf.Clamp(utilityModifier, 0, 4);
+        battleModifier =  Mathf.Clamp(battleModifier, 0, 4);
+        playerModifier =  Mathf.Clamp(playerModifier, 0, 4);
 
         utilityModifier = 0;
         battleModifier = 0;
@@ -206,8 +205,8 @@ public class Enemy_Master : MonoBehaviour {
         // Get a spawn position for this next wave
         spawnPosition = GetSpawnPosition();
 
-        CalcModifiers();
-        SortTasks();
+        //CalcModifiers();
+        //SortTasks();
         SelectStrategy();
 
         if (selectedStrategy != null && selectedStrategy != EconomicStrategy)
@@ -235,16 +234,16 @@ public class Enemy_Master : MonoBehaviour {
 
         Debug.Log("Waves left: " + (totalWavesThisLevel - curWavesTotal));
         // Stop making decisions if all waves necessary for this level have been spawned
-        if (Mission_Manager.Instance.AllWavesAreCompleted(curWavesTotal))
-        {
-            Mission_Manager.Instance.CompleteMissionEnemyWaves(curWavesTotal);
-            return;
-        }
+        //if (curWavesTotal >= totalWavesThisLevel)
+        //{
+        //    //Mission_Manager.Instance.CompleteMissionEnemyWaves(curWavesTotal);
+        //    return;
+        //}
 
         if (selectedStrategy != null)
         {
             if (selectedStrategy != EconomicStrategy)
-                UI_Manager.Instance.DisplayWaveIncoming(curWavesTotal + 1);
+                UI_Manager.Instance.DisplayWaveIncoming(curWavesTotal);
             // Call the strategy
             selectedStrategy();
         }
@@ -256,116 +255,116 @@ public class Enemy_Master : MonoBehaviour {
 
 
 
-    // Before we can score each task we need to get a Spawn Position (where this next wave will be spawning from is a random water tile position)
-    void CalcModifiers()
-    {
-        //TODO: How to handle the player's modifier?? Could raise modifier by health, the lower their health the higher modifier they get?
+    //// Before we can score each task we need to get a Spawn Position (where this next wave will be spawning from is a random water tile position)
+    //void CalcModifiers()
+    //{
+    //    //TODO: How to handle the player's modifier?? Could raise modifier by health, the lower their health the higher modifier they get?
 
 
-        // First, calculate the modifiers.
-        // Each Utility tower built gives the Destroy Utility task a + 1 modifier
-        if (utilityTowersBuilt.Count != utilityTowerCount)
-        {
-            utilityTowerCount = utilityTowersBuilt.Count;
-            utilityModifier = utilityTowerCount;
-        }
+    //    // First, calculate the modifiers.
+    //    // Each Utility tower built gives the Destroy Utility task a + 1 modifier
+    //    if (utilityTowersBuilt.Count != utilityTowerCount)
+    //    {
+    //        utilityTowerCount = utilityTowersBuilt.Count;
+    //        utilityModifier = utilityTowerCount;
+    //    }
 
-        // Every 3 Battle Towers built gives the Destroy Battle task a + 1 modifier
-        if (battleTowersBuilt.Count != battleTowerCount)
-        {
-            // ... set the new battle count from the list...
-            battleTowerCount = battleTowersBuilt.Count;
+    //    // Every 3 Battle Towers built gives the Destroy Battle task a + 1 modifier
+    //    if (battleTowersBuilt.Count != battleTowerCount)
+    //    {
+    //        // ... set the new battle count from the list...
+    //        battleTowerCount = battleTowersBuilt.Count;
 
-            // ... and check if that new count is divisible by 3 by making sure the remainder is 0
-            if (battleTowerCount % 3 == 0 || battleTowerCount > 3)
-            {
-                // ... if it's true then the result of the division is the modifier or just +1 if its only a count of 3
-                if (battleTowerCount == 3)
-                {
-                    battleModifier = 1;
-                }
-                else
-                {
-                    battleModifier = battleTowerCount / 3;
-                }
+    //        // ... and check if that new count is divisible by 3 by making sure the remainder is 0
+    //        if (battleTowerCount % 3 == 0 || battleTowerCount > 3)
+    //        {
+    //            // ... if it's true then the result of the division is the modifier or just +1 if its only a count of 3
+    //            if (battleTowerCount == 3)
+    //            {
+    //                battleModifier = 1;
+    //            }
+    //            else
+    //            {
+    //                battleModifier = battleTowerCount / 3;
+    //            }
 
-            }
+    //        }
 
-            // If the count is not divisible by 3 or it results in less than 1, no modifier is added yet.
-        }
+    //        // If the count is not divisible by 3 or it results in less than 1, no modifier is added yet.
+    //    }
 
-        //// Get a spawn position for this next wave
-        //spawnPosition = GetSpawnPosition();
+    //    //// Get a spawn position for this next wave
+    //    //spawnPosition = GetSpawnPosition();
 
-        // Calculate distances
+    //    // Calculate distances
 
-        if (utilityTowerCount > 0)
-        {
-            nearestUtilityTower = GetNearestTower(utilityTowersBuilt.ToArray(), spawnPosition);
-        }
+    //    if (utilityTowerCount > 0)
+    //    {
+    //        nearestUtilityTower = GetNearestTower(utilityTowersBuilt.ToArray(), spawnPosition);
+    //    }
 
-        if (battleTowerCount > 0)
-        {
-            nearestBattleTower = GetNearestTower(battleTowersBuilt.ToArray(), spawnPosition);
-        }
+    //    if (battleTowerCount > 0)
+    //    {
+    //        nearestBattleTower = GetNearestTower(battleTowersBuilt.ToArray(), spawnPosition);
+    //    }
 
-        // Calculate Assignment Scores: (0 Kill Player, 1 Destroy Utility, 2 Destroy Battle Tower)
+    //    // Calculate Assignment Scores: (0 Kill Player, 1 Destroy Utility, 2 Destroy Battle Tower)
 
-        // We need the distance to the Player...
-        float distanceToPlayer = (ResourceGrid.Grid.Hero.transform.position - spawnPosition).magnitude;
+    //    // We need the distance to the Player...
+    //    float distanceToPlayer = (ResourceGrid.Grid.Hero.transform.position - spawnPosition).magnitude;
 
-        // ... then Calculate assignment score for player.
-        tasks[0].CalcAssignment(playerModifier, 3, distanceToPlayer);
+    //    // ... then Calculate assignment score for player.
+    //    tasks[0].CalcAssignment(playerModifier, 3, distanceToPlayer);
 
-        // If there is a nearest utility tower...
-        if (nearestUtilityTower != null)
-        {
-            // ... use the distance to it to calculate its assignment
-            tasks[1].CalcAssignment(utilityModifier, 3, (nearestUtilityTower.position - spawnPosition).magnitude);
-        }
-        else
-        {
-            // ... if there is no nearest, just hardcode it to 100 to make sure it won't be assigned as an active task
-            tasks[1].CalcAssignment(utilityModifier, 3, 100f);
-        }
+    //    // If there is a nearest utility tower...
+    //    if (nearestUtilityTower != null)
+    //    {
+    //        // ... use the distance to it to calculate its assignment
+    //        tasks[1].CalcAssignment(utilityModifier, 3, (nearestUtilityTower.position - spawnPosition).magnitude);
+    //    }
+    //    else
+    //    {
+    //        // ... if there is no nearest, just hardcode it to 100 to make sure it won't be assigned as an active task
+    //        tasks[1].CalcAssignment(utilityModifier, 3, 100f);
+    //    }
 
-        // Same thing as above, but for the Battle Tower...
-        if (nearestBattleTower != null)
-        {
-            tasks[2].CalcAssignment(battleModifier, 3, (nearestBattleTower.position - spawnPosition).magnitude);
-        }
-        else
-        {
-            tasks[2].CalcAssignment(battleModifier, 3, 100f);
-        }
+    //    // Same thing as above, but for the Battle Tower...
+    //    if (nearestBattleTower != null)
+    //    {
+    //        tasks[2].CalcAssignment(battleModifier, 3, (nearestBattleTower.position - spawnPosition).magnitude);
+    //    }
+    //    else
+    //    {
+    //        tasks[2].CalcAssignment(battleModifier, 3, 100f);
+    //    }
 
-       // SortTasks();
-    }
+    //   // SortTasks();
+    //}
 
-    void SortTasks()
-    {
+    //void SortTasks()
+    //{
 
-        EnemyTask[] orderedTasks = new EnemyTask[] { tasks[0], tasks[1], tasks[2] };
+    //    EnemyTask[] orderedTasks = new EnemyTask[] { tasks[0], tasks[1], tasks[2] };
 
-        // Now all tasks must be sorted by their Assignment Score. Ordering them by descending so the highest score goes first.
-        orderedTasks.OrderByDescending(x => x.AssignmentScore);
+    //    // Now all tasks must be sorted by their Assignment Score. Ordering them by descending so the highest score goes first.
+    //    orderedTasks.OrderByDescending(x => x.AssignmentScore);
 
-        // Set the active task
-        activeTask = orderedTasks[0];
+    //    // Set the active task
+    //    activeTask = orderedTasks[0];
 
-        // NOTE: Forcing a specific active task below for Testing
-        //activeTask = new EnemyTask(EnemyTaskType.BATTLE, 1);
+    //    // NOTE: Forcing a specific active task below for Testing
+    //    //activeTask = new EnemyTask(EnemyTaskType.BATTLE, 1);
 
-        //Debug.Log("ENEMY MASTER Assignment scores: ");
-        //for (int i = 0; i < tasks.Length; i++)
-        //{
-        //    Debug.Log(orderedTasks[i].taskType.ToString() + " score = " + orderedTasks[i].AssignmentScore);
-        //}
+    //    //Debug.Log("ENEMY MASTER Assignment scores: ");
+    //    //for (int i = 0; i < tasks.Length; i++)
+    //    //{
+    //    //    Debug.Log(orderedTasks[i].taskType.ToString() + " score = " + orderedTasks[i].AssignmentScore);
+    //    //}
 
-        //Debug.Log("ENEMY MASTER: Active task is " + activeTask.taskType.ToString());
+    //    //Debug.Log("ENEMY MASTER: Active task is " + activeTask.taskType.ToString());
 
-        //SelectStrategy();
-    }
+    //    //SelectStrategy();
+    //}
 
     // Tasks now sorted and active task set, now decide what wave to spawn
     void SelectStrategy()
@@ -378,60 +377,62 @@ public class Enemy_Master : MonoBehaviour {
             return;
         }
 
-        // To select what Wave to spawn we are first considering what the active Task is, each task has a different strategy
-        if (activeTask != null)
+
+        // Use Conservative or Rush strategies if criteria is met, if not go to Economic strategy
+        if (timeAtStartofDecision - timeAtStartOfLevel > 120)
         {
-
-            // FIX ME: There should be different implementation of strategies depending on the active task's type.
-            //         It should implement a different strategy when attacking a battle tower than when it attacks the player.
-            //         Right now the selection of strategy is dependant on the ammount of Spawn Points (currency used to spawn units)
-            //         the Enemy Master currently has available AND how much time has passed since it made its first decision.
-
-            // Use Conservative or Rush strategies if criteria is met, if not go to Economic strategy
-            if (timeAtStartofDecision - timeAtStartOfLevel > 120)
+            // more than a minute has passed, consider Rushing
+            if (spawnPoints >= (maxSpawnPoints / 2))
             {
-                // more than a minute has passed, consider Rushing
-                if (spawnPoints >= (maxSpawnPoints / 2))
-                {
-                    // Currently have half of max Spawn points or more, Rush Aggressively!
-                    selectedStrategy = RushAggressiveStrategy;
+                // Currently have half of max Spawn points or more, Rush Aggressively!
+                selectedStrategy = RushAggressiveStrategy;
 
-                }
-                else if (spawnPoints > (maxSpawnPoints / 4))
-                {
-                    // Currently have more than or equal 1/4th of max spawn points, Rush Conservatively!
-                    selectedStrategy = RushConservativeStrategy;
-                }
-                else if (spawnPoints >= 20)
-                {
-                    selectedStrategy = ConservativeStrategy;
-                }
-                else
-                {
-                    selectedStrategy = EconomicStrategy;
-                }
+            }
+            else if (spawnPoints > (maxSpawnPoints / 4))
+            {
+                // Currently have more than or equal 1/4th of max spawn points, Rush Conservatively!
+                selectedStrategy = RushConservativeStrategy;
+            }
+            else if (spawnPoints >= 20)
+            {
+                selectedStrategy = ConservativeStrategy;
             }
             else
             {
-                // During the 1st minute, if Kill Player is active task, always go Conservative
-                selectedStrategy = ConservativeStrategy;
+                selectedStrategy = EconomicStrategy;
             }
-            //if (activeTask.taskType == EnemyTaskType.PLAYER)
-            //{
-             
-            //}
-            //else if (activeTask.taskType == EnemyTaskType.UTILITY)
-            //{
-            //    // Use Agressive strategy only if the player is more than half way done with their mission goal, else go Conservative
-            //}
-            //else if (activeTask.taskType == EnemyTaskType.BATTLE)
-            //{
-            //    // Use Agressive or Rush Agressive if possible, or attempt Rush Conservative if not able. Else go Conservative.
-            //}
+        }
+        else
+        {
+            // During the 1st minute, if Kill Player is active task, always go Conservative
+            selectedStrategy = ConservativeStrategy;
         }
 
+        //// To select what Wave to spawn we are first considering what the active Task is, each task has a different strategy
+        //if (activeTask != null)
+        //{
+
+        //    // FIX ME: There should be different implementation of strategies depending on the active task's type.
+        //    //         It should implement a different strategy when attacking a battle tower than when it attacks the player.
+        //    //         Right now the selection of strategy is dependant on the ammount of Spawn Points (currency used to spawn units)
+        //    //         the Enemy Master currently has available AND how much time has passed since it made its first decision.
+
+        //    //if (activeTask.taskType == EnemyTaskType.PLAYER)
+        //    //{
+
+        //    //}
+        //    //else if (activeTask.taskType == EnemyTaskType.UTILITY)
+        //    //{
+        //    //    // Use Agressive strategy only if the player is more than half way done with their mission goal, else go Conservative
+        //    //}
+        //    //else if (activeTask.taskType == EnemyTaskType.BATTLE)
+        //    //{
+        //    //    // Use Agressive or Rush Agressive if possible, or attempt Rush Conservative if not able. Else go Conservative.
+        //    //}
+        //}
+
         // After a strategy has been executed, wait to decide what to do next
-       // StartWaitToAct();
+        // StartWaitToAct();
     }
 
     // **************************************************************   BASIC STRATEGIES:
@@ -452,13 +453,6 @@ public class Enemy_Master : MonoBehaviour {
 
         int midCost = Enemy_Database.Instance.GetEnemy("Slimer_Mid_noAggro").spawnCost;
         int weakCost = Enemy_Database.Instance.GetEnemy("Slimer_Weak_noAggro").spawnCost;
-        if (spawnPoints < midCost && spawnPoints < weakCost)
-        {
-            EconomicStrategy();
-
-            return;
-        }
-        
 
         if (spawnPoints > maxSpawnPoints / 2)
         {
@@ -505,8 +499,6 @@ public class Enemy_Master : MonoBehaviour {
             }
         }
 
-        AddWaveSpawned();
-
         DecideStrategyAndWaitToAct();
     }
 
@@ -518,45 +510,36 @@ public class Enemy_Master : MonoBehaviour {
 
         if (spawnPoints < heavyCost)
         {
-            EconomicStrategy();
-
-            return;
-        }
-       
-
-        if ((spawnPoints / heavyCost) > maxUnitsCap)
-        {
-            IssueSpawnCommand(maxUnitsCap, "Slimer_Heavy_noAggro");
+            IssueSpawnCommand(2, "Slimer_Weak_noAggro");
         }
         else
         {
-            IssueSpawnCommand(spawnPoints / heavyCost, "Slimer_Heavy_noAggro");
-        }
-
-        // Then as a second spawn command, buy as many Mid units as you can without exceeding max Units
-        int midCost = Enemy_Database.Instance.GetEnemy("Slimer_Mid_noAggro").spawnCost;
-        if (spawnPoints < midCost)
-        {
-            AddWaveSpawned();
-
-            DecideStrategyAndWaitToAct();
-            return;
-        }
-        else
-        {
-            if (spawnPoints / midCost > maxUnitsCap - CurrUnitsOnField)
+            if ((spawnPoints / heavyCost) > maxUnitsCap)
             {
-                Debug.Log("MASTER: Implementing RushAggressiveStrategy Second Spawn Command!");
-                StartCoroutine(WaitForSecondSpawnCommand(maxUnitsCap - CurrUnitsOnField, "Slimer_Mid_noAggro"));
+                IssueSpawnCommand(maxUnitsCap, "Slimer_Heavy_noAggro");
             }
             else
             {
-                Debug.Log("MASTER: Implementing RushAggressiveStrategy Second Spawn Command!");
-                StartCoroutine(WaitForSecondSpawnCommand(spawnPoints / midCost - CurrUnitsOnField, "Slimer_Mid_noAggro"));
+                IssueSpawnCommand(spawnPoints / heavyCost, "Slimer_Heavy_noAggro");
+            }
+
+            // Then as a second spawn command, buy as many Mid units as you can without exceeding max Units
+            int midCost = Enemy_Database.Instance.GetEnemy("Slimer_Mid_noAggro").spawnCost;
+
+            if (spawnPoints >= midCost)
+            {
+                if (spawnPoints / midCost > maxUnitsCap - CurrUnitsOnField)
+                {
+                    Debug.Log("MASTER: Implementing RushAggressiveStrategy Second Spawn Command!");
+                    StartCoroutine(WaitForSecondSpawnCommand(maxUnitsCap - CurrUnitsOnField, "Slimer_Mid_noAggro"));
+                }
+                else
+                {
+                    Debug.Log("MASTER: Implementing RushAggressiveStrategy Second Spawn Command!");
+                    StartCoroutine(WaitForSecondSpawnCommand(spawnPoints / midCost - CurrUnitsOnField, "Slimer_Mid_noAggro"));
+                }
             }
         }
-
-        AddWaveSpawned();
 
         DecideStrategyAndWaitToAct();
     }
@@ -569,30 +552,25 @@ public class Enemy_Master : MonoBehaviour {
         int weakCost = Enemy_Database.Instance.GetEnemy("Slimer_Weak_noAggro").spawnCost;
         if (spawnPoints < weakCost)
         {
-            EconomicStrategy();
-
-            return;
-        }
-           
-
-        if ((spawnPoints / weakCost) > maxUnitsCap)
-        {
-            IssueSpawnCommand(maxUnitsCap, "Slimer_Weak_noAggro");
+            IssueSpawnCommand(2, "Slimer_Weak_noAggro");
         }
         else
         {
-            IssueSpawnCommand(spawnPoints / weakCost, "Slimer_Weak_noAggro");
+            if ((spawnPoints / weakCost) > maxUnitsCap)
+            {
+                IssueSpawnCommand(maxUnitsCap, "Slimer_Weak_noAggro");
+            }
+            else
+            {
+                IssueSpawnCommand(spawnPoints / weakCost, "Slimer_Weak_noAggro");
+            }
         }
-
-
-        AddWaveSpawned();
-
         DecideStrategyAndWaitToAct();
-
     }
 
     void AddWaveSpawned()
     {
+        Debug.Log("Wave added!");
         curWavesTotal++;
     }
 
@@ -884,6 +862,8 @@ public class Enemy_Master : MonoBehaviour {
             ChargeSpawnPoints(e.spawnCost * total);
 
             CurrUnitsOnField += total;
+
+            AddWaveSpawned();
         }
         else
         {
@@ -903,25 +883,19 @@ public class Enemy_Master : MonoBehaviour {
     }
 
 
-    public void RegisterDeath(Transform killer)
+    public void RegisterDeath()
     {
         CurrUnitsOnField--;
 
+        Debug.Log("Enemy death registered!");
+
         // Check if this level has been completed
-        if (CurrUnitsOnField <= 0)
+        if (CurrUnitsOnField == 0 && curWavesTotal >= totalWavesThisLevel)
         {
-            if (Mission_Manager.Instance.AllWavesAreCompleted(curWavesTotal))
-            {
-                Mission_Manager.Instance.CompleteMissionEnemyWaves(curWavesTotal);
-            }
+            Debug.Log("Mission complete -- ALL WAVES DESTROYED!");
+            Mission_Manager.Instance.CompleteMissionEnemyWaves(curWavesTotal);
         }
-        else
-        {
-            if (killer != target_killer)
-            {
-                target_killer = killer;
-            }
-        }
+  
 
     }
 }

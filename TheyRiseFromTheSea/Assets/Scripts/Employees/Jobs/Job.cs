@@ -8,7 +8,8 @@ public enum JobType
     Pump_Water,
     Heal,
     Repair,
-    Operate
+    Operate, 
+    Cancel
 }
 
 public class Job {
@@ -34,6 +35,8 @@ public class Job {
 
     JobType job_type;
     public JobType Job_Type { get { return job_type; } }
+
+    public Job() { }
 
     public Job (JobType _jobType, TileData.Types tileType, Transform target, bool hasStarted = false, float hardness = 0.5f)
     {

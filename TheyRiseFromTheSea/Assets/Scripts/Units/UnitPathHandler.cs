@@ -171,8 +171,8 @@ public class UnitPathHandler : MonoBehaviour {
         if (pathSuccesful)
         {
             // Draw the Path
-            if (GetComponentInChildren<Path_Draw>() != null)
-                GetComponentInChildren<Path_Draw>().DrawPath(newPath);
+            //if (GetComponentInChildren<Path_Draw>() != null)
+            //    GetComponentInChildren<Path_Draw>().DrawPath(newPath);
 
             // Stop requesting a path
             StopCoroutine("RequestPath");
@@ -266,14 +266,16 @@ public class UnitPathHandler : MonoBehaviour {
                     }
                     else
                     {
-                        if (ResourceGrid.Grid.NodeFromWorldPoint(path[curPathIndex]).isWalkable)
+                        if (ResourceGrid.Grid.GetTileFromWorldPos(path[curPathIndex]).isWalkable)
                         {
                             // the next node is walkable, keep going
                             currWayPoint = path[curPathIndex];
                         }
-                        else
+                        else if (!ResourceGrid.Grid.GetTileFromWorldPos(path[curPathIndex]).isWalkable)
                         {
                             // next node is NOT walkable
+                            StopCoroutine("VerifyTargetPosition");
+                            GetANewPath();
                             yield break;
                         }
                     }
