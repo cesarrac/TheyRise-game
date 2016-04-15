@@ -2,6 +2,13 @@
 using System.Collections;
 using System;
 
+/// <summary>
+///                             ITEMS:
+///                                     Objects that can be Equipped, Used, Consumed, and
+///                                     are represented by a graphic.
+///                                     They can be bought, created or found as loot.
+/// </summary>
+
 public enum ItemType
 {
     Weapon,

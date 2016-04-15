@@ -36,14 +36,12 @@ public class Ship_Manager : MonoBehaviour {
     // GM can call this when starting a New Game
     public void InitStartingValues()
     {
-        Ship_Inventory.Instance.StoreResource(TileData.Types.water, startingWater);
-        Ship_Inventory.Instance.StoreResource(TileData.Types.food, startingFood);
-        Ship_Inventory.Instance.StoreResource(TileData.Types.oxygen, startingFood);
-        Ship_Inventory.Instance.StoreResource(TileData.Types.energy, startingFood);
+        Ship_Inventory.Instance.AddToMainInventory(ResourceType.Water, startingWater);
+        Ship_Inventory.Instance.AddToMainInventory(ResourceType.Food, startingFood);
+        Ship_Inventory.Instance.AddToMainInventory(ResourceType.Energy, startingEnergy);
 
         currWaterCons = startingWaterConsumption;
         currFoodCons = startingFoodConsumption;
-        currOxygenCons = startingOxygenConsumption;
     }
 
     // GM calls this as it Ends a day (triggered by player pressing End Day button)

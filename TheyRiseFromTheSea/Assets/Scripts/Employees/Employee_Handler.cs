@@ -200,15 +200,18 @@ public class Employee_Handler : MonoBehaviour {
     {
         while (true)
         {
-            if (!hasJob || workState == Work_State.Idling)
+            if (!hasJob || workState == Work_State.Idling || curJob == null)
                 yield break;
 
-            if (IsToolPowered() == false)
+            // Only use the Tool Power when the Employee reaches the intended job target
+            if (Employee_Actions.Instance.RangeCheck(curJob.Job_Target.position, transform.position))
             {
-                OutOfPower();
-                yield break;
+                if (IsToolPowered() == false)
+                {
+                    OutOfPower();
+                    yield break;
+                }
             }
-
             yield return new WaitForSeconds(myEmployee.emp_stats.WorkRate);
         }
     }
@@ -219,11 +222,7 @@ public class Employee_Handler : MonoBehaviour {
             return false;
         else
         {
-            if (curJob != null)
-            {
-                curToolPower -= curJob.Job_Hardness;
-            }
-
+            curToolPower -= curJob.Job_Hardness;
             return true;
         }
     }
@@ -263,9 +262,18 @@ public class Employee_Handler : MonoBehaviour {
         curJob = null;
     }
 
-    public void CancelJob()
+    public void CancelJob(bool isRemovingJob)
     {
-        AddOldJobToQueue();
+        if (!isRemovingJob)
+        {
+            AddOldJobToQueue();
+        }
+        else
+        {
+            Debug.Log("Employee: I'm cancelling my job and removing it.");
+        }
+
+
         if (curToolPower < myEmployee.emp_stats.ToolPower)
         {
             OutOfPower();
@@ -306,11 +314,15 @@ public class Employee_Handler : MonoBehaviour {
             {
                 // Now ready to get a new job
                 hasJob = false;
+                curJob = null;
                 workState = Work_State.Idling;
                 yield break;
             }
             else
+            {
                 curToolPower += 1;
+                yield return null;
+            }
 
             yield return new WaitForSeconds(1);
         }

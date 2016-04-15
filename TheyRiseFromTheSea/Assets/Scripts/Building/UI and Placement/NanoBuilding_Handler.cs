@@ -273,25 +273,24 @@ public class NanoBuilding_Handler : MonoBehaviour {
 
     public bool CheckBuildCost(Blueprint bp, int multiplier = 1)
     {
-        // Check cost from the blueprint's required resources
-        foreach (TileData.Types resource in bp.buildReq.reqResourcesMap.Keys)
+        foreach(Resource_Required required in bp.buildReq.buildRequirements)
         {
-            if (Ship_Inventory.Instance.CheckForResourceByAmmnt(resource, bp.buildReq.reqResourcesMap[resource] * multiplier) == false)
+            if (Ship_Inventory.Instance.CheckForResource(required.resource, required.ammnt * multiplier) == false)
             {
-                UI_Manager.Instance.DisplayBuildWarning(resource);
+                UI_Manager.Instance.DisplayBuildWarning(required.resource);
                 return false;
             }
         }
-
         return true;
     }
 
     public void ChargeBuildResources(Blueprint bp)
     {
-        foreach (TileData.Types resource in bp.buildReq.reqResourcesMap.Keys)
+        foreach (Resource_Required required in bp.buildReq.buildRequirements)
         {
-            Ship_Inventory.Instance.ChargeResourcesFromTemp(resource, bp.buildReq.reqResourcesMap[resource]);
+            Ship_Inventory.Instance.ChargeResourceFromTemp(required.resource, required.ammnt);
         }
+
     }
 
     public void ReturnBuildResources(TileData.Types bpTileType, int multiplier = 1)
@@ -300,19 +299,9 @@ public class NanoBuilding_Handler : MonoBehaviour {
         {
             Blueprint bp = GetAvailableBlueprint(bpTileType);
 
-            foreach (TileData.Types resource in bp.buildReq.reqResourcesMap.Keys)
+            foreach (Resource_Required required in bp.buildReq.buildRequirements)
             {
-                if (bp.buildReq.reqResourcesMap[resource] <= 0)
-                    continue;
-
-                if (resource == TileData.Types.rock)
-                {
-                    Ship_Inventory.Instance.ReceiveTempRock(bp.buildReq.reqResourcesMap[resource] * multiplier, Rock.RockProductionType.steel);
-                }
-                else
-                {
-                    Ship_Inventory.Instance.ReceiveTemporaryResources(resource, bp.buildReq.reqResourcesMap[resource] * multiplier);
-                }
+                Ship_Inventory.Instance.AddTempResource(required.resource, required.ammnt);
             }
         }
     }

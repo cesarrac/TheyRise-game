@@ -8,29 +8,29 @@ public class Ship_Inventory : MonoBehaviour {
 
 	public static Ship_Inventory Instance { get; protected set; }
 
-    Inventory main_Inventory;
+    public Inventory main_Inventory;
     Inventory temp_Inventory;
 
-    public int waterStored { get; protected set; }
-    public int steelStored { get; protected set; }
-    public int foodStored { get; protected set; }
-    public int organicsStored { get; protected set; }
+    //public int waterStored { get; protected set; }
+    //public int steelStored { get; protected set; }
+    //public int foodStored { get; protected set; }
+    //public int organicsStored { get; protected set; }
 
-    // Oxygen is NOT gathered on the planet, therefore it has no temporary storage
-    public int oxygenStored { get; protected set; }
+    //// Oxygen is NOT gathered on the planet, therefore it has no temporary storage
+    //public int oxygenStored { get; protected set; }
 
-    // Same case with Energy
-    public int energyStored { get; protected set; }
+    //// Same case with Energy
+    //public int energyStored { get; protected set; }
 
     public int storageTotal { get; protected set; }
 
 
     // ## Use this to create a temporary inventory that gets added to ship inventory only once Player launches (succeeds in Terraforming)
-    public int tempWater { get; protected set; }
-    public int tempFood { get; protected set; }
-    public int tempSteel { get; protected set; }
-    public int tempVit { get; protected set; }
-    public int tempOrganics { get; protected set; }
+    //public int tempWater { get; protected set; }
+    //public int tempFood { get; protected set; }
+    //public int tempSteel { get; protected set; }
+    //public int tempVit { get; protected set; }
+    //public int tempOrganics { get; protected set; }
 
     // CURRENCY:
     int credits;
@@ -38,13 +38,13 @@ public class Ship_Inventory : MonoBehaviour {
 
 
     public Dictionary<Item, int> fabricatedGoodsMap { get; protected set; }
-    public Dictionary<TileData.Types, int> rawResourcesMap { get; protected set; }
+    //public Dictionary<TileData.Types, int> rawResourcesMap { get; protected set; }
 
     List<Weapon> availableWeapons;
     List<Armor> availableArmor;
     List<Tool> availableTools;
 
-    Action missionCompletedCB;
+   // Action missionCompletedCB;
     Action dailyChargeFailCB, dailyChargeSuccessCB;
 
     public int vitCrystalsSold { get; protected set; }
@@ -56,9 +56,9 @@ public class Ship_Inventory : MonoBehaviour {
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            fabricatedGoodsMap = new Dictionary<Item, int>();
-            rawResourcesMap = new Dictionary<TileData.Types, int>();
-
+            //fabricatedGoodsMap = new Dictionary<Item, int>();
+            //rawResourcesMap = new Dictionary<TileData.Types, int>();
+            temp_Inventory = new Inventory();
             main_Inventory = new Inventory();
 
         }
@@ -68,216 +68,80 @@ public class Ship_Inventory : MonoBehaviour {
         }
     }
 
-
-    public void RegisterCompleteMissionCallback(Action cb)
+    public void LoadSavedInventory(Inventory savedInventory)
     {
-        missionCompletedCB = cb;
+        main_Inventory = new Inventory(savedInventory);
     }
 
-    public void UnRegisterCompleteMissionCallback()
+
+    //public void RegisterCompleteMissionCallback(Action cb)
+    //{
+    //    missionCompletedCB = cb;
+    //}
+
+    //public void UnRegisterCompleteMissionCallback()
+    //{
+    //    missionCompletedCB = null;
+    //}
+
+
+    //************************************ USING RESOURCE TYPE
+
+    public bool CheckForResource(ResourceType res, int ammnt, bool checkTemp = true)
     {
-        missionCompletedCB = null;
+        if (checkTemp)
+        {
+            return temp_Inventory.CheckForResource(res, ammnt);
+        }
+        else
+        {
+            return main_Inventory.CheckForResource(res, ammnt);
+        }
     }
 
-    /// <summary>
-    /// Stores items in the temporary Ship Inventory. They will not be registered
-    /// to the actual inventory until the Player launches back to the ship.
-    /// </summary>
-    /// <param name="rType"></param>
-    /// <param name="ammnt"></param>
-    public void ReceiveTemporaryResources(TileData.Types rType, int ammnt)
+    public int GetResourceAmmntFromMainInventory(ResourceType resource)
     {
-       // Debug.Log(ammnt + " of " + rType + " beamed to the SHIP!");
-        //switch (rType)
-        //{
-        //    case TileData.Types.water:
-        //        tempWater += ammnt;
-        //        if (ammnt != 0)
-        //            Player_UIHandler.instance.DisplayTransporterStorage(rType, tempWater);
-        //        break;
-        //    case TileData.Types.food:
-        //        tempFood += ammnt;
-        //        if (ammnt != 0)
-        //            Player_UIHandler.instance.DisplayTransporterStorage(rType, tempFood);
-        //        break;
-        //    default:
-        //        // Cant find that resource
-        //        break;
-        //}
+        return main_Inventory.GetResourceAmmnt(resource);
+    }
 
-        // add to the total
-        storageTotal += ammnt;
+    public int GetResourceAmmntFromTempInventory(ResourceType resource)
+    {
+        return temp_Inventory.GetResourceAmmnt(resource);
+    }
 
-        //TEST:
+    public void AddTempResource(ResourceType rType, int ammnt)
+    {
         temp_Inventory.AddResource(rType, ammnt);
-
-        if (missionCompletedCB != null)
-        {
-            missionCompletedCB();
-        }
+        Player_UIHandler.instance.DisplayTransporterStorage(rType, temp_Inventory.GetResourceAmmnt(rType));
+        //    if (missionCompletedCB != null)
+        //    {
+        //        missionCompletedCB();
+        //    }
     }
 
-    public void ReceiveTempRock(int ammnt, Rock.RockProductionType rockType)
+    public void ChargeResourceFromTemp(ResourceType res, int ammnt)
     {
-        //TEST:
-        temp_Inventory.AddRock(rockType, ammnt);
-        Player_UIHandler.instance.DisplayTransporterStorage(TileData.Types.rock, temp_Inventory.GetRockAmmnt(rockType));
-
-        //if (rockType == Rock.RockProductionType.steel)
-        //{
-        //    tempSteel += ammnt;
-        //    Player_UIHandler.instance.DisplayTransporterStorage(TileData.Types.rock, tempSteel);
-        //}
-        //else if (rockType == Rock.RockProductionType.vit)
-        //{
-        //    tempVit += ammnt;
-        //}
+        temp_Inventory.TakeResource(res, ammnt);
     }
 
-    public void StoreResource(TileData.Types rType, int ammnt)
+    public void AddToMainInventory(ResourceType rType, int ammnt)
     {
-        //if (rawResourcesMap.ContainsKey(rType))
-        //{
-        //    rawResourcesMap[rType] += ammnt;
-        //}
-        //else
-        //{
-        //    rawResourcesMap.Add(rType, ammnt);
-        //}
-
         main_Inventory.AddResource(rType, ammnt);
-
-        // add to the total
-        storageTotal += ammnt;
     }
 
-    public int CheckForSpecificResource(TileData.Types resource, bool checkTemp = false)
+    public void StoreTempInMainInventory()
     {
-        if (checkTemp)
-        {
-            return temp_Inventory.GetResourceAmmnt(resource);
-        }
-        else
-        {
-            return main_Inventory.GetResourceAmmnt(resource);
-        }
-        //int ammnt = 0;
-        //if (!checkTemp)
-        //{
-        //    if (rawResourcesMap.ContainsKey(resource))
-        //    {
-        //        ammnt = rawResourcesMap[resource];
-        //    }
-        //}
-        //else
-        //{
-          
-        //    switch (resource)
-        //    {
-        //        case TileData.Types.water:
-        //            ammnt = tempWater;
-        //            break;
-        //        case TileData.Types.rock:
-        //            ammnt = tempSteel;
-        //            break;
-        //        case TileData.Types.food:
-        //            ammnt = tempFood;
-        //            break;
-        //        default:
-        //            // Cant find that resource
-        //            break;
-        //    }
-        //}
-
-        //return ammnt;
-    }
-
-    public bool CheckForResourceByAmmnt(TileData.Types resource, int ammnt, bool checkTemp = true)
-    {
-        if (checkTemp)
-        {
-            return temp_Inventory.CheckForResource(resource, ammnt);
-        }
-        else
-        {
-            return main_Inventory.CheckForResource(resource, ammnt);
-        }
-        //bool containsResource = false;
-
-        //if (checkTemp)
-        //{
-        //    switch (resource)
-        //    {
-        //        case TileData.Types.water:
-        //            if (tempWater >= ammnt)
-        //            {
-        //                containsResource = true;
-        //            }
-        //            break;
-        //        case TileData.Types.rock:
-        //            if (tempSteel >= ammnt)
-        //            {
-        //                containsResource = true;
-        //            }
-        //            break;
-        //        case TileData.Types.food:
-        //            if (tempFood >= ammnt)
-        //            {
-        //                containsResource = true;
-        //            }
-        //            break;
-        //        default:
-        //            // Cant find that resource
-        //            containsResource = false;
-        //            break;
-        //    }
-        //}
-        //else
-        //{
-        //    if (rawResourcesMap.ContainsKey(resource))
-        //    {
-        //        if (rawResourcesMap[resource] >= ammnt)
-        //        {
-        //            containsResource = true;
-        //        }
-        //    }
-        //}
-
-
-        //return containsResource;
-    }
-
-    /// <summary>
-    /// Call this from the Launchpad when the Player launches back to the ship. 
-    /// At this point Terraformer stages would be complete and the Launchpad should be ready to send items to ship.
-    /// </summary>
-    public void RegisterTempInventoryToShip()
-    {
-        //waterStored += tempWater;
-
-        //AutoSellVitCrystals();
-
-        //steelStored += tempSteel;
-
-        //foodStored += tempFood;
-
-        //StoreResource(TileData.Types.water, tempWater);
-        //StoreResource(TileData.Types.rock, tempSteel);
-        //StoreResource(TileData.Types.food, tempFood);
-
-        // TEST: Merge the current temp inventory with the main inventory
         main_Inventory.MergeInventories(temp_Inventory);
-        temp_Inventory = null;
 
-        //UnRegisterCompleteMissionCallback();
+       // UnRegisterCompleteMissionCallback();
     }
 
     void AutoSellVitCrystals()
     {
         // vitCrystalsSold = tempVit;
-        vitCrystalsSold = temp_Inventory.GetRockAmmnt(Rock.RockProductionType.vit);
+        vitCrystalsSold = temp_Inventory.GetResourceAmmnt(ResourceType.Vit);
         Debug.Log("Selling " + vitCrystalsSold + " VIT Crystals!");
-        tempVit = 0;
+        //tempVit = 0;
        
     }
 
@@ -286,41 +150,23 @@ public class Ship_Inventory : MonoBehaviour {
         vitCrystalsSold = 0;
     }
 
-
-    public int DisplayResourceAmount(TileData.Types key)
-    {
-        if (rawResourcesMap.ContainsKey(key))
-        {
-            return rawResourcesMap[key];
-        }
-        else
-            return 0;
-    }
-
-
-
     public void InitUI()
     {
        // ResetTempInventory();
 
         if (SceneManager.GetActiveScene().name == "Level_Planet")
         {
-            Player_UIHandler.instance.InitTransporterTempInventory(tempFood, tempWater, tempSteel);
+          //  Player_UIHandler.instance.InitTransporterTempInventory(tempFood, tempWater, tempSteel);
+            Player_UIHandler.instance.InitTransporterTempInventory(0, 0, 0);
         }
 
     }
 
     public void ResetTempInventory()
     {
-
-        //tempWater = 0;
-        //tempFood = 0;
-        //tempSteel = 0;
-        //tempVit = 0;
-        //vitCrystalsSold = 0;
+        vitCrystalsSold = 0;
         temp_Inventory = new Inventory();
     }
-
 
     // FABRICATOR:
     public void AddFabricatedGood(Item good, int ammnt)
@@ -335,7 +181,11 @@ public class Ship_Inventory : MonoBehaviour {
         }
     }
 
-    
+    // TRADE ORDERS:
+
+    // If the above method returns true a button on the Trade Order UI will allow the player to complete the Order by...
+
+    // ... giving their client the required Fabricated Goods ... 
     // Whenever the player opens the info of a Current trade order, call this method below to check if the required good are available
     public bool CheckForGoods(Item good, int ammnt)
     {
@@ -348,86 +198,6 @@ public class Ship_Inventory : MonoBehaviour {
         }
 
         return false;
-    }
-
-    public bool CheckForRawResources(TileData.Types resource, int ammnt)
-    {
-        if (rawResourcesMap.ContainsKey(resource))
-        {
-            if (rawResourcesMap[resource] >= ammnt)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    // FOR BUILDING WE USE THE TEMPORARY INVENTORY (on the planet surface inventory)
-    public void ChargeResourcesFromTemp(TileData.Types resource, int ammnt)
-    {
-        // TODO: Instead of using the TileData type "rock", I SHOULD be using the RockType "Steel"
-        if (resource == TileData.Types.rock)
-        {
-            temp_Inventory.TakeRock(Rock.RockProductionType.steel, ammnt);
-            Player_UIHandler.instance.DisplayTransporterStorage(resource, temp_Inventory.GetRockAmmnt(Rock.RockProductionType.steel));
-        }
-        else
-        {
-            temp_Inventory.TakeResource(resource, ammnt);
-            Player_UIHandler.instance.DisplayTransporterStorage(resource, temp_Inventory.GetResourceAmmnt(resource));
-        }
-
-        //switch (resource)
-        //{
-        //    case TileData.Types.water:
-        //        tempWater -= ammnt;
-        //        Player_UIHandler.instance.DisplayTransporterStorage(resource, tempWater);
-        //        break;
-        //    case TileData.Types.rock:
-        //        tempSteel -= ammnt;
-        //        Player_UIHandler.instance.DisplayTransporterStorage(resource, tempSteel);
-        //        break;
-        //    case TileData.Types.food:
-        //        tempFood -= ammnt;
-        //        Player_UIHandler.instance.DisplayTransporterStorage(resource, tempFood);
-        //        break;
-        //    default:
-        //        // Cant find that resource
-                
-        //        break;
-        //}
-    }
-
-    // TRADE ORDERS:
-
-    // If the above method returns true a button on the Trade Order UI will allow the player to complete the Order by...
-
-    // ... giving their client the required Fabricated Goods ... 
-    public void TakeGoods(Item good, int ammnt)
-    {
-        if (!fabricatedGoodsMap.ContainsKey(good))
-            return;
-
-        fabricatedGoodsMap[good] -= ammnt;
-
-        if (fabricatedGoodsMap[good] <= 0)
-        {
-            fabricatedGoodsMap.Remove(good);
-        }
-    }
-    // ... or required Raw Resource.
-    public void TakeResources(TileData.Types resource, int ammnt)
-    {
-        if (!rawResourcesMap.ContainsKey(resource))
-            return;
-
-        rawResourcesMap[resource] -= ammnt;
-
-        if (rawResourcesMap[resource] <= 0)
-        {
-            rawResourcesMap.Remove(resource);
-        }
     }
 
     public void RegisterConsumptionCallbacks(Action cbFail, Action cbSuccess)
@@ -447,9 +217,8 @@ public class Ship_Inventory : MonoBehaviour {
         // if NOT all 3 return true call fail callback
 
         if (   
-                ConsumeDailyResource(TileData.Types.water, waterAmmnt) &&
-                ConsumeDailyResource(TileData.Types.water, foodAmmnt) &&
-                ConsumeDailyResource(TileData.Types.water, oxygenAmmnt)
+                ConsumeDailyResource(ResourceType.Water, waterAmmnt) &&
+                ConsumeDailyResource(ResourceType.Food, foodAmmnt)
            )
         {
 
@@ -467,30 +236,13 @@ public class Ship_Inventory : MonoBehaviour {
     }
     
     // TODO: Consider making this a function return a bool so that we know if it succeeded or not
-    public bool ConsumeDailyResource(TileData.Types resource, int ammnt)
+    public bool ConsumeDailyResource(ResourceType resource, int ammnt)
     {
         // If inventory contains this resource...
-        if (rawResourcesMap.ContainsKey(resource))
+        if (main_Inventory.CheckForResource(resource, ammnt))
         {
-            // ... and more than or equal the ammnt...
-            if (rawResourcesMap[resource] >= ammnt)
-            {
-                // subtract the ammnt from it.
-                rawResourcesMap[resource] -= ammnt;
-
-                CheckIfResourceAtZero(resource);
-
-                return true;
-            }
-            else
-            {
-                // Doesn't have enough of it in store!
-
-
-                return false;
-
-            }
-
+            main_Inventory.TakeResource(resource, ammnt);
+            return true;
         }
         else
         {
@@ -511,34 +263,21 @@ public class Ship_Inventory : MonoBehaviour {
     /// <returns></returns>
     public bool ConsumeEnergy(int cost)
     {
-        if (rawResourcesMap.ContainsKey(TileData.Types.energy))
+        if (main_Inventory.CheckForResource(ResourceType.Energy, cost))
         {
-            if (rawResourcesMap[TileData.Types.energy] >= cost)
-            {
-                rawResourcesMap[TileData.Types.energy] -= cost;
-                return true;
-            }
-            else
-                return false;
+            main_Inventory.TakeResource(ResourceType.Energy, cost);
+            return true;
         }
         else
+        {
             return false;
+        }
     }
 
     public void RechargeEnergy(int startingEnergy)
     {
-        if (rawResourcesMap.ContainsKey(TileData.Types.energy))
-        {
-            rawResourcesMap[TileData.Types.energy] = startingEnergy;
-        }
+        main_Inventory.AddResource(ResourceType.Energy, startingEnergy);
     }
 
-    void CheckIfResourceAtZero(TileData.Types resource)
-    {
-        if (rawResourcesMap[resource] <= 0)
-        {
-            rawResourcesMap.Remove(resource);
-        }
-    }
 
 }

@@ -18,6 +18,7 @@ public class Employee_Generator : MonoBehaviour {
 
     // Employees that are currently active on a mission.
     public List<Employee> active_employees { get; protected set; }
+    public GameObject[] spawned_employees { get; protected set; }
 
     // Array of string keys for any employee marked to die -- always limited to the max Employees on mission
     List<string> markedAsDead;
@@ -143,6 +144,8 @@ public class Employee_Generator : MonoBehaviour {
 
         Employee[] actives = active_employees.ToArray();
 
+        spawned_employees = new GameObject[active_employees.Count];
+
         Debug.Log("Spawning active employees!");
 
         for (int i = 0; i < actives.Length; i++)
@@ -192,6 +195,9 @@ public class Employee_Generator : MonoBehaviour {
                 }
 
                 offset++;
+
+                // Add GObj to spawned employees array
+                spawned_employees[i] = employee;
             }
 
         }

@@ -7,9 +7,9 @@ public class Player_UIHandler : MonoBehaviour {
     public static Player_UIHandler instance;
 
 	// Resources Panel 
-	public Text oreText, foodText, creditsText, waterText, energyText;
-    public Text tempOreTxt, tempFoodTxt, tempCreditTxt, tempWaterTxt, tempEnergyTxt;
-	int ore, food, credits, totalFood, farmCount, water, extractCount, waterPumpCount, energy;
+	//public Text steelText, foodText, creditsText, waterText, energyText, vitText;
+    public Text tempSteelText, tempFoodTxt, tempCreditTxt, tempWaterTxt, tempEnergyTxt, tempVitText;
+	//int steel, vit, food, credits, totalFood, farmCount, water, extractCount, waterPumpCount, energy;
 
 	// Food Production Panel
 	//public Text foodProd_txt, farmCount_txt, foodCost_txt;
@@ -63,10 +63,10 @@ public class Player_UIHandler : MonoBehaviour {
     public void InitTransporterTempInventory(int _food, int _water, int _ore)         // FIX THIS: Add the rest of the resources!
     {
         // Right now this will initialize the text for the Transporter storage panel
-        tempOreTxt.text = _ore.ToString();
+        tempSteelText.text = _ore.ToString();
         tempFoodTxt.text = _food.ToString();
         tempWaterTxt.text = _water.ToString();
-
+        tempVitText.text = "0";
     }
 
 
@@ -99,19 +99,22 @@ public class Player_UIHandler : MonoBehaviour {
     //    }
     //}
 
-    public void DisplayTransporterStorage(TileData.Types statThatChanges, int ammnt)
+    public void DisplayTransporterStorage(ResourceType statThatChanges, int ammnt)
     {
         // This method will only be called when a stat is changing. This will update the text. 
         switch (statThatChanges)
         {
-            case TileData.Types.rock:
-                tempOreTxt.text = ammnt.ToString();
+            case ResourceType.Steel:
+                tempSteelText.text = ammnt.ToString();
                 break;
-            case TileData.Types.food:
+            case ResourceType.Food:
                 tempFoodTxt.text = ammnt.ToString();
                 break;
-            case TileData.Types.water:
+            case ResourceType.Water:
                 tempWaterTxt.text = ammnt.ToString();
+                break;
+            case ResourceType.Vit:
+                tempVitText.text = ammnt.ToString();
                 break;
             default:
                 // do nothing

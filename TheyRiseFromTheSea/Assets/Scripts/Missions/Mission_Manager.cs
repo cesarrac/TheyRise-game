@@ -64,9 +64,14 @@ public class Mission_Manager : MonoBehaviour {
             availableMissions_Map.Add("Available " + i, availableMissions[i]);
         }
 
-        // Also UnRegister callback on active mission
-        activeMission.UnRegisterMissionCompleteCallback();
-        availableMissions_Map.Add("Active", activeMission);
+        if (activeMission != null)
+        {
+            // Also UnRegister callback on active mission
+            activeMission.UnRegisterMissionCompleteCallback();
+
+            availableMissions_Map.Add("Active", activeMission);
+        }
+
 
         return availableMissions_Map;
     }
@@ -188,14 +193,14 @@ public class Mission_Manager : MonoBehaviour {
     // Checks to verify if Mission has been completed:
     public void CheckSurvivalMissionCompleted()
     {
-        // A Survival Mission's objective is to gather x amount of y resource.
-        if (Ship_Inventory.Instance.CheckForSpecificResource(activeMission.ObjectiveResource, true) >= activeMission.ObjectiveAmnt)
-        {
-            activeMission.FlagAsCompleted();
+        //// A Survival Mission's objective is to gather x amount of y resource.
+        //if (Ship_Inventory.Instance.CheckForSpecificResource(activeMission.ObjectiveResource, true) >= activeMission.ObjectiveAmnt)
+        //{
+        //    activeMission.FlagAsCompleted();
 
-            // Display objective completed message
-            UI_Manager.Instance.DisplayVictoryPanel();
-        }
+        //    // Display objective completed message
+        //    UI_Manager.Instance.DisplayVictoryPanel();
+        //}
     }
 
     public void CheckScienceMissionCompleted(int currStageCount)

@@ -12,7 +12,7 @@ public class ResourceDrop : MonoBehaviour {
     float forceAmmt = 10;
     int randomForceDirection;
 
-    TileData.Types resourceType;
+    ResourceType resourceType;
 
     public bool goesToPlayer = false, goesToTransporter = true;
 
@@ -28,7 +28,7 @@ public class ResourceDrop : MonoBehaviour {
         extractionSource = e;
         totalAmmntOfResource = ammnt;
 
-        if (e.resourceType == TileData.Types.rock)
+        if (e.tileTypeToExtract == TileData.Types.rock)
         {
             rockProdType = ResourceGrid.Grid.GetTileGameObjFromIntCoords(e.targetTile.posX, e.targetTile.posY).GetComponent<Rock_Handler>().myRock._rockProductionType;
         }
@@ -38,7 +38,10 @@ public class ResourceDrop : MonoBehaviour {
     {
         totalAmmntOfResource = ammnt;
         rockProdType = rock;
-        resourceType = TileData.Types.rock;
+        if (rock == Rock.RockProductionType.steel)
+            resourceType = ResourceType.Steel;
+        else if (rock == Rock.RockProductionType.vit)
+            resourceType = ResourceType.Vit;
     }
 
     void Start()
@@ -52,7 +55,7 @@ public class ResourceDrop : MonoBehaviour {
         if (extractionSource != null)
         {
             // Once spawned, if on Water bob in the waves...
-            if (extractionSource.resourceType == TileData.Types.water)
+            if (extractionSource.tileTypeToExtract == TileData.Types.water)
             {
                 // For water we always need to make sure to push away from the water
                 var origin = ResourceGrid.Grid.GetWorldPosFromTile(extractionSource.originTile.posX, extractionSource.originTile.posY);
@@ -166,17 +169,8 @@ public class ResourceDrop : MonoBehaviour {
         }
         else
         {
-    
-            
-            if (resourceType == TileData.Types.rock)
-            {
-                Ship_Inventory.Instance.ReceiveTempRock(totalAmmntOfResource, rockProdType);
-            }
-            else
-            {
-                Ship_Inventory.Instance.ReceiveTemporaryResources(resourceType, totalAmmntOfResource);
-            }
-           
+
+            Ship_Inventory.Instance.AddTempResource(resourceType, totalAmmntOfResource);
 
             StopCoroutine("Wave");
 

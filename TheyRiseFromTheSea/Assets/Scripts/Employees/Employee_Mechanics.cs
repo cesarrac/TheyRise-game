@@ -58,6 +58,33 @@ public class Employee_Mechanics : MonoBehaviour {
         {
             if (nanoBuild_handler.CheckBuildCost(curBP))
             {
+                // NOTE: Right now grabbing the supplies from transporter just means the 
+                // Employee waits 3 seconds and charges the Inventory for the resources.
+                // What I'd like is:
+                // 1: Ask the machine's inventory if it is missing any of its Blueprints required materials
+                // 2: If NO, proceed to Assemble... If YES move to transport
+                // 3: Ask the machine for the resource and ammnt it's missing, take from Ship Inventory and fill up character inventory with each one
+                // 4: IF character inventory is FULL and not all materials have been gathered, go to target machine to dump materials
+                // 5: Deposit materials to machine inventory, IF the machine inventory contains all required resources, Assemble, 
+                //    IF NOT go to transport and do step 3
+
+                /*  *****    EXAMPLE of method for finding what Resource is required by the machine we are trying to assemble: ****
+
+                Inventory machine = new Inventory(); <----- this we would get from the job target's gObj by getting its Building_Handler comp and finding its inventory
+                                                        ---- OR, the TileData itself could hold an Inventory, when it gets swapped it would reset
+                Inventory machine = job.tile.tile_inventory;
+
+                foreach(Resource_Required resource in curBP.buildReq.buildRequirements)
+                {
+                    if (machine.CheckForResource(resource.resource, resource.ammnt) == false)
+                    {
+                        Resource_Required resRequiredForThisMachine = resource;
+                    }
+
+                }
+
+                */
+
                 // Charge the building cost to the ship's inventory
                 nanoBuild_handler.ChargeBuildResources(curBP);
                 Invoke("AssembleTarget", 3f);
@@ -66,7 +93,7 @@ public class Employee_Mechanics : MonoBehaviour {
             {
                 // If we don't have enough resources to build this...
                 // Add the job again to the last position of the Job Queue and go get a new job!
-                emp_handler.CancelJob();
+                emp_handler.CancelJob(false);
             }
         }
         else

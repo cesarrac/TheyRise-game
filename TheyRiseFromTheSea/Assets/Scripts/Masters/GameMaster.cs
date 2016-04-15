@@ -425,7 +425,7 @@ public class GameMaster : MonoBehaviour {
     public void ReturnToShip()
     {
         // Tell Ship Inventory to register items that were on the Temporary inventory, since now the Player is finally taking them to the ship
-        Ship_Inventory.Instance.RegisterTempInventoryToShip();
+        Ship_Inventory.Instance.StoreTempInMainInventory();
 
         // Complete the current Active Mission
         //Mission_Manager.Instance.CompleteActiveMission();

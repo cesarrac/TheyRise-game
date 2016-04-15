@@ -46,7 +46,8 @@ public class FoodProduction_Manager : ExtractionBuilding {
         PersonalStorageCap = startingStorageCap;
         SecondStorageCap = startingSecondStorageCap;
 
-        InitSelfProducer(TileData.Types.food, ProductionRate, ProductionAmmnt, PersonalStorageCap, SecondStorageCap, waterConsumed, TileData.Types.water, transform);
+        //  TODO: The Resource Type of this "Farm" should match the seed that is being used / what is being grown 
+        InitSelfProducer(TileData.Types.food, ResourceType.Food, ProductionRate, ProductionAmmnt, PersonalStorageCap, SecondStorageCap, waterConsumed, ResourceType.Water, transform);
 
         _state = State.SEARCHING;
     }

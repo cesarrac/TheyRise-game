@@ -59,10 +59,6 @@ public class Employee_Actions : MonoBehaviour {
 
     void AssembleMachine(GameObject gObj, Transform t)
     {
-        // This would cause the employee to walk up to the machine and operate it
-        // so we'll need to hook this up to a component on the machine that tells it
-        // it can start operating 
-        // (probably the Building Handler, set its state to READY ... how would that work?)
         // The building handler sets its state to READY when it finishes constructing, maybe with buildings
         // that need operators they can build and set their state to WAITING until an 
         // Operator can be there to make it work.

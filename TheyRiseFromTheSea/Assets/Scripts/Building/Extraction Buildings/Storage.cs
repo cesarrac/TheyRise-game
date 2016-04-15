@@ -111,19 +111,19 @@ public class Storage : ExtractionBuilding {
 
         if (waterStored > 0)
         {
-            shipInventory.ReceiveTemporaryResources(TileData.Types.water, waterStored);
+            shipInventory.AddTempResource(ResourceType.Water, waterStored);
 
         }
 
         if (oreStored > 0)
         {
-            shipInventory.ReceiveTemporaryResources(TileData.Types.rock, oreStored);
+            shipInventory.AddTempResource(ResourceType.Steel, oreStored);
 
         }
 
         if (foodStored > 0)
         {
-            shipInventory.ReceiveTemporaryResources(TileData.Types.food, foodStored);
+            shipInventory.AddTempResource(ResourceType.Food, foodStored);
 
         }
 

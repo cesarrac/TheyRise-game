@@ -203,7 +203,7 @@ public class DeSalt_Plant : ExtractionBuilding {
                 }
                 else
                 {
-                    Debug.Log("EXTRACTOR: Cant find my resource of type: " + resourceType);
+                    Debug.Log("EXTRACTOR: Cant find my resource of type: " + tileTypeToExtract);
                     if (statusIndicated)
                     {
                         // Repeat callibrating message if it CANT find a rock

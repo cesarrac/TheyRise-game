@@ -46,7 +46,7 @@ public class Extractor : ExtractionBuilding {
 
         BlueprintDatabase.Instance.GetExtractorStats("Extractor", myTransform, this, TileData.Types.rock);
 
-        inventoryTypeCallback = SendToShipByRockType;
+        //inventoryTypeCallback = SendToShipByRockType;
 
        // splitShipInventoryCallback = DefineEnrichedAndCommonOre;
 
@@ -107,6 +107,9 @@ public class Extractor : ExtractionBuilding {
                             {
                                 currRock = currTarget.GetComponent<Rock_Handler>().myRock;
                                 currRockWorldPos = resourceWorldPos;
+
+                                // Define my extractor resource type 
+                                DefineMyResourceType(currRock._rockProductionType);
                             }
                         }
            
@@ -123,7 +126,7 @@ public class Extractor : ExtractionBuilding {
 
                         StopCoroutine("ShowStatusMessage");
                         StartCoroutine("ShowStatusMessage");
-                        statusMessage = "Extracting!";
+                        statusMessage = "Extracting " + resourceType.ToString();
                     }
                     else
                     {
@@ -224,7 +227,7 @@ public class Extractor : ExtractionBuilding {
                 }
                 else
                 {
-                    Debug.Log("EXTRACTOR: Cant find my resource of type: " + resourceType);
+                    Debug.Log("EXTRACTOR: Cant find my resource of type: " + tileTypeToExtract);
                     if (statusIndicated)
                     {
                         // Repeat callibrating message if it CANT find a rock
@@ -262,12 +265,12 @@ public class Extractor : ExtractionBuilding {
     }
 
 
-    void SendToShipByRockType(int currTotal)
-    {
+    //void SendToShipByRockType(int currTotal)
+    //{
 
-        Ship_Inventory.Instance.ReceiveTempRock(currTotal, currRock._rockProductionType);
+    //    Ship_Inventory.Instance.ReceiveTempRock(currTotal, currRock._rockProductionType);
 
-    }
+    //}
 
     //void CountDownToExtract()
     //{

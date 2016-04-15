@@ -86,7 +86,7 @@ public class GameTracker : MonoBehaviour {
 
         GameData gameData = new GameData();
 
-        gameData.SaveResources(Ship_Inventory.Instance.rawResourcesMap);
+        gameData.SaveResources(Ship_Inventory.Instance.main_Inventory);
         gameData.SaveDays(Days);
         gameData.SaveHero(GameMaster.Instance.theHero.heroName,
                           GameMaster.Instance.theHero.weapons[0].itemName,
@@ -125,10 +125,13 @@ public class GameTracker : MonoBehaviour {
             file.Close();
 
             // Load the Resources map
-            foreach (TileData.Types resource in gameData.savedResourceMap.Keys)
-            {
-                Ship_Inventory.Instance.StoreResource(resource, gameData.savedResourceMap[resource]);
-            }
+            //foreach (TileData.Types resource in gameData.savedResourceMap.Keys)
+            //{
+            //    Ship_Inventory.Instance.StoreResource(resource, gameData.savedResourceMap[resource]);
+            //}
+
+            // Load the saved Ship Inventory:
+            Ship_Inventory.Instance.LoadSavedInventory(gameData.savedShipInventory);
 
             // Load the Days
             AddDay(gameData.days);
@@ -179,7 +182,8 @@ public class GameTracker : MonoBehaviour {
 [Serializable]
 public class GameData
 {
-    public Dictionary<TileData.Types, int> savedResourceMap { get; protected set; }
+    public Inventory savedShipInventory { get; protected set; }
+   // public Dictionary<TileData.Types, int> savedResourceMap { get; protected set; }
     public int days { get; protected set; }
 
     // Hero:
@@ -209,15 +213,16 @@ public class GameData
 
     public GameData()
     {
-        savedResourceMap = new Dictionary<TileData.Types, int>();
+       // savedResourceMap = new Dictionary<TileData.Types, int>();
     }
 
-    public void SaveResources(Dictionary<TileData.Types, int> storedResources)
+    public void SaveResources(Inventory inventory)
     {
-        foreach(TileData.Types resource in storedResources.Keys)
-        {
-            savedResourceMap.Add(resource, storedResources[resource]);
-        }
+        savedShipInventory = new Inventory(inventory);
+        //foreach(TileData.Types resource in storedResources.Keys)
+        //{
+        //    savedResourceMap.Add(resource, storedResources[resource]);
+        //}
     }
 
     public void SaveDays(int d)

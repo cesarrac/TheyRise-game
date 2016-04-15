@@ -6,6 +6,9 @@ using System.Collections;
 public class BuildRequirement
 {
     public Dictionary<TileData.Types, int> reqResourcesMap { get; protected set; }
+    public Dictionary<Rock.RockProductionType, int> reqRocksMap { get; protected set; }
+
+    public Resource_Required[] buildRequirements;
 
     // Constructors for requiring 1, 2, or up to 3 resources to build something
     public BuildRequirement(TileData.Types r1, int r1Ammnt)
@@ -28,8 +31,42 @@ public class BuildRequirement
         reqResourcesMap.Add(r2, r2Ammnt);
         reqResourcesMap.Add(r3, r3Ammnt);
     }
+
+    // One Rock Type
+    //public BuildRequirement(Rock.RockProductionType rock1, int rock1Ammnt)
+    //{
+    //    reqRocksMap = new Dictionary<Rock.RockProductionType, int>();
+    //    reqRocksMap.Add(rock1, rock1Ammnt);
+    //}
+
+    // One raw resource + One rock type
+    public BuildRequirement(Rock.RockProductionType rock1, int rock1Ammnt, TileData.Types res1, int res1Ammnt)
+    {
+        reqRocksMap = new Dictionary<Rock.RockProductionType, int>();
+        reqResourcesMap = new Dictionary<TileData.Types, int>();
+        reqRocksMap.Add(rock1, rock1Ammnt);
+        reqResourcesMap.Add(res1, res1Ammnt);
+
+    }
+
+    public BuildRequirement(Resource_Required[] requirements)
+    {
+        buildRequirements = requirements;
+    }
 }
 
+[System.Serializable]
+public class Resource_Required
+{
+    public int ammnt;
+    public ResourceType resource;
+    public Resource_Required(ResourceType res, int amt)
+    {
+        ammnt = amt;
+        resource = res;
+    }
+
+}
 
 // Type of Building: Battle or Utility
 public enum BuildingType

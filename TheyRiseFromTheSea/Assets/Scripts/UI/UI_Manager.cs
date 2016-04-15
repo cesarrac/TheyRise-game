@@ -98,14 +98,14 @@ public class UI_Manager : MonoBehaviour
 
     public void DisplayTotalResources()
     {
-        ore_total.text = Ship_Inventory.Instance.DisplayResourceAmount(TileData.Types.rock).ToString();
-        ore_new.text = Ship_Inventory.Instance.tempSteel.ToString();
+        ore_total.text = Ship_Inventory.Instance.GetResourceAmmntFromMainInventory(ResourceType.Steel).ToString();
+        ore_new.text = Ship_Inventory.Instance.GetResourceAmmntFromTempInventory(ResourceType.Steel).ToString();
 
-        water_total.text = Ship_Inventory.Instance.DisplayResourceAmount(TileData.Types.water).ToString();
-        water_new.text = Ship_Inventory.Instance.tempWater.ToString();
+        water_total.text = Ship_Inventory.Instance.GetResourceAmmntFromMainInventory(ResourceType.Water).ToString();
+        water_new.text = Ship_Inventory.Instance.GetResourceAmmntFromTempInventory(ResourceType.Water).ToString();
 
-        food_total.text = Ship_Inventory.Instance.DisplayResourceAmount(TileData.Types.food).ToString();
-        food_new.text = Ship_Inventory.Instance.tempFood.ToString();
+        food_total.text = Ship_Inventory.Instance.GetResourceAmmntFromMainInventory(ResourceType.Food).ToString();
+        food_new.text = Ship_Inventory.Instance.GetResourceAmmntFromTempInventory(ResourceType.Food).ToString();
 
         //organics_total.text = Ship_Inventory.Instance.DisplayResourceAmount(TileData.Types.organic).ToString();
         //organics_new.text = Ship_Inventory.Instance.tempOrganics.ToString();
@@ -122,6 +122,16 @@ public class UI_Manager : MonoBehaviour
     }
 
     public void DisplayBuildWarning(TileData.Types resource)
+    {
+        if (buildWarningGObj.activeSelf == false)
+        {
+            buildWarningGObj.gameObject.SetActive(true);
+        }
+
+        buildWarning.text = "Need more " + resource.ToString() + "!";
+    }
+
+    public void DisplayBuildWarning(ResourceType resource)
     {
         if (buildWarningGObj.activeSelf == false)
         {

@@ -6,9 +6,7 @@ public class Job_Manager : MonoBehaviour {
 	public static Job_Manager Instance { get; protected set; }
 
     List<Job> jobs_available;
-    List<Job> jobs_cancelled; // A list that will get filled with all cancelled jobs to check against when adding new jobs.
-                              // This will keep Employees from adding jobs that I wanted to cancel whenever they leave a job
-                              // they think they are leaving unfinished.
+
     Dictionary<Vector3, GameObject> taskCircles = new Dictionary<Vector3, GameObject>();
 
     void Awake()
@@ -16,10 +14,6 @@ public class Job_Manager : MonoBehaviour {
         Instance = this;
 
         jobs_available = new List<Job>();
-        jobs_cancelled = new List<Job>();
-
-        // Every 60 seconds we check the cancelled jobs list, if it contains jobs clear it
-        InvokeRepeating("CheckCancelledJobs", 60, 60);
     }
 
     void Start()
@@ -35,13 +29,6 @@ public class Job_Manager : MonoBehaviour {
         UI_Manager.Instance.CreateTaskJobButtons(JobType.Cancel);
 
 
-    }
-
-    void CheckCancelledJobs()
-    {
-        // Clear the cancelled jobs list every 60 seconds
-        if (jobs_cancelled.Count > 0)
-            jobs_cancelled.Clear();
     }
 
     // These are manually assigned Jobs, called by the Mouse Controller
@@ -62,7 +49,11 @@ public class Job_Manager : MonoBehaviour {
             }
             else
             {
-                CancelJob(jType, tile.tileType, tileTransform);
+                if (tile.tileType == TileData.Types.rock)
+                {
+                    CancelJob(JobType.Mine, tile.tileType, tileTransform);
+                }
+
             }
         }
     }
@@ -71,12 +62,6 @@ public class Job_Manager : MonoBehaviour {
     {
         if (IsDuplicateJob(jType, target) == true)
             return;
-
-        if (jobs_cancelled.Count > 0)
-        {
-            if (IsCancelledJob(jType, target) == true)
-                return;
-        }
 
         // Make the job's hardness less than the default 0.5 for jobs like construction/assembly
         if (tileType != TileData.Types.rock)
@@ -112,20 +97,6 @@ public class Job_Manager : MonoBehaviour {
         return false;
     }
 
-    bool IsCancelledJob(JobType jType, Transform target)
-    {
-        foreach (Job j in jobs_cancelled)
-        {
-            if (j.Job_Target == target)
-            {
-                if (j.Job_Type == jType)
-                    return true;
-            }
-        }
-        return false;
-    }
-
-
     public void FindJobs(JobType[] jobTypes)
     {
         foreach (Job job in jobs_available)
@@ -150,10 +121,44 @@ public class Job_Manager : MonoBehaviour {
         jobs_available.Remove(completedJob);
     }
 
+    Job GetJobFromAvailable(JobType jType, Transform target)
+    {
+        foreach (Job j in jobs_available)
+        {
+            if (j.Job_Target == target)
+            {
+                if (j.Job_Type == jType)
+                    return j;
+            }
+        }
+        return null;
+    }
+
     public void CancelJob(JobType jType, TileData.Types tileType, Transform target)
     {
         Debug.Log("Cancelling job!");
-        jobs_cancelled.Add(new Job(jType, tileType, target));
+
+        // Find any employee that might be working on this job so they know to cancel it
+        foreach(GameObject employee in Employee_Generator.Instance.spawned_employees)
+        {
+            Job employeeJob = employee.GetComponent<Employee_Handler>().curJob;
+            if (employeeJob != null)
+            {
+               if ( employeeJob.Job_Type == jType && employeeJob.Job_Target.position == target.position)
+                {
+                    employee.GetComponent<Employee_Handler>().CancelJob(true);
+                }
+            }
+        }
+
+        // In case it is in the jobs-available list, Remove it
+        Job j = GetJobFromAvailable(jType, target);
+        if ( j != null)
+        {
+            RemoveJob(j);
+        }
+
+        // Remove any selection circle marking the job tile
         if (taskCircles.ContainsKey(target.position))
         {
             ObjectPool.instance.PoolObject(taskCircles[target.position]);

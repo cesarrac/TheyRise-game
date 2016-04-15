@@ -63,7 +63,7 @@ public class MasterState_Manager : MonoBehaviour {
 
     public void DoCheat()
     {
-        Ship_Inventory.Instance.ReceiveTempRock(100, Rock.RockProductionType.steel);
+        Ship_Inventory.Instance.AddTempResource(ResourceType.Steel, 100);
     }
 
 	void MasterStateMachine(MasterState _curState)

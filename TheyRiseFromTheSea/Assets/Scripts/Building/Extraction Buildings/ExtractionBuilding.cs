@@ -76,7 +76,9 @@ public class ExtractionBuilding : MonoBehaviour {
     // VARS:
     public LineRenderer lineR; // < --- to display connections from inputs to outputs
 
-    public TileData.Types resourceType { get; protected set; }
+    public TileData.Types tileTypeToExtract { get; protected set; }
+
+    public ResourceType resourceType { get; protected set; }
 
     public ExtractorStats extractorStats { get; protected set; }
 
@@ -101,7 +103,7 @@ public class ExtractionBuilding : MonoBehaviour {
     public TileData.Types inputType { get; protected set; }
 
     // This is for checking that the Input being received IS the material that this Producer NEEDS
-    public TileData.Types requiredMaterial { get; protected set; }
+    public ResourceType requiredMaterial { get; protected set; }
 
     // position of the tile containing the resource being extracted
     public int r_PosX { get; protected set; }
@@ -157,10 +159,16 @@ public class ExtractionBuilding : MonoBehaviour {
     public State _state { get; protected set; }
 
     // INITIALIZERS:
-    public void Init(TileData.Types r_type, float rate, float power, int ammnt, int storageCap, Transform _trans)
+    public void Init(TileData.Types tileType, float rate, float power, int ammnt, int storageCap, Transform _trans)
     {
         extractorStats = new ExtractorStats(rate, ammnt, power, storageCap);
-        resourceType = r_type;
+        tileTypeToExtract = tileType;
+
+        if (tileTypeToExtract != TileData.Types.rock)
+        {
+            DefineMyResourceType(tileType);
+        }
+
         myTransform = _trans;
 
         resource_grid = ResourceGrid.Grid;
@@ -170,10 +178,12 @@ public class ExtractionBuilding : MonoBehaviour {
     }
 
     // this Initializer works for buildings that extract from another building to produce their OWN resource
-    public void InitSelfProducer(TileData.Types productType, float rate, int ammnt, int storageCap, int secondStorageCap, int matConsumed, TileData.Types requiredMat,Transform _trans)
+    public void InitSelfProducer(TileData.Types tileType, ResourceType productType, float rate, int ammnt, int storageCap, int secondStorageCap, int matConsumed, ResourceType requiredMat,Transform _trans)
     {
         extractorStats = new ExtractorStats(rate, ammnt, storageCap, secondStorageCap, matConsumed);
+        tileTypeToExtract = tileType;
         resourceType = productType;
+
         myTransform = _trans;
 
         resource_grid = ResourceGrid.Grid;
@@ -193,8 +203,36 @@ public class ExtractionBuilding : MonoBehaviour {
         b_statusIndicator = GetComponent<Building_Handler>().buildingStatusIndicator;
 
         // all storage units require an empty material since they can take any
-        requiredMaterial = TileData.Types.empty;
+        requiredMaterial = ResourceType.Empty;
     }
+
+    public void DefineMyResourceType(Rock.RockProductionType rockType)
+    {
+        // Derives the appropriate Resource type from the tile this building is extracting from
+        switch (rockType)
+        {
+            case Rock.RockProductionType.steel:
+                resourceType = ResourceType.Steel;
+                break;
+            case Rock.RockProductionType.vit:
+                resourceType = ResourceType.Vit;
+                break;
+            default:
+                resourceType = ResourceType.Steel;
+                break;
+        }
+    }
+
+    void DefineMyResourceType(TileData.Types tileType)
+    {
+        // Derives the appropriate Resource type from the tile this building is extracting from
+        if (tileType == TileData.Types.water)
+        {
+            resourceType = ResourceType.Water;
+        }
+    }
+
+
 
     public void EnergizeCallback(Action<ExtractionBuilding> cb)
     {
@@ -297,7 +335,7 @@ public class ExtractionBuilding : MonoBehaviour {
 
     TileData CheckTileType(int x, int y)
     {
-        if (resource_grid.GetTileType(x, y) == resourceType)
+        if (resource_grid.GetTileType(x, y) == tileTypeToExtract)
         {
             resourceWorldPos = new Vector3(x, y, 0);
             return resource_grid.tiles[x, y];
@@ -526,7 +564,7 @@ public class ExtractionBuilding : MonoBehaviour {
                         ExtractionBuilding extractor = input.GetComponent<ExtractionBuilding>();
 
                         // Check that this new input extracts/produces the required material OR that my required material is just empty (meaning im just a storage unit)
-                        if (extractor.resourceType == requiredMaterial || requiredMaterial == TileData.Types.empty)  // <----- Storage units require an empty since they can take any type of material
+                        if (extractor.resourceType == requiredMaterial || requiredMaterial == ResourceType.Empty)  // <----- Storage units require an empty since they can take any type of material
                         {
                             extractor.SetOutput(this);
 
@@ -577,7 +615,7 @@ public class ExtractionBuilding : MonoBehaviour {
         if (output != null)
         {
             // Make sure that my resource Type IS of the same type as my Output's required material
-            if (resourceType == output.requiredMaterial || output.requiredMaterial == TileData.Types.empty)
+            if (resourceType == output.resourceType || output.requiredMaterial == ResourceType.Empty)
             {
                 int ammnt = currResourceStored + output.currMaterialsStored;
 
@@ -624,7 +662,7 @@ public class ExtractionBuilding : MonoBehaviour {
         // Tell the output what it's receiving
 
         // Give to output
-        output.ReceiveResources(ammntToOutput, resourceType);
+        output.ReceiveResources(ammntToOutput, tileTypeToExtract);
 
         // Subtract from this building's storage
         currResourceStored -= ammntToOutput;
@@ -649,7 +687,7 @@ public class ExtractionBuilding : MonoBehaviour {
     // This Beams all the contents STORED inside of a building to the ship
     public void BeamAllStoredToShip()
     {
-        Ship_Inventory.Instance.ReceiveTemporaryResources(resourceType, currResourceStored);
+        Ship_Inventory.Instance.AddTempResource(resourceType, currResourceStored);
 
         // This will split the current resources before sending them to ship (for example split between common ore and enriched ore)
         //if (splitShipInventoryCallback != null)
@@ -667,15 +705,16 @@ public class ExtractionBuilding : MonoBehaviour {
     {
         // This method on Ship Inventory Receives Items and stores them Temporarily. They will actually become part of the inventory once the Player
         // launches from the Transporter.
-        if (resourceType == TileData.Types.rock)
-        {
-            if (inventoryTypeCallback != null)
-                inventoryTypeCallback(total);
-        }
-        else
-        {
-            Ship_Inventory.Instance.ReceiveTemporaryResources(resourceType, total);
-        }
+        //if (tileTypeToExtract == TileData.Types.rock)
+        //{
+        //    if (inventoryTypeCallback != null)
+        //        inventoryTypeCallback(total);
+        //}
+        //else
+        //{
+        //    Ship_Inventory.Instance.ReceiveTemporaryResource(resourceType, total);
+        //}
+        Ship_Inventory.Instance.AddTempResource(resourceType, total);
 
     }
 
